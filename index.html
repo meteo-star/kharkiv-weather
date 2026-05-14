@@ -21,8 +21,14 @@ body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;ove
 body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(circle at 15% 25%, rgba(0,212,255,0.08) 0%, transparent 25%),radial-gradient(circle at 85% 75%, rgba(167,139,250,0.06) 0%, transparent 25%),radial-gradient(circle at 50% 50%, rgba(96,165,250,0.04) 0%, transparent 40%);animation:bgFloat 20s ease-in-out infinite alternate}
 @keyframes bgFloat{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-20px,20px) scale(1.05)}}
 
-.particle{position:fixed;width:3px;height:3px;border-radius:50%;background:rgba(0,212,255,0.4);box-shadow:0 0 10px rgba(0,212,255,0.6);pointer-events:none;z-index:0;animation:float 18s linear infinite}
-@keyframes float{0%{transform:translateY(110vh);opacity:0}10%,90%{opacity:1}100%{transform:translateY(-10vh) translateX(50px);opacity:0}}
+.particle{position:fixed;width:3px;height:3px;border-radius:50%;background:rgba(0,212,255,0.4);box-shadow:0 0 10px rgba(0,212,255,0.6);pointer-events:none;z-index:0;animation:float-up 18s linear infinite}
+/* Пять разных траекторий — каждой частице назначается своя через inline animation-name.
+   Cubic-bezier-подобные waypoints дают плавно изогнутые пути, заметно отличающиеся друг от друга. */
+@keyframes float-up{0%{transform:translate(0,110vh);opacity:0}10%,90%{opacity:1}35%{transform:translate(30px,65vh)}65%{transform:translate(-25px,30vh)}100%{transform:translate(50px,-10vh);opacity:0}}
+@keyframes float-down{0%{transform:translate(0,-10vh);opacity:0}10%,90%{opacity:1}35%{transform:translate(-35px,30vh)}65%{transform:translate(25px,70vh)}100%{transform:translate(-55px,110vh);opacity:0}}
+@keyframes float-diag-right{0%{transform:translate(-12vw,110vh);opacity:0}10%,90%{opacity:1}50%{transform:translate(4vw,45vh)}100%{transform:translate(22vw,-10vh);opacity:0}}
+@keyframes float-diag-left{0%{transform:translate(12vw,-10vh);opacity:0}10%,90%{opacity:1}50%{transform:translate(-4vw,55vh)}100%{transform:translate(-22vw,110vh);opacity:0}}
+@keyframes float-zigzag{0%{transform:translate(0,110vh);opacity:0}10%,90%{opacity:1}25%{transform:translate(45px,80vh)}50%{transform:translate(-45px,50vh)}75%{transform:translate(55px,20vh)}100%{transform:translate(-30px,-10vh);opacity:0}}
 
 .container{max-width:1180px;margin:0 auto;padding:24px 20px 40px;position:relative;z-index:1}
 
@@ -172,6 +178,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .source-btn.active{background:linear-gradient(135deg,var(--src-bg) 0%,rgba(255,255,255,0.04) 100%);border-color:var(--src-color);color:#fff;box-shadow:0 0 20px var(--src-glow),inset 0 1px 0 rgba(255,255,255,0.1)}
 .source-btn .src-dot{width:8px;height:8px;border-radius:50%;background:var(--src-color);box-shadow:0 0 8px var(--src-color);flex-shrink:0}
 .source-btn .src-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:11px}
+.source-btn .src-badge{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fde68a 0%,#facc15 60%,#ca8a04 100%);box-shadow:0 0 10px rgba(250,204,21,0.7),inset 0 1px 0 rgba(255,255,255,0.5);font-size:11px;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;animation:badgePulse 2.4s ease-in-out infinite;filter:drop-shadow(0 0 2px rgba(0,0,0,0.3))}
+@keyframes badgePulse{0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(250,204,21,0.7),inset 0 1px 0 rgba(255,255,255,0.5)}50%{transform:scale(1.08);box-shadow:0 0 14px rgba(250,204,21,0.9),inset 0 1px 0 rgba(255,255,255,0.5)}}
 
 .footer-info{padding:16px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
 .footer-info .left{font-size:11px;color:rgba(232,240,255,0.4);font-family:'JetBrains Mono',monospace}
@@ -712,18 +720,76 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .storm-legend{gap:8px}
 }
 
+/* === Accuracy card (В7) — самооценка точности источников === */
+.accuracy-card{padding:22px;margin-bottom:18px}
+.accuracy-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.accuracy-card h2 .ac-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(94,234,212,0.55))}
+.accuracy-card .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px;margin-bottom:14px}
+
+.acc-empty{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:rgba(94,234,212,0.06);border:1px solid rgba(94,234,212,0.18)}
+.acc-empty-icon{font-size:28px;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(94,234,212,0.4))}
+.acc-empty-text{flex:1;min-width:0}
+.acc-empty-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
+.acc-empty-progress{font-size:11px;font-family:'JetBrains Mono',monospace;color:#5eead4;margin-bottom:4px}
+.acc-empty-hint{font-size:11px;color:rgba(232,240,255,0.55);line-height:1.45}
+
+.acc-table{display:flex;flex-direction:column;gap:8px}
+.acc-row{display:grid;grid-template-columns:24px 90px 1fr 70px 70px;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.05);transition:background 0.18s ease}
+.acc-row:hover{background:rgba(255,255,255,0.05)}
+.acc-row.best{background:rgba(94,234,212,0.08);border-color:rgba(94,234,212,0.3)}
+.acc-rank{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:rgba(232,240,255,0.4);text-align:center}
+.acc-rank.r1{color:#facc15;filter:drop-shadow(0 0 4px rgba(250,204,21,0.5))}
+.acc-name{font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px;min-width:0}
+.acc-name .ac-dot{width:8px;height:8px;border-radius:100px;flex-shrink:0;box-shadow:0 0 4px currentColor}
+.acc-name .ac-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-bar-wrap{position:relative;height:8px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden}
+.acc-bar{position:absolute;top:0;left:0;height:100%;border-radius:100px;transition:width 0.4s ease}
+.acc-bar.q1{background:linear-gradient(90deg,#5eead4,#22d3ee)}
+.acc-bar.q2{background:linear-gradient(90deg,#facc15,#fbbf24)}
+.acc-bar.q3{background:linear-gradient(90deg,#fb923c,#f97316)}
+.acc-bar.q4{background:linear-gradient(90deg,#ef4444,#dc2626)}
+.acc-metric{font-size:11px;font-family:'JetBrains Mono',monospace;color:rgba(232,240,255,0.85);text-align:right}
+.acc-metric .acm-val{color:#fff;font-weight:600}
+.acc-metric .acm-unit{color:rgba(232,240,255,0.4);margin-left:2px}
+.acc-metric.na{color:rgba(232,240,255,0.3)}
+
+.acc-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;font-size:10px;color:rgba(232,240,255,0.55);font-family:'JetBrains Mono',monospace}
+.acc-legend .al-item{display:inline-flex;align-items:center;gap:5px}
+.acc-legend .al-sw{display:inline-block;width:14px;height:6px;border-radius:100px}
+.acc-legend .al-sw.q1{background:linear-gradient(90deg,#5eead4,#22d3ee)}
+.acc-legend .al-sw.q2{background:linear-gradient(90deg,#facc15,#fbbf24)}
+.acc-legend .al-sw.q3{background:linear-gradient(90deg,#fb923c,#f97316)}
+.acc-legend .al-sw.q4{background:linear-gradient(90deg,#ef4444,#dc2626)}
+
+.acc-thead{display:grid;grid-template-columns:24px 90px 1fr 70px 70px;align-items:center;gap:10px;padding:0 10px 6px 10px;font-size:10px;color:rgba(232,240,255,0.4);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
+.acc-thead .acth-r{text-align:right}
+
+@media (max-width: 640px){
+  .accuracy-card{padding:18px}
+  .acc-row,.acc-thead{grid-template-columns:22px 70px 1fr 56px 56px;gap:8px;padding:7px 8px}
+  .acc-name{font-size:11px}
+  .acc-metric{font-size:10px}
+}
+
 </style>
 </head>
 <body>
 
 <h2 class="sr-only">Прогноз погоды для Харькова с переключателем источников</h2>
 
-<div class="particle" style="left:10%;animation-delay:0s;animation-duration:18s"></div>
-<div class="particle" style="left:25%;animation-delay:3s;animation-duration:22s;background:rgba(167,139,250,0.4);box-shadow:0 0 10px rgba(167,139,250,0.6)"></div>
-<div class="particle" style="left:45%;animation-delay:6s;animation-duration:16s"></div>
-<div class="particle" style="left:65%;animation-delay:2s;animation-duration:20s;background:rgba(167,139,250,0.4);box-shadow:0 0 10px rgba(167,139,250,0.6)"></div>
-<div class="particle" style="left:80%;animation-delay:9s;animation-duration:24s"></div>
-<div class="particle" style="left:90%;animation-delay:5s;animation-duration:19s"></div>
+<div class="particle" style="left:5%;animation:float-zigzag 21s linear 7s infinite;background:rgba(94,234,212,0.4);box-shadow:0 0 10px rgba(94,234,212,0.6)"></div>
+<div class="particle" style="left:10%;animation:float-up 18s linear 0s infinite"></div>
+<div class="particle" style="left:18%;animation:float-down 23s linear 12s infinite"></div>
+<div class="particle" style="left:25%;animation:float-diag-right 26s linear 3s infinite;background:rgba(167,139,250,0.4);box-shadow:0 0 10px rgba(167,139,250,0.6)"></div>
+<div class="particle" style="left:35%;animation:float-down 25s linear 10s infinite;background:rgba(167,139,250,0.4);box-shadow:0 0 10px rgba(167,139,250,0.6)"></div>
+<div class="particle" style="left:45%;animation:float-up 16s linear 6s infinite"></div>
+<div class="particle" style="left:55%;animation:float-diag-left 24s linear 14s infinite;background:rgba(94,234,212,0.4);box-shadow:0 0 10px rgba(94,234,212,0.6)"></div>
+<div class="particle" style="left:65%;animation:float-zigzag 22s linear 2s infinite;background:rgba(167,139,250,0.4);box-shadow:0 0 10px rgba(167,139,250,0.6)"></div>
+<div class="particle" style="left:73%;animation:float-up 25s linear 11s infinite"></div>
+<div class="particle" style="left:80%;animation:float-diag-left 27s linear 9s infinite"></div>
+<div class="particle" style="left:85%;animation:float-down 20s linear 15s infinite;background:rgba(94,234,212,0.4);box-shadow:0 0 10px rgba(94,234,212,0.6)"></div>
+<div class="particle" style="left:90%;animation:float-diag-right 28s linear 5s infinite"></div>
+<div class="particle" style="left:95%;animation:float-zigzag 22s linear 13s infinite;background:rgba(167,139,250,0.4);box-shadow:0 0 10px rgba(167,139,250,0.6)"></div>
 
 <div class="container">
 
@@ -859,41 +925,21 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     </div>
   </div>
 
-  <div class="glass astro-photo" id="astroPhotoCard">
+  <div class="glass chart-card">
     <div class="card-title">
       <div>
-        <h2><span class="ap-emoji">📸</span><span data-i18n="astro.photoTitle">Для фотографа и астронома</span></h2>
-        <div class="sub" data-i18n="astro.photoSub">Золотой / синий час, качество заката, видимость звёзд</div>
+        <h2 data-i18n="chart.title">Сегодня · почасовой прогноз</h2>
+        <div class="sub" id="chartSourceSub">Усреднено по 10 моделям</div>
+      </div>
+      <div class="legend">
+        <span><span class="sw t"></span><span data-i18n="chart.legendTemp">Температура</span></span>
+        <span><span class="sw p"></span><span data-i18n="chart.legendPrecip">Осадки</span></span>
       </div>
     </div>
-    <div class="astro-photo-grid">
-      <div class="ap-cell golden">
-        <div class="ap-head"><span class="ap-icon">🌅</span><span class="ap-label" data-i18n="astro.goldenHour">Золотой час</span></div>
-        <div class="ap-times">
-          <div class="ap-time-row"><span class="lbl" data-i18n="astro.morning">Утром</span><span class="val" id="apGoldenMorning">—</span></div>
-          <div class="ap-time-row"><span class="lbl" data-i18n="astro.evening">Вечером</span><span class="val" id="apGoldenEvening">—</span></div>
-        </div>
-      </div>
-      <div class="ap-cell blue">
-        <div class="ap-head"><span class="ap-icon">🌆</span><span class="ap-label" data-i18n="astro.blueHour">Синий час</span></div>
-        <div class="ap-times">
-          <div class="ap-time-row"><span class="lbl" data-i18n="astro.morning">Утром</span><span class="val" id="apBlueMorning">—</span></div>
-          <div class="ap-time-row"><span class="lbl" data-i18n="astro.evening">Вечером</span><span class="val" id="apBlueEvening">—</span></div>
-        </div>
-      </div>
-      <div class="ap-cell sunset">
-        <div class="ap-head"><span class="ap-icon">🌇</span><span class="ap-label" data-i18n="astro.sunsetQuality">Закат сегодня</span></div>
-        <div class="ap-status" id="apSunsetStatus">—</div>
-        <div class="ap-hint" id="apSunsetHint">—</div>
-      </div>
-      <div class="ap-cell stars">
-        <div class="ap-head"><span class="ap-icon">⭐</span><span class="ap-label" data-i18n="astro.stars">Видимость звёзд</span></div>
-        <div class="ap-stars" id="apStarsRating"></div>
-        <div class="ap-status" id="apStarsStatus">—</div>
-        <div class="ap-hint" id="apStarsHint">—</div>
-      </div>
-    </div>
+    <div class="chart-wrap"><canvas id="hourlyChart"></canvas></div>
   </div>
+
+  <div class="days" id="daysGrid"></div>
 
   <div class="glass activity-windows" id="activityWindowsCard">
     <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
@@ -966,21 +1012,68 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     </div>
   </div>
 
-  <div class="glass chart-card">
+  <div class="glass astro-photo" id="astroPhotoCard">
     <div class="card-title">
       <div>
-        <h2 data-i18n="chart.title">Сегодня · почасовой прогноз</h2>
-        <div class="sub" id="chartSourceSub">Усреднено по 10 моделям</div>
-      </div>
-      <div class="legend">
-        <span><span class="sw t"></span><span data-i18n="chart.legendTemp">Температура</span></span>
-        <span><span class="sw p"></span><span data-i18n="chart.legendPrecip">Осадки</span></span>
+        <h2><span class="ap-emoji">📸</span><span data-i18n="astro.photoTitle">Для фотографа и астронома</span></h2>
+        <div class="sub" data-i18n="astro.photoSub">Золотой / синий час, качество заката, видимость звёзд</div>
       </div>
     </div>
-    <div class="chart-wrap"><canvas id="hourlyChart"></canvas></div>
+    <div class="astro-photo-grid">
+      <div class="ap-cell golden">
+        <div class="ap-head"><span class="ap-icon">🌅</span><span class="ap-label" data-i18n="astro.goldenHour">Золотой час</span></div>
+        <div class="ap-times">
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.morning">Утром</span><span class="val" id="apGoldenMorning">—</span></div>
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.evening">Вечером</span><span class="val" id="apGoldenEvening">—</span></div>
+        </div>
+      </div>
+      <div class="ap-cell blue">
+        <div class="ap-head"><span class="ap-icon">🌆</span><span class="ap-label" data-i18n="astro.blueHour">Синий час</span></div>
+        <div class="ap-times">
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.morning">Утром</span><span class="val" id="apBlueMorning">—</span></div>
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.evening">Вечером</span><span class="val" id="apBlueEvening">—</span></div>
+        </div>
+      </div>
+      <div class="ap-cell sunset">
+        <div class="ap-head"><span class="ap-icon">🌇</span><span class="ap-label" data-i18n="astro.sunsetQuality">Закат сегодня</span></div>
+        <div class="ap-status" id="apSunsetStatus">—</div>
+        <div class="ap-hint" id="apSunsetHint">—</div>
+      </div>
+      <div class="ap-cell stars">
+        <div class="ap-head"><span class="ap-icon">⭐</span><span class="ap-label" data-i18n="astro.stars">Видимость звёзд</span></div>
+        <div class="ap-stars" id="apStarsRating"></div>
+        <div class="ap-status" id="apStarsStatus">—</div>
+        <div class="ap-hint" id="apStarsHint">—</div>
+      </div>
+    </div>
   </div>
 
-  <div class="days" id="daysGrid"></div>
+  <div class="glass accuracy-card" id="accuracyCard">
+    <h2><span class="ac-emoji">🎯</span><span data-i18n="accuracy.title">Точность источников</span></h2>
+    <div class="sub" id="accuracySub" data-i18n="accuracy.subEmpty">Накапливаем сравнение прогноза с фактом для вашей локации</div>
+    <div class="acc-empty" id="accuracyEmpty">
+      <div class="acc-empty-icon">📊</div>
+      <div class="acc-empty-text">
+        <div class="acc-empty-title" data-i18n="accuracy.emptyTitle">Накапливаем данные</div>
+        <div class="acc-empty-progress" id="accuracyProgress">0 / 7</div>
+        <div class="acc-empty-hint" data-i18n="accuracy.emptyHint">Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки</div>
+      </div>
+    </div>
+    <div class="acc-thead" id="accuracyHead" style="display:none">
+      <span></span>
+      <span data-i18n="accuracy.colModel">Модель</span>
+      <span data-i18n="accuracy.colScore">Композитная точность</span>
+      <span class="acth-r" data-i18n="accuracy.colTemp">°C</span>
+      <span class="acth-r" data-i18n="accuracy.colPrecip">%осад</span>
+    </div>
+    <div class="acc-table" id="accuracyTable" style="display:none"></div>
+    <div class="acc-legend" id="accuracyLegend" style="display:none">
+      <span class="al-item"><span class="al-sw q1"></span><span data-i18n="accuracy.legendQ1">отлично</span></span>
+      <span class="al-item"><span class="al-sw q2"></span><span data-i18n="accuracy.legendQ2">хорошо</span></span>
+      <span class="al-item"><span class="al-sw q3"></span><span data-i18n="accuracy.legendQ3">средне</span></span>
+      <span class="al-item"><span class="al-sw q4"></span><span data-i18n="accuracy.legendQ4">слабо</span></span>
+    </div>
+  </div>
 
   <!-- SOURCES CARD with picker -->
   <div class="glass sources-card">
@@ -1287,6 +1380,21 @@ const I18N = {
     'storm.axisNow': 'сейчас',
     'storm.alertSoon': 'Гроза прогнозируется в ближайшие {hours}ч',
     'storm.alertNow': 'Гроза идёт сейчас',
+    'accuracy.title': 'Точность источников',
+    'accuracy.subEmpty': 'Накапливаем сравнение прогноза с фактом для вашей локации',
+    'accuracy.subData': 'Среднее отклонение прогноза по последним {n} замерам',
+    'accuracy.emptyTitle': 'Накапливаем данные',
+    'accuracy.emptyHint': 'Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки',
+    'accuracy.samplesUnit': 'замеров',
+    'accuracy.colModel': 'Модель',
+    'accuracy.colScore': 'Композитная точность',
+    'accuracy.colTemp': '°C',
+    'accuracy.colPrecip': '%осад',
+    'accuracy.legendQ1': 'отлично',
+    'accuracy.legendQ2': 'хорошо',
+    'accuracy.legendQ3': 'средне',
+    'accuracy.legendQ4': 'слабо',
+    'accuracy.bestBadge': 'Самая точная модель по последним замерам',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
@@ -1535,6 +1643,21 @@ const I18N = {
     'storm.axisNow': 'зараз',
     'storm.alertSoon': 'Гроза прогнозується найближчі {hours}год',
     'storm.alertNow': 'Гроза йде зараз',
+    'accuracy.title': 'Точність джерел',
+    'accuracy.subEmpty': 'Накопичуємо порівняння прогнозу з фактом для вашої локації',
+    'accuracy.subData': 'Середнє відхилення прогнозу за останніми {n} замірами',
+    'accuracy.emptyTitle': 'Накопичуємо дані',
+    'accuracy.emptyHint': 'Відкривайте сайт раз на день — за ~тиждень з\'явиться рейтинг моделей з MAE за температурою та опадами саме для цієї точки',
+    'accuracy.samplesUnit': 'замірів',
+    'accuracy.colModel': 'Модель',
+    'accuracy.colScore': 'Композитна точність',
+    'accuracy.colTemp': '°C',
+    'accuracy.colPrecip': '%опад',
+    'accuracy.legendQ1': 'відмінно',
+    'accuracy.legendQ2': 'добре',
+    'accuracy.legendQ3': 'середньо',
+    'accuracy.legendQ4': 'слабко',
+    'accuracy.bestBadge': 'Найточніша модель за останніми замірами',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
@@ -1783,6 +1906,21 @@ const I18N = {
     'storm.axisNow': 'now',
     'storm.alertSoon': 'Storm expected within {hours}h',
     'storm.alertNow': 'Storm in progress now',
+    'accuracy.title': 'Source accuracy',
+    'accuracy.subEmpty': 'Collecting forecast-vs-actual data for your location',
+    'accuracy.subData': 'Mean absolute error across last {n} comparisons',
+    'accuracy.emptyTitle': 'Collecting data',
+    'accuracy.emptyHint': 'Open the site once a day — after ~a week you\'ll see a model ranking with MAE for temperature and precipitation specific to this location',
+    'accuracy.samplesUnit': 'samples',
+    'accuracy.colModel': 'Model',
+    'accuracy.colScore': 'Composite accuracy',
+    'accuracy.colTemp': '°C',
+    'accuracy.colPrecip': '%precip',
+    'accuracy.legendQ1': 'excellent',
+    'accuracy.legendQ2': 'good',
+    'accuracy.legendQ3': 'fair',
+    'accuracy.legendQ4': 'poor',
+    'accuracy.bestBadge': 'Most accurate model by recent samples',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
@@ -2890,9 +3028,27 @@ function renderAll() {
    SOURCE PICKER UI
    ============================================ */
 
+// Возвращает id источника с лучшей композитной точностью (или null, если данных мало).
+function bestAccuracySourceId() {
+  const state = ACCURACY_STATE || { stats: {}, sampleSize: 0 };
+  if (state.sampleSize < ACCURACY_MIN_SAMPLES) return null;
+  let bestId = null;
+  let bestScore = Infinity;
+  for (const src of SOURCES) {
+    if (src.id === 'avg') continue;
+    const s = state.stats[src.id];
+    if (!s) continue;
+    const score = accuracyComposite(s);
+    if (score == null) continue;
+    if (score < bestScore) { bestScore = score; bestId = src.id; }
+  }
+  return bestId;
+}
+
 function renderSourceButtons() {
   const grid = document.getElementById('sourcesGrid');
   grid.innerHTML = '';
+  const bestId = bestAccuracySourceId();
   SOURCES.filter(s => s.id !== 'avg').forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'source-btn' + (currentSourceId === s.id ? ' active' : '');
@@ -2900,7 +3056,10 @@ function renderSourceButtons() {
     btn.style.setProperty('--src-color', s.color);
     btn.style.setProperty('--src-bg', hexToRgba(s.color, 0.15));
     btn.style.setProperty('--src-glow', hexToRgba(s.color, 0.2));
-    btn.innerHTML = `<span class="src-dot"></span><span class="src-name">${s.shortName}</span>`;
+    const badge = (s.id === bestId)
+      ? `<span class="src-badge" title="${t('accuracy.bestBadge')}">🏆</span>`
+      : '';
+    btn.innerHTML = `<span class="src-dot"></span><span class="src-name">${s.shortName}</span>${badge}`;
     btn.addEventListener('click', () => selectSource(s.id));
     grid.appendChild(btn);
   });
@@ -3382,6 +3541,149 @@ function renderStorm() {
       }
     }
   }
+}
+
+/* ============================================
+   ACCURACY (В7) — рендер карточки самооценки точности
+   Использует ACCURACY_STATE, заполняемый в refreshForecast.
+   ============================================ */
+
+// Минимальное число пар (prediction, actual), при котором имеет смысл показать рейтинг.
+const ACCURACY_MIN_SAMPLES = 3;
+// Цель прогресса в плейсхолдере (для бара «N / 7»).
+const ACCURACY_TARGET_SAMPLES = 7;
+
+// Композитный скор = MAE °C по max + MAE °C по min + MAE %осад / 10 (приводим % к ° по масштабу).
+// Чем меньше — тем точнее. Возвращает null если данных совсем нет.
+function accuracyComposite(s) {
+  if (!s) return null;
+  const parts = [];
+  if (typeof s.tempMaxMAE === 'number') parts.push(s.tempMaxMAE);
+  if (typeof s.tempMinMAE === 'number') parts.push(s.tempMinMAE);
+  if (typeof s.precipMAE  === 'number') parts.push(s.precipMAE / 10);
+  if (parts.length === 0) return null;
+  return parts.reduce((a, b) => a + b, 0);
+}
+
+// Качество: 0 (отлично) … 3 (слабо). Пороги по композитному скору.
+function accuracyQuality(score, minScore, maxScore) {
+  if (score == null) return null;
+  if (maxScore === minScore) return 0;
+  const norm = (score - minScore) / (maxScore - minScore); // 0..1
+  if (norm < 0.25) return 0;
+  if (norm < 0.5)  return 1;
+  if (norm < 0.75) return 2;
+  return 3;
+}
+
+function renderAccuracy() {
+  const card = document.getElementById('accuracyCard');
+  if (!card) return;
+  card.style.display = '';
+
+  const subEl     = document.getElementById('accuracySub');
+  const emptyEl   = document.getElementById('accuracyEmpty');
+  const progEl    = document.getElementById('accuracyProgress');
+  const headEl    = document.getElementById('accuracyHead');
+  const tableEl   = document.getElementById('accuracyTable');
+  const legendEl  = document.getElementById('accuracyLegend');
+
+  const state = ACCURACY_STATE || { stats: {}, sampleSize: 0 };
+  const n = state.sampleSize || 0;
+
+  // Empty state: данных меньше минимума
+  if (n < ACCURACY_MIN_SAMPLES) {
+    if (emptyEl) emptyEl.style.display = '';
+    if (headEl) headEl.style.display = 'none';
+    if (tableEl) tableEl.style.display = 'none';
+    if (legendEl) legendEl.style.display = 'none';
+    if (progEl) progEl.textContent = `${n} / ${ACCURACY_TARGET_SAMPLES} ${t('accuracy.samplesUnit')}`;
+    if (subEl) subEl.textContent = t('accuracy.subEmpty');
+    return;
+  }
+
+  // Есть данные: считаем рейтинг по композитному скору
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (headEl) headEl.style.display = '';
+  if (tableEl) tableEl.style.display = '';
+  if (legendEl) legendEl.style.display = '';
+  if (subEl) subEl.textContent = t('accuracy.subData', { n });
+
+  // Собираем массив строк (только для реальных моделей, avg отдельно)
+  const rows = [];
+  for (const src of SOURCES) {
+    if (src.id === 'avg') continue;
+    const s = state.stats[src.id];
+    if (!s) continue;
+    const score = accuracyComposite(s);
+    if (score == null) continue;
+    rows.push({ src, s, score });
+  }
+  // avg в конец отдельной строкой (если есть данные)
+  const avgSrc = SOURCES.find(s => s.id === 'avg');
+  const avgS = state.stats.avg;
+  const avgScore = avgS ? accuracyComposite(avgS) : null;
+
+  // Сортировка по композитному скору (меньше — точнее)
+  rows.sort((a, b) => a.score - b.score);
+
+  // Пороги для квартилей по реальным моделям
+  const scores = rows.map(r => r.score);
+  const minScore = scores.length > 0 ? Math.min(...scores) : 0;
+  const maxScore = scores.length > 0 ? Math.max(...scores) : 1;
+
+  // Ширина бара: чем меньше score, тем длиннее бар (инверсия). minScore → 100%, maxScore → 25%
+  function barWidth(score) {
+    if (maxScore === minScore) return 100;
+    const norm = (score - minScore) / (maxScore - minScore); // 0..1
+    return Math.round(100 - norm * 75); // 100..25
+  }
+
+  function formatMetric(val, unit, decimals = 1) {
+    if (val == null || typeof val !== 'number') {
+      return `<span class="acm-val">—</span>`;
+    }
+    const v = decimals > 0 ? val.toFixed(decimals) : Math.round(val).toString();
+    return `<span class="acm-val">${v}</span><span class="acm-unit">${unit}</span>`;
+  }
+
+  function buildRow({ src, s, score }, rank) {
+    const q = accuracyQuality(score, minScore, maxScore) || 0;
+    const w = barWidth(score);
+    const rankBadge = rank === 1 ? '🏆' : String(rank);
+    const rankCls = rank === 1 ? 'r1' : '';
+    const bestCls = rank === 1 ? ' best' : '';
+    const tempCls = s.tempMaxMAE == null ? ' na' : '';
+    const precipCls = s.precipMAE == null ? ' na' : '';
+    return `
+      <div class="acc-row${bestCls}" data-src="${src.id}">
+        <div class="acc-rank ${rankCls}">${rankBadge}</div>
+        <div class="acc-name"><span class="ac-dot" style="background:${src.color};color:${src.color}"></span><span class="ac-text">${src.shortName || src.name}</span></div>
+        <div class="acc-bar-wrap"><div class="acc-bar q${q + 1}" style="width:${w}%"></div></div>
+        <div class="acc-metric${tempCls}">${formatMetric(s.tempMaxMAE, '°', 1)}</div>
+        <div class="acc-metric${precipCls}">${formatMetric(s.precipMAE, '%', 0)}</div>
+      </div>`;
+  }
+
+  let html = rows.map((r, i) => buildRow(r, i + 1)).join('');
+
+  // Добавляем avg как контрольную строку (без ранга)
+  if (avgSrc && avgScore != null) {
+    const q = accuracyQuality(avgScore, minScore, maxScore);
+    const w = barWidth(avgScore);
+    const tempCls = avgS.tempMaxMAE == null ? ' na' : '';
+    const precipCls = avgS.precipMAE == null ? ' na' : '';
+    html += `
+      <div class="acc-row" data-src="avg" style="margin-top:6px;border-top:1px dashed rgba(255,255,255,0.08);border-radius:0 0 10px 10px">
+        <div class="acc-rank" style="color:#5eead4">∑</div>
+        <div class="acc-name"><span class="ac-dot" style="background:${avgSrc.color};color:${avgSrc.color}"></span><span class="ac-text">${avgSrc.shortName || avgSrc.name}</span></div>
+        <div class="acc-bar-wrap"><div class="acc-bar q${(q || 0) + 1}" style="width:${w}%"></div></div>
+        <div class="acc-metric${tempCls}">${formatMetric(avgS.tempMaxMAE, '°', 1)}</div>
+        <div class="acc-metric${precipCls}">${formatMetric(avgS.precipMAE, '%', 0)}</div>
+      </div>`;
+  }
+
+  if (tableEl) tableEl.innerHTML = html;
 }
 
 /* ============================================
@@ -4230,6 +4532,7 @@ function applyAll() {
   renderClimateContext();
   renderPollen();
   renderStorm();
+  renderAccuracy();
   renderSourceButtons();
   renderAll();
   updateClock();
@@ -4422,6 +4725,128 @@ function saveForecastCache(lat, lon, byModel) {
     localStorage.setItem(forecastCacheKey(lat, lon), JSON.stringify({ timestamp: Date.now(), byModel }));
   } catch (e) { /* localStorage переполнен / отключён — не критично */ }
 }
+
+// === Самооценка точности источников (Шаг В7) ===
+// При каждом fetch сохраняем для каждой модели предсказание на завтра/+2д.
+// Когда эти даты наступают (становятся forecast[0]), записываем actual из avg[0] —
+// лучший доступный наблюдаемый сигнал без backend (archive-api лагает 5 дней).
+// MAE считаем по накопленным парам (prediction, actual).
+const ACCURACY_MAX_RECORDS = 30;
+
+function accuracyKey(lat, lon) {
+  return `kw:accuracy:${lat.toFixed(2)}_${lon.toFixed(2)}:v1`;
+}
+function loadAccuracyData(lat, lon) {
+  try {
+    const raw = localStorage.getItem(accuracyKey(lat, lon));
+    if (!raw) return { records: [] };
+    const obj = JSON.parse(raw);
+    if (!obj || !Array.isArray(obj.records)) return { records: [] };
+    return obj;
+  } catch (e) { return { records: [] }; }
+}
+function saveAccuracyData(lat, lon, data) {
+  try {
+    localStorage.setItem(accuracyKey(lat, lon), JSON.stringify(data));
+  } catch (e) { /* лимит исчерпан — не критично */ }
+}
+function extractDayMetrics(day) {
+  if (!day || typeof day.max !== 'number') return null;
+  return {
+    tempMax: day.max,
+    tempMin: typeof day.min === 'number' ? day.min : null,
+    precip: typeof day.precip === 'number' ? day.precip : null
+  };
+}
+function todayIso() { return new Date().toISOString().slice(0, 10); }
+function dateOffsetIso(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().slice(0, 10);
+}
+
+// Обновляет accuracy-records на основе свежего byModel.
+// (a) Для записей без actual, дата = сегодня → берём actual из byModel.avg[0]
+// (b) Добавляем новые предсказания на +1 и +2 дня от каждой модели (если ещё не сохранены)
+function updateAccuracyData(lat, lon, byModel) {
+  if (!byModel || !byModel.avg || byModel.avg.length === 0) return;
+  const data = loadAccuracyData(lat, lon);
+  const today = todayIso();
+
+  // (a) Заполнить actual для сегодняшней даты
+  const todayActual = extractDayMetrics(byModel.avg[0]);
+  if (todayActual) {
+    for (const rec of data.records) {
+      if (!rec.actual && rec.date === today) rec.actual = todayActual;
+    }
+  }
+
+  // (b) Новые предсказания на +1 и +2 дня
+  for (let offset = 1; offset <= 2; offset++) {
+    const targetDate = dateOffsetIso(offset);
+    if (data.records.some(r => r.date === targetDate)) continue;
+    const predictions = {};
+    let hasAny = false;
+    for (const srcId of Object.keys(byModel)) {
+      if (srcId === 'avg') continue;
+      const day = byModel[srcId][offset];
+      const m = extractDayMetrics(day);
+      if (m) { predictions[srcId] = m; hasAny = true; }
+    }
+    const avgM = extractDayMetrics(byModel.avg[offset]);
+    if (avgM) { predictions.avg = avgM; hasAny = true; }
+    if (hasAny) data.records.push({ date: targetDate, predictions, actual: null });
+  }
+
+  data.records.sort((a, b) => a.date.localeCompare(b.date));
+  if (data.records.length > ACCURACY_MAX_RECORDS) {
+    data.records = data.records.slice(-ACCURACY_MAX_RECORDS);
+  }
+  saveAccuracyData(lat, lon, data);
+}
+
+// MAE по моделям → { ecmwf: {tempMaxMAE, tempMinMAE, precipMAE, n}, ..., avg: {...} }
+// sampleSize = число записей с заполненным actual.
+function computeAccuracyStats(records) {
+  const acc = {};
+  let sampleSize = 0;
+  if (!Array.isArray(records)) return { stats: acc, sampleSize: 0 };
+
+  for (const rec of records) {
+    if (!rec.actual || !rec.predictions) continue;
+    sampleSize++;
+    for (const srcId of Object.keys(rec.predictions)) {
+      const pred = rec.predictions[srcId];
+      if (!pred) continue;
+      if (!acc[srcId]) acc[srcId] = { tempMaxSum: 0, tempMinSum: 0, precipSum: 0, nTempMax: 0, nTempMin: 0, nPrecip: 0 };
+      const s = acc[srcId];
+      if (typeof pred.tempMax === 'number' && typeof rec.actual.tempMax === 'number') {
+        s.tempMaxSum += Math.abs(pred.tempMax - rec.actual.tempMax); s.nTempMax++;
+      }
+      if (typeof pred.tempMin === 'number' && typeof rec.actual.tempMin === 'number') {
+        s.tempMinSum += Math.abs(pred.tempMin - rec.actual.tempMin); s.nTempMin++;
+      }
+      if (typeof pred.precip === 'number' && typeof rec.actual.precip === 'number') {
+        s.precipSum += Math.abs(pred.precip - rec.actual.precip); s.nPrecip++;
+      }
+    }
+  }
+
+  const out = {};
+  for (const srcId of Object.keys(acc)) {
+    const s = acc[srcId];
+    out[srcId] = {
+      tempMaxMAE: s.nTempMax > 0 ? Math.round((s.tempMaxSum / s.nTempMax) * 10) / 10 : null,
+      tempMinMAE: s.nTempMin > 0 ? Math.round((s.tempMinSum / s.nTempMin) * 10) / 10 : null,
+      precipMAE:  s.nPrecip  > 0 ? Math.round((s.precipSum  / s.nPrecip)  * 10) / 10 : null,
+      n: Math.max(s.nTempMax, s.nTempMin, s.nPrecip)
+    };
+  }
+  return { stats: out, sampleSize };
+}
+
+// Состояние accuracy — обновляется в refreshForecast, читается в renderAccuracy.
+let ACCURACY_STATE = { stats: {}, sampleSize: 0 };
 
 // Запрос к Air Quality API (отдельный домен, тот же провайдер Open-Meteo).
 // Возвращает european_aqi + pm2_5 + pm10 на 5 дней (часовые).
@@ -4889,6 +5314,9 @@ async function refreshForecast(force = false) {
     if (cached) {
       ACTIVE_FORECAST_BY_MODEL = cached.byModel;
       API_STATE.lastSuccess = new Date(cached.timestamp);
+      // Обновляем accuracy-историю на основе кэшированных данных (идемпотентно)
+      updateAccuracyData(currentLocation.lat, currentLocation.lon, cached.byModel);
+      ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
 
       // Climate-данные тоже из кэша; если нет — догружаем в фоне (не блокируем UI).
       const climateCached = loadClimateCache(currentLocation.lat, currentLocation.lon);
@@ -4916,6 +5344,8 @@ async function refreshForecast(force = false) {
       renderClimateContext();
       renderPollen();
       renderStorm();
+      renderAccuracy();
+      renderSourceButtons();
       renderAll();
       updateClock();
       return; // кэш свежий — основной сетевой запрос не делаем
@@ -4978,7 +5408,12 @@ async function refreshForecast(force = false) {
     API_STATE.lastError = null;
     // Кэш в localStorage — мгновенный показ при следующем открытии в течение 15 минут
     saveForecastCache(currentLocation.lat, currentLocation.lon, byModel);
+    // Самооценка точности (В7) — копим историю предсказаний и фактов
+    updateAccuracyData(currentLocation.lat, currentLocation.lon, byModel);
+    ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
     renderStaticAstro();
+    renderAccuracy();
+    renderSourceButtons();
     renderAll();
     updateClock();
   } catch (err) {
@@ -4994,6 +5429,7 @@ async function refreshForecast(force = false) {
       renderClimateContext();
       renderPollen();
       renderStorm();
+      renderAccuracy();
       renderAll();
     }
   } finally {
