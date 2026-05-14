@@ -402,7 +402,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div class="container">
 
   <div class="header">
-    <div class="location-block">
+    <div class="location-block" id="locationBlock" role="button" tabindex="0" aria-label="Сменить город">
       <div class="location-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <defs><linearGradient id="locGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#4dabf7"/></linearGradient></defs>
@@ -411,8 +411,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         </svg>
       </div>
       <div class="location-text">
-        <h1>Харьков, Высокий</h1>
+        <h1><span id="locationName">Харьков</span><span class="geo-tag" id="locationTag" style="display:none"></span></h1>
         <p id="dateLine">Среда, 13.05.2026 · 23:10 UTC+3</p>
+        <div class="location-edit-hint">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          Нажмите чтобы сменить
+        </div>
       </div>
     </div>
     <div class="source-indicator" id="sourceIndicator">
@@ -563,6 +567,48 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
     <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- City picker modal -->
+<div class="modal-backdrop" id="cityModal" role="dialog" aria-modal="true" aria-labelledby="cityModalTitle">
+  <div class="modal city-modal">
+    <button class="modal-close" id="cityModalClose" aria-label="Закрыть">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-header">
+      <div class="modal-day-label">Выбор локации</div>
+      <h2 class="modal-day-title" id="cityModalTitle">Где смотрим погоду?</h2>
+    </div>
+
+    <button class="city-geo-btn" id="cityGeoBtn" type="button">
+      <div class="geo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M19.1 4.9l-2.1 2.1M7 17l-2.1 2.1M19.1 19.1L17 17M7 7 4.9 4.9"/></svg>
+      </div>
+      <div class="geo-spinner"></div>
+      <div class="geo-text">
+        <div class="t">Использовать моё местоположение</div>
+        <div class="s">Браузер спросит разрешение. Координаты не уходят на сервер</div>
+      </div>
+    </button>
+
+    <div class="city-error" id="cityGeoError" style="display:none">
+      <svg class="err-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      <div id="cityGeoErrorText">Не удалось определить местоположение</div>
+    </div>
+
+    <div class="city-search-wrap">
+      <span class="city-search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <input type="search" class="city-search-input" id="citySearchInput" placeholder="Поиск города по Украине..." autocomplete="off" spellcheck="false">
+      <button class="city-search-clear" id="citySearchClear" aria-label="Очистить" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="city-list-header" id="cityListHeader">Популярные города Украины</div>
+    <div class="city-list" id="cityList" role="listbox" aria-label="Список городов"></div>
   </div>
 </div>
 
@@ -1288,6 +1334,338 @@ function updateClock() {
   document.getElementById('clockLine').textContent = `обновлено: ${h}:${m}:${s} UTC+3 · v0.4 prototype`;
 }
 setInterval(updateClock, 1000);
+
+/* ============================================
+   LOCATION / CITY PICKER
+   ============================================ */
+
+const LOCATION_STORAGE_KEY = 'kw:location:v1';
+
+// Дефолт – Харьков (центр)
+const DEFAULT_LOCATION = {
+  name: 'Харьков', region: 'Харьковская обл.', country: 'Украина',
+  lat: 49.9935, lon: 36.2304, source: 'default'
+};
+
+// Топ-30 населённых пунктов Украины + Высокий (по умолчанию показываем при открытии модалки)
+const POPULAR_UA_CITIES = [
+  { name: 'Киев',              region: 'Киевская обл.',          lat: 50.4501, lon: 30.5234 },
+  { name: 'Харьков',           region: 'Харьковская обл.',       lat: 49.9935, lon: 36.2304 },
+  { name: 'Высокий',           region: 'Харьковская обл. (пгт)', lat: 49.9000, lon: 36.2100 },
+  { name: 'Одесса',            region: 'Одесская обл.',          lat: 46.4825, lon: 30.7233 },
+  { name: 'Днепр',             region: 'Днепропетровская обл.',  lat: 48.4647, lon: 35.0462 },
+  { name: 'Львов',             region: 'Львовская обл.',         lat: 49.8397, lon: 24.0297 },
+  { name: 'Запорожье',         region: 'Запорожская обл.',       lat: 47.8388, lon: 35.1396 },
+  { name: 'Кривой Рог',        region: 'Днепропетровская обл.',  lat: 47.9105, lon: 33.3918 },
+  { name: 'Николаев',          region: 'Николаевская обл.',      lat: 46.9750, lon: 31.9946 },
+  { name: 'Винница',           region: 'Винницкая обл.',         lat: 49.2331, lon: 28.4682 },
+  { name: 'Полтава',           region: 'Полтавская обл.',        lat: 49.5883, lon: 34.5514 },
+  { name: 'Чернигов',          region: 'Черниговская обл.',      lat: 51.4982, lon: 31.2893 },
+  { name: 'Херсон',            region: 'Херсонская обл.',        lat: 46.6354, lon: 32.6169 },
+  { name: 'Черкассы',          region: 'Черкасская обл.',        lat: 49.4444, lon: 32.0598 },
+  { name: 'Сумы',              region: 'Сумская обл.',           lat: 50.9077, lon: 34.7981 },
+  { name: 'Житомир',           region: 'Житомирская обл.',       lat: 50.2547, lon: 28.6587 },
+  { name: 'Ровно',             region: 'Ровненская обл.',        lat: 50.6199, lon: 26.2516 },
+  { name: 'Кропивницкий',      region: 'Кировоградская обл.',    lat: 48.5079, lon: 32.2623 },
+  { name: 'Хмельницкий',       region: 'Хмельницкая обл.',       lat: 49.4229, lon: 26.9871 },
+  { name: 'Ивано-Франковск',   region: 'Ивано-Франковская обл.', lat: 48.9226, lon: 24.7111 },
+  { name: 'Тернополь',         region: 'Тернопольская обл.',     lat: 49.5535, lon: 25.5948 },
+  { name: 'Луцк',              region: 'Волынская обл.',         lat: 50.7472, lon: 25.3254 },
+  { name: 'Краматорск',        region: 'Донецкая обл.',          lat: 48.7387, lon: 37.5848 },
+  { name: 'Белая Церковь',     region: 'Киевская обл.',          lat: 49.7958, lon: 30.1278 },
+  { name: 'Мелитополь',        region: 'Запорожская обл.',       lat: 46.8395, lon: 35.3654 },
+  { name: 'Ужгород',           region: 'Закарпатская обл.',      lat: 48.6207, lon: 22.2879 },
+  { name: 'Бровары',           region: 'Киевская обл.',          lat: 50.5114, lon: 30.7906 },
+  { name: 'Каменское',         region: 'Днепропетровская обл.',  lat: 48.5114, lon: 34.6021 },
+  { name: 'Мариуполь',         region: 'Донецкая обл.',          lat: 47.0971, lon: 37.5430 },
+  { name: 'Северодонецк',      region: 'Луганская обл.',         lat: 48.9482, lon: 38.4913 },
+  { name: 'Бахмут',            region: 'Донецкая обл.',          lat: 48.5947, lon: 37.9959 },
+  { name: 'Каменец-Подольский',region: 'Хмельницкая обл.',       lat: 48.6845, lon: 26.5868 }
+];
+
+// Текущая локация — заполнится в loadInitialLocation()
+let currentLocation = { ...DEFAULT_LOCATION };
+
+// === localStorage ===
+function loadSavedLocation() {
+  try {
+    const raw = localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    // Sanity check
+    if (typeof obj.lat !== 'number' || typeof obj.lon !== 'number' || !obj.name) return null;
+    if (obj.lat < -90 || obj.lat > 90 || obj.lon < -180 || obj.lon > 180) return null;
+    return obj;
+  } catch (e) {
+    console.warn('Не удалось прочитать локацию из localStorage:', e);
+    return null;
+  }
+}
+function saveLocation(loc) {
+  try {
+    localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify(loc));
+  } catch (e) {
+    console.warn('Не удалось сохранить локацию:', e);
+  }
+}
+
+// === Применение локации к UI ===
+function setCurrentLocation(loc) {
+  currentLocation = { ...loc };
+  saveLocation(currentLocation);
+  renderLocationHeader();
+  // На этом шаге погодные данные пока не пересчитываются — это будет в Шаге Б2 (подключение Open-Meteo).
+  // Заготовка: в Б2 вызов будет здесь, например refreshForecast(currentLocation).
+}
+function renderLocationHeader() {
+  const nameEl = document.getElementById('locationName');
+  const tagEl = document.getElementById('locationTag');
+  if (!nameEl || !tagEl) return;
+
+  // Имя: если регион короткий и не совпадает с городом — показываем «Город · регион», иначе только город
+  let title = currentLocation.name;
+  if (currentLocation.region && !currentLocation.region.startsWith(currentLocation.name)) {
+    // Шапка короткая, поэтому регион добавим только если суммарная длина не больше 28 символов
+    const combined = `${currentLocation.name} · ${currentLocation.region}`;
+    title = combined.length <= 32 ? combined : currentLocation.name;
+  }
+  nameEl.textContent = title;
+
+  // Тег источника локации
+  if (currentLocation.source === 'geo') {
+    tagEl.className = 'geo-tag';
+    tagEl.textContent = '📍 по геолокации';
+    tagEl.style.display = '';
+  } else if (currentLocation.source === 'manual') {
+    tagEl.className = 'geo-tag manual';
+    tagEl.textContent = '✋ выбрано';
+    tagEl.style.display = '';
+  } else {
+    tagEl.style.display = 'none';
+  }
+}
+
+// === Геолокация браузера + reverse-geocode ===
+async function requestGeolocation() {
+  if (!('geolocation' in navigator)) {
+    throw new Error('Браузер не поддерживает геолокацию');
+  }
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy }),
+      err => {
+        const map = {
+          1: 'Доступ к местоположению отклонён. Разреши его в настройках браузера.',
+          2: 'Не удалось определить позицию (нет сигнала GPS / сети)',
+          3: 'Время ожидания истекло'
+        };
+        reject(new Error(map[err.code] || 'Ошибка геолокации'));
+      },
+      { timeout: 8000, maximumAge: 60_000, enableHighAccuracy: false }
+    );
+  });
+}
+
+async function reverseGeocode(lat, lon) {
+  // Open-Meteo не имеет reverse-geocode. Используем Nominatim (OpenStreetMap).
+  // Лимит: 1 req/sec — для нашего одного запроса при геолокации этого с запасом.
+  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru&zoom=12`;
+  try {
+    const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const data = await resp.json();
+    const a = data.address || {};
+    const name = a.city || a.town || a.village || a.hamlet || a.suburb || a.county || `${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+    const region = a.state || a.region || a.country || '';
+    return { name, region };
+  } catch (e) {
+    console.warn('Reverse-geocode не удался:', e);
+    return { name: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, region: 'Координаты' };
+  }
+}
+
+// === Поиск через Open-Meteo Geocoding ===
+async function searchCities(query) {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const params = new URLSearchParams({
+    name: q,
+    count: '15',
+    language: 'ru',
+    countryCode: 'UA'
+  });
+  const url = `https://geocoding-api.open-meteo.com/v1/search?${params}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('Geocoding HTTP ' + resp.status);
+  const data = await resp.json();
+  if (!data.results) return [];
+  return data.results.map(r => ({
+    name: r.name,
+    region: [r.admin1, r.admin2].filter(Boolean).join(' · ') || r.country || 'Украина',
+    lat: r.latitude,
+    lon: r.longitude
+  }));
+}
+
+// === Модалка: открыть/закрыть/отрисовка ===
+const cityModal = document.getElementById('cityModal');
+const cityModalClose = document.getElementById('cityModalClose');
+const cityGeoBtn = document.getElementById('cityGeoBtn');
+const cityGeoError = document.getElementById('cityGeoError');
+const cityGeoErrorText = document.getElementById('cityGeoErrorText');
+const citySearchInput = document.getElementById('citySearchInput');
+const citySearchClear = document.getElementById('citySearchClear');
+const cityListHeader = document.getElementById('cityListHeader');
+const cityList = document.getElementById('cityList');
+
+function openCityModal() {
+  hideGeoError();
+  citySearchInput.value = '';
+  citySearchClear.classList.remove('visible');
+  cityListHeader.textContent = 'Популярные города Украины';
+  renderCityList(POPULAR_UA_CITIES);
+  cityModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => citySearchInput.focus(), 350);
+}
+function closeCityModal() {
+  cityModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderCityList(cities, opts = {}) {
+  cityList.innerHTML = '';
+  if (!cities.length) {
+    cityList.innerHTML = `
+      <div class="city-empty">
+        <div class="empty-icon">🔍</div>
+        <div>${opts.emptyText || 'Город не найден. Попробуй другое название.'}</div>
+      </div>`;
+    return;
+  }
+  cities.forEach(c => {
+    const isActive = Math.abs(c.lat - currentLocation.lat) < 0.01 && Math.abs(c.lon - currentLocation.lon) < 0.01;
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'city-item' + (isActive ? ' active' : '');
+    item.innerHTML = `
+      <span class="city-pin">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.5 8 12 8 12s8-6.5 8-12c0-4.42-3.58-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+      </span>
+      <span class="city-text">
+        <span class="city-name">${escapeHtml(c.name)}</span>
+        <span class="city-region">${escapeHtml(c.region || '')}</span>
+      </span>
+      <span class="city-active-check">✓</span>`;
+    item.addEventListener('click', () => selectCityFromList(c));
+    cityList.appendChild(item);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function selectCityFromList(c) {
+  setCurrentLocation({ ...c, source: 'manual' });
+  closeCityModal();
+}
+
+function showGeoError(text) {
+  cityGeoErrorText.textContent = text;
+  cityGeoError.style.display = 'flex';
+}
+function hideGeoError() {
+  cityGeoError.style.display = 'none';
+}
+
+// === Обработчики ===
+document.getElementById('locationBlock').addEventListener('click', openCityModal);
+document.getElementById('locationBlock').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCityModal(); }
+});
+cityModalClose.addEventListener('click', closeCityModal);
+cityModal.addEventListener('click', e => { if (e.target === cityModal) closeCityModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && cityModal.classList.contains('open')) closeCityModal();
+});
+
+cityGeoBtn.addEventListener('click', async () => {
+  hideGeoError();
+  cityGeoBtn.classList.add('loading');
+  try {
+    const pos = await requestGeolocation();
+    const { name, region } = await reverseGeocode(pos.lat, pos.lon);
+    setCurrentLocation({ name, region, lat: pos.lat, lon: pos.lon, source: 'geo' });
+    closeCityModal();
+  } catch (err) {
+    showGeoError(err.message || 'Не удалось определить местоположение');
+  } finally {
+    cityGeoBtn.classList.remove('loading');
+  }
+});
+
+// debounce — чтобы не дёргать API на каждой букве
+let searchTimer = null;
+citySearchInput.addEventListener('input', () => {
+  const q = citySearchInput.value;
+  citySearchClear.classList.toggle('visible', q.length > 0);
+
+  clearTimeout(searchTimer);
+
+  if (q.trim().length === 0) {
+    cityListHeader.textContent = 'Популярные города Украины';
+    renderCityList(POPULAR_UA_CITIES);
+    return;
+  }
+  if (q.trim().length < 2) {
+    cityListHeader.textContent = 'Введи минимум 2 символа';
+    renderCityList([]);
+    return;
+  }
+
+  // Локальная фильтрация POPULAR_UA_CITIES — мгновенно
+  const local = POPULAR_UA_CITIES.filter(c => c.name.toLowerCase().includes(q.toLowerCase().trim()));
+  if (local.length > 0) {
+    cityListHeader.textContent = 'Найдено в популярных';
+    renderCityList(local);
+  } else {
+    cityListHeader.innerHTML = '<span style="display:inline-flex;gap:8px;align-items:center"><span class="geo-spinner" style="width:11px;height:11px;border-width:1.5px"></span>Ищу...</span>';
+    renderCityList([]);
+  }
+
+  // Параллельно — API-поиск (с задержкой 300 мс)
+  searchTimer = setTimeout(async () => {
+    try {
+      const found = await searchCities(q);
+      cityListHeader.textContent = found.length ? `Найдено: ${found.length}` : 'Ничего не найдено';
+      renderCityList(found, { emptyText: `Города «${escapeHtml(q)}» нет в базе Open-Meteo по Украине.` });
+    } catch (err) {
+      cityListHeader.textContent = 'Ошибка поиска';
+      renderCityList([], { emptyText: 'Не удалось выполнить поиск. Проверь интернет.' });
+    }
+  }, 300);
+});
+
+citySearchClear.addEventListener('click', () => {
+  citySearchInput.value = '';
+  citySearchClear.classList.remove('visible');
+  cityListHeader.textContent = 'Популярные города Украины';
+  renderCityList(POPULAR_UA_CITIES);
+  citySearchInput.focus();
+});
+
+// === Инициализация локации при загрузке ===
+function loadInitialLocation() {
+  const saved = loadSavedLocation();
+  if (saved) {
+    currentLocation = saved;
+  } else {
+    currentLocation = { ...DEFAULT_LOCATION };
+  }
+  renderLocationHeader();
+}
+loadInitialLocation();
 </script>
 
 </body>
