@@ -580,6 +580,45 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .aw-cell{padding:12px}
 }
 
+/* ============================================
+   CLIMATE CONTEXT (В4) — сравнение с климатической нормой
+   ============================================ */
+.climate-card{padding:22px;margin-bottom:18px;display:flex;flex-direction:column;gap:14px}
+.climate-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.climate-card h2 .cc-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(167,139,250,0.55))}
+.climate-card .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px}
+
+.climate-body{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+.climate-metrics{display:flex;flex-direction:column;gap:10px}
+.climate-metric{padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;display:flex;flex-direction:column;gap:5px;position:relative;overflow:hidden}
+.climate-metric .cm-head{display:flex;align-items:center;gap:8px}
+.climate-metric .cm-emoji{font-size:14px;width:22px;text-align:center}
+.climate-metric .cm-label{font-size:10px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+.climate-metric .cm-values{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace}
+.climate-metric .cm-current{font-size:17px;font-weight:700;color:#fff}
+.climate-metric .cm-norm{font-size:11px;color:rgba(232,240,255,0.5);font-weight:500}
+.climate-metric .cm-diff{font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;font-family:'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:4px}
+.climate-metric .cm-diff.warmer  { color:#fb923c; background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.25) }
+.climate-metric .cm-diff.colder  { color:#60a5fa; background:rgba(96,165,250,0.12); border:1px solid rgba(96,165,250,0.25) }
+.climate-metric .cm-diff.normal  { color:#5eead4; background:rgba(94,234,212,0.12); border:1px solid rgba(94,234,212,0.25) }
+.climate-metric .cm-diff.wetter  { color:#00d4ff; background:rgba(0,212,255,0.12); border:1px solid rgba(0,212,255,0.25) }
+.climate-metric .cm-diff.drier   { color:#facc15; background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.25) }
+
+.climate-spark{padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;display:flex;flex-direction:column;gap:6px}
+.climate-spark .cs-title{font-size:10px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+.climate-spark .cs-chart{position:relative;height:110px;margin-top:4px}
+.climate-spark .cs-chart svg{width:100%;height:100%;display:block;overflow:visible}
+.climate-spark .cs-years{display:flex;justify-content:space-between;font-size:10px;color:rgba(232,240,255,0.45);font-family:'JetBrains Mono',monospace;margin-top:2px}
+.climate-spark .cs-empty{font-size:12px;color:rgba(232,240,255,0.4);text-align:center;padding:20px 0}
+
+@media (max-width: 720px){
+  .climate-body{grid-template-columns:1fr;gap:12px}
+}
+@media (max-width: 640px){
+  .climate-card{padding:18px}
+  .climate-metric{padding:10px 12px}
+}
+
 </style>
 </head>
 <body>
@@ -767,6 +806,46 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
     <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 48 часов</div>
     <div class="aw-grid" id="activityWindowsGrid"></div>
+  </div>
+
+  <div class="glass climate-card" id="climateCard">
+    <div>
+      <h2><span class="cc-emoji">📊</span><span data-i18n="climate.title">Климатический контекст</span></h2>
+      <div class="sub" data-i18n="climate.sub">Сегодня vs средние значения за последние 5 лет</div>
+    </div>
+    <div class="climate-body">
+      <div class="climate-metrics">
+        <div class="climate-metric" id="climateTempMetric">
+          <div class="cm-head"><span class="cm-emoji">🌡</span><span class="cm-label" data-i18n="climate.tempLabel">Максимум дня</span></div>
+          <div class="cm-values">
+            <span class="cm-current" id="climateTempCurrent">—</span>
+            <span class="cm-norm" id="climateTempNorm">—</span>
+            <span class="cm-diff" id="climateTempDiff" style="display:none">—</span>
+          </div>
+        </div>
+        <div class="climate-metric" id="climatePrecipMetric">
+          <div class="cm-head"><span class="cm-emoji">🌧</span><span class="cm-label" data-i18n="climate.precipLabel">Осадки за 5 дней</span></div>
+          <div class="cm-values">
+            <span class="cm-current" id="climatePrecipCurrent">—</span>
+            <span class="cm-norm" id="climatePrecipNorm">—</span>
+            <span class="cm-diff" id="climatePrecipDiff" style="display:none">—</span>
+          </div>
+        </div>
+        <div class="climate-metric" id="climateMinMetric">
+          <div class="cm-head"><span class="cm-emoji">❄️</span><span class="cm-label" data-i18n="climate.minLabel">Минимум ночью</span></div>
+          <div class="cm-values">
+            <span class="cm-current" id="climateMinCurrent">—</span>
+            <span class="cm-norm" id="climateMinNorm">—</span>
+            <span class="cm-diff" id="climateMinDiff" style="display:none">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="climate-spark">
+        <div class="cs-title" data-i18n="climate.sparkTitle">В этот день в прошлые годы</div>
+        <div class="cs-chart" id="climateSparkChart"></div>
+        <div class="cs-years" id="climateSparkYears"></div>
+      </div>
+    </div>
   </div>
 
   <div class="glass chart-card">
@@ -1050,6 +1129,20 @@ const I18N = {
     'windows.noWindow': 'Нет окна в ближайшие 48 ч',
     'windows.carwash.dry': 'Сухо {h} ч подряд',
     'windows.carwash.notRec': 'Не рекомендуется · ожидается дождь',
+    'climate.title': 'Климатический контекст',
+    'climate.sub': 'Сегодня vs средние значения за последние 5 лет',
+    'climate.tempLabel': 'Максимум дня',
+    'climate.minLabel': 'Минимум ночью',
+    'climate.precipLabel': 'Осадки за 5 дней',
+    'climate.norm': 'норма {v}',
+    'climate.warmer': '+{v}° теплее',
+    'climate.colder': '−{v}° холоднее',
+    'climate.aboutNorm': 'около нормы',
+    'climate.wetter': '+{v}% мокрее',
+    'climate.drier': '−{v}% суше',
+    'climate.sparkTitle': 'В этот день в прошлые годы',
+    'climate.sparkEmpty': 'Архивные данные недоступны',
+    'climate.loading': 'Загрузка истории...',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
@@ -1258,6 +1351,20 @@ const I18N = {
     'windows.noWindow': 'Немає вікна у найближчі 48 год',
     'windows.carwash.dry': 'Сухо {h} год поспіль',
     'windows.carwash.notRec': 'Не рекомендується · очікується дощ',
+    'climate.title': 'Кліматичний контекст',
+    'climate.sub': 'Сьогодні vs середні значення за останні 5 років',
+    'climate.tempLabel': 'Максимум дня',
+    'climate.minLabel': 'Мінімум вночі',
+    'climate.precipLabel': 'Опади за 5 днів',
+    'climate.norm': 'норма {v}',
+    'climate.warmer': '+{v}° тепліше',
+    'climate.colder': '−{v}° холодніше',
+    'climate.aboutNorm': 'близько норми',
+    'climate.wetter': '+{v}% мокріше',
+    'climate.drier': '−{v}% сухіше',
+    'climate.sparkTitle': 'У цей день у минулі роки',
+    'climate.sparkEmpty': 'Архівні дані недоступні',
+    'climate.loading': 'Завантаження історії...',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
@@ -1466,6 +1573,20 @@ const I18N = {
     'windows.noWindow': 'No suitable window in the next 48 h',
     'windows.carwash.dry': 'Dry for {h} h straight',
     'windows.carwash.notRec': 'Not recommended · rain expected',
+    'climate.title': 'Climate context',
+    'climate.sub': 'Today vs 5-year average for this date',
+    'climate.tempLabel': 'Daily max',
+    'climate.minLabel': 'Overnight low',
+    'climate.precipLabel': 'Precipitation in 5 days',
+    'climate.norm': 'normal {v}',
+    'climate.warmer': '+{v}° warmer',
+    'climate.colder': '−{v}° colder',
+    'climate.aboutNorm': 'about normal',
+    'climate.wetter': '+{v}% wetter',
+    'climate.drier': '−{v}% drier',
+    'climate.sparkTitle': 'On this date in past years',
+    'climate.sparkEmpty': 'Archive data unavailable',
+    'climate.loading': 'Loading history...',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
@@ -2867,6 +2988,230 @@ function renderAstroPhoto() {
 }
 
 /* ============================================
+   CLIMATE CONTEXT (В4) — сравнение с 5-летней нормой
+   Один запрос к Open-Meteo Archive API на последние 5 лет, плюс кэш на 30 дней.
+   ============================================ */
+
+const CLIMATE_CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 дней
+function climateCacheKey(lat, lon) {
+  return `kw:climate-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v1`;
+}
+function loadClimateCache(lat, lon) {
+  try {
+    const raw = localStorage.getItem(climateCacheKey(lat, lon));
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj.timestamp !== 'number') return null;
+    if (Date.now() - obj.timestamp > CLIMATE_CACHE_TTL_MS) return null;
+    return obj.data;
+  } catch (e) { return null; }
+}
+function saveClimateCache(lat, lon, data) {
+  try { localStorage.setItem(climateCacheKey(lat, lon), JSON.stringify({ timestamp: Date.now(), data })); } catch (e) {}
+}
+
+// Запрос архива за последние 5 лет, ±3 дня от сегодняшней даты в каждом году.
+// Чтобы один запрос покрыл 5 лет — берём диапазон с 5 лет назад до прошлого года, целиком.
+// Из этого диапазона потом отфильтруем нужные дни.
+async function fetchArchiveClimate(lat, lon) {
+  const now = new Date();
+  const thisYear = now.getFullYear();
+  const startDate = `${thisYear - 5}-01-01`;
+  const endDate   = `${thisYear - 1}-12-31`;
+  const params = new URLSearchParams({
+    latitude: lat.toFixed(4),
+    longitude: lon.toFixed(4),
+    start_date: startDate,
+    end_date: endDate,
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum',
+    timezone: 'auto'
+  });
+  const url = `https://archive-api.open-meteo.com/v1/archive?${params.toString()}`;
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (e) { return null; }
+}
+
+// Разбираем archive-ответ: для каждого года последних 5 лет считаем средние max/min/precip-sum
+// в окне ±3 дня от сегодняшней даты (по календарю).
+// Возвращает { years: [{year, maxT, minT, precipSum}], normMax, normMin, normPrecip5d }.
+function parseArchiveClimate(data) {
+  if (!data || !data.daily || !Array.isArray(data.daily.time)) return null;
+  const now = new Date();
+  const todayMonth = now.getMonth(); // 0..11
+  const todayDay = now.getDate();    // 1..31
+  // Объединяем дни в "дни года" (приблизительно — пропускаем 29 февраля).
+  const yearGroups = {};
+  data.daily.time.forEach((dateStr, i) => {
+    const d = new Date(dateStr + 'T12:00:00');
+    const yr = d.getFullYear();
+    if (!yearGroups[yr]) yearGroups[yr] = [];
+    // Окно ±3 дня вокруг сегодняшней даты, без учёта года (по календарной близости)
+    const refDate = new Date(yr, todayMonth, todayDay);
+    const diffDays = Math.abs((d - refDate) / 86400000);
+    if (diffDays <= 3) {
+      yearGroups[yr].push({
+        maxT: data.daily.temperature_2m_max[i],
+        minT: data.daily.temperature_2m_min[i],
+        precip: data.daily.precipitation_sum[i]
+      });
+    }
+  });
+
+  const years = [];
+  Object.keys(yearGroups).sort().forEach(yr => {
+    const items = yearGroups[yr].filter(x => x.maxT != null);
+    if (items.length === 0) return;
+    const meanMax = items.reduce((a, b) => a + b.maxT, 0) / items.length;
+    const meanMin = items.reduce((a, b) => a + (b.minT != null ? b.minT : 0), 0) / items.length;
+    const sumPrecip = items.reduce((a, b) => a + (b.precip != null ? b.precip : 0), 0);
+    years.push({
+      year: parseInt(yr, 10),
+      maxT: Math.round(meanMax * 10) / 10,
+      minT: Math.round(meanMin * 10) / 10,
+      precipSum: Math.round(sumPrecip * 10) / 10
+    });
+  });
+
+  if (years.length === 0) return null;
+
+  const normMax = years.reduce((a, b) => a + b.maxT, 0) / years.length;
+  const normMin = years.reduce((a, b) => a + b.minT, 0) / years.length;
+  const normPrecip5d = years.reduce((a, b) => a + b.precipSum, 0) / years.length;
+
+  return {
+    years,
+    normMax: Math.round(normMax * 10) / 10,
+    normMin: Math.round(normMin * 10) / 10,
+    normPrecip5d: Math.round(normPrecip5d * 10) / 10
+  };
+}
+
+// === Render ===
+let CLIMATE_DATA = null; // заполняется в refreshForecast
+
+function renderClimateContext() {
+  if (!CLIMATE_DATA) return;
+  const c = CLIMATE_DATA;
+
+  // Текущие значения из ACTIVE_FORECAST_BY_MODEL.avg (или fallback)
+  const fc = ACTIVITY_PRESETS_FORECAST_SOURCE();
+  if (!fc || !fc[0]) return;
+  const today = fc[0];
+
+  // Максимум сегодня и норма
+  setClimateMetric('climateTempCurrent', 'climateTempNorm', 'climateTempDiff',
+    today.max, c.normMax, 'temp');
+  // Минимум сегодня
+  setClimateMetric('climateMinCurrent', 'climateMinNorm', 'climateMinDiff',
+    today.min, c.normMin, 'temp');
+  // Сумма осадков на 5 дней
+  let precip5d = 0;
+  for (let i = 0; i < Math.min(5, fc.length); i++) {
+    // precip — вероятность, не миллиметры. Аппроксимируем: precip% * 0.07 мм/% (как в renderHeroAndMetrics)
+    precip5d += Math.max(0, fc[i].precip * 0.07);
+  }
+  precip5d = Math.round(precip5d * 10) / 10;
+  setClimateMetric('climatePrecipCurrent', 'climatePrecipNorm', 'climatePrecipDiff',
+    precip5d, c.normPrecip5d, 'precip');
+
+  // Спарклайн
+  renderClimateSpark(c.years);
+}
+
+function setClimateMetric(curId, normId, diffId, current, norm, kind) {
+  const curEl = document.getElementById(curId);
+  const normEl = document.getElementById(normId);
+  const diffEl = document.getElementById(diffId);
+  if (!curEl || !normEl || !diffEl) return;
+
+  if (kind === 'temp') {
+    curEl.textContent = fmtTemp(current);
+    normEl.textContent = t('climate.norm', { v: fmtTemp(norm) });
+  } else if (kind === 'precip') {
+    curEl.textContent = `${current} мм`;
+    normEl.textContent = t('climate.norm', { v: `${norm} мм` });
+  }
+
+  if (typeof current !== 'number' || typeof norm !== 'number') { diffEl.style.display = 'none'; return; }
+  diffEl.style.display = '';
+  diffEl.classList.remove('warmer','colder','normal','wetter','drier');
+
+  if (kind === 'temp') {
+    const diff = current - norm;
+    const absDiff = Math.abs(diff);
+    if (absDiff < 1) {
+      diffEl.classList.add('normal');
+      diffEl.textContent = t('climate.aboutNorm');
+    } else if (diff > 0) {
+      diffEl.classList.add('warmer');
+      diffEl.textContent = t('climate.warmer', { v: Math.round(diff * 10) / 10 });
+    } else {
+      diffEl.classList.add('colder');
+      diffEl.textContent = t('climate.colder', { v: Math.round(absDiff * 10) / 10 });
+    }
+  } else if (kind === 'precip') {
+    if (norm < 0.5) { diffEl.style.display = 'none'; return; }
+    const pct = Math.round(((current - norm) / norm) * 100);
+    if (Math.abs(pct) < 10) {
+      diffEl.classList.add('normal');
+      diffEl.textContent = t('climate.aboutNorm');
+    } else if (pct > 0) {
+      diffEl.classList.add('wetter');
+      diffEl.textContent = t('climate.wetter', { v: pct });
+    } else {
+      diffEl.classList.add('drier');
+      diffEl.textContent = t('climate.drier', { v: Math.abs(pct) });
+    }
+  }
+}
+
+// Простой SVG-спарклайн max-температуры по годам.
+function renderClimateSpark(years) {
+  const chart = document.getElementById('climateSparkChart');
+  const yearsEl = document.getElementById('climateSparkYears');
+  if (!chart || !yearsEl) return;
+  if (!years || years.length === 0) {
+    chart.innerHTML = `<div class="cs-empty">${t('climate.sparkEmpty')}</div>`;
+    yearsEl.innerHTML = '';
+    return;
+  }
+  const values = years.map(y => y.maxT);
+  const minV = Math.min(...values), maxV = Math.max(...values);
+  const range = Math.max(1, maxV - minV);
+  // Большой viewBox + сохранение aspect ratio — текст не сплющивается, точки и подписи выровнены.
+  const W = 300, H = 110, PAD_X = 22, TOP = 22, LINE_BOTTOM = 82; // график занимает 22..82, годы — на y=100
+  const step = (W - PAD_X * 2) / Math.max(1, values.length - 1);
+  const points = values.map((v, i) => {
+    const x = PAD_X + i * step;
+    const y = TOP + (LINE_BOTTOM - TOP) * (1 - (v - minV) / range);
+    return { x, y, v, year: years[i].year };
+  });
+  const pathD = points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
+  const areaD = pathD + ` L ${points[points.length-1].x} ${LINE_BOTTOM} L ${points[0].x} ${LINE_BOTTOM} Z`;
+  const dotsHtml = points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#a78bfa" stroke="#fff" stroke-width="1.5"/>`).join('');
+  const tempLabelsHtml = points.map(p => `<text x="${p.x}" y="${Math.max(p.y - 7, 13)}" text-anchor="middle" font-size="10" fill="#fff" font-family="JetBrains Mono" font-weight="600">${Math.round(p.v)}°</text>`).join('');
+  const yearLabelsHtml = points.map(p => `<text x="${p.x}" y="100" text-anchor="middle" font-size="9" fill="rgba(232,240,255,0.55)" font-family="JetBrains Mono">${p.year}</text>`).join('');
+  chart.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">
+      <defs>
+        <linearGradient id="csGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(167,139,250,0.45)"/>
+          <stop offset="100%" stop-color="rgba(167,139,250,0)"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaD}" fill="url(#csGrad)"/>
+      <path d="${pathD}" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+      ${dotsHtml}
+      ${tempLabelsHtml}
+      ${yearLabelsHtml}
+    </svg>`;
+  yearsEl.innerHTML = ''; // годы внутри SVG
+}
+
+/* ============================================
    ACTIVITY WINDOWS (В3) — окна возможностей для бытовых задач
    ============================================ */
 
@@ -3485,6 +3830,7 @@ function applyAll() {
   renderStaticAstro();
   renderAstroPhoto();
   renderActivityWindows();
+  renderClimateContext();
   renderSourceButtons();
   renderAll();
   updateClock();
@@ -4101,12 +4447,28 @@ async function refreshForecast(force = false) {
     if (cached) {
       ACTIVE_FORECAST_BY_MODEL = cached.byModel;
       API_STATE.lastSuccess = new Date(cached.timestamp);
+
+      // Climate-данные тоже из кэша; если нет — догружаем в фоне (не блокируем UI).
+      const climateCached = loadClimateCache(currentLocation.lat, currentLocation.lon);
+      CLIMATE_DATA = climateCached || null;
+      if (!climateCached) {
+        fetchArchiveClimate(currentLocation.lat, currentLocation.lon).then(d => {
+          const parsed = d ? parseArchiveClimate(d) : null;
+          if (parsed) {
+            saveClimateCache(currentLocation.lat, currentLocation.lon, parsed);
+            CLIMATE_DATA = parsed;
+            renderClimateContext();
+          }
+        }).catch(() => {});
+      }
+
       renderStaticAstro();
       renderAstroPhoto();
       renderActivityWindows();
+      renderClimateContext();
       renderAll();
       updateClock();
-      return; // кэш свежий — не делаем сетевой запрос
+      return; // кэш свежий — основной сетевой запрос не делаем
     }
   }
 
@@ -4118,11 +4480,28 @@ async function refreshForecast(force = false) {
   const modelIds = SOURCES.filter(s => s.model).map(s => s.model);
 
   try {
-    // Параллельно запрашиваем основной прогноз и качество воздуха. AQI не критичен — если упадёт, продолжаем.
-    const [data, aqiData] = await Promise.all([
+    // Параллельно: основной прогноз + AQI + climate.
+    // Используем allSettled, чтобы падение AQI или climate не валило весь рендер.
+    const climateCached = loadClimateCache(currentLocation.lat, currentLocation.lon);
+    const climatePromise = climateCached
+      ? Promise.resolve(climateCached)
+      : fetchArchiveClimate(currentLocation.lat, currentLocation.lon).then(d => {
+          const parsed = d ? parseArchiveClimate(d) : null;
+          if (parsed) saveClimateCache(currentLocation.lat, currentLocation.lon, parsed);
+          return parsed;
+        }).catch(() => null);
+
+    const results = await Promise.allSettled([
       fetchOpenMeteo(currentLocation.lat, currentLocation.lon, modelIds),
-      fetchAirQuality(currentLocation.lat, currentLocation.lon)
+      fetchAirQuality(currentLocation.lat, currentLocation.lon),
+      climatePromise
     ]);
+    // Основной прогноз обязателен — если он упал, бросаем ошибку дальше
+    if (results[0].status === 'rejected') throw results[0].reason;
+    const data       = results[0].value;
+    const aqiData    = results[1].status === 'fulfilled' ? results[1].value : null;
+    const climateData = results[2].status === 'fulfilled' ? results[2].value : null;
+    CLIMATE_DATA = climateData;
     const byModel = parseAllModels(data, SOURCES);
     if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
@@ -4159,6 +4538,7 @@ async function refreshForecast(force = false) {
       renderStaticAstro();
       renderAstroPhoto();
       renderActivityWindows();
+      renderClimateContext();
       renderAll();
     }
   } finally {
