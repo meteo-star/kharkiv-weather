@@ -943,7 +943,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
   <div class="glass activity-windows" id="activityWindowsCard">
     <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
-    <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 48 часов</div>
+    <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 5 дней</div>
     <div class="aw-grid" id="activityWindowsGrid"></div>
   </div>
 
@@ -1325,7 +1325,7 @@ const I18N = {
     'confidence.tooltip': '{n} моделей · разброс ±{range}°C по максимальной температуре сегодня',
     'chart.spreadLabel': 'Разброс между 7 моделями',
     'windows.title': 'Окна возможностей',
-    'windows.sub': 'Лучшее время для бытовых задач в ближайшие 48 часов',
+    'windows.sub': 'Лучшее время для бытовых задач в ближайшие 5 дней',
     'windows.preset.jogging': 'Пробежка',
     'windows.preset.kids': 'Прогулка с ребёнком',
     'windows.preset.bbq': 'Шашлык / дача',
@@ -1337,7 +1337,7 @@ const I18N = {
     'windows.range': '{day} {start}–{end}',
     'windows.crossDay': '{startDay} {start} — {endDay} {end}',
     'windows.duration': 'длительность {h} ч',
-    'windows.noWindow': 'Нет окна в ближайшие 48 ч',
+    'windows.noWindow': 'Нет окна в ближайшие 5 дней',
     'windows.carwash.dry': 'Сухо {h} ч подряд',
     'windows.carwash.notRec': 'Не рекомендуется · ожидается дождь',
     'climate.title': 'Климатический контекст',
@@ -1588,7 +1588,7 @@ const I18N = {
     'confidence.tooltip': '{n} моделей · розкид ±{range}°C по максимальній температурі сьогодні',
     'chart.spreadLabel': 'Розкид між 7 моделями',
     'windows.title': 'Вікна можливостей',
-    'windows.sub': 'Найкращий час для побутових справ у наступні 48 годин',
+    'windows.sub': 'Найкращий час для побутових справ у найближчі 5 днів',
     'windows.preset.jogging': 'Пробіжка',
     'windows.preset.kids': 'Прогулянка з дитиною',
     'windows.preset.bbq': 'Шашлик / дача',
@@ -1600,7 +1600,7 @@ const I18N = {
     'windows.range': '{day} {start}–{end}',
     'windows.crossDay': '{startDay} {start} — {endDay} {end}',
     'windows.duration': 'тривалість {h} год',
-    'windows.noWindow': 'Немає вікна у найближчі 48 год',
+    'windows.noWindow': 'Немає вікна у найближчі 5 днів',
     'windows.carwash.dry': 'Сухо {h} год поспіль',
     'windows.carwash.notRec': 'Не рекомендується · очікується дощ',
     'climate.title': 'Кліматичний контекст',
@@ -1851,7 +1851,7 @@ const I18N = {
     'confidence.tooltip': '{n} models · spread ±{range}°C on today\'s max temperature',
     'chart.spreadLabel': 'Spread across 7 models',
     'windows.title': 'Activity windows',
-    'windows.sub': 'Best time for everyday tasks in the next 48 hours',
+    'windows.sub': 'Best time for everyday tasks in the next 5 days',
     'windows.preset.jogging': 'Jogging',
     'windows.preset.kids': 'Walk with a child',
     'windows.preset.bbq': 'BBQ / outdoors',
@@ -1863,7 +1863,7 @@ const I18N = {
     'windows.range': '{day} {start}–{end}',
     'windows.crossDay': '{startDay} {start} — {endDay} {end}',
     'windows.duration': 'duration {h} h',
-    'windows.noWindow': 'No suitable window in the next 48 h',
+    'windows.noWindow': 'No suitable window in the next 5 days',
     'windows.carwash.dry': 'Dry for {h} h straight',
     'windows.carwash.notRec': 'Not recommended · rain expected',
     'climate.title': 'Climate context',
@@ -3916,13 +3916,27 @@ function renderClimateSpark(years) {
 
 // Пресеты. Все температурные пороги в °C (база). Часы в локальном времени из API.
 // minDuration — минимум подряд идущих часов, удовлетворяющих условию.
+// Helper-функции для проверки осадков на час.
+// pmm — среднее по моделям мм/ч; pmmMax — максимум по моделям (если хоть одна модель прогнозит дождь, мы это видим);
+// wc — weather_code (51-67 дождь, 71-77 снег, 80-86 ливни, 95-99 гроза).
+// Тройная проверка: средний прогноз + максимум по моделям + категория погоды.
+const RAIN_WC_RANGES = [[51,57],[61,67],[71,77],[80,86],[95,99]];
+function isRainyCode(wc) {
+  if (wc == null) return false;
+  return RAIN_WC_RANGES.some(([lo, hi]) => wc >= lo && wc <= hi);
+}
+// Полная сухость: avg < 0.1мм И max < 0.3мм И не дождевой код. Для bbq/laundry — где даже дождь критичен.
+function isDry(h)      { return (h.pmm || 0) < 0.1 && (h.pmmMax || 0) < 0.3 && !isRainyCode(h.wc); }
+// Лёгкая сухость: avg < 0.3мм И max < 0.7мм И не дождевой код. Для пробежки, прогулки с детьми.
+function isMostlyDry(h){ return (h.pmm || 0) < 0.3 && (h.pmmMax || 0) < 0.7 && !isRainyCode(h.wc); }
+
 const ACTIVITY_PRESETS = [
   {
     id: 'jogging',
     minDuration: 1,
     check: (h) => {
       const t = h.feels != null ? h.feels : h.t;
-      return t >= 5 && t <= 22 && h.w <= 5 && h.p < 30;
+      return t >= 5 && t <= 22 && h.w <= 5 && isMostlyDry(h);
     }
   },
   {
@@ -3930,35 +3944,39 @@ const ACTIVITY_PRESETS = [
     minDuration: 1,
     check: (h) => {
       const t = h.feels != null ? h.feels : h.t;
-      return t >= 12 && t <= 24 && h.w < 5 && h.p < 25 && h.h >= 8 && h.h <= 20;
+      return t >= 12 && t <= 24 && h.w < 5 && isMostlyDry(h) && h.h >= 8 && h.h <= 20;
     }
   },
   {
     id: 'bbq',
     minDuration: 3,
-    check: (h) => h.t > 15 && h.w < 5 && h.p < 20 && h.h >= 12 && h.h <= 22
+    check: (h) => h.t > 15 && h.w < 5 && isDry(h) && h.h >= 12 && h.h <= 22
   },
   {
     id: 'laundry',
     minDuration: 6,
-    check: (h) => h.p < 15 && h.w >= 2 && h.h >= 8 && h.h <= 22
+    check: (h) => isDry(h) && h.w >= 2 && h.h >= 8 && h.h <= 22
   },
   {
     id: 'carwash',
     minDuration: 24,
-    check: (h) => h.p < 30
+    check: (h) => isMostlyDry(h)
   },
   {
     id: 'watering',
     minDuration: 1,
-    check: (h) => h.p < 20 && h.h >= 18 && h.h <= 22
+    check: (h) => isMostlyDry(h) && h.h >= 18 && h.h <= 22
   }
 ];
 
-// Собрать все часовые слоты из 2 ближайших дней (сегодня + завтра) начиная с текущего часа.
+// Горизонт поиска окон — 5 дней (вся доступная глубина прогноза).
+// Если в ближайшие 48ч нет подходящего окна, оно может найтись на 3-4-5-й день.
+const ACTIVITY_HORIZON_DAYS = 5;
+
+// Собрать все часовые слоты из forecast (до ACTIVITY_HORIZON_DAYS дней) начиная с текущего часа.
 function collectUpcomingHours(forecast) {
   const out = [];
-  for (let dayIdx = 0; dayIdx < Math.min(2, forecast.length); dayIdx++) {
+  for (let dayIdx = 0; dayIdx < Math.min(ACTIVITY_HORIZON_DAYS, forecast.length); dayIdx++) {
     const day = forecast[dayIdx];
     if (!day || !day.hourly) continue;
     for (const h of day.hourly) {
@@ -3968,6 +3986,15 @@ function collectUpcomingHours(forecast) {
     }
   }
   return out;
+}
+
+// Лейбл дня по индексу: 0 — сегодня, 1 — завтра, 2-4 — локализованное имя дня недели ("Сб", "Вс"...)
+function dayLabelFromForecast(forecast, dayId) {
+  if (dayId === 0) return t('windows.today');
+  if (dayId === 1) return t('windows.tomorrow');
+  const day = forecast[dayId];
+  if (!day) return '';
+  return localizeDayShort(day.name);
 }
 
 // Найти ближайшее окно длиной >= minDuration, удовлетворяющее check.
@@ -3995,11 +4022,39 @@ function findActivityWindow(hours, check, minDuration) {
   return null;
 }
 
-// Форматирование результата для отображения
-function formatActivityWindow(win) {
+// Найти самое длинное окно (без ограничения minDuration). Полезно для carwash —
+// если 24ч полосы нет, показываем хотя бы доступный максимум (≥6ч).
+function findLongestActivityWindow(hours, check, minDuration = 1) {
+  let best = null;
+  let runStart = null;
+  const flush = (endIdx) => {
+    if (runStart === null) return;
+    const len = endIdx - runStart + 1;
+    if (len >= minDuration && (!best || len > best.duration)) {
+      best = {
+        dayId: hours[runStart].dayId,
+        startH: hours[runStart].h,
+        endH: hours[endIdx].h,
+        endDayId: hours[endIdx].dayId,
+        duration: len
+      };
+    }
+    runStart = null;
+  };
+  for (let i = 0; i < hours.length; i++) {
+    const ok = check(hours[i]);
+    if (ok && runStart === null) runStart = i;
+    if (!ok) flush(i - 1);
+    if (i === hours.length - 1 && ok) flush(i);
+  }
+  return best;
+}
+
+// Форматирование результата для отображения. Принимает forecast — нужен для лейблов дней 2-4.
+function formatActivityWindow(win, forecast) {
   if (!win) return { text: t('windows.noWindow'), found: false, hint: '' };
-  const startDay = win.dayId === 0 ? t('windows.today') : t('windows.tomorrow');
-  const endDay = win.endDayId === 0 ? t('windows.today') : t('windows.tomorrow');
+  const startDay = dayLabelFromForecast(forecast, win.dayId);
+  const endDay = dayLabelFromForecast(forecast, win.endDayId);
   const sh = String(win.startH).padStart(2,'0') + ':00';
   const eh = String((win.endH + 1) % 24).padStart(2,'0') + ':00';
   let text;
@@ -4022,22 +4077,24 @@ function renderActivityWindows() {
   ACTIVITY_PRESETS.forEach(preset => {
     let result;
     if (preset.id === 'carwash') {
-      // Спецлогика: смотрим вперёд 24 часа, ищем самую длинную сухую полосу с начала
-      let dry = 0;
-      for (let i = 0; i < Math.min(24, hours.length); i++) {
-        if (preset.check(hours[i])) dry++;
-        else break;
-      }
-      if (dry >= 24) {
-        result = { text: t('windows.carwash.dry', { h: dry }), found: true, hint: '' };
-      } else if (dry >= 6) {
-        result = { text: t('windows.carwash.dry', { h: dry }), found: true, hint: '' };
+      // Спецлогика: ищем самое раннее окно ≥24ч в 5-дневном горизонте.
+      // Если такого нет — самое длинное доступное окно ≥6ч (где можно помыть, и оно постоит).
+      const longWin = findActivityWindow(hours, preset.check, 24);
+      if (longWin) {
+        const fmt = formatActivityWindow(longWin, fc);
+        result = { text: fmt.text, found: true, hint: t('windows.carwash.dry', { h: longWin.duration }) };
       } else {
-        result = { text: t('windows.carwash.notRec'), found: false, hint: '' };
+        const fallback = findLongestActivityWindow(hours, preset.check, 6);
+        if (fallback) {
+          const fmt = formatActivityWindow(fallback, fc);
+          result = { text: fmt.text, found: true, hint: t('windows.carwash.dry', { h: fallback.duration }) };
+        } else {
+          result = { text: t('windows.carwash.notRec'), found: false, hint: '' };
+        }
       }
     } else {
       const win = findActivityWindow(hours, preset.check, preset.minDuration);
-      result = formatActivityWindow(win);
+      result = formatActivityWindow(win, fc);
     }
 
     const cell = document.createElement('div');
@@ -4703,8 +4760,8 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v4: после В6 в hourly добавились weatherCode/cape/liftedIndex для гроза-индикатора.
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v4`;
+  // v5: hotfix activity-windows — в hourly добавились pmm/pmmMax (осадки в мм/ч для надёжных проверок).
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v5`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -4713,10 +4770,10 @@ function loadForecastCache(lat, lon) {
     const obj = JSON.parse(raw);
     if (!obj || typeof obj.timestamp !== 'number' || !obj.byModel) return null;
     if (Date.now() - obj.timestamp > FORECAST_CACHE_TTL_MS) return null;
-    // Структурная валидация: в hourly должно быть поле cl (cloud_cover, добавлено в В1).
+    // Структурная валидация: в hourly должно быть поле pmm (precipitation mm/ч, добавлено в hotfix activity-windows).
     // Если его нет — кэш создан более старой версией кода, игнорируем.
     const avg = obj.byModel.avg;
-    if (avg && avg[0] && avg[0].hourly && avg[0].hourly[0] && avg[0].hourly[0].cl === undefined) return null;
+    if (avg && avg[0] && avg[0].hourly && avg[0].hourly[0] && avg[0].hourly[0].pmm === undefined) return null;
     return obj;
   } catch (e) { return null; }
 }
@@ -4928,6 +4985,7 @@ async function fetchOpenMeteo(lat, lon, models = null) {
     hourly: [
       'temperature_2m',
       'precipitation_probability',
+      'precipitation',
       'wind_speed_10m',
       'wind_direction_10m',
       'wind_gusts_10m',
@@ -5032,6 +5090,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
 
   const hT   = hPick('temperature_2m');
   const hPp  = hPick('precipitation_probability');
+  const hPmm = hPick('precipitation');               // фактический прогноз осадков в мм/ч (надёжнее, чем вероятность)
   const hW   = hPick('wind_speed_10m');
   const hHum = hPick('relative_humidity_2m');
   const hPr  = hPick('surface_pressure');
@@ -5064,6 +5123,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         h: hourDate.getHours(),
         t: hT && hT[idx] != null ? Math.round(hT[idx]) : 0,
         p: hPp && hPp[idx] != null ? Math.round(hPp[idx]) : 0,
+        pmm: hPmm && hPmm[idx] != null ? Math.round(hPmm[idx] * 10) / 10 : 0,  // мм/ч (для activity-windows и других проверок реальных осадков)
         w: hW && hW[idx] != null ? Math.round(hW[idx]) : 0,
         c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy',
         feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null,
@@ -5194,6 +5254,8 @@ function computeAverageForecast(forecasts) {
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
         p: Math.round(meanOf(hours, 'p')),
+        pmm: Math.round(meanOf(hours, 'pmm') * 10) / 10,  // среднее количество осадков мм/ч по моделям
+        pmmMax: Math.max(0, ...hours.map(o => typeof o.pmm === 'number' ? o.pmm : 0)),  // максимум среди моделей (для консервативной проверки)
         w: Math.round(meanOf(hours, 'w')),
         c: hours[0].c,
         feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
