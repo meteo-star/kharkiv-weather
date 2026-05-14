@@ -663,6 +663,55 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .pollen-cell{padding:10px}
 }
 
+/* ============================================
+   STORM TRACKER (В6) — гроза-индикатор на 48ч
+   ============================================ */
+.storm-card{padding:22px;margin-bottom:18px}
+.storm-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.storm-card h2 .sm-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(168,85,247,0.55))}
+.storm-card .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px;margin-bottom:14px}
+
+.storm-banner{display:none;margin:0 0 14px 0;padding:10px 14px;border-radius:10px;font-size:12px;color:#fff;font-weight:500;align-items:center;gap:10px}
+.storm-banner.show{display:flex}
+.storm-banner.bn-r2{background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.35);color:#fed7aa}
+.storm-banner.bn-r3{background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.4);color:#fecaca}
+.storm-banner.bn-r4{background:rgba(168,85,247,0.16);border:1px solid rgba(168,85,247,0.45);color:#e9d5ff}
+.storm-banner .sb-icon{font-size:16px;flex-shrink:0}
+
+.storm-status{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.storm-status-text{font-size:13px;font-weight:500;color:#fff}
+.storm-status-pill{font-size:10px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;padding:3px 9px;border-radius:100px;font-family:'JetBrains Mono',monospace}
+.storm-status.st-r0 .storm-status-pill{color:#5eead4;background:rgba(94,234,212,0.12);border:1px solid rgba(94,234,212,0.25)}
+.storm-status.st-r1 .storm-status-pill{color:#facc15;background:rgba(250,204,21,0.12);border:1px solid rgba(250,204,21,0.3)}
+.storm-status.st-r2 .storm-status-pill{color:#fb923c;background:rgba(251,146,60,0.14);border:1px solid rgba(251,146,60,0.35)}
+.storm-status.st-r3 .storm-status-pill{color:#f87171;background:rgba(239,68,68,0.14);border:1px solid rgba(239,68,68,0.4)}
+.storm-status.st-r4 .storm-status-pill{color:#c084fc;background:rgba(168,85,247,0.16);border:1px solid rgba(168,85,247,0.45)}
+
+.storm-heatmap{display:grid;grid-template-columns:repeat(48,1fr);gap:2px;height:38px}
+.storm-h{border-radius:3px;background:rgba(255,255,255,0.05);transition:transform 0.18s ease, box-shadow 0.18s ease;cursor:default}
+.storm-h:hover{transform:scaleY(1.18)}
+.storm-h.r0{background:rgba(94,234,212,0.07)}
+.storm-h.r1{background:#facc15;box-shadow:0 0 5px rgba(250,204,21,0.55)}
+.storm-h.r2{background:#fb923c;box-shadow:0 0 5px rgba(251,146,60,0.6)}
+.storm-h.r3{background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.65)}
+.storm-h.r4{background:#a855f7;box-shadow:0 0 8px rgba(168,85,247,0.75)}
+
+.storm-axis{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:rgba(232,240,255,0.45);font-family:'JetBrains Mono',monospace}
+
+.storm-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:10px;color:rgba(232,240,255,0.55);font-family:'JetBrains Mono',monospace}
+.storm-legend .sl-item{display:inline-flex;align-items:center;gap:5px}
+.storm-legend .sl-sw{display:inline-block;width:10px;height:10px;border-radius:2px;background:rgba(255,255,255,0.08)}
+.storm-legend .sl-sw.r1{background:#facc15;box-shadow:0 0 3px rgba(250,204,21,0.6)}
+.storm-legend .sl-sw.r2{background:#fb923c;box-shadow:0 0 3px rgba(251,146,60,0.6)}
+.storm-legend .sl-sw.r3{background:#ef4444;box-shadow:0 0 3px rgba(239,68,68,0.6)}
+.storm-legend .sl-sw.r4{background:#a855f7;box-shadow:0 0 3px rgba(168,85,247,0.7)}
+
+@media (max-width: 640px){
+  .storm-card{padding:18px}
+  .storm-heatmap{height:32px;gap:1px}
+  .storm-legend{gap:8px}
+}
+
 </style>
 </head>
 <body>
@@ -856,6 +905,25 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <h2><span class="pl-emoji">🌼</span><span data-i18n="pollen.title">Пыльца сегодня</span></h2>
     <div class="sub" data-i18n="pollen.sub">Концентрация аллергенов в воздухе</div>
     <div class="pollen-grid" id="pollenGrid"></div>
+  </div>
+
+  <div class="glass storm-card" id="stormCard">
+    <h2><span class="sm-emoji">⚡</span><span data-i18n="storm.title">Гроза-индикатор</span></h2>
+    <div class="sub" data-i18n="storm.sub">Риск грозы по часам на ближайшие 48 часов</div>
+    <div class="storm-banner" id="stormBanner"><span class="sb-icon">⚠</span><span id="stormBannerText"></span></div>
+    <div class="storm-status st-r0" id="stormStatus">
+      <span class="storm-status-text" id="stormStatusText">—</span>
+      <span class="storm-status-pill" id="stormStatusPill" style="display:none">—</span>
+    </div>
+    <div class="storm-heatmap" id="stormHeatmap"></div>
+    <div class="storm-axis">
+      <span data-i18n="storm.axisNow">сейчас</span>
+      <span>+12ч</span>
+      <span>+24ч</span>
+      <span>+36ч</span>
+      <span>+48ч</span>
+    </div>
+    <div class="storm-legend" id="stormLegend"></div>
   </div>
 
   <div class="glass climate-card" id="climateCard">
@@ -1206,6 +1274,19 @@ const I18N = {
     'pollen.level.mid': 'Средняя',
     'pollen.level.high': 'Высокая',
     'pollen.level.veryHigh': 'Очень высокая',
+    'storm.title': 'Гроза-индикатор',
+    'storm.sub': 'Риск грозы по часам на ближайшие 48 часов',
+    'storm.noStorm': 'Гроз в ближайшие 48 часов не ожидается',
+    'storm.upcoming': 'Гроза через {hours}ч',
+    'storm.now': 'Гроза сейчас',
+    'storm.risk0': 'нет риска',
+    'storm.risk1': 'слабый',
+    'storm.risk2': 'умеренный',
+    'storm.risk3': 'высокий',
+    'storm.risk4': 'опасный',
+    'storm.axisNow': 'сейчас',
+    'storm.alertSoon': 'Гроза прогнозируется в ближайшие {hours}ч',
+    'storm.alertNow': 'Гроза идёт сейчас',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
@@ -1441,6 +1522,19 @@ const I18N = {
     'pollen.level.mid': 'Середня',
     'pollen.level.high': 'Висока',
     'pollen.level.veryHigh': 'Дуже висока',
+    'storm.title': 'Гроза-індикатор',
+    'storm.sub': 'Ризик грози по годинах на найближчі 48 годин',
+    'storm.noStorm': 'Гроз у найближчі 48 годин не очікується',
+    'storm.upcoming': 'Гроза через {hours}год',
+    'storm.now': 'Гроза зараз',
+    'storm.risk0': 'без ризику',
+    'storm.risk1': 'слабкий',
+    'storm.risk2': 'помірний',
+    'storm.risk3': 'високий',
+    'storm.risk4': 'небезпечно',
+    'storm.axisNow': 'зараз',
+    'storm.alertSoon': 'Гроза прогнозується найближчі {hours}год',
+    'storm.alertNow': 'Гроза йде зараз',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
@@ -1676,6 +1770,19 @@ const I18N = {
     'pollen.level.mid': 'Moderate',
     'pollen.level.high': 'High',
     'pollen.level.veryHigh': 'Very high',
+    'storm.title': 'Storm tracker',
+    'storm.sub': 'Hourly thunderstorm risk for the next 48 hours',
+    'storm.noStorm': 'No storms expected in the next 48 hours',
+    'storm.upcoming': 'Storm in {hours}h',
+    'storm.now': 'Storm now',
+    'storm.risk0': 'no risk',
+    'storm.risk1': 'low',
+    'storm.risk2': 'moderate',
+    'storm.risk3': 'high',
+    'storm.risk4': 'dangerous',
+    'storm.axisNow': 'now',
+    'storm.alertSoon': 'Storm expected within {hours}h',
+    'storm.alertNow': 'Storm in progress now',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
@@ -3134,6 +3241,150 @@ function renderPollen() {
 }
 
 /* ============================================
+   STORM TRACKER (В6) — гроза-индикатор на 48ч
+   Источник: hourly weather_code / cape / lifted_index из Open-Meteo (вычисляются на стороне API).
+   Гроза-сигналы: weather_code in {95, 96, 99} + CAPE (J/kg) + LI (lifted_index).
+   ============================================ */
+
+// Уровень риска грозы для одного часа: 0 нет / 1 слабый / 2 умеренный / 3 высокий / 4 опасный.
+function stormRiskLevel(h) {
+  if (!h) return 0;
+  const wc   = typeof h.wc === 'number' ? h.wc : null;
+  const cape = typeof h.cape === 'number' ? h.cape : null;
+  const li   = typeof h.li === 'number' ? h.li : null;
+  const pp   = typeof h.p === 'number' ? h.p : null;
+  const cl   = typeof h.cl === 'number' ? h.cl : null;
+
+  // 4 — опасный: явный код грозы с градом/ливнем или экстремальные CAPE+LI
+  if (wc === 99) return 4;
+  if (cape != null && cape > 2500 && li != null && li < -6) return 4;
+
+  // 3 — высокий: гроза с умеренным/сильным градом, или CAPE 1500..2500
+  if (wc === 96) return 3;
+  if (cape != null && cape > 1500 && cape <= 2500) return 3;
+  if (cape != null && cape > 1500 && li != null && li < -4) return 3;
+
+  // 2 — умеренный: обычный грозовой код, или CAPE 800..1500
+  if (wc === 95) return 2;
+  if (cape != null && cape > 800 && cape <= 1500) return 2;
+
+  // 1 — слабый: малый CAPE (нестабильность есть, но энергии мало),
+  // либо высокая вероятность дождя при густой облачности и небольшом CAPE.
+  if (cape != null && cape >= 300 && cape <= 800) return 1;
+  if (pp != null && pp >= 60 && cl != null && cl >= 70 && cape != null && cape >= 200) return 1;
+
+  return 0;
+}
+
+// Строит массив 48 часов начиная с ТЕКУЩЕГО часа из AVG-прогноза.
+// Элемент: { level, hoursAhead, hour, day, wc, cape, li, p }
+function buildStorm48h() {
+  const f = getForecast('avg');
+  if (!Array.isArray(f) || f.length === 0) return [];
+  const now = new Date();
+  const startHour = now.getHours();
+  const result = [];
+  for (let d = 0; d < Math.min(3, f.length); d++) {
+    const day = f[d];
+    if (!day || !Array.isArray(day.hourly)) continue;
+    const offset = d === 0 ? startHour : 0;
+    for (let i = offset; i < 24; i++) {
+      const h = day.hourly[i];
+      if (!h) continue;
+      result.push({
+        level: stormRiskLevel(h),
+        hoursAhead: result.length,
+        hour: h.h,
+        day: d,
+        wc: h.wc,
+        cape: h.cape,
+        li: h.li,
+        p: h.p
+      });
+      if (result.length >= 48) break;
+    }
+    if (result.length >= 48) break;
+  }
+  return result;
+}
+
+// Рендер карточки гроза-индикатора + тревожный баннер если есть риск в ближайшие 6ч.
+function renderStorm() {
+  const card = document.getElementById('stormCard');
+  if (!card) return;
+  card.style.display = '';
+
+  const heatmap   = document.getElementById('stormHeatmap');
+  const statusEl  = document.getElementById('stormStatus');
+  const textEl    = document.getElementById('stormStatusText');
+  const pillEl    = document.getElementById('stormStatusPill');
+  const bannerEl  = document.getElementById('stormBanner');
+  const bannerTxt = document.getElementById('stormBannerText');
+  const legendEl  = document.getElementById('stormLegend');
+
+  const hours = buildStorm48h();
+
+  // Heatmap
+  if (heatmap) {
+    heatmap.innerHTML = '';
+    hours.forEach(h => {
+      const cell = document.createElement('div');
+      cell.className = 'storm-h r' + h.level;
+      const parts = [
+        `+${h.hoursAhead}ч`,
+        t('storm.risk' + h.level)
+      ];
+      if (h.cape != null) parts.push('CAPE ' + h.cape);
+      if (h.wc != null)   parts.push('wc ' + h.wc);
+      cell.title = parts.join(' · ');
+      heatmap.appendChild(cell);
+    });
+  }
+
+  // Легенда (5 уровней)
+  if (legendEl) {
+    legendEl.innerHTML = [0,1,2,3,4].map(lvl =>
+      `<span class="sl-item"><span class="sl-sw r${lvl}"></span>${escapeHtml(t('storm.risk' + lvl))}</span>`
+    ).join('');
+  }
+
+  // Статус и баннер
+  const firstRisky = hours.find(x => x.level >= 1);
+  const maxLvl = hours.reduce((m, x) => Math.max(m, x.level), 0);
+  if (!firstRisky) {
+    if (textEl) textEl.textContent = t('storm.noStorm');
+    if (pillEl) pillEl.style.display = 'none';
+    if (statusEl) statusEl.className = 'storm-status st-r0';
+    if (bannerEl) bannerEl.className = 'storm-banner';
+  } else {
+    if (textEl) {
+      textEl.textContent = firstRisky.hoursAhead === 0
+        ? t('storm.now')
+        : t('storm.upcoming', { hours: firstRisky.hoursAhead });
+    }
+    if (pillEl) {
+      pillEl.style.display = '';
+      pillEl.textContent = t('storm.risk' + maxLvl);
+    }
+    if (statusEl) statusEl.className = 'storm-status st-r' + maxLvl;
+
+    // Тревожный баннер: первый риск ≥2 в ближайшие 6ч
+    if (bannerEl && bannerTxt) {
+      const earlyDanger = hours.find(x => x.hoursAhead <= 6 && x.level >= 2);
+      if (earlyDanger) {
+        const lvl = Math.max(...hours.filter(x => x.hoursAhead <= 6).map(x => x.level));
+        bannerEl.className = 'storm-banner show bn-r' + lvl;
+        bannerTxt.textContent = earlyDanger.hoursAhead === 0
+          ? t('storm.alertNow')
+          : t('storm.alertSoon', { hours: earlyDanger.hoursAhead });
+      } else {
+        bannerEl.className = 'storm-banner';
+      }
+    }
+  }
+}
+
+/* ============================================
    CLIMATE CONTEXT (В4) — сравнение с 5-летней нормой
    Один запрос к Open-Meteo Archive API на последние 5 лет, плюс кэш на 30 дней.
    ============================================ */
@@ -3978,6 +4229,7 @@ function applyAll() {
   renderActivityWindows();
   renderClimateContext();
   renderPollen();
+  renderStorm();
   renderSourceButtons();
   renderAll();
   updateClock();
@@ -4148,8 +4400,8 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v3: после В2 в hourly добавились tMin/tMax (полоса разброса), у дня — confidence/tempRange/modelCount.
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v3`;
+  // v4: после В6 в hourly добавились weatherCode/cape/liftedIndex для гроза-индикатора.
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v4`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -4259,7 +4511,9 @@ async function fetchOpenMeteo(lat, lon, models = null) {
       'weather_code',
       'dew_point_2m',
       'apparent_temperature',
-      'cloud_cover'
+      'cloud_cover',
+      'cape',
+      'lifted_index'
     ].join(','),
     daily: [
       'temperature_2m_max',
@@ -4360,6 +4614,8 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   const hDp  = hPick('dew_point_2m');
   const hAp  = hPick('apparent_temperature');
   const hCl  = hPick('cloud_cover');
+  const hCape = hPick('cape');           // CAPE J/kg — энергия конвекции (для В6)
+  const hLi   = hPick('lifted_index');   // Lifted Index — индекс неустойчивости (для В6)
 
   // Если у модели вообще нет температуры — отбраковываем (модель не покрывает регион)
   if (!tMax || tMax.every(v => v == null)) return null;
@@ -4386,7 +4642,11 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         w: hW && hW[idx] != null ? Math.round(hW[idx]) : 0,
         c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy',
         feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null,
-        cl: hCl && hCl[idx] != null ? Math.round(hCl[idx]) : null
+        cl: hCl && hCl[idx] != null ? Math.round(hCl[idx]) : null,
+        // В6 (гроза-индикатор): сырой weather_code (число), CAPE, lifted_index
+        wc: hWc && hWc[idx] != null ? hWc[idx] : null,
+        cape: hCape && hCape[idx] != null ? Math.round(hCape[idx]) : null,
+        li: hLi && hLi[idx] != null ? Math.round(hLi[idx] * 10) / 10 : null
       });
     }
 
@@ -4500,6 +4760,11 @@ function computeAverageForecast(forecasts) {
       const feelsVals = hours.map(o => o.feels).filter(v => typeof v === 'number');
       const clVals = hours.map(o => o.cl).filter(v => typeof v === 'number');
       const tVals = hours.map(o => o.t).filter(v => typeof v === 'number');
+      // В6: cape/li усредняем; wc берём максимум по моделям — если хоть одна предсказала
+      // грозовой код (95/96/99), он «выиграет» у спокойных кодов.
+      const capeVals = hours.map(o => o.cape).filter(v => typeof v === 'number');
+      const liVals   = hours.map(o => o.li).filter(v => typeof v === 'number');
+      const wcVals   = hours.map(o => o.wc).filter(v => typeof v === 'number');
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
@@ -4509,7 +4774,10 @@ function computeAverageForecast(forecasts) {
         feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
         cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null,
         tMin: tVals.length > 0 ? Math.min(...tVals) : null,
-        tMax: tVals.length > 0 ? Math.max(...tVals) : null
+        tMax: tVals.length > 0 ? Math.max(...tVals) : null,
+        wc: wcVals.length > 0 ? Math.max(...wcVals) : null,
+        cape: capeVals.length > 0 ? Math.round(capeVals.reduce((a,b) => a+b, 0) / capeVals.length) : null,
+        li: liVals.length > 0 ? Math.round((liVals.reduce((a,b) => a+b, 0) / liVals.length) * 10) / 10 : null
       });
     }
 
@@ -4647,6 +4915,7 @@ async function refreshForecast(force = false) {
       renderActivityWindows();
       renderClimateContext();
       renderPollen();
+      renderStorm();
       renderAll();
       updateClock();
       return; // кэш свежий — основной сетевой запрос не делаем
@@ -4724,6 +4993,7 @@ async function refreshForecast(force = false) {
       renderActivityWindows();
       renderClimateContext();
       renderPollen();
+      renderStorm();
       renderAll();
     }
   } finally {
