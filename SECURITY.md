@@ -60,6 +60,8 @@ GitHub Pages обслуживает сайт только по HTTPS. В `<head>
 | `api.open-meteo.com` | IP, координаты, User-Agent | Open-Meteo (Швейцария, GDPR) |
 | `air-quality-api.open-meteo.com` | IP, координаты | Open-Meteo |
 | `archive-api.open-meteo.com` | IP, координаты, диапазон дат | Open-Meteo |
+| `geocoding-api.open-meteo.com` | IP, поисковый запрос (название города) | Open-Meteo |
+| `nominatim.openstreetmap.org` | IP, координаты пользователя (при использовании геолокации) | OpenStreetMap Foundation (UK) |
 | `fonts.googleapis.com` / `fonts.gstatic.com` | IP, User-Agent | Google (один раз кэшируется) |
 | `cdn.jsdelivr.net` | IP, User-Agent | jsDelivr (Cloudflare) |
 | `ws.blitzortung.org` (опционально) | IP | Blitzortung (Германия, open data) |
