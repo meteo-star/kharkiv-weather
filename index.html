@@ -423,6 +423,30 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .seg-btn .seg-sub{font-size:9px}
 }
 
+/* ============================================
+   API LOADER + ERROR BANNER
+   ============================================ */
+.hero{position:relative}
+.hero.loading::after{content:'';position:absolute;inset:0;border-radius:24px;background:rgba(5,10,38,0.4);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;z-index:3;transition:opacity 0.25s}
+.hero-loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border:3px solid rgba(0,212,255,0.2);border-top-color:#00d4ff;border-radius:50%;animation:spin 0.9s linear infinite;z-index:4;display:none}
+.hero.loading .hero-loader{display:block}
+.hero-loader-text{position:absolute;top:calc(50% + 32px);left:50%;transform:translateX(-50%);font-size:11px;color:rgba(0,212,255,0.85);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;z-index:4;display:none;white-space:nowrap}
+.hero.loading .hero-loader-text{display:block}
+
+.api-error-banner{padding:12px 16px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:14px;color:#fca5a5;font-size:13px;display:flex;align-items:center;gap:12px;margin-bottom:18px;animation:slideDown 0.4s ease}
+.api-error-banner .err-icon{width:24px;height:24px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(239,68,68,0.15);border-radius:6px;color:#ef4444}
+.api-error-banner .err-content{flex:1;min-width:0}
+.api-error-banner .err-title{font-weight:600;color:#fca5a5;margin-bottom:2px;font-size:12px}
+.api-error-banner .err-msg{font-size:11px;color:rgba(252,165,165,0.85);line-height:1.4}
+.api-error-banner .err-retry{padding:7px 12px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);border-radius:10px;color:#fca5a5;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;transition:all 0.2s;flex-shrink:0;text-transform:uppercase;letter-spacing:0.05em}
+.api-error-banner .err-retry:hover{background:rgba(239,68,68,0.22);border-color:rgba(239,68,68,0.55);color:#fff}
+.api-error-banner .err-retry:active{transform:scale(0.97)}
+
+@media (max-width: 640px){
+  .api-error-banner{flex-wrap:wrap}
+  .api-error-banner .err-retry{width:100%;margin-top:4px;padding:9px}
+}
+
 </style>
 </head>
 <body>
@@ -477,7 +501,18 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     </div>
   </div>
 
-  <div class="glass hero">
+  <div class="api-error-banner" id="apiErrorBanner" style="display:none">
+    <span class="err-icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    </span>
+    <div class="err-content">
+      <div class="err-title" id="apiErrorTitle">Не удалось загрузить прогноз</div>
+      <div class="err-msg" id="apiErrorMsg">Показаны демо-данные. Проверь интернет и попробуй ещё раз.</div>
+    </div>
+    <button class="err-retry" id="apiErrorRetry" type="button">Повторить</button>
+  </div>
+
+  <div class="glass hero" id="heroBlock">
     <div class="hero-info">
       <div class="hero-label" data-i18n="hero.label">Сейчас</div>
       <div class="hero-temp"><span class="hero-temp-num" id="heroTempNum">16</span><span class="hero-temp-unit" id="heroTempUnit">°C</span></div>
@@ -486,6 +521,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       <div class="hero-source-note" id="heroSourceNote"></div>
     </div>
     <div class="weather-icon-3d" id="heroIcon"></div>
+    <div class="hero-loader"></div>
+    <div class="hero-loader-text" id="heroLoaderText">Загрузка...</div>
   </div>
 
   <div class="metrics">
@@ -602,7 +639,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
   <div class="glass footer-info">
     <div class="left" id="clockLine">обновлено: 23:10:42 UTC+3 · v0.4 prototype</div>
-    <button class="btn-refresh" onclick="this.style.transform='scale(0.94)';setTimeout(()=>this.style.transform='',150)">
+    <button class="btn-refresh" id="btnRefresh" type="button">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
       <span data-i18n="footer.refresh">Обновить</span>
     </button>
@@ -818,6 +855,15 @@ const I18N = {
     'city.geoErr.timeout': 'Время ожидания истекло',
     'city.geoErr.notSupported': 'Браузер не поддерживает геолокацию',
     'city.geoErr.generic': 'Ошибка геолокации',
+    'loader.fetching': 'Загрузка прогноза...',
+    'loader.refreshing': 'Обновление...',
+    'apiErr.title': 'Не удалось загрузить прогноз',
+    'apiErr.msg': 'Показаны демо-данные. Проверь интернет и попробуй ещё раз.',
+    'apiErr.retry': 'Повторить',
+    'apiErr.cors': 'Сервис погоды недоступен (CORS / сеть)',
+    'apiErr.timeout': 'Превышено время ожидания ответа от Open-Meteo',
+    'apiErr.http': 'Ошибка ответа сервера ({code})',
+    'apiErr.parse': 'Не удалось разобрать ответ Open-Meteo',
     'settings.aria': 'Настройки',
     'settings.label': 'Настройки',
     'settings.title': 'Язык и единицы измерения',
@@ -962,6 +1008,15 @@ const I18N = {
     'city.geoErr.timeout': 'Час очікування минув',
     'city.geoErr.notSupported': 'Браузер не підтримує геолокацію',
     'city.geoErr.generic': 'Помилка геолокації',
+    'loader.fetching': 'Завантаження прогнозу...',
+    'loader.refreshing': 'Оновлення...',
+    'apiErr.title': 'Не вдалося завантажити прогноз',
+    'apiErr.msg': 'Показані демо-дані. Перевір інтернет та спробуй ще раз.',
+    'apiErr.retry': 'Повторити',
+    'apiErr.cors': 'Сервіс погоди недоступний (CORS / мережа)',
+    'apiErr.timeout': 'Перевищено час очікування відповіді від Open-Meteo',
+    'apiErr.http': 'Помилка відповіді сервера ({code})',
+    'apiErr.parse': 'Не вдалося розібрати відповідь Open-Meteo',
     'settings.aria': 'Налаштування',
     'settings.label': 'Налаштування',
     'settings.title': 'Мова та одиниці виміру',
@@ -1106,6 +1161,15 @@ const I18N = {
     'city.geoErr.timeout': 'Request timed out',
     'city.geoErr.notSupported': "Browser doesn't support geolocation",
     'city.geoErr.generic': 'Geolocation error',
+    'loader.fetching': 'Loading forecast...',
+    'loader.refreshing': 'Refreshing...',
+    'apiErr.title': 'Forecast load failed',
+    'apiErr.msg': 'Showing demo data. Check your connection and try again.',
+    'apiErr.retry': 'Retry',
+    'apiErr.cors': 'Weather service unreachable (CORS / network)',
+    'apiErr.timeout': 'Open-Meteo response timed out',
+    'apiErr.http': 'Server response error ({code})',
+    'apiErr.parse': 'Failed to parse Open-Meteo response',
     'settings.aria': 'Settings',
     'settings.label': 'Settings',
     'settings.title': 'Language and units',
@@ -1850,7 +1914,13 @@ const BASELINE = [
     ] }
 ];
 
-const NOW_HOUR = 23;
+// NOW_HOUR — обновляется автоматически из системного времени при каждом applyAll().
+// Захардкоженное значение 23 нужно только до первого applyAll() (рендер не должен упасть).
+let NOW_HOUR = 23;
+
+// ACTIVE_FORECAST — источник данных для всех render-функций.
+// До успешного fetch Open-Meteo это BASELINE (демо). После fetch — реальные данные.
+let ACTIVE_FORECAST = BASELINE;
 
 /* ============================================
    DERIVE PER-SOURCE DATA
@@ -1858,11 +1928,11 @@ const NOW_HOUR = 23;
 
 function getForecast(sourceId) {
   const src = getSrc(sourceId);
-  if (!src.bias) return BASELINE.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))})); // deep copy avg
+  if (!src.bias) return ACTIVE_FORECAST.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))})); // deep copy avg
   const b = src.bias;
   const srcIdx = SOURCES.indexOf(src);
 
-  return BASELINE.map((day, dayIdx) => {
+  return ACTIVE_FORECAST.map((day, dayIdx) => {
     const dseed = (srcIdx + 1) * 100 + dayIdx;
     const tn = pseudo(dseed) * 0.4;
     const pn = pseudo(dseed + 7) * 4;
@@ -2256,10 +2326,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.cl
    INIT
    ============================================ */
 
-// Astro / UV / AQI плашки в шапке — статика по BASELINE[0], но текстовые подписи зависят от языка.
+// Astro / UV / AQI плашки в шапке — статика по ACTIVE_FORECAST[0], но текстовые подписи зависят от языка.
 // Вызывается из applyAll() при загрузке и при смене языка.
 function renderStaticAstro() {
-  const d = BASELINE[0];
+  const d = ACTIVE_FORECAST[0];
   const sunArcEl = document.getElementById('sunArc');
   if (sunArcEl) sunArcEl.innerHTML = sunArc(d.sunrise, d.sunset, '23:10');
   const moonIconEl = document.getElementById('moonIcon');
@@ -2384,8 +2454,8 @@ function setCurrentLocation(loc) {
   currentLocation = { ...loc };
   saveLocation(currentLocation);
   renderLocationHeader();
-  // На этом шаге погодные данные пока не пересчитываются — это будет в Шаге Б2 (подключение Open-Meteo).
-  // Заготовка: в Б2 вызов будет здесь, например refreshForecast(currentLocation).
+  // Перезапросить прогноз для новых координат
+  refreshForecast();
 }
 function renderLocationHeader() {
   const nameEl = document.getElementById('locationName');
@@ -2709,6 +2779,358 @@ function applyAll() {
 }
 
 /* ============================================
+   OPEN-METEO API — fetch, parse, helpers
+   Шаг Б2: одна модель ECMWF, дальше расширим
+   ============================================ */
+
+// hPa → мм рт.ст.
+function hPaToMmHg(hPa) { return Math.round(hPa * 0.750062); }
+
+// Градусы → 8-румбовый код направления ветра
+function degreesToCardinal(deg) {
+  if (deg == null || Number.isNaN(deg)) return 'N';
+  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(((deg % 360) / 45)) % 8];
+}
+
+// WMO weather_code → строковый ключ нашей иконки (clear / partly-cloudy / rain / etc)
+function codeToCondition(code) {
+  if (code == null) return 'cloudy';
+  if (code === 0) return 'clear';
+  if (code <= 2) return 'partly-cloudy';
+  if (code === 3) return 'cloudy';
+  if (code === 45 || code === 48) return 'fog';
+  if (code >= 51 && code <= 57) return 'rain';        // drizzle
+  if (code >= 61 && code <= 65) return 'rain';        // rain
+  if (code >= 66 && code <= 67) return 'rain';        // freezing rain
+  if (code >= 71 && code <= 77) return 'snow';
+  if (code >= 80 && code <= 82) return 'heavy-rain';
+  if (code >= 85 && code <= 86) return 'snow';
+  if (code >= 95 && code <= 99) return 'thunderstorm';
+  return 'cloudy';
+}
+
+// WMO weather_code → русский condLabel (совместим с COND_LABEL_TO_KEY локализатором)
+function codeToCondLabelRu(code) {
+  if (code == null) return 'Облачно';
+  if (code === 0) return 'Ясно';
+  if (code <= 2) return 'Переменная облачность';
+  if (code === 3) return 'Облачно';
+  if (code === 45 || code === 48) return 'Туман';
+  if (code >= 51 && code <= 57) return 'Дождь';
+  if (code >= 61 && code <= 65) return 'Дождь';
+  if (code >= 66 && code <= 67) return 'Дождь';
+  if (code >= 71 && code <= 77) return 'Снег';
+  if (code >= 80 && code <= 82) return 'Сильный дождь';
+  if (code >= 85 && code <= 86) return 'Снег';
+  if (code >= 95 && code <= 99) return 'Гроза';
+  return 'Облачно';
+}
+
+// UV-значение → русский label (совместим с UV_LABEL_TO_KEY)
+function uvLabelFromValue(uv) {
+  if (uv == null || uv < 3) return 'Низкий';
+  if (uv < 6) return 'Умеренный';
+  if (uv < 8) return 'Высокий';
+  if (uv < 11) return 'Очень высокий';
+  return 'Экстремальный';
+}
+
+// AQI European → русский label
+function aqiLabelFromValue(aqi) {
+  if (aqi == null || aqi <= 20) return 'Хорошее';
+  if (aqi <= 40) return 'Хорошее';
+  if (aqi <= 60) return 'Умеренное';
+  if (aqi <= 80) return 'Вредно для чувствительных';
+  if (aqi <= 100) return 'Вредно';
+  return 'Очень вредно';
+}
+
+// Дата → "ДД.ММ.ГГГГ"
+function formatDateDDMMYYYY(date) {
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  return `${dd}.${mm}.${date.getFullYear()}`;
+}
+
+// День недели короткий ("Пн", "Вт", ... — русский, для совместимости с локализаторами)
+function dayShortRu(date) {
+  // JS: 0=Sun, 1=Mon, ..., 6=Sat. Наш порядок: Пн, Вт, Ср, Чт, Пт, Сб, Вс
+  const idx = date.getDay() === 0 ? 6 : date.getDay() - 1;
+  return ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'][idx];
+}
+function dayFullRu(date) {
+  const idx = date.getDay() === 0 ? 6 : date.getDay() - 1;
+  return ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'][idx];
+}
+
+// "2026-05-14T05:13" → "05:13"
+function isoTimeToHHMM(iso) {
+  if (!iso || typeof iso !== 'string') return '—';
+  const m = iso.match(/T(\d{2}:\d{2})/);
+  return m ? m[1] : iso;
+}
+
+// Длительность дня из sunrise/sunset (ISO-строки) в минутах
+function dayLengthMinutes(sunriseIso, sunsetIso) {
+  try {
+    const r = new Date(sunriseIso);
+    const s = new Date(sunsetIso);
+    return Math.max(0, Math.round((s - r) / 60000));
+  } catch (e) { return 0; }
+}
+
+// Простая аппроксимация фазы луны (29.5305882 дней цикл, опорная точка - известное новолуние)
+function moonPhaseInfo(date) {
+  const REF = Date.UTC(2000, 0, 6, 18, 14); // известное новолуние 6 янв 2000
+  const SYNODIC = 29.5305882;
+  const days = (date.getTime() - REF) / 86400000;
+  let phase = (days / SYNODIC) % 1;
+  if (phase < 0) phase += 1;
+  // фаза: 0 = новолуние, 0.5 = полнолуние
+  const illum = Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2 * 100);
+  const waxing = phase < 0.5;
+  let name;
+  if (phase < 0.03 || phase > 0.97) name = 'Новолуние';
+  else if (phase < 0.22) name = 'Молодая луна';
+  else if (phase < 0.28) name = 'Первая четверть';
+  else if (phase < 0.47) name = 'Прибывающая луна';
+  else if (phase < 0.53) name = 'Полнолуние';
+  else if (phase < 0.72) name = 'Убывающая луна';
+  else if (phase < 0.78) name = 'Последняя четверть';
+  else name = 'Старая луна';
+  return { illum, name, waxing };
+}
+
+// === Глобальное состояние API-загрузки ===
+const API_STATE = {
+  loading: false,
+  lastError: null,        // { code: 'cors'|'http'|'timeout'|'parse', detail }
+  lastSuccess: null,      // Date — успешного fetch
+  abortController: null   // для отмены текущего запроса
+};
+
+// Сам fetch. На Шаге Б2 используем best_match (Open-Meteo сам выбирает лучшую модель для каждого поля).
+// В Шаге Б3 переключимся на явный список моделей с корректными суффиксами полей.
+async function fetchOpenMeteo(lat, lon, model = null) {
+  // Отменим предыдущий незавершённый запрос (например при быстрой смене города)
+  if (API_STATE.abortController) {
+    try { API_STATE.abortController.abort(); } catch (_) {}
+  }
+  API_STATE.abortController = new AbortController();
+  const ctrl = API_STATE.abortController;
+
+  // Таймаут 12 сек — отменим, если Open-Meteo не ответил
+  const timeoutId = setTimeout(() => { try { ctrl.abort('timeout'); } catch (_) {} }, 12000);
+
+  const params = new URLSearchParams({
+    latitude: lat.toFixed(4),
+    longitude: lon.toFixed(4),
+    hourly: [
+      'temperature_2m',
+      'precipitation_probability',
+      'wind_speed_10m',
+      'wind_direction_10m',
+      'wind_gusts_10m',
+      'relative_humidity_2m',
+      'surface_pressure',
+      'weather_code',
+      'dew_point_2m',
+      'apparent_temperature'
+    ].join(','),
+    daily: [
+      'temperature_2m_max',
+      'temperature_2m_min',
+      'precipitation_probability_max',
+      'weather_code',
+      'sunrise',
+      'sunset',
+      'uv_index_max',
+      'wind_speed_10m_max',
+      'wind_gusts_10m_max',
+      'wind_direction_10m_dominant'
+    ].join(','),
+    timezone: 'auto',
+    wind_speed_unit: 'ms',
+    forecast_days: '5'
+  });
+  if (model) params.set('models', model);
+
+  const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
+  try {
+    const resp = await fetch(url, { signal: ctrl.signal });
+    if (!resp.ok) {
+      const err = new Error('HTTP ' + resp.status);
+      err.code = 'http';
+      err.httpStatus = resp.status;
+      throw err;
+    }
+    const data = await resp.json();
+    return data;
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      const err = new Error('timeout');
+      err.code = 'timeout';
+      throw err;
+    }
+    if (e.code === 'http') throw e;
+    // TypeError при fetch = почти всегда CORS / сеть
+    const err = new Error(e.message || 'network');
+    err.code = 'cors';
+    throw err;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+// Превращаем JSON Open-Meteo в массив 5 дней в нашем внутреннем формате (как BASELINE).
+// Bы будем хранить русские строки в полях condLabel/uvLabel/aqiLabel/moonName/windDir чтобы
+// существующие локализаторы (localizeCondLabel, localizeUvLabel и т.д.) работали без изменений.
+function parseOpenMeteoToForecast(data) {
+  if (!data || !data.daily || !data.hourly) {
+    const err = new Error('Invalid response shape');
+    err.code = 'parse';
+    throw err;
+  }
+  const d  = data.daily;
+  const h  = data.hourly;
+  const days = [];
+
+  for (let i = 0; i < Math.min(5, d.time.length); i++) {
+    const date = new Date(d.time[i] + 'T12:00:00');
+    const sunriseIso = d.sunrise[i];
+    const sunsetIso  = d.sunset[i];
+    const dayLenMin  = dayLengthMinutes(sunriseIso, sunsetIso);
+    const moon       = moonPhaseInfo(date);
+    const wcDaily    = d.weather_code[i];
+
+    // Срез часовых данных на этот день: 24 часа подряд начиная с i*24
+    const hourly = [];
+    for (let k = 0; k < 24; k++) {
+      const idx = i * 24 + k;
+      if (idx >= h.time.length) break;
+      const hourDate = new Date(h.time[idx]);
+      hourly.push({
+        h: hourDate.getHours(),
+        t: Math.round(h.temperature_2m[idx]),
+        p: Math.round(h.precipitation_probability[idx] || 0),
+        w: Math.round(h.wind_speed_10m[idx] || 0),
+        c: codeToCondition(h.weather_code[idx])
+      });
+    }
+
+    // Полуденные значения (12:00) — компактная сводка для дня
+    const noonIdx = i * 24 + 12;
+    const noonHum  = h.relative_humidity_2m[noonIdx] != null ? Math.round(h.relative_humidity_2m[noonIdx]) : 60;
+    const noonPres = h.surface_pressure[noonIdx]     != null ? hPaToMmHg(h.surface_pressure[noonIdx])     : 760;
+    const noonDew  = h.dew_point_2m[noonIdx]         != null ? Math.round(h.dew_point_2m[noonIdx])        : 10;
+
+    days.push({
+      id: i,
+      name: i === 0 ? 'Сегодня' : dayShortRu(date),
+      dayName: dayFullRu(date),
+      date: formatDateDDMMYYYY(date),
+      condition: codeToCondition(wcDaily),
+      condLabel: codeToCondLabelRu(wcDaily),
+      condDesc: '',                                  // в Б4 добавим осмысленный desc
+      max: Math.round(d.temperature_2m_max[i]),
+      min: Math.round(d.temperature_2m_min[i]),
+      precip: Math.round(d.precipitation_probability_max[i] || 0),
+      wind: Math.round(d.wind_speed_10m_max[i] || 0),
+      windDir: degreesToCardinal(d.wind_direction_10m_dominant[i]),
+      windGust: Math.round(d.wind_gusts_10m_max[i] || 0),
+      humidity: noonHum,
+      pressure: noonPres,
+      dewPoint: noonDew,
+      sunrise: isoTimeToHHMM(sunriseIso),
+      sunset:  isoTimeToHHMM(sunsetIso),
+      dayLen: fmtDayLen(dayLenMin),                  // уже локализованная строка через fmtDayLen
+      moonIllum: moon.illum,
+      moonName: moon.name,
+      moonWaxing: moon.waxing,
+      uv: Math.round(d.uv_index_max[i] || 0),
+      uvLabel: uvLabelFromValue(d.uv_index_max[i]),
+      aqi: 42,                                       // плейсхолдер до Б4 (AQI отдельным запросом)
+      aqiLabel: aqiLabelFromValue(42),
+      hourly
+    });
+  }
+  return days;
+}
+
+// === Error banner (показ/скрытие/локализация) ===
+const apiErrorBanner = document.getElementById('apiErrorBanner');
+const apiErrorTitle  = document.getElementById('apiErrorTitle');
+const apiErrorMsg    = document.getElementById('apiErrorMsg');
+const apiErrorRetry  = document.getElementById('apiErrorRetry');
+
+function showApiError(errCode, detail) {
+  if (!apiErrorBanner) return;
+  apiErrorTitle.textContent = t('apiErr.title');
+  let msg;
+  if (errCode === 'cors')    msg = t('apiErr.cors');
+  else if (errCode === 'timeout') msg = t('apiErr.timeout');
+  else if (errCode === 'http')    msg = t('apiErr.http', { code: detail || '?' });
+  else if (errCode === 'parse')   msg = t('apiErr.parse');
+  else msg = t('apiErr.msg');
+  apiErrorMsg.textContent = msg;
+  apiErrorRetry.textContent = t('apiErr.retry');
+  apiErrorBanner.style.display = '';
+}
+function hideApiError() { if (apiErrorBanner) apiErrorBanner.style.display = 'none'; }
+
+// === Loader (overlay на hero) ===
+const heroBlock = document.getElementById('heroBlock');
+const heroLoaderText = document.getElementById('heroLoaderText');
+function showLoader() {
+  if (heroBlock) heroBlock.classList.add('loading');
+  if (heroLoaderText) heroLoaderText.textContent = API_STATE.lastSuccess ? t('loader.refreshing') : t('loader.fetching');
+}
+function hideLoader() {
+  if (heroBlock) heroBlock.classList.remove('loading');
+}
+
+// === Главная функция обновления прогноза ===
+async function refreshForecast() {
+  if (API_STATE.loading) return;
+  if (!currentLocation || typeof currentLocation.lat !== 'number' || typeof currentLocation.lon !== 'number') return;
+  API_STATE.loading = true;
+  hideApiError();
+  showLoader();
+  NOW_HOUR = new Date().getHours();
+
+  try {
+    const data = await fetchOpenMeteo(currentLocation.lat, currentLocation.lon);
+    const parsed = parseOpenMeteoToForecast(data);
+    if (!parsed || parsed.length === 0) {
+      const e = new Error('empty'); e.code = 'parse'; throw e;
+    }
+    ACTIVE_FORECAST = parsed;
+    API_STATE.lastSuccess = new Date();
+    API_STATE.lastError = null;
+    renderStaticAstro();
+    renderAll();
+    updateClock();
+  } catch (err) {
+    if (err.code === 'timeout' && err.name === 'AbortError') return; // тихая отмена при смене города
+    console.warn('Open-Meteo error:', err.code, err.message);
+    API_STATE.lastError = { code: err.code || 'cors', detail: err.httpStatus };
+    showApiError(API_STATE.lastError.code, API_STATE.lastError.detail);
+    if (ACTIVE_FORECAST !== BASELINE && !API_STATE.lastSuccess) {
+      ACTIVE_FORECAST = BASELINE;
+      renderStaticAstro();
+      renderAll();
+    }
+  } finally {
+    API_STATE.loading = false;
+    hideLoader();
+  }
+}
+
+// Retry-кнопка в баннере
+if (apiErrorRetry) apiErrorRetry.addEventListener('click', () => refreshForecast());
+
+/* ============================================
    INITIAL LOCATION + FINAL INIT
    ============================================ */
 
@@ -2722,6 +3144,19 @@ loadSavedSettings();
 loadInitialLocation();
 setupSegmentedHandlers();
 applyAll();
+
+// Refresh-кнопка в footer — вручную перезапросить прогноз
+const btnRefresh = document.getElementById('btnRefresh');
+if (btnRefresh) {
+  btnRefresh.addEventListener('click', () => {
+    btnRefresh.style.transform = 'scale(0.94)';
+    setTimeout(() => { btnRefresh.style.transform = ''; }, 150);
+    refreshForecast();
+  });
+}
+
+// Первый запрос реального прогноза при загрузке
+refreshForecast();
 </script>
 
 </body>
