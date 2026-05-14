@@ -386,6 +386,43 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .city-search-input{font-size:13px;padding:12px 40px}
 }
 
+/* ============================================
+   SETTINGS CHIP + SETTINGS MODAL
+   ============================================ */
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+.settings-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(167,139,250,0.3);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e8f0ff;font-weight:500;cursor:pointer;transition:all 0.25s ease;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(167,139,250,0.1)}
+.settings-chip:hover{border-color:rgba(167,139,250,0.55);background:rgba(255,255,255,0.06);box-shadow:0 0 24px rgba(167,139,250,0.2);transform:translateY(-1px)}
+.settings-chip:active{transform:translateY(0) scale(0.98)}
+.settings-chip .gear-icon{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:#a78bfa;transition:transform 0.5s ease}
+.settings-chip:hover .gear-icon{transform:rotate(75deg)}
+.settings-chip .sep{color:rgba(232,240,255,0.25);font-weight:300}
+.settings-chip .val{color:#a78bfa;font-weight:600}
+
+/* Settings modal */
+.settings-modal{max-width:560px}
+.settings-modal .modal-day-label{color:#a78bfa}
+.settings-section{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:14px 16px;margin-bottom:10px}
+.settings-section-title{display:flex;align-items:center;gap:10px;font-size:11px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-bottom:10px}
+.settings-section-title .sec-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:rgba(167,139,250,0.12);border-radius:7px;color:#a78bfa;box-shadow:inset 0 0 8px rgba(167,139,250,0.15)}
+
+.segmented{display:flex;flex-wrap:wrap;gap:6px}
+.seg-btn{flex:1 1 auto;min-width:64px;padding:9px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:rgba(232,240,255,0.7);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;backdrop-filter:blur(6px)}
+.seg-btn:hover{background:rgba(255,255,255,0.07);border-color:rgba(167,139,250,0.3);color:#fff;transform:translateY(-1px)}
+.seg-btn.active{background:linear-gradient(135deg,rgba(167,139,250,0.18) 0%,rgba(0,212,255,0.08) 100%);border-color:rgba(167,139,250,0.5);color:#fff;box-shadow:0 0 16px rgba(167,139,250,0.22),inset 0 1px 0 rgba(255,255,255,0.08)}
+.seg-btn .seg-main{font-size:13px;font-weight:600;font-family:'JetBrains Mono',monospace;line-height:1.1}
+.seg-btn .seg-sub{font-size:10px;color:rgba(232,240,255,0.5);font-weight:400;line-height:1.2}
+.seg-btn.active .seg-sub{color:rgba(232,240,255,0.75)}
+
+@media (max-width: 640px){
+  .settings-chip{font-size:10px;padding:6px 10px;gap:6px}
+  .settings-chip .val:nth-of-type(n+3),.settings-chip .sep:nth-of-type(n+2){display:none}
+  .settings-section{padding:12px}
+  .seg-btn{min-width:54px;padding:8px 8px;font-size:11px}
+  .seg-btn .seg-main{font-size:12px}
+  .seg-btn .seg-sub{font-size:9px}
+}
+
 </style>
 </head>
 <body>
@@ -402,7 +439,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div class="container">
 
   <div class="header">
-    <div class="location-block" id="locationBlock" role="button" tabindex="0" aria-label="Сменить город">
+    <div class="location-block" id="locationBlock" role="button" tabindex="0" aria-label="Сменить город" data-i18n-aria="header.changeCity">
       <div class="location-icon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <defs><linearGradient id="locGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00d4ff"/><stop offset="100%" stop-color="#4dabf7"/></linearGradient></defs>
@@ -415,26 +452,38 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         <p id="dateLine">Среда, 13.05.2026 · 23:10 UTC+3</p>
         <div class="location-edit-hint">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
-          Нажмите чтобы сменить
+          <span data-i18n="header.editHint">Нажмите чтобы сменить</span>
         </div>
       </div>
     </div>
-    <div class="source-indicator" id="sourceIndicator">
-      <span class="si-dot"></span>
-      <div>
-        <div class="si-label">Источник данных</div>
-        <div class="si-name" id="sourceIndicatorName">Среднее по 10 источникам</div>
+    <div class="header-right">
+      <button class="settings-chip" id="settingsChip" type="button" aria-label="Настройки" data-i18n-aria="settings.aria">
+        <span class="gear-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </span>
+        <span class="val" id="chipLang">RU</span>
+        <span class="sep">·</span>
+        <span class="val" id="chipTemp">°C</span>
+        <span class="sep">·</span>
+        <span class="val" id="chipWind">м/с</span>
+      </button>
+      <div class="source-indicator" id="sourceIndicator">
+        <span class="si-dot"></span>
+        <div>
+          <div class="si-label" data-i18n="header.sourceLabel">Источник данных</div>
+          <div class="si-name" id="sourceIndicatorName">Среднее по 10 источникам</div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="glass hero">
     <div class="hero-info">
-      <div class="hero-label">Сейчас</div>
-      <div class="hero-temp"><span class="hero-temp-num" id="heroTempNum">16</span><span class="hero-temp-unit">°C</span></div>
+      <div class="hero-label" data-i18n="hero.label">Сейчас</div>
+      <div class="hero-temp"><span class="hero-temp-num" id="heroTempNum">16</span><span class="hero-temp-unit" id="heroTempUnit">°C</span></div>
       <div class="hero-condition" id="heroCondition">Пасмурно с прояснениями</div>
-      <div class="hero-feels">Ощущается как <strong id="heroFeels">15°C</strong> · Закат был в 20:11</div>
-      <div class="hero-source-note">По данным <span class="src-name" id="heroSourceName">усреднения 10 моделей</span></div>
+      <div class="hero-feels" id="heroFeelsLine"></div>
+      <div class="hero-source-note" id="heroSourceNote"></div>
     </div>
     <div class="weather-icon-3d" id="heroIcon"></div>
   </div>
@@ -443,7 +492,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <div class="glass metric">
       <div class="metric-head">
         <div class="metric-icon wind"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/><path d="M17.6 7.6A2.5 2.5 0 1 1 19 12H2"/></svg></div>
-        <div class="metric-label">Ветер</div>
+        <div class="metric-label" data-i18n="metric.wind">Ветер</div>
       </div>
       <div class="metric-value" id="metricWind">3<span>м/с</span></div>
       <div class="metric-sub" id="metricWindSub">Северо-западный · порывы 6</div>
@@ -451,7 +500,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <div class="glass metric">
       <div class="metric-head">
         <div class="metric-icon rain"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M8 19v3M12 17v5M16 19v3"/></svg></div>
-        <div class="metric-label">Осадки</div>
+        <div class="metric-label" data-i18n="metric.rain">Осадки</div>
       </div>
       <div class="metric-value" id="metricRain">30<span>%</span></div>
       <div class="metric-sub" id="metricRainSub">~2 мм · слабый дождь</div>
@@ -459,7 +508,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <div class="glass metric">
       <div class="metric-head">
         <div class="metric-icon pressure"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-        <div class="metric-label">Давление</div>
+        <div class="metric-label" data-i18n="metric.pressure">Давление</div>
       </div>
       <div class="metric-value" id="metricPressure">756<span>мм рт.ст.</span></div>
       <div class="metric-sub" id="metricPressureSub">Понижается ↓</div>
@@ -467,7 +516,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <div class="glass metric">
       <div class="metric-head">
         <div class="metric-icon humidity"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg></div>
-        <div class="metric-label">Влажность</div>
+        <div class="metric-label" data-i18n="metric.humidity">Влажность</div>
       </div>
       <div class="metric-value" id="metricHumidity">72<span>%</span></div>
       <div class="metric-sub" id="metricHumiditySub">Точка росы 11°C</div>
@@ -477,33 +526,33 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   <div class="astro-row">
     <div class="glass sun-moon">
       <div class="sun-section">
-        <div class="sun-title">Солнце</div>
-        <div class="daylen">15ч 19мин</div>
+        <div class="sun-title" data-i18n="astro.sun">Солнце</div>
+        <div class="daylen" id="dayLength">15ч 19мин</div>
         <div class="sun-arc-wrap" id="sunArc"></div>
         <div class="sun-times">
-          <span><span class="lbl">Восход</span><strong>05:13</strong></span>
-          <span style="text-align:right"><span class="lbl">Закат</span><strong>20:11</strong></span>
+          <span><span class="lbl" data-i18n="astro.sunrise">Восход</span><strong id="sunriseTime">05:13</strong></span>
+          <span style="text-align:right"><span class="lbl" data-i18n="astro.sunset">Закат</span><strong id="sunsetTime">20:11</strong></span>
         </div>
       </div>
       <div class="moon-section">
         <div class="moon-svg" id="moonIcon"></div>
-        <div class="moon-illum">26%</div>
-        <div class="moon-name">Убывающая<br>луна</div>
+        <div class="moon-illum" id="moonIllum">26%</div>
+        <div class="moon-name" id="moonName">Убывающая<br>луна</div>
       </div>
     </div>
 
     <div class="glass uv-card">
-      <div class="lbl">УФ-индекс</div>
+      <div class="lbl" data-i18n="astro.uv">УФ-индекс</div>
       <div class="uv-gauge" id="uvGauge"></div>
-      <div class="uv-val">5</div>
-      <div class="uv-status" style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)">Умеренный</div>
+      <div class="uv-val" id="uvVal">5</div>
+      <div class="uv-status" id="uvStatus" style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)">Умеренный</div>
     </div>
 
     <div class="glass aqi-card">
-      <div class="lbl">Качество воздуха</div>
-      <div class="aqi-val">42</div>
-      <div class="aqi-status" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)">Хорошее</div>
-      <div class="aqi-bar"><div class="aqi-marker" style="left:8.4%"></div></div>
+      <div class="lbl" data-i18n="astro.aqi">Качество воздуха</div>
+      <div class="aqi-val" id="aqiVal">42</div>
+      <div class="aqi-status" id="aqiStatus" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)">Хорошее</div>
+      <div class="aqi-bar"><div class="aqi-marker" id="aqiMarker" style="left:8.4%"></div></div>
       <div class="aqi-scale"><span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300+</span></div>
     </div>
   </div>
@@ -511,12 +560,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   <div class="glass chart-card">
     <div class="card-title">
       <div>
-        <h2>Сегодня · почасовой прогноз</h2>
+        <h2 data-i18n="chart.title">Сегодня · почасовой прогноз</h2>
         <div class="sub" id="chartSourceSub">Усреднено по 10 моделям</div>
       </div>
       <div class="legend">
-        <span><span class="sw t"></span>Температура</span>
-        <span><span class="sw p"></span>Осадки</span>
+        <span><span class="sw t"></span><span data-i18n="chart.legendTemp">Температура</span></span>
+        <span><span class="sw p"></span><span data-i18n="chart.legendPrecip">Осадки</span></span>
       </div>
     </div>
     <div class="chart-wrap"><canvas id="hourlyChart"></canvas></div>
@@ -526,8 +575,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
   <!-- SOURCES CARD with picker -->
   <div class="glass sources-card">
-    <h2>Источник прогноза</h2>
-    <div class="sources-sub">Выбери источник или используй среднее по всем 10 моделям</div>
+    <h2 data-i18n="sources.title">Источник прогноза</h2>
+    <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 10 моделям</div>
 
     <button class="main-source-btn active" id="mainSrcBtn" data-source="avg">
       <div class="msb-left">
@@ -539,15 +588,15 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
           </svg>
         </div>
         <div class="msb-text">
-          <div class="msb-title">Среднее по всем сервисам</div>
-          <div class="msb-sub">Агрегация 10 моделей · ансамблевый прогноз</div>
+          <div class="msb-title" data-i18n="sources.avgTitle">Среднее по всем сервисам</div>
+          <div class="msb-sub" data-i18n="sources.avgSub">Агрегация 10 моделей · ансамблевый прогноз</div>
         </div>
       </div>
       <span class="msb-arrow">→</span>
       <span class="msb-check">✓</span>
     </button>
 
-    <div class="sources-divider">или конкретный источник</div>
+    <div class="sources-divider" data-i18n="sources.dividerOr">или конкретный источник</div>
     <div class="sources-grid" id="sourcesGrid"></div>
   </div>
 
@@ -555,7 +604,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <div class="left" id="clockLine">обновлено: 23:10:42 UTC+3 · v0.4 prototype</div>
     <button class="btn-refresh" onclick="this.style.transform='scale(0.94)';setTimeout(()=>this.style.transform='',150)">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
-      Обновить
+      <span data-i18n="footer.refresh">Обновить</span>
     </button>
   </div>
 
@@ -563,7 +612,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
 <div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal" id="modalContent">
-    <button class="modal-close" id="modalClose" aria-label="Закрыть">
+    <button class="modal-close" id="modalClose" aria-label="Закрыть" data-i18n-aria="modal.closeAria">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
     <div id="modalBody"></div>
@@ -573,12 +622,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <!-- City picker modal -->
 <div class="modal-backdrop" id="cityModal" role="dialog" aria-modal="true" aria-labelledby="cityModalTitle">
   <div class="modal city-modal">
-    <button class="modal-close" id="cityModalClose" aria-label="Закрыть">
+    <button class="modal-close" id="cityModalClose" aria-label="Закрыть" data-i18n-aria="modal.closeAria">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
     </button>
     <div class="modal-header">
-      <div class="modal-day-label">Выбор локации</div>
-      <h2 class="modal-day-title" id="cityModalTitle">Где смотрим погоду?</h2>
+      <div class="modal-day-label" data-i18n="city.label">Выбор локации</div>
+      <h2 class="modal-day-title" id="cityModalTitle" data-i18n="city.title">Где смотрим погоду?</h2>
     </div>
 
     <button class="city-geo-btn" id="cityGeoBtn" type="button">
@@ -587,8 +636,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       </div>
       <div class="geo-spinner"></div>
       <div class="geo-text">
-        <div class="t">Использовать моё местоположение</div>
-        <div class="s">Браузер спросит разрешение. Координаты не уходят на сервер</div>
+        <div class="t" data-i18n="city.useMyLocation">Использовать моё местоположение</div>
+        <div class="s" data-i18n="city.geoDesc">Браузер спросит разрешение. Координаты не уходят на сервер</div>
       </div>
     </button>
 
@@ -601,14 +650,83 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       <span class="city-search-icon">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </span>
-      <input type="search" class="city-search-input" id="citySearchInput" placeholder="Поиск города по Украине..." autocomplete="off" spellcheck="false">
-      <button class="city-search-clear" id="citySearchClear" aria-label="Очистить" type="button">
+      <input type="search" class="city-search-input" id="citySearchInput" placeholder="Поиск города по Украине..." data-i18n-placeholder="city.search.placeholder" autocomplete="off" spellcheck="false">
+      <button class="city-search-clear" id="citySearchClear" aria-label="Очистить" data-i18n-aria="city.search.clearAria" type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
 
-    <div class="city-list-header" id="cityListHeader">Популярные города Украины</div>
-    <div class="city-list" id="cityList" role="listbox" aria-label="Список городов"></div>
+    <div class="city-list-header" id="cityListHeader" data-i18n="city.list.popular">Популярные города Украины</div>
+    <div class="city-list" id="cityList" role="listbox" aria-label="Список городов" data-i18n-aria="city.list.aria"></div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+  <div class="modal settings-modal">
+    <button class="modal-close" id="settingsModalClose" aria-label="Закрыть" data-i18n-aria="modal.closeAria">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-header">
+      <div class="modal-day-label" data-i18n="settings.label">Настройки</div>
+      <h2 class="modal-day-title" id="settingsModalTitle" data-i18n="settings.title">Язык и единицы измерения</h2>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <span class="sec-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2c2.5 2.5 4 6 4 10s-1.5 7.5-4 10C9.5 19.5 8 16 8 12s1.5-7.5 4-10z"/></svg>
+        </span>
+        <span data-i18n="settings.lang.title">Язык интерфейса</span>
+      </div>
+      <div class="segmented" id="segLang">
+        <button class="seg-btn" type="button" data-val="ru"><span class="seg-main">RU</span><span class="seg-sub">Русский</span></button>
+        <button class="seg-btn" type="button" data-val="uk"><span class="seg-main">UK</span><span class="seg-sub">Українська</span></button>
+        <button class="seg-btn" type="button" data-val="en"><span class="seg-main">EN</span><span class="seg-sub">English</span></button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <span class="sec-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+        </span>
+        <span data-i18n="settings.temp.title">Температура</span>
+      </div>
+      <div class="segmented" id="segTemp">
+        <button class="seg-btn" type="button" data-val="C"><span class="seg-main">°C</span><span class="seg-sub" data-i18n="settings.temp.c">Цельсий</span></button>
+        <button class="seg-btn" type="button" data-val="F"><span class="seg-main">°F</span><span class="seg-sub" data-i18n="settings.temp.f">Фаренгейт</span></button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <span class="sec-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/><path d="M17.6 7.6A2.5 2.5 0 1 1 19 12H2"/></svg>
+        </span>
+        <span data-i18n="settings.wind.title">Скорость ветра</span>
+      </div>
+      <div class="segmented" id="segWind">
+        <button class="seg-btn" type="button" data-val="ms"><span class="seg-main" data-i18n="settings.wind.ms.unit">м/с</span><span class="seg-sub" data-i18n="settings.wind.ms.full">метры/сек</span></button>
+        <button class="seg-btn" type="button" data-val="kmh"><span class="seg-main" data-i18n="settings.wind.kmh.unit">км/ч</span><span class="seg-sub" data-i18n="settings.wind.kmh.full">километры/час</span></button>
+        <button class="seg-btn" type="button" data-val="mph"><span class="seg-main">mph</span><span class="seg-sub" data-i18n="settings.wind.mph.full">мили/час</span></button>
+        <button class="seg-btn" type="button" data-val="kn"><span class="seg-main" data-i18n="settings.wind.kn.unit">уз</span><span class="seg-sub" data-i18n="settings.wind.kn.full">узлы</span></button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">
+        <span class="sec-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </span>
+        <span data-i18n="settings.pressure.title">Атмосферное давление</span>
+      </div>
+      <div class="segmented" id="segPressure">
+        <button class="seg-btn" type="button" data-val="mmhg"><span class="seg-main" data-i18n="settings.pressure.mmhg.unit">мм рт.ст.</span><span class="seg-sub" data-i18n="settings.pressure.mmhg.full">миллиметры</span></button>
+        <button class="seg-btn" type="button" data-val="hpa"><span class="seg-main" data-i18n="settings.pressure.hpa.unit">гПа</span><span class="seg-sub" data-i18n="settings.pressure.hpa.full">гектопаскали</span></button>
+        <button class="seg-btn" type="button" data-val="inhg"><span class="seg-main">inHg</span><span class="seg-sub" data-i18n="settings.pressure.inhg.full">дюймы рт.ст.</span></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -621,6 +739,794 @@ const uid = () => ++_uid;
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const pseudo = (s) => { const x = Math.sin(s * 9999) * 10000; return ((x - Math.floor(x)) * 2 - 1); };
 const hexToRgba = (hex, a) => { const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
+
+/* ============================================
+   I18N — три языка: RU (default), UK, EN
+   ============================================ */
+const I18N = {
+  ru: {
+    'html.lang': 'ru',
+    'header.changeCity': 'Сменить город',
+    'header.editHint': 'Нажмите чтобы сменить',
+    'header.sourceLabel': 'Источник данных',
+    'hero.label': 'Сейчас',
+    'hero.feels': 'Ощущается как {feels} · Закат был в {sunset}',
+    'hero.feelsNoSunset': 'Ощущается как {feels}',
+    'hero.sourceNote': 'По данным {name}',
+    'hero.sourceAvg': 'усреднения 10 моделей',
+    'metric.wind': 'Ветер',
+    'metric.rain': 'Осадки',
+    'metric.pressure': 'Давление',
+    'metric.humidity': 'Влажность',
+    'metric.windSub': '{dir} · порывы {gust}',
+    'metric.rainSub': '~{mm} мм · {desc}',
+    'metric.rain.none': 'без осадков',
+    'metric.rain.light': 'слабый дождь',
+    'metric.rain.moderate': 'умеренный дождь',
+    'metric.rain.heavy': 'сильный дождь',
+    'metric.pressure.falling': 'Понижается ↓',
+    'metric.pressure.rising': 'Растёт ↑',
+    'metric.pressure.stable': 'Стабильное',
+    'metric.humidity.dewPoint': 'Точка росы {t}',
+    'astro.sun': 'Солнце',
+    'astro.sunrise': 'Восход',
+    'astro.sunset': 'Закат',
+    'astro.uv': 'УФ-индекс',
+    'astro.aqi': 'Качество воздуха',
+    'astro.dayLen': '{h}ч {m}мин',
+    'chart.title': 'Сегодня · почасовой прогноз',
+    'chart.sub.avg': 'Усреднено по 10 моделям',
+    'chart.sub.named': 'Прогноз {name}',
+    'chart.legendTemp': 'Температура',
+    'chart.legendPrecip': 'Осадки',
+    'sources.title': 'Источник прогноза',
+    'sources.sub': 'Выбери источник или используй среднее по всем 10 моделям',
+    'sources.avgTitle': 'Среднее по всем сервисам',
+    'sources.avgSub': 'Агрегация 10 моделей · ансамблевый прогноз',
+    'sources.avgShort': 'Среднее по 10 источникам',
+    'sources.dividerOr': 'или конкретный источник',
+    'footer.refresh': 'Обновить',
+    'footer.updated': 'обновлено: {time} UTC+3 · v0.5-i18n',
+    'modal.closeAria': 'Закрыть',
+    'modal.day.forecast': 'Прогноз',
+    'modal.day.today': 'Сегодня',
+    'modal.day.dayLen': 'Долгота дня: {len}',
+    'modal.day.uvScale': 'Шкала 0–11+',
+    'modal.day.pm25norm': 'PM2.5 в норме',
+    'modal.day.hourlyTitle': 'Почасовая температура и осадки',
+    'modal.day.hoursTitle': 'Час за часом',
+    'city.label': 'Выбор локации',
+    'city.title': 'Где смотрим погоду?',
+    'city.useMyLocation': 'Использовать моё местоположение',
+    'city.geoDesc': 'Браузер спросит разрешение. Координаты не уходят на сервер',
+    'city.search.placeholder': 'Поиск города по Украине...',
+    'city.search.clearAria': 'Очистить',
+    'city.list.popular': 'Популярные города Украины',
+    'city.list.foundLocal': 'Найдено в популярных',
+    'city.list.searching': 'Ищу...',
+    'city.list.found': 'Найдено: {n}',
+    'city.list.notFound': 'Ничего не найдено',
+    'city.list.empty': 'Город не найден. Попробуй другое название.',
+    'city.list.emptyForQuery': 'Города «{q}» нет в базе Open-Meteo по Украине.',
+    'city.list.searchError': 'Не удалось выполнить поиск. Проверь интернет.',
+    'city.list.minChars': 'Введи минимум 2 символа',
+    'city.list.aria': 'Список городов',
+    'city.tag.geo': '📍 по геолокации',
+    'city.tag.manual': '✋ выбрано',
+    'city.geoErr.denied': 'Доступ к местоположению отклонён. Разреши его в настройках браузера.',
+    'city.geoErr.unavailable': 'Не удалось определить позицию (нет сигнала GPS / сети)',
+    'city.geoErr.timeout': 'Время ожидания истекло',
+    'city.geoErr.notSupported': 'Браузер не поддерживает геолокацию',
+    'city.geoErr.generic': 'Ошибка геолокации',
+    'settings.aria': 'Настройки',
+    'settings.label': 'Настройки',
+    'settings.title': 'Язык и единицы измерения',
+    'settings.lang.title': 'Язык интерфейса',
+    'settings.temp.title': 'Температура',
+    'settings.temp.c': 'Цельсий',
+    'settings.temp.f': 'Фаренгейт',
+    'settings.wind.title': 'Скорость ветра',
+    'settings.wind.ms.unit': 'м/с',
+    'settings.wind.ms.full': 'метры/сек',
+    'settings.wind.kmh.unit': 'км/ч',
+    'settings.wind.kmh.full': 'километры/час',
+    'settings.wind.mph.full': 'мили/час',
+    'settings.wind.kn.unit': 'уз',
+    'settings.wind.kn.full': 'узлы',
+    'settings.pressure.title': 'Атмосферное давление',
+    'settings.pressure.mmhg.unit': 'мм рт.ст.',
+    'settings.pressure.mmhg.full': 'миллиметры',
+    'settings.pressure.hpa.unit': 'гПа',
+    'settings.pressure.hpa.full': 'гектопаскали',
+    'settings.pressure.inhg.full': 'дюймы рт.ст.',
+    'cond.clear': 'Ясно',
+    'cond.partlyCloudy': 'Переменная облачность',
+    'cond.cloudy': 'Облачно',
+    'cond.overcast': 'Сплошная облачность',
+    'cond.rain': 'Дождь',
+    'cond.heavyRain': 'Сильный дождь',
+    'cond.thunderstorm': 'Гроза',
+    'cond.snow': 'Снег',
+    'cond.fog': 'Туман',
+    'cond.partlyCloudyWithClear': 'Пасмурно с прояснениями',
+    'condDesc.day0': 'Северо-западный фронт, временами морось',
+    'condDesc.day1': 'Активный циклон, сильные осадки днём',
+    'condDesc.day2': 'Циклон уходит, остаточная облачность',
+    'condDesc.day3': 'Антициклон, солнечный день',
+    'condDesc.day4': 'Слабый ветер, переменная облачность',
+    'uvLabel.low': 'Низкий',
+    'uvLabel.moderate': 'Умеренный',
+    'uvLabel.high': 'Высокий',
+    'uvLabel.veryHigh': 'Очень высокий',
+    'uvLabel.extreme': 'Экстремальный',
+    'aqiLabel.good': 'Хорошее',
+    'aqiLabel.moderate': 'Умеренное',
+    'aqiLabel.unhealthySens': 'Вредно для чувствительных',
+    'aqiLabel.unhealthy': 'Вредно',
+    'aqiLabel.veryUnhealthy': 'Очень вредно',
+    'aqiLabel.hazardous': 'Опасно',
+    'moon.new': 'Новолуние',
+    'moon.waxingCrescent': 'Молодая луна',
+    'moon.firstQuarter': 'Первая четверть',
+    'moon.waxingGibbous': 'Прибывающая луна',
+    'moon.full': 'Полнолуние',
+    'moon.waningGibbous': 'Убывающая луна',
+    'moon.lastQuarter': 'Последняя четверть',
+    'moon.waningCrescent': 'Старая луна',
+    'windDir.N': 'С',   'windDir.NE': 'СВ', 'windDir.E': 'В',  'windDir.SE': 'ЮВ',
+    'windDir.S': 'Ю',   'windDir.SW': 'ЮЗ', 'windDir.W': 'З',  'windDir.NW': 'СЗ',
+    'windDirFull.N': 'Северный', 'windDirFull.NE': 'Северо-восточный', 'windDirFull.E': 'Восточный', 'windDirFull.SE': 'Юго-восточный',
+    'windDirFull.S': 'Южный', 'windDirFull.SW': 'Юго-западный', 'windDirFull.W': 'Западный', 'windDirFull.NW': 'Северо-западный',
+    'day.tap': 'подробнее',
+    'day.today': 'Сегодня',
+    'day.short.mon': 'Пн', 'day.short.tue': 'Вт', 'day.short.wed': 'Ср', 'day.short.thu': 'Чт',
+    'day.short.fri': 'Пт', 'day.short.sat': 'Сб', 'day.short.sun': 'Вс',
+    'day.full.mon': 'Понедельник', 'day.full.tue': 'Вторник', 'day.full.wed': 'Среда', 'day.full.thu': 'Четверг',
+    'day.full.fri': 'Пятница', 'day.full.sat': 'Суббота', 'day.full.sun': 'Воскресенье',
+    'month.1': 'января', 'month.2': 'февраля', 'month.3': 'марта', 'month.4': 'апреля',
+    'month.5': 'мая', 'month.6': 'июня', 'month.7': 'июля', 'month.8': 'августа',
+    'month.9': 'сентября', 'month.10': 'октября', 'month.11': 'ноября', 'month.12': 'декабря'
+  },
+
+  uk: {
+    'html.lang': 'uk',
+    'header.changeCity': 'Змінити місто',
+    'header.editHint': 'Натисніть щоб змінити',
+    'header.sourceLabel': 'Джерело даних',
+    'hero.label': 'Зараз',
+    'hero.feels': 'Відчувається як {feels} · Захід був о {sunset}',
+    'hero.feelsNoSunset': 'Відчувається як {feels}',
+    'hero.sourceNote': 'За даними {name}',
+    'hero.sourceAvg': 'усереднення 10 моделей',
+    'metric.wind': 'Вітер',
+    'metric.rain': 'Опади',
+    'metric.pressure': 'Тиск',
+    'metric.humidity': 'Вологість',
+    'metric.windSub': '{dir} · пориви {gust}',
+    'metric.rainSub': '~{mm} мм · {desc}',
+    'metric.rain.none': 'без опадів',
+    'metric.rain.light': 'слабкий дощ',
+    'metric.rain.moderate': 'помірний дощ',
+    'metric.rain.heavy': 'сильний дощ',
+    'metric.pressure.falling': 'Знижується ↓',
+    'metric.pressure.rising': 'Зростає ↑',
+    'metric.pressure.stable': 'Стабільний',
+    'metric.humidity.dewPoint': 'Точка роси {t}',
+    'astro.sun': 'Сонце',
+    'astro.sunrise': 'Схід',
+    'astro.sunset': 'Захід',
+    'astro.uv': 'УФ-індекс',
+    'astro.aqi': 'Якість повітря',
+    'astro.dayLen': '{h}год {m}хв',
+    'chart.title': 'Сьогодні · погодинний прогноз',
+    'chart.sub.avg': 'Усереднено по 10 моделях',
+    'chart.sub.named': 'Прогноз {name}',
+    'chart.legendTemp': 'Температура',
+    'chart.legendPrecip': 'Опади',
+    'sources.title': 'Джерело прогнозу',
+    'sources.sub': 'Обери джерело або використовуй середнє по 10 моделях',
+    'sources.avgTitle': 'Середнє по всіх сервісах',
+    'sources.avgSub': 'Агрегація 10 моделей · ансамблевий прогноз',
+    'sources.avgShort': 'Середнє по 10 джерелах',
+    'sources.dividerOr': 'або конкретне джерело',
+    'footer.refresh': 'Оновити',
+    'footer.updated': 'оновлено: {time} UTC+3 · v0.5-i18n',
+    'modal.closeAria': 'Закрити',
+    'modal.day.forecast': 'Прогноз',
+    'modal.day.today': 'Сьогодні',
+    'modal.day.dayLen': 'Тривалість дня: {len}',
+    'modal.day.uvScale': 'Шкала 0–11+',
+    'modal.day.pm25norm': 'PM2.5 в нормі',
+    'modal.day.hourlyTitle': 'Погодинна температура та опади',
+    'modal.day.hoursTitle': 'Година за годиною',
+    'city.label': 'Вибір локації',
+    'city.title': 'Де дивимось погоду?',
+    'city.useMyLocation': 'Використати моє місцезнаходження',
+    'city.geoDesc': 'Браузер запитає дозвіл. Координати не йдуть на сервер',
+    'city.search.placeholder': 'Пошук міста по Україні...',
+    'city.search.clearAria': 'Очистити',
+    'city.list.popular': 'Популярні міста України',
+    'city.list.foundLocal': 'Знайдено в популярних',
+    'city.list.searching': 'Шукаю...',
+    'city.list.found': 'Знайдено: {n}',
+    'city.list.notFound': 'Нічого не знайдено',
+    'city.list.empty': 'Місто не знайдене. Спробуй іншу назву.',
+    'city.list.emptyForQuery': 'Міста «{q}» немає в базі Open-Meteo по Україні.',
+    'city.list.searchError': 'Не вдалось виконати пошук. Перевір інтернет.',
+    'city.list.minChars': 'Введи мінімум 2 символи',
+    'city.list.aria': 'Список міст',
+    'city.tag.geo': '📍 за геолокацією',
+    'city.tag.manual': '✋ обрано',
+    'city.geoErr.denied': 'Доступ до місцезнаходження відхилено. Дозволь його в налаштуваннях браузера.',
+    'city.geoErr.unavailable': 'Не вдалося визначити позицію (немає сигналу GPS / мережі)',
+    'city.geoErr.timeout': 'Час очікування минув',
+    'city.geoErr.notSupported': 'Браузер не підтримує геолокацію',
+    'city.geoErr.generic': 'Помилка геолокації',
+    'settings.aria': 'Налаштування',
+    'settings.label': 'Налаштування',
+    'settings.title': 'Мова та одиниці виміру',
+    'settings.lang.title': 'Мова інтерфейсу',
+    'settings.temp.title': 'Температура',
+    'settings.temp.c': 'Цельсій',
+    'settings.temp.f': 'Фаренгейт',
+    'settings.wind.title': 'Швидкість вітру',
+    'settings.wind.ms.unit': 'м/с',
+    'settings.wind.ms.full': 'метри/сек',
+    'settings.wind.kmh.unit': 'км/год',
+    'settings.wind.kmh.full': 'кілометри/год',
+    'settings.wind.mph.full': 'милі/год',
+    'settings.wind.kn.unit': 'вуз',
+    'settings.wind.kn.full': 'вузли',
+    'settings.pressure.title': 'Атмосферний тиск',
+    'settings.pressure.mmhg.unit': 'мм рт.ст.',
+    'settings.pressure.mmhg.full': 'міліметри',
+    'settings.pressure.hpa.unit': 'гПа',
+    'settings.pressure.hpa.full': 'гектопаскалі',
+    'settings.pressure.inhg.full': 'дюйми рт.ст.',
+    'cond.clear': 'Ясно',
+    'cond.partlyCloudy': 'Мінлива хмарність',
+    'cond.cloudy': 'Хмарно',
+    'cond.overcast': 'Суцільна хмарність',
+    'cond.rain': 'Дощ',
+    'cond.heavyRain': 'Сильний дощ',
+    'cond.thunderstorm': 'Гроза',
+    'cond.snow': 'Сніг',
+    'cond.fog': 'Туман',
+    'cond.partlyCloudyWithClear': 'Хмарно з проясненнями',
+    'condDesc.day0': 'Північно-західний фронт, інколи мряка',
+    'condDesc.day1': 'Активний циклон, сильні опади вдень',
+    'condDesc.day2': 'Циклон відходить, залишкова хмарність',
+    'condDesc.day3': 'Антициклон, сонячний день',
+    'condDesc.day4': 'Слабкий вітер, мінлива хмарність',
+    'uvLabel.low': 'Низький',
+    'uvLabel.moderate': 'Помірний',
+    'uvLabel.high': 'Високий',
+    'uvLabel.veryHigh': 'Дуже високий',
+    'uvLabel.extreme': 'Екстремальний',
+    'aqiLabel.good': 'Добре',
+    'aqiLabel.moderate': 'Помірне',
+    'aqiLabel.unhealthySens': 'Шкідливе для чутливих',
+    'aqiLabel.unhealthy': 'Шкідливе',
+    'aqiLabel.veryUnhealthy': 'Дуже шкідливе',
+    'aqiLabel.hazardous': 'Небезпечне',
+    'moon.new': 'Молодик',
+    'moon.waxingCrescent': 'Молодий місяць',
+    'moon.firstQuarter': 'Перша чверть',
+    'moon.waxingGibbous': 'Зростаючий місяць',
+    'moon.full': 'Повня',
+    'moon.waningGibbous': 'Спадний місяць',
+    'moon.lastQuarter': 'Остання чверть',
+    'moon.waningCrescent': 'Старий місяць',
+    'windDir.N': 'Пн',  'windDir.NE': 'ПнСх', 'windDir.E': 'Сх', 'windDir.SE': 'ПдСх',
+    'windDir.S': 'Пд',  'windDir.SW': 'ПдЗх', 'windDir.W': 'Зх', 'windDir.NW': 'ПнЗх',
+    'windDirFull.N': 'Північний', 'windDirFull.NE': 'Північно-східний', 'windDirFull.E': 'Східний', 'windDirFull.SE': 'Південно-східний',
+    'windDirFull.S': 'Південний', 'windDirFull.SW': 'Південно-західний', 'windDirFull.W': 'Західний', 'windDirFull.NW': 'Північно-західний',
+    'day.tap': 'детальніше',
+    'day.today': 'Сьогодні',
+    'day.short.mon': 'Пн', 'day.short.tue': 'Вт', 'day.short.wed': 'Ср', 'day.short.thu': 'Чт',
+    'day.short.fri': 'Пт', 'day.short.sat': 'Сб', 'day.short.sun': 'Нд',
+    'day.full.mon': 'Понеділок', 'day.full.tue': 'Вівторок', 'day.full.wed': 'Середа', 'day.full.thu': 'Четвер',
+    'day.full.fri': 'Пʼятниця', 'day.full.sat': 'Субота', 'day.full.sun': 'Неділя',
+    'month.1': 'січня', 'month.2': 'лютого', 'month.3': 'березня', 'month.4': 'квітня',
+    'month.5': 'травня', 'month.6': 'червня', 'month.7': 'липня', 'month.8': 'серпня',
+    'month.9': 'вересня', 'month.10': 'жовтня', 'month.11': 'листопада', 'month.12': 'грудня'
+  },
+
+  en: {
+    'html.lang': 'en',
+    'header.changeCity': 'Change city',
+    'header.editHint': 'Click to change',
+    'header.sourceLabel': 'Data source',
+    'hero.label': 'Now',
+    'hero.feels': 'Feels like {feels} · Sunset was at {sunset}',
+    'hero.feelsNoSunset': 'Feels like {feels}',
+    'hero.sourceNote': 'Source: {name}',
+    'hero.sourceAvg': 'average of 10 models',
+    'metric.wind': 'Wind',
+    'metric.rain': 'Precipitation',
+    'metric.pressure': 'Pressure',
+    'metric.humidity': 'Humidity',
+    'metric.windSub': '{dir} · gusts {gust}',
+    'metric.rainSub': '~{mm} mm · {desc}',
+    'metric.rain.none': 'no precipitation',
+    'metric.rain.light': 'light rain',
+    'metric.rain.moderate': 'moderate rain',
+    'metric.rain.heavy': 'heavy rain',
+    'metric.pressure.falling': 'Falling ↓',
+    'metric.pressure.rising': 'Rising ↑',
+    'metric.pressure.stable': 'Stable',
+    'metric.humidity.dewPoint': 'Dew point {t}',
+    'astro.sun': 'Sun',
+    'astro.sunrise': 'Sunrise',
+    'astro.sunset': 'Sunset',
+    'astro.uv': 'UV index',
+    'astro.aqi': 'Air quality',
+    'astro.dayLen': '{h}h {m}min',
+    'chart.title': 'Today · hourly forecast',
+    'chart.sub.avg': 'Averaged across 10 models',
+    'chart.sub.named': 'Forecast by {name}',
+    'chart.legendTemp': 'Temperature',
+    'chart.legendPrecip': 'Precipitation',
+    'sources.title': 'Forecast source',
+    'sources.sub': 'Pick a source or use the average of all 10 models',
+    'sources.avgTitle': 'Average of all services',
+    'sources.avgSub': 'Aggregation of 10 models · ensemble forecast',
+    'sources.avgShort': 'Average of 10 sources',
+    'sources.dividerOr': 'or a specific source',
+    'footer.refresh': 'Refresh',
+    'footer.updated': 'updated: {time} UTC+3 · v0.5-i18n',
+    'modal.closeAria': 'Close',
+    'modal.day.forecast': 'Forecast',
+    'modal.day.today': 'Today',
+    'modal.day.dayLen': 'Day length: {len}',
+    'modal.day.uvScale': 'Scale 0-11+',
+    'modal.day.pm25norm': 'PM2.5 normal',
+    'modal.day.hourlyTitle': 'Hourly temperature and precipitation',
+    'modal.day.hoursTitle': 'Hour by hour',
+    'city.label': 'Location',
+    'city.title': 'Where to check weather?',
+    'city.useMyLocation': 'Use my location',
+    'city.geoDesc': 'Browser will ask for permission. Coordinates stay in your browser',
+    'city.search.placeholder': 'Search city in Ukraine...',
+    'city.search.clearAria': 'Clear',
+    'city.list.popular': 'Popular Ukrainian cities',
+    'city.list.foundLocal': 'Found in popular',
+    'city.list.searching': 'Searching...',
+    'city.list.found': 'Found: {n}',
+    'city.list.notFound': 'Nothing found',
+    'city.list.empty': 'City not found. Try a different name.',
+    'city.list.emptyForQuery': 'City "{q}" not found in Open-Meteo Ukraine database.',
+    'city.list.searchError': 'Search failed. Check your internet connection.',
+    'city.list.minChars': 'Enter at least 2 characters',
+    'city.list.aria': 'List of cities',
+    'city.tag.geo': '📍 by geolocation',
+    'city.tag.manual': '✋ chosen',
+    'city.geoErr.denied': 'Location access denied. Allow it in browser settings.',
+    'city.geoErr.unavailable': 'Position unavailable (no GPS/network signal)',
+    'city.geoErr.timeout': 'Request timed out',
+    'city.geoErr.notSupported': "Browser doesn't support geolocation",
+    'city.geoErr.generic': 'Geolocation error',
+    'settings.aria': 'Settings',
+    'settings.label': 'Settings',
+    'settings.title': 'Language and units',
+    'settings.lang.title': 'Interface language',
+    'settings.temp.title': 'Temperature',
+    'settings.temp.c': 'Celsius',
+    'settings.temp.f': 'Fahrenheit',
+    'settings.wind.title': 'Wind speed',
+    'settings.wind.ms.unit': 'm/s',
+    'settings.wind.ms.full': 'meters/sec',
+    'settings.wind.kmh.unit': 'km/h',
+    'settings.wind.kmh.full': 'kilometers/hour',
+    'settings.wind.mph.full': 'miles/hour',
+    'settings.wind.kn.unit': 'kn',
+    'settings.wind.kn.full': 'knots',
+    'settings.pressure.title': 'Atmospheric pressure',
+    'settings.pressure.mmhg.unit': 'mmHg',
+    'settings.pressure.mmhg.full': 'millimeters Hg',
+    'settings.pressure.hpa.unit': 'hPa',
+    'settings.pressure.hpa.full': 'hectopascals',
+    'settings.pressure.inhg.full': 'inches Hg',
+    'cond.clear': 'Clear',
+    'cond.partlyCloudy': 'Partly cloudy',
+    'cond.cloudy': 'Cloudy',
+    'cond.overcast': 'Overcast',
+    'cond.rain': 'Rain',
+    'cond.heavyRain': 'Heavy rain',
+    'cond.thunderstorm': 'Thunderstorm',
+    'cond.snow': 'Snow',
+    'cond.fog': 'Fog',
+    'cond.partlyCloudyWithClear': 'Cloudy with clear spells',
+    'condDesc.day0': 'NW front, occasional drizzle',
+    'condDesc.day1': 'Active cyclone, heavy precipitation in afternoon',
+    'condDesc.day2': 'Cyclone leaving, residual clouds',
+    'condDesc.day3': 'Anticyclone, sunny day',
+    'condDesc.day4': 'Light wind, variable clouds',
+    'uvLabel.low': 'Low',
+    'uvLabel.moderate': 'Moderate',
+    'uvLabel.high': 'High',
+    'uvLabel.veryHigh': 'Very high',
+    'uvLabel.extreme': 'Extreme',
+    'aqiLabel.good': 'Good',
+    'aqiLabel.moderate': 'Moderate',
+    'aqiLabel.unhealthySens': 'Unhealthy for sensitive',
+    'aqiLabel.unhealthy': 'Unhealthy',
+    'aqiLabel.veryUnhealthy': 'Very unhealthy',
+    'aqiLabel.hazardous': 'Hazardous',
+    'moon.new': 'New moon',
+    'moon.waxingCrescent': 'Waxing crescent',
+    'moon.firstQuarter': 'First quarter',
+    'moon.waxingGibbous': 'Waxing gibbous',
+    'moon.full': 'Full moon',
+    'moon.waningGibbous': 'Waning gibbous',
+    'moon.lastQuarter': 'Last quarter',
+    'moon.waningCrescent': 'Waning crescent',
+    'windDir.N': 'N',   'windDir.NE': 'NE', 'windDir.E': 'E',  'windDir.SE': 'SE',
+    'windDir.S': 'S',   'windDir.SW': 'SW', 'windDir.W': 'W',  'windDir.NW': 'NW',
+    'windDirFull.N': 'Northern', 'windDirFull.NE': 'North-eastern', 'windDirFull.E': 'Eastern', 'windDirFull.SE': 'South-eastern',
+    'windDirFull.S': 'Southern', 'windDirFull.SW': 'South-western', 'windDirFull.W': 'Western', 'windDirFull.NW': 'North-western',
+    'day.tap': 'details',
+    'day.today': 'Today',
+    'day.short.mon': 'Mon', 'day.short.tue': 'Tue', 'day.short.wed': 'Wed', 'day.short.thu': 'Thu',
+    'day.short.fri': 'Fri', 'day.short.sat': 'Sat', 'day.short.sun': 'Sun',
+    'day.full.mon': 'Monday', 'day.full.tue': 'Tuesday', 'day.full.wed': 'Wednesday', 'day.full.thu': 'Thursday',
+    'day.full.fri': 'Friday', 'day.full.sat': 'Saturday', 'day.full.sun': 'Sunday',
+    'month.1': 'January', 'month.2': 'February', 'month.3': 'March', 'month.4': 'April',
+    'month.5': 'May', 'month.6': 'June', 'month.7': 'July', 'month.8': 'August',
+    'month.9': 'September', 'month.10': 'October', 'month.11': 'November', 'month.12': 'December'
+  }
+};
+
+// App-level state (overwritten from localStorage in init below)
+const state = {
+  lang: 'ru',
+  units: { temp: 'C', wind: 'ms', pressure: 'mmhg' }
+};
+
+function t(key, params) {
+  let s = (I18N[state.lang] && I18N[state.lang][key]);
+  if (s === undefined) s = I18N.ru[key];
+  if (s === undefined) return key; // fail-safe: вернуть сам ключ
+  if (params) {
+    for (const k of Object.keys(params)) {
+      s = s.replace(new RegExp('\\{' + k + '\\}', 'g'), params[k]);
+    }
+  }
+  return s;
+}
+
+function applyTranslations() {
+  document.documentElement.lang = t('html.lang');
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (!key) return;
+    el.textContent = t(key);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (key) el.placeholder = t(key);
+  });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+    const key = el.dataset.i18nAria;
+    if (key) el.setAttribute('aria-label', t(key));
+  });
+}
+
+/* ============================================
+   UNITS — конверсии + форматтеры
+   База: температура – °C, ветер – м/с, давление – мм рт.ст.
+   ============================================ */
+
+function convertTemp(c, to) {
+  if (to === 'F') return c * 9/5 + 32;
+  return c;
+}
+function convertWind(ms, to) {
+  switch(to) {
+    case 'kmh': return ms * 3.6;
+    case 'mph': return ms * 2.236936;
+    case 'kn':  return ms * 1.943844;
+    default:    return ms;
+  }
+}
+function convertPressure(mmhg, to) {
+  switch(to) {
+    case 'hpa':  return mmhg * 1.33322;
+    case 'inhg': return mmhg * 0.0393701;
+    default:     return mmhg;
+  }
+}
+
+// Краткие текущие единицы (для чипа и подписей)
+function unitTemp()     { return '°' + state.units.temp; }
+function unitWind()     { return t('settings.wind.' + state.units.wind + '.unit'); }
+function unitPressure() { return t('settings.pressure.' + state.units.pressure + '.unit'); }
+
+// Форматтер температуры. opts: { withUnit, sign, precision }
+function fmtTemp(c, opts = {}) {
+  const { withUnit = true, sign = false, precision = 0 } = opts;
+  if (c == null || Number.isNaN(c)) return '—';
+  const u = state.units.temp;
+  const v = convertTemp(c, u);
+  const rounded = precision === 0 ? Math.round(v) : Number(v.toFixed(precision));
+  const num = sign && rounded > 0 ? '+' + rounded : String(rounded);
+  return withUnit ? `${num}°${u}` : num;
+}
+
+// Только число температуры, без °
+function fmtTempNum(c, precision = 0) { return fmtTemp(c, { withUnit: false, precision }); }
+
+// Форматтер скорости ветра
+function fmtWind(ms, opts = {}) {
+  const { withUnit = true, precision = 0 } = opts;
+  if (ms == null || Number.isNaN(ms)) return '—';
+  const u = state.units.wind;
+  const v = convertWind(ms, u);
+  const rounded = precision === 0 ? Math.round(v) : Number(v.toFixed(precision));
+  return withUnit ? `${rounded} ${unitWind()}` : String(rounded);
+}
+
+// Форматтер давления (точность зависит от единицы)
+function fmtPressure(mmhg, opts = {}) {
+  const { withUnit = true } = opts;
+  if (mmhg == null || Number.isNaN(mmhg)) return '—';
+  const u = state.units.pressure;
+  const v = convertPressure(mmhg, u);
+  let num;
+  if (u === 'inhg') num = v.toFixed(2);
+  else num = String(Math.round(v));
+  return withUnit ? `${num} ${unitPressure()}` : num;
+}
+
+// Длина дня из суммарных минут → локализованная строка ("15ч 19мин" / "15h 19min")
+function fmtDayLen(totalMinutes) {
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return t('astro.dayLen', { h, m });
+}
+
+// Парсер "15ч 19мин" (или "15ч 19мин"-подобных строк) обратно в минуты, для совместимости с BASELINE
+function parseDayLenToMinutes(str) {
+  if (typeof str !== 'string') return 0;
+  const numbers = (str.match(/\d+/g) || []).map(Number);
+  if (numbers.length >= 2) return numbers[0] * 60 + numbers[1];
+  if (numbers.length === 1) return numbers[0] * 60;
+  return 0;
+}
+
+// Краткий код направления ветра ("СЗ" / "Ю" / "В" и т.д.) → внутренний код "NW" / "S" / "E"
+const WIND_DIR_RU2CODE = { 'С': 'N', 'СВ': 'NE', 'В': 'E', 'ЮВ': 'SE', 'Ю': 'S', 'ЮЗ': 'SW', 'З': 'W', 'СЗ': 'NW' };
+function windDirCode(dir) {
+  if (!dir) return null;
+  if (WIND_DIR_RU2CODE[dir]) return WIND_DIR_RU2CODE[dir];
+  if (['N','NE','E','SE','S','SW','W','NW'].includes(dir)) return dir;
+  return null;
+}
+function localizeWindDirShort(dir) { const c = windDirCode(dir); return c ? t('windDir.' + c) : dir; }
+function localizeWindDirFull(dir)  { const c = windDirCode(dir); return c ? t('windDirFull.' + c) : dir; }
+
+/* ============================================
+   ЛОКАЛИЗАТОРЫ — мапперы русских строк из BASELINE в i18n-ключи
+   (BASELINE/SOURCES не меняем, маппинг лежит здесь)
+   ============================================ */
+
+const COND_LABEL_TO_KEY = {
+  'Ясно': 'cond.clear',
+  'Переменная облачность': 'cond.partlyCloudy',
+  'Малооблачно': 'cond.partlyCloudy',
+  'Облачно': 'cond.cloudy',
+  'Пасмурно с прояснениями': 'cond.partlyCloudyWithClear',
+  'Сплошная облачность': 'cond.overcast',
+  'Дождь': 'cond.rain',
+  'Сильный дождь': 'cond.heavyRain',
+  'Гроза': 'cond.thunderstorm',
+  'Снег': 'cond.snow',
+  'Туман': 'cond.fog'
+};
+function localizeCondLabel(label) {
+  return COND_LABEL_TO_KEY[label] ? t(COND_LABEL_TO_KEY[label]) : label;
+}
+
+// condDesc из BASELINE — нумерованные ключи по dayId (см. I18N condDesc.day0..day4)
+function localizeCondDescByDayId(dayId) {
+  return t('condDesc.day' + dayId);
+}
+
+const UV_LABEL_TO_KEY = {
+  'Низкий': 'uvLabel.low',
+  'Слабый': 'uvLabel.low',
+  'Умеренный': 'uvLabel.moderate',
+  'Высокий': 'uvLabel.high',
+  'Очень высокий': 'uvLabel.veryHigh',
+  'Экстремальный': 'uvLabel.extreme'
+};
+function localizeUvLabel(label) {
+  return UV_LABEL_TO_KEY[label] ? t(UV_LABEL_TO_KEY[label]) : label;
+}
+
+const AQI_LABEL_TO_KEY = {
+  'Хорошее': 'aqiLabel.good',
+  'Умеренное': 'aqiLabel.moderate',
+  'Вредно для чувствительных': 'aqiLabel.unhealthySens',
+  'Вредно': 'aqiLabel.unhealthy',
+  'Очень вредно': 'aqiLabel.veryUnhealthy',
+  'Опасно': 'aqiLabel.hazardous'
+};
+function localizeAqiLabel(label) {
+  return AQI_LABEL_TO_KEY[label] ? t(AQI_LABEL_TO_KEY[label]) : label;
+}
+
+const MOON_NAME_TO_KEY = {
+  'Новолуние': 'moon.new',
+  'Молодая луна': 'moon.waxingCrescent',
+  'Первая четверть': 'moon.firstQuarter',
+  'Прибывающая луна': 'moon.waxingGibbous',
+  'Полнолуние': 'moon.full',
+  'Убывающая луна': 'moon.waningGibbous',
+  'Последняя четверть': 'moon.lastQuarter',
+  'Старая луна': 'moon.waningCrescent'
+};
+function localizeMoonName(name) {
+  return MOON_NAME_TO_KEY[name] ? t(MOON_NAME_TO_KEY[name]) : name;
+}
+
+// Дни недели: dayName из BASELINE на русском
+const DAY_FULL_TO_KEY = {
+  'Понедельник': 'day.full.mon', 'Вторник': 'day.full.tue', 'Среда': 'day.full.wed', 'Четверг': 'day.full.thu',
+  'Пятница': 'day.full.fri', 'Суббота': 'day.full.sat', 'Воскресенье': 'day.full.sun'
+};
+function localizeDayFull(name) { return DAY_FULL_TO_KEY[name] ? t(DAY_FULL_TO_KEY[name]) : name; }
+
+const DAY_SHORT_TO_KEY = {
+  'Пн':'day.short.mon','Вт':'day.short.tue','Ср':'day.short.wed','Чт':'day.short.thu',
+  'Пт':'day.short.fri','Сб':'day.short.sat','Вс':'day.short.sun'
+};
+function localizeDayShort(name) { return DAY_SHORT_TO_KEY[name] ? t(DAY_SHORT_TO_KEY[name]) : name; }
+
+// Имя источника (для SOURCES.shortName, который захардкожен по-русски)
+function localizeSourceName(src) {
+  if (!src) return '';
+  if (src.id === 'avg') return t('sources.avgShort');
+  return src.shortName || src.name;
+}
+function localizeSourceFullName(src) {
+  if (!src) return '';
+  if (src.id === 'avg') return t('hero.sourceAvg');
+  return src.name;
+}
+
+// Описание осадков по проценту
+function precipDescKey(p) {
+  if (!p || p < 5) return 'metric.rain.none';
+  if (p < 30) return 'metric.rain.light';
+  if (p < 60) return 'metric.rain.moderate';
+  return 'metric.rain.heavy';
+}
+
+// Дата "ДД.ММ.ГГГГ" → локализованная "13 мая 2026" / "13 травня 2026" / "May 13, 2026"
+function formatDateLocale(dateStr) {
+  // dateStr формата "13.05.2026"
+  const m = dateStr.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  if (!m) return dateStr;
+  const day = parseInt(m[1], 10), month = parseInt(m[2], 10), year = m[3];
+  const monthName = t('month.' + month);
+  if (state.lang === 'en') return `${monthName} ${day}, ${year}`;
+  return `${day} ${monthName} ${year}`;
+}
+
+// "15ч 19мин" → перевод
+function localizeDayLen(rusStr) {
+  const minutes = parseDayLenToMinutes(rusStr);
+  return fmtDayLen(minutes);
+}
+
+// Локализация городов из POPULAR_UA_CITIES.
+// Принимает объект city {name, region, lat, lon} с русскими полями и возвращает локализованную пару.
+const UA_CITY_TRANSLATIONS = {
+  'Киев':           { uk: 'Київ',           en: 'Kyiv' },
+  'Харьков':        { uk: 'Харків',         en: 'Kharkiv' },
+  'Высокий':        { uk: 'Високий',        en: 'Vysokyi' },
+  'Одесса':         { uk: 'Одеса',          en: 'Odesa' },
+  'Днепр':          { uk: 'Дніпро',         en: 'Dnipro' },
+  'Львов':          { uk: 'Львів',          en: 'Lviv' },
+  'Запорожье':      { uk: 'Запоріжжя',      en: 'Zaporizhzhia' },
+  'Кривой Рог':     { uk: 'Кривий Ріг',     en: 'Kryvyi Rih' },
+  'Николаев':       { uk: 'Миколаїв',       en: 'Mykolaiv' },
+  'Винница':        { uk: 'Вінниця',        en: 'Vinnytsia' },
+  'Полтава':        { uk: 'Полтава',        en: 'Poltava' },
+  'Чернигов':       { uk: 'Чернігів',       en: 'Chernihiv' },
+  'Херсон':         { uk: 'Херсон',         en: 'Kherson' },
+  'Черкассы':       { uk: 'Черкаси',        en: 'Cherkasy' },
+  'Сумы':           { uk: 'Суми',           en: 'Sumy' },
+  'Житомир':        { uk: 'Житомир',        en: 'Zhytomyr' },
+  'Ровно':          { uk: 'Рівне',          en: 'Rivne' },
+  'Кропивницкий':   { uk: 'Кропивницький',  en: 'Kropyvnytskyi' },
+  'Хмельницкий':    { uk: 'Хмельницький',   en: 'Khmelnytskyi' },
+  'Ивано-Франковск':{ uk: 'Івано-Франківськ',en: 'Ivano-Frankivsk' },
+  'Тернополь':      { uk: 'Тернопіль',      en: 'Ternopil' },
+  'Луцк':           { uk: 'Луцьк',          en: 'Lutsk' },
+  'Краматорск':     { uk: 'Краматорськ',    en: 'Kramatorsk' },
+  'Белая Церковь':  { uk: 'Біла Церква',    en: 'Bila Tserkva' },
+  'Мелитополь':     { uk: 'Мелітополь',     en: 'Melitopol' },
+  'Ужгород':        { uk: 'Ужгород',        en: 'Uzhhorod' },
+  'Бровары':        { uk: 'Бровари',        en: 'Brovary' },
+  'Каменское':      { uk: 'Камʼянське', en: 'Kamianske' },
+  'Мариуполь':      { uk: 'Маріуполь',      en: 'Mariupol' },
+  'Северодонецк':   { uk: 'Сєвєродонецьк',  en: 'Sievierodonetsk' },
+  'Бахмут':         { uk: 'Бахмут',         en: 'Bakhmut' },
+  'Каменец-Подольский': { uk: 'Камʼянець-Подільський', en: 'Kamianets-Podilskyi' }
+};
+
+const UA_REGION_TRANSLATIONS = {
+  'Киевская обл.':           { uk: 'Київська обл.',           en: 'Kyiv region' },
+  'Харьковская обл.':        { uk: 'Харківська обл.',         en: 'Kharkiv region' },
+  'Харьковская обл. (пгт)':  { uk: 'Харківська обл. (смт)',   en: 'Kharkiv region (town)' },
+  'Одесская обл.':           { uk: 'Одеська обл.',            en: 'Odesa region' },
+  'Днепропетровская обл.':   { uk: 'Дніпропетровська обл.',   en: 'Dnipropetrovsk region' },
+  'Львовская обл.':          { uk: 'Львівська обл.',          en: 'Lviv region' },
+  'Запорожская обл.':        { uk: 'Запорізька обл.',         en: 'Zaporizhzhia region' },
+  'Николаевская обл.':       { uk: 'Миколаївська обл.',       en: 'Mykolaiv region' },
+  'Винницкая обл.':          { uk: 'Вінницька обл.',          en: 'Vinnytsia region' },
+  'Полтавская обл.':         { uk: 'Полтавська обл.',         en: 'Poltava region' },
+  'Черниговская обл.':       { uk: 'Чернігівська обл.',       en: 'Chernihiv region' },
+  'Херсонская обл.':         { uk: 'Херсонська обл.',         en: 'Kherson region' },
+  'Черкасская обл.':         { uk: 'Черкаська обл.',          en: 'Cherkasy region' },
+  'Сумская обл.':            { uk: 'Сумська обл.',            en: 'Sumy region' },
+  'Житомирская обл.':        { uk: 'Житомирська обл.',        en: 'Zhytomyr region' },
+  'Ровненская обл.':         { uk: 'Рівненська обл.',         en: 'Rivne region' },
+  'Кировоградская обл.':     { uk: 'Кіровоградська обл.',     en: 'Kirovohrad region' },
+  'Хмельницкая обл.':        { uk: 'Хмельницька обл.',        en: 'Khmelnytskyi region' },
+  'Ивано-Франковская обл.':  { uk: 'Івано-Франківська обл.',  en: 'Ivano-Frankivsk region' },
+  'Тернопольская обл.':      { uk: 'Тернопільська обл.',      en: 'Ternopil region' },
+  'Волынская обл.':          { uk: 'Волинська обл.',          en: 'Volyn region' },
+  'Донецкая обл.':           { uk: 'Донецька обл.',           en: 'Donetsk region' },
+  'Закарпатская обл.':       { uk: 'Закарпатська обл.',       en: 'Zakarpattia region' },
+  'Луганская обл.':          { uk: 'Луганська обл.',          en: 'Luhansk region' },
+  'Украина':                 { uk: 'Україна',                 en: 'Ukraine' }
+};
+
+function localizeCity(city) {
+  if (!city) return { name: '', region: '' };
+  const tr = UA_CITY_TRANSLATIONS[city.name];
+  const rtr = UA_REGION_TRANSLATIONS[city.region];
+  let name = city.name, region = city.region || '';
+  if (state.lang === 'uk' && tr) name = tr.uk;
+  else if (state.lang === 'en' && tr) name = tr.en;
+  if (state.lang === 'uk' && rtr) region = rtr.uk;
+  else if (state.lang === 'en' && rtr) region = rtr.en;
+  return { name, region };
+}
+
+/* ============================================
+   SETTINGS — localStorage + apply
+   ============================================ */
+
+const SETTINGS_STORAGE_KEY = 'kw:settings:v1';
+
+function loadSavedSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s && typeof s === 'object') {
+      if (['ru','uk','en'].includes(s.lang)) state.lang = s.lang;
+      if (s.units && typeof s.units === 'object') {
+        if (['C','F'].includes(s.units.temp)) state.units.temp = s.units.temp;
+        if (['ms','kmh','mph','kn'].includes(s.units.wind)) state.units.wind = s.units.wind;
+        if (['mmhg','hpa','inhg'].includes(s.units.pressure)) state.units.pressure = s.units.pressure;
+      }
+    }
+  } catch (e) {
+    console.warn('Не удалось прочитать настройки:', e);
+  }
+}
+function saveSettings() {
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ lang: state.lang, units: { ...state.units } }));
+  } catch (e) {
+    console.warn('Не удалось сохранить настройки:', e);
+  }
+}
 
 /* ============================================
    3D ICONS (same as v3)
@@ -1019,33 +1925,50 @@ function applySourceTheme() {
 
 function renderSourceIndicator() {
   const s = getCurrentSource();
-  document.getElementById('sourceIndicatorName').textContent = s.shortName;
-  document.getElementById('heroSourceName').textContent = s.id === 'avg' ? 'усреднения 10 моделей' : s.name;
-  document.getElementById('chartSourceSub').textContent = s.id === 'avg' ? 'Усреднено по 10 моделям' : `Источник: ${s.name}`;
+  document.getElementById('sourceIndicatorName').textContent = localizeSourceName(s);
+  document.getElementById('chartSourceSub').textContent =
+    s.id === 'avg' ? t('chart.sub.avg') : t('chart.sub.named', { name: s.name });
 }
 
 function renderHeroAndMetrics(forecast) {
+  const s = getCurrentSource();
   const today = forecast[0];
   const nowH = today.hourly[NOW_HOUR];
   document.getElementById('heroIcon').innerHTML = weatherIcon(today.condition, 170);
-  document.getElementById('heroTempNum').textContent = nowH.t;
-  document.getElementById('heroCondition').textContent = today.condLabel;
-  const feels = Math.round(nowH.t - Math.max(0, nowH.w - 2) * 0.5);
-  document.getElementById('heroFeels').textContent = feels + '°C';
-  document.getElementById('metricWind').innerHTML = `${today.wind}<span>м/с</span>`;
-  document.getElementById('metricWindSub').textContent = `${windDirName(today.windDir)} · порывы ${today.windGust}`;
+
+  document.getElementById('heroTempNum').textContent = fmtTempNum(nowH.t);
+  document.getElementById('heroTempUnit').textContent = unitTemp();
+  document.getElementById('heroCondition').textContent = localizeCondLabel(today.condLabel);
+
+  const feelsC = nowH.t - Math.max(0, nowH.w - 2) * 0.5;
+  const feelsStr = `<strong>${fmtTemp(feelsC)}</strong>`;
+  document.getElementById('heroFeelsLine').innerHTML =
+    t('hero.feels', { feels: feelsStr, sunset: today.sunset });
+
+  const srcName = `<span class="src-name">${localizeSourceFullName(s)}</span>`;
+  document.getElementById('heroSourceNote').innerHTML =
+    t('hero.sourceNote', { name: srcName });
+
+  document.getElementById('metricWind').innerHTML =
+    `${fmtWind(today.wind, {withUnit:false})}<span>${unitWind()}</span>`;
+  document.getElementById('metricWindSub').textContent =
+    t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust, {withUnit:false}) });
+
   document.getElementById('metricRain').innerHTML = `${today.precip}<span>%</span>`;
   const mm = Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
-  document.getElementById('metricRainSub').textContent = `~${mm} мм · ${today.precip < 25 ? 'возможны осадки' : today.precip < 60 ? 'слабый дождь' : 'умеренный дождь'}`;
-  document.getElementById('metricPressure').innerHTML = `${today.pressure}<span>мм рт.ст.</span>`;
-  document.getElementById('metricPressureSub').textContent = today.pressure < 755 ? 'Понижается ↓' : today.pressure > 760 ? 'Повышается ↑' : 'Стабильно ↔';
-  document.getElementById('metricHumidity').innerHTML = `${today.humidity}<span>%</span>`;
-  document.getElementById('metricHumiditySub').textContent = `Точка росы ${today.dewPoint}°C`;
-}
+  document.getElementById('metricRainSub').textContent =
+    t('metric.rainSub', { mm: mm, desc: t(precipDescKey(today.precip)) });
 
-function windDirName(dir) {
-  const map = {'С':'Северный','СВ':'Северо-восточный','В':'Восточный','ЮВ':'Юго-восточный','Ю':'Южный','ЮЗ':'Юго-западный','З':'Западный','СЗ':'Северо-западный'};
-  return map[dir] || dir;
+  document.getElementById('metricPressure').innerHTML =
+    `${fmtPressure(today.pressure, {withUnit:false})}<span>${unitPressure()}</span>`;
+  const pKey = today.pressure < 755 ? 'metric.pressure.falling'
+             : today.pressure > 760 ? 'metric.pressure.rising'
+             : 'metric.pressure.stable';
+  document.getElementById('metricPressureSub').textContent = t(pKey);
+
+  document.getElementById('metricHumidity').innerHTML = `${today.humidity}<span>%</span>`;
+  document.getElementById('metricHumiditySub').textContent =
+    t('metric.humidity.dewPoint', { t: fmtTemp(today.dewPoint) });
 }
 
 function renderDays(forecast) {
@@ -1054,14 +1977,15 @@ function renderDays(forecast) {
   forecast.forEach((d, i) => {
     const card = document.createElement('div');
     card.className = 'glass day' + (i === 0 ? ' today' : '');
+    const dayLabel = d.id === 0 ? t('day.today') : localizeDayShort(d.name);
     card.innerHTML = `
-      <div class="day-name">${d.name}</div>
+      <div class="day-name">${dayLabel}</div>
       <div class="day-date">${d.date.slice(0,5)}</div>
       <div class="day-icon">${weatherIcon(d.condition, 56)}</div>
-      <div class="day-temps"><span class="day-hi">${d.max}°</span><span class="day-lo">${d.min}°</span></div>
+      <div class="day-temps"><span class="day-hi">${fmtTempNum(d.max)}°</span><span class="day-lo">${fmtTempNum(d.min)}°</span></div>
       <div class="day-prec"><svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>${d.precip}%</div>
-      <div class="day-wind">${d.wind} м/с ${d.windDir}</div>
-      <div class="day-tap">Подробнее ↑</div>
+      <div class="day-wind">${fmtWind(d.wind)} ${localizeWindDirShort(d.windDir)}</div>
+      <div class="day-tap">${t('day.tap')} ↑</div>
     `;
     card.addEventListener('click', () => openModal(d.id));
     grid.appendChild(card);
@@ -1071,9 +1995,13 @@ function renderDays(forecast) {
 function renderMainChart(forecast) {
   const today = forecast[0];
   const hours = today.hourly.map(h => String(h.h).padStart(2, '0'));
-  const temps = today.hourly.map(h => h.t);
+  const tempsC = today.hourly.map(h => h.t);
+  const temps = tempsC.map(c => convertTemp(c, state.units.temp));
   const precs = today.hourly.map(h => h.p);
   const minT = Math.min(...temps), maxT = Math.max(...temps);
+  const tUnit = unitTemp();
+  const labelTemp = t('chart.legendTemp');
+  const labelPrecip = t('chart.legendPrecip');
 
   const ctx = document.getElementById('hourlyChart').getContext('2d');
   if (mainChartInstance) mainChartInstance.destroy();
@@ -1088,11 +2016,11 @@ function renderMainChart(forecast) {
     data: {
       labels: hours,
       datasets: [
-        { type: 'line', label: 'Температура', data: temps, borderColor: '#00d4ff', backgroundColor: grad, borderWidth: 2.5,
+        { type: 'line', label: labelTemp, data: temps, borderColor: '#00d4ff', backgroundColor: grad, borderWidth: 2.5,
           pointRadius: hours.map((_,i) => i === NOW_HOUR ? 6 : 0),
           pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2,
           pointHoverRadius: 6, fill: true, tension: 0.45, yAxisID: 'yT', order: 1 },
-        { type: 'bar', label: 'Осадки', data: precs,
+        { type: 'bar', label: labelPrecip, data: precs,
           backgroundColor: hours.map((_,i) => i === NOW_HOUR ? 'rgba(167,139,250,0.85)' : 'rgba(167,139,250,0.4)'),
           borderRadius: 4, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.65, categoryPercentage: 0.85 }
       ]
@@ -1111,7 +2039,7 @@ function renderMainChart(forecast) {
             title: (items) => items[0].label + ':00',
             label: (ctx) => {
               const v = Math.round(ctx.parsed.y);
-              return ctx.datasetIndex === 0 ? ` Температура: ${v}°C` : ` Осадки: ${v}%`;
+              return ctx.datasetIndex === 0 ? ` ${labelTemp}: ${v}${tUnit}` : ` ${labelPrecip}: ${v}%`;
             }
           }
         }
@@ -1184,81 +2112,87 @@ function openModal(dayId) {
   const uvColor = colorForUV(d.uv);
   const aqiColor = colorForAQI(d.aqi);
 
+  const dayLabel = d.id === 0 ? t('modal.day.today') : t('modal.day.forecast');
+  const dayTitle = localizeDayFull(d.dayName);
+  const dateLoc  = formatDateLocale(d.date);
+  const dayLenLoc = localizeDayLen(d.dayLen);
+  const srcFull = `<span class="src-name">${localizeSourceFullName(src)}</span>`;
+
   modalBody.innerHTML = `
     <div class="modal-header">
-      <div class="modal-day-label">${d.name === 'Сегодня' ? 'Сегодня' : 'Прогноз'} · ${src.tag}</div>
-      <h2 class="modal-day-title" id="modalTitle">${d.dayName}</h2>
-      <div class="modal-day-date">${d.date} · ${d.dayLen}</div>
-      <div class="modal-source-note">По данным <span class="src-name">${src.id === 'avg' ? 'усреднения 10 моделей' : src.name}</span></div>
+      <div class="modal-day-label">${dayLabel} · ${src.tag}</div>
+      <h2 class="modal-day-title" id="modalTitle">${dayTitle}</h2>
+      <div class="modal-day-date">${dateLoc} · ${dayLenLoc}</div>
+      <div class="modal-source-note">${t('hero.sourceNote', { name: srcFull })}</div>
     </div>
 
     <div class="modal-hero">
       <div class="modal-icon">${weatherIcon(d.condition, 110)}</div>
       <div>
         <div class="modal-temp">
-          <span class="modal-hi">${d.max}</span>
-          <span class="modal-unit">°C</span>
-          <span class="modal-lo">${d.min}°</span>
+          <span class="modal-hi">${fmtTempNum(d.max)}</span>
+          <span class="modal-unit">${unitTemp()}</span>
+          <span class="modal-lo">${fmtTempNum(d.min)}°</span>
         </div>
-        <div class="modal-cond">${d.condLabel}</div>
-        <div class="modal-cond-sub">${d.condDesc}</div>
+        <div class="modal-cond">${localizeCondLabel(d.condLabel)}</div>
+        <div class="modal-cond-sub">${localizeCondDescByDayId(d.id)}</div>
       </div>
     </div>
 
     <div class="modal-mini-metrics">
-      <div class="mini-m"><div class="l">Ветер</div><div class="v">${d.wind}<span> м/с ${d.windDir}</span></div></div>
-      <div class="mini-m"><div class="l">Осадки</div><div class="v">${d.precip}<span> %</span></div></div>
-      <div class="mini-m"><div class="l">Давление</div><div class="v">${d.pressure}<span> мм</span></div></div>
-      <div class="mini-m"><div class="l">Влажность</div><div class="v">${d.humidity}<span> %</span></div></div>
+      <div class="mini-m"><div class="l">${t('metric.wind')}</div><div class="v">${fmtWind(d.wind, {withUnit:false})}<span> ${unitWind()} ${localizeWindDirShort(d.windDir)}</span></div></div>
+      <div class="mini-m"><div class="l">${t('metric.rain')}</div><div class="v">${d.precip}<span> %</span></div></div>
+      <div class="mini-m"><div class="l">${t('metric.pressure')}</div><div class="v">${fmtPressure(d.pressure, {withUnit:false})}<span> ${unitPressure()}</span></div></div>
+      <div class="mini-m"><div class="l">${t('metric.humidity')}</div><div class="v">${d.humidity}<span> %</span></div></div>
     </div>
 
     <div class="modal-astro">
       <div class="modal-astro-cell sun">
         <div class="ico">${sunMini3D(48)}</div>
         <div class="txt">
-          <div class="l">Солнце</div>
+          <div class="l">${t('astro.sun')}</div>
           <div class="v big">↑ ${d.sunrise} · ↓ ${d.sunset}</div>
-          <div class="v" style="font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px">Долгота дня: ${d.dayLen}</div>
+          <div class="v" style="font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px">${t('modal.day.dayLen', { len: dayLenLoc })}</div>
         </div>
       </div>
       <div class="modal-astro-cell moon">
         <div class="ico">${moonPhaseIcon(d.moonIllum, d.moonWaxing)}</div>
         <div class="txt">
           <div class="l">Луна · ${d.moonIllum}%</div>
-          <div class="v big">${d.moonName}</div>
+          <div class="v big">${localizeMoonName(d.moonName)}</div>
         </div>
       </div>
       <div class="modal-astro-cell" style="background:linear-gradient(135deg,${uvColor.bg} 0%,rgba(0,0,0,0.02) 100%);border-color:${uvColor.br}">
         <div class="ico" style="background:${uvColor.bg};box-shadow:inset 0 0 16px ${uvColor.bg},0 0 12px ${uvColor.bg}">${uvMini3D(48, d.uv, uvColor.c)}</div>
         <div class="txt">
-          <div class="l">УФ-индекс</div>
-          <div class="v big" style="color:${uvColor.c}">${d.uv} · ${d.uvLabel}</div>
-          <div class="v" style="font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px">Шкала 0–11+</div>
+          <div class="l">${t('astro.uv')}</div>
+          <div class="v big" style="color:${uvColor.c}">${d.uv} · ${localizeUvLabel(d.uvLabel)}</div>
+          <div class="v" style="font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px">${t('modal.day.uvScale')}</div>
         </div>
       </div>
       <div class="modal-astro-cell" style="background:linear-gradient(135deg,${aqiColor.bg} 0%,rgba(0,0,0,0.02) 100%);border-color:${aqiColor.br}">
         <div class="ico" style="background:${aqiColor.bg};box-shadow:inset 0 0 16px ${aqiColor.bg},0 0 12px ${aqiColor.bg}">${aqiMini3D(48, d.aqi, aqiColor.c)}</div>
         <div class="txt">
-          <div class="l">Качество воздуха</div>
-          <div class="v big" style="color:${aqiColor.c}">${d.aqi} AQI · ${d.aqiLabel}</div>
-          <div class="v" style="font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px">PM2.5 в норме</div>
+          <div class="l">${t('astro.aqi')}</div>
+          <div class="v big" style="color:${aqiColor.c}">${d.aqi} AQI · ${localizeAqiLabel(d.aqiLabel)}</div>
+          <div class="v" style="font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px">${t('modal.day.pm25norm')}</div>
         </div>
       </div>
     </div>
 
     <div class="modal-hourly">
-      <h3>Почасовая температура и осадки</h3>
+      <h3>${t('modal.day.hourlyTitle')}</h3>
       <div class="modal-chart-wrap"><canvas id="modalChart"></canvas></div>
     </div>
 
     <div class="modal-hours-list">
-      <h3>Час за часом</h3>
+      <h3>${t('modal.day.hoursTitle')}</h3>
       <div class="hours-scroll">
         ${d.hourly.map(h => `
           <div class="hour-cell">
             <div class="h">${String(h.h).padStart(2,'0')}:00</div>
             <div class="ic">${weatherIcon(h.c, 36)}</div>
-            <div class="t">${h.t}°</div>
+            <div class="t">${fmtTempNum(h.t)}°</div>
             <div class="p">${h.p}%</div>
           </div>
         `).join('')}
@@ -1271,7 +2205,8 @@ function openModal(dayId) {
 
   setTimeout(() => {
     const mctx = document.getElementById('modalChart').getContext('2d');
-    const mTemps = d.hourly.map(h => h.t);
+    const mTempsC = d.hourly.map(h => h.t);
+    const mTemps = mTempsC.map(c => convertTemp(c, state.units.temp));
     const mPrecs = d.hourly.map(h => h.p);
     const mHours = d.hourly.map(h => String(h.h).padStart(2, '0'));
     const mGrad = mctx.createLinearGradient(0, 0, 0, 220);
@@ -1279,6 +2214,9 @@ function openModal(dayId) {
     mGrad.addColorStop(0.5, 'rgba(77,171,247,0.15)');
     mGrad.addColorStop(1, 'rgba(0,212,255,0.0)');
     const minT = Math.min(...mTemps), maxT = Math.max(...mTemps);
+    const mTUnit = unitTemp();
+    const mLabelT = t('chart.legendTemp');
+    const mLabelP = t('chart.legendPrecip');
 
     if (modalChartInstance) modalChartInstance.destroy();
     modalChartInstance = new Chart(mctx, {
@@ -1286,14 +2224,14 @@ function openModal(dayId) {
       data: {
         labels: mHours,
         datasets: [
-          { type: 'line', label: 'Температура', data: mTemps, borderColor: '#00d4ff', backgroundColor: mGrad, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2, fill: true, tension: 0.45, yAxisID: 'yT', order: 1 },
-          { type: 'bar', label: 'Осадки', data: mPrecs, backgroundColor: 'rgba(167,139,250,0.5)', borderRadius: 3, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.7, categoryPercentage: 0.85 }
+          { type: 'line', label: mLabelT, data: mTemps, borderColor: '#00d4ff', backgroundColor: mGrad, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2, fill: true, tension: 0.45, yAxisID: 'yT', order: 1 },
+          { type: 'bar', label: mLabelP, data: mPrecs, backgroundColor: 'rgba(167,139,250,0.5)', borderRadius: 3, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.7, categoryPercentage: 0.85 }
         ]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,17,40,0.95)', titleColor: '#00d4ff', bodyColor: '#e8f0ff', borderColor: 'rgba(0,212,255,0.3)', borderWidth: 1, padding: 12, cornerRadius: 12, titleFont: { family: 'Onest', size: 13, weight: '600' }, bodyFont: { family: 'Onest', size: 12 }, callbacks: { title: (items) => items[0].label + ':00', label: (ctx) => { const v = Math.round(ctx.parsed.y); return ctx.datasetIndex === 0 ? ` Температура: ${v}°C` : ` Осадки: ${v}%`; } } } },
+        plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,17,40,0.95)', titleColor: '#00d4ff', bodyColor: '#e8f0ff', borderColor: 'rgba(0,212,255,0.3)', borderWidth: 1, padding: 12, cornerRadius: 12, titleFont: { family: 'Onest', size: 13, weight: '600' }, bodyFont: { family: 'Onest', size: 12 }, callbacks: { title: (items) => items[0].label + ':00', label: (ctx) => { const v = Math.round(ctx.parsed.y); return ctx.datasetIndex === 0 ? ` ${mLabelT}: ${v}${mTUnit}` : ` ${mLabelP}: ${v}%`; } } } },
         scales: {
           x: { ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, autoSkip: false, callback: (v, i) => (i % 3 === 0) ? mHours[i] : '' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
           yT: { type: 'linear', position: 'left', min: minT - 3, max: maxT + 3, ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, callback: v => Math.round(v) + '°' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
@@ -1318,20 +2256,52 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.cl
    INIT
    ============================================ */
 
-// Render static parts (sun/moon/uv/aqi don't depend on source)
-document.getElementById('sunArc').innerHTML = sunArc(BASELINE[0].sunrise, BASELINE[0].sunset, '23:10');
-document.getElementById('moonIcon').innerHTML = moonPhaseIcon(BASELINE[0].moonIllum, BASELINE[0].moonWaxing);
-document.getElementById('uvGauge').innerHTML = uvGauge(BASELINE[0].uv);
+// Astro / UV / AQI плашки в шапке — статика по BASELINE[0], но текстовые подписи зависят от языка.
+// Вызывается из applyAll() при загрузке и при смене языка.
+function renderStaticAstro() {
+  const d = BASELINE[0];
+  const sunArcEl = document.getElementById('sunArc');
+  if (sunArcEl) sunArcEl.innerHTML = sunArc(d.sunrise, d.sunset, '23:10');
+  const moonIconEl = document.getElementById('moonIcon');
+  if (moonIconEl) moonIconEl.innerHTML = moonPhaseIcon(d.moonIllum, d.moonWaxing);
+  const uvGaugeEl = document.getElementById('uvGauge');
+  if (uvGaugeEl) uvGaugeEl.innerHTML = uvGauge(d.uv);
 
-renderSourceButtons();
-renderAll();
+  const dayLenEl = document.getElementById('dayLength');
+  if (dayLenEl) dayLenEl.textContent = localizeDayLen(d.dayLen);
+  const sunriseEl = document.getElementById('sunriseTime');
+  if (sunriseEl) sunriseEl.textContent = d.sunrise;
+  const sunsetEl = document.getElementById('sunsetTime');
+  if (sunsetEl) sunsetEl.textContent = d.sunset;
+
+  const moonIllumEl = document.getElementById('moonIllum');
+  if (moonIllumEl) moonIllumEl.textContent = d.moonIllum + '%';
+  const moonNameEl = document.getElementById('moonName');
+  if (moonNameEl) {
+    const localized = localizeMoonName(d.moonName);
+    // Двухстрочное отображение (как в оригинале) – разбиваем по пробелу пополам если есть
+    const parts = localized.split(' ');
+    moonNameEl.innerHTML = parts.length > 1 ? parts.join('<br>') : localized;
+  }
+
+  const uvValEl = document.getElementById('uvVal');
+  if (uvValEl) uvValEl.textContent = d.uv;
+  const uvStatusEl = document.getElementById('uvStatus');
+  if (uvStatusEl) uvStatusEl.textContent = localizeUvLabel(d.uvLabel);
+
+  const aqiValEl = document.getElementById('aqiVal');
+  if (aqiValEl) aqiValEl.textContent = d.aqi;
+  const aqiStatusEl = document.getElementById('aqiStatus');
+  if (aqiStatusEl) aqiStatusEl.textContent = localizeAqiLabel(d.aqiLabel);
+}
 
 function updateClock() {
   const now = new Date();
   const h = String(now.getHours()).padStart(2,'0');
   const m = String(now.getMinutes()).padStart(2,'0');
   const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clockLine').textContent = `обновлено: ${h}:${m}:${s} UTC+3 · v0.4 prototype`;
+  const el = document.getElementById('clockLine');
+  if (el) el.textContent = t('footer.updated', { time: `${h}:${m}:${s}` });
 }
 setInterval(updateClock, 1000);
 
@@ -1422,23 +2392,23 @@ function renderLocationHeader() {
   const tagEl = document.getElementById('locationTag');
   if (!nameEl || !tagEl) return;
 
-  // Имя: если регион короткий и не совпадает с городом — показываем «Город · регион», иначе только город
-  let title = currentLocation.name;
-  if (currentLocation.region && !currentLocation.region.startsWith(currentLocation.name)) {
-    // Шапка короткая, поэтому регион добавим только если суммарная длина не больше 28 символов
-    const combined = `${currentLocation.name} · ${currentLocation.region}`;
-    title = combined.length <= 32 ? combined : currentLocation.name;
+  // Локализованные имя и регион (если город из POPULAR_UA_CITIES)
+  const { name: locName, region: locRegion } = localizeCity(currentLocation);
+
+  let title = locName;
+  if (locRegion && !locRegion.startsWith(locName)) {
+    const combined = `${locName} · ${locRegion}`;
+    title = combined.length <= 32 ? combined : locName;
   }
   nameEl.textContent = title;
 
-  // Тег источника локации
   if (currentLocation.source === 'geo') {
     tagEl.className = 'geo-tag';
-    tagEl.textContent = '📍 по геолокации';
+    tagEl.textContent = t('city.tag.geo');
     tagEl.style.display = '';
   } else if (currentLocation.source === 'manual') {
     tagEl.className = 'geo-tag manual';
-    tagEl.textContent = '✋ выбрано';
+    tagEl.textContent = t('city.tag.manual');
     tagEl.style.display = '';
   } else {
     tagEl.style.display = 'none';
@@ -1448,18 +2418,14 @@ function renderLocationHeader() {
 // === Геолокация браузера + reverse-geocode ===
 async function requestGeolocation() {
   if (!('geolocation' in navigator)) {
-    throw new Error('Браузер не поддерживает геолокацию');
+    throw new Error(t('city.geoErr.notSupported'));
   }
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
       pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude, accuracy: pos.coords.accuracy }),
       err => {
-        const map = {
-          1: 'Доступ к местоположению отклонён. Разреши его в настройках браузера.',
-          2: 'Не удалось определить позицию (нет сигнала GPS / сети)',
-          3: 'Время ожидания истекло'
-        };
-        reject(new Error(map[err.code] || 'Ошибка геолокации'));
+        const map = { 1: 'city.geoErr.denied', 2: 'city.geoErr.unavailable', 3: 'city.geoErr.timeout' };
+        reject(new Error(t(map[err.code] || 'city.geoErr.generic')));
       },
       { timeout: 8000, maximumAge: 60_000, enableHighAccuracy: false }
     );
@@ -1467,9 +2433,8 @@ async function requestGeolocation() {
 }
 
 async function reverseGeocode(lat, lon) {
-  // Open-Meteo не имеет reverse-geocode. Используем Nominatim (OpenStreetMap).
-  // Лимит: 1 req/sec — для нашего одного запроса при геолокации этого с запасом.
-  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=ru&zoom=12`;
+  const acceptLang = state.lang === 'uk' ? 'uk' : state.lang === 'en' ? 'en' : 'ru';
+  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=${acceptLang}&zoom=12`;
   try {
     const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
@@ -1480,7 +2445,7 @@ async function reverseGeocode(lat, lon) {
     return { name, region };
   } catch (e) {
     console.warn('Reverse-geocode не удался:', e);
-    return { name: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, region: 'Координаты' };
+    return { name: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, region: '' };
   }
 }
 
@@ -1488,10 +2453,11 @@ async function reverseGeocode(lat, lon) {
 async function searchCities(query) {
   const q = query.trim();
   if (q.length < 2) return [];
+  const apiLang = state.lang === 'uk' ? 'uk' : state.lang === 'en' ? 'en' : 'ru';
   const params = new URLSearchParams({
     name: q,
     count: '15',
-    language: 'ru',
+    language: apiLang,
     countryCode: 'UA'
   });
   const url = `https://geocoding-api.open-meteo.com/v1/search?${params}`;
@@ -1501,7 +2467,7 @@ async function searchCities(query) {
   if (!data.results) return [];
   return data.results.map(r => ({
     name: r.name,
-    region: [r.admin1, r.admin2].filter(Boolean).join(' · ') || r.country || 'Украина',
+    region: [r.admin1, r.admin2].filter(Boolean).join(' · ') || r.country || '',
     lat: r.latitude,
     lon: r.longitude
   }));
@@ -1522,7 +2488,7 @@ function openCityModal() {
   hideGeoError();
   citySearchInput.value = '';
   citySearchClear.classList.remove('visible');
-  cityListHeader.textContent = 'Популярные города Украины';
+  cityListHeader.textContent = t('city.list.popular');
   renderCityList(POPULAR_UA_CITIES);
   cityModal.classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1539,7 +2505,7 @@ function renderCityList(cities, opts = {}) {
     cityList.innerHTML = `
       <div class="city-empty">
         <div class="empty-icon">🔍</div>
-        <div>${opts.emptyText || 'Город не найден. Попробуй другое название.'}</div>
+        <div>${opts.emptyText || t('city.list.empty')}</div>
       </div>`;
     return;
   }
@@ -1548,13 +2514,14 @@ function renderCityList(cities, opts = {}) {
     const item = document.createElement('button');
     item.type = 'button';
     item.className = 'city-item' + (isActive ? ' active' : '');
+    const { name: dispName, region: dispRegion } = localizeCity(c);
     item.innerHTML = `
       <span class="city-pin">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.5 8 12 8 12s8-6.5 8-12c0-4.42-3.58-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
       </span>
       <span class="city-text">
-        <span class="city-name">${escapeHtml(c.name)}</span>
-        <span class="city-region">${escapeHtml(c.region || '')}</span>
+        <span class="city-name">${escapeHtml(dispName)}</span>
+        <span class="city-region">${escapeHtml(dispRegion)}</span>
       </span>
       <span class="city-active-check">✓</span>`;
     item.addEventListener('click', () => selectCityFromList(c));
@@ -1599,7 +2566,7 @@ cityGeoBtn.addEventListener('click', async () => {
     setCurrentLocation({ name, region, lat: pos.lat, lon: pos.lon, source: 'geo' });
     closeCityModal();
   } catch (err) {
-    showGeoError(err.message || 'Не удалось определить местоположение');
+    showGeoError(err.message || t('city.geoErr.generic'));
   } finally {
     cityGeoBtn.classList.remove('loading');
   }
@@ -1614,23 +2581,29 @@ citySearchInput.addEventListener('input', () => {
   clearTimeout(searchTimer);
 
   if (q.trim().length === 0) {
-    cityListHeader.textContent = 'Популярные города Украины';
+    cityListHeader.textContent = t('city.list.popular');
     renderCityList(POPULAR_UA_CITIES);
     return;
   }
   if (q.trim().length < 2) {
-    cityListHeader.textContent = 'Введи минимум 2 символа';
+    cityListHeader.textContent = t('city.list.minChars');
     renderCityList([]);
     return;
   }
 
-  // Локальная фильтрация POPULAR_UA_CITIES — мгновенно
-  const local = POPULAR_UA_CITIES.filter(c => c.name.toLowerCase().includes(q.toLowerCase().trim()));
+  // Локальная фильтрация POPULAR_UA_CITIES — учитываем все языковые имена
+  const ql = q.toLowerCase().trim();
+  const local = POPULAR_UA_CITIES.filter(c => {
+    const tr = UA_CITY_TRANSLATIONS[c.name] || {};
+    return c.name.toLowerCase().includes(ql)
+        || (tr.uk && tr.uk.toLowerCase().includes(ql))
+        || (tr.en && tr.en.toLowerCase().includes(ql));
+  });
   if (local.length > 0) {
-    cityListHeader.textContent = 'Найдено в популярных';
+    cityListHeader.textContent = t('city.list.foundLocal');
     renderCityList(local);
   } else {
-    cityListHeader.innerHTML = '<span style="display:inline-flex;gap:8px;align-items:center"><span class="geo-spinner" style="width:11px;height:11px;border-width:1.5px"></span>Ищу...</span>';
+    cityListHeader.innerHTML = `<span style="display:inline-flex;gap:8px;align-items:center"><span class="geo-spinner" style="width:11px;height:11px;border-width:1.5px"></span>${escapeHtml(t('city.list.searching'))}</span>`;
     renderCityList([]);
   }
 
@@ -1638,11 +2611,11 @@ citySearchInput.addEventListener('input', () => {
   searchTimer = setTimeout(async () => {
     try {
       const found = await searchCities(q);
-      cityListHeader.textContent = found.length ? `Найдено: ${found.length}` : 'Ничего не найдено';
-      renderCityList(found, { emptyText: `Города «${escapeHtml(q)}» нет в базе Open-Meteo по Украине.` });
+      cityListHeader.textContent = found.length ? t('city.list.found', { n: found.length }) : t('city.list.notFound');
+      renderCityList(found, { emptyText: t('city.list.emptyForQuery', { q: escapeHtml(q) }) });
     } catch (err) {
-      cityListHeader.textContent = 'Ошибка поиска';
-      renderCityList([], { emptyText: 'Не удалось выполнить поиск. Проверь интернет.' });
+      cityListHeader.textContent = t('city.list.notFound');
+      renderCityList([], { emptyText: t('city.list.searchError') });
     }
   }, 300);
 });
@@ -1650,22 +2623,105 @@ citySearchInput.addEventListener('input', () => {
 citySearchClear.addEventListener('click', () => {
   citySearchInput.value = '';
   citySearchClear.classList.remove('visible');
-  cityListHeader.textContent = 'Популярные города Украины';
+  cityListHeader.textContent = t('city.list.popular');
   renderCityList(POPULAR_UA_CITIES);
   citySearchInput.focus();
 });
 
-// === Инициализация локации при загрузке ===
+/* ============================================
+   SETTINGS MENU — chip + modal + handlers
+   ============================================ */
+
+const settingsChip       = document.getElementById('settingsChip');
+const settingsModal      = document.getElementById('settingsModal');
+const settingsModalClose = document.getElementById('settingsModalClose');
+
+function openSettingsModal()  { refreshSegmentedActive(); settingsModal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeSettingsModal() { settingsModal.classList.remove('open'); document.body.style.overflow = ''; }
+
+settingsChip.addEventListener('click', openSettingsModal);
+settingsModalClose.addEventListener('click', closeSettingsModal);
+settingsModal.addEventListener('click', e => { if (e.target === settingsModal) closeSettingsModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && settingsModal.classList.contains('open')) closeSettingsModal();
+});
+
+function setActiveInGroup(groupId, val) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === val));
+}
+function refreshSegmentedActive() {
+  setActiveInGroup('segLang',     state.lang);
+  setActiveInGroup('segTemp',     state.units.temp);
+  setActiveInGroup('segWind',     state.units.wind);
+  setActiveInGroup('segPressure', state.units.pressure);
+}
+
+function setupSegmentedHandlers() {
+  const groups = [
+    { id: 'segLang',     allowed: ['ru','uk','en'],            apply: v => { state.lang = v; } },
+    { id: 'segTemp',     allowed: ['C','F'],                   apply: v => { state.units.temp = v; } },
+    { id: 'segWind',     allowed: ['ms','kmh','mph','kn'],     apply: v => { state.units.wind = v; } },
+    { id: 'segPressure', allowed: ['mmhg','hpa','inhg'],       apply: v => { state.units.pressure = v; } }
+  ];
+  groups.forEach(g => {
+    const el = document.getElementById(g.id);
+    if (!el) return;
+    el.addEventListener('click', e => {
+      const btn = e.target.closest('.seg-btn');
+      if (!btn) return;
+      const v = btn.dataset.val;
+      if (!g.allowed.includes(v)) return;
+      g.apply(v);
+      saveSettings();
+      applyAll();
+    });
+  });
+}
+
+function updateChip() {
+  document.getElementById('chipLang').textContent = state.lang.toUpperCase();
+  document.getElementById('chipTemp').textContent = unitTemp();
+  document.getElementById('chipWind').textContent = unitWind();
+}
+
+// Перерисовать ВСЁ: переводы DOM + чип + активные кнопки + локация + астро + погода + часы + открытые модалки
+function applyAll() {
+  applyTranslations();
+  updateChip();
+  refreshSegmentedActive();
+  renderLocationHeader();
+  renderStaticAstro();
+  renderSourceButtons();
+  renderAll();
+  updateClock();
+  if (modal.classList.contains('open')) closeModal();
+  if (cityModal.classList.contains('open')) {
+    const q = citySearchInput.value;
+    if (!q.trim()) {
+      cityListHeader.textContent = t('city.list.popular');
+      renderCityList(POPULAR_UA_CITIES);
+    } else {
+      citySearchInput.dispatchEvent(new Event('input'));
+    }
+  }
+}
+
+/* ============================================
+   INITIAL LOCATION + FINAL INIT
+   ============================================ */
+
 function loadInitialLocation() {
   const saved = loadSavedLocation();
-  if (saved) {
-    currentLocation = saved;
-  } else {
-    currentLocation = { ...DEFAULT_LOCATION };
-  }
-  renderLocationHeader();
+  currentLocation = saved ? saved : { ...DEFAULT_LOCATION };
 }
+
+// Read settings + location from localStorage, hook up segmented controls, paint everything
+loadSavedSettings();
 loadInitialLocation();
+setupSegmentedHandlers();
+applyAll();
 </script>
 
 </body>
