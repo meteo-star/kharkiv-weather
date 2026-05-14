@@ -32,3 +32,6 @@ npm-debug.log*
 # Локальные заметки разработчика
 NOTES.local.md
 TODO.local.md
+
+# Claude Code (локальные настройки, worktrees, кэш — не часть проекта)
+.claude/
