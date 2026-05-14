@@ -787,10 +787,12 @@ const I18N = {
     'header.editHint': 'Нажмите чтобы сменить',
     'header.sourceLabel': 'Источник данных',
     'hero.label': 'Сейчас',
-    'hero.feels': 'Ощущается как {feels} · Закат был в {sunset}',
-    'hero.feelsNoSunset': 'Ощущается как {feels}',
+    'hero.feels': 'Ощущается как {feels}',
+    'hero.feelsBeforeSunrise': 'Ощущается как {feels} · Восход в {sunrise}',
+    'hero.feelsBeforeSunset':  'Ощущается как {feels} · Закат в {sunset}',
+    'hero.feelsAfterSunset':   'Ощущается как {feels} · Закат был в {sunset}',
     'hero.sourceNote': 'По данным {name}',
-    'hero.sourceAvg': 'усреднения 10 моделей',
+    'hero.sourceAvg': 'усреднения 7 моделей',
     'metric.wind': 'Ветер',
     'metric.rain': 'Осадки',
     'metric.pressure': 'Давление',
@@ -823,7 +825,7 @@ const I18N = {
     'sources.avgShort': 'Среднее по 7 моделям',
     'sources.dividerOr': 'или конкретный источник',
     'footer.refresh': 'Обновить',
-    'footer.updated': 'обновлено: {time} UTC+3 · v0.5-i18n',
+    'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
     'modal.day.forecast': 'Прогноз',
     'modal.day.today': 'Сегодня',
@@ -900,6 +902,18 @@ const I18N = {
     'condDesc.day2': 'Циклон уходит, остаточная облачность',
     'condDesc.day3': 'Антициклон, солнечный день',
     'condDesc.day4': 'Слабый ветер, переменная облачность',
+    'condDesc.clear': 'Ясный солнечный день',
+    'condDesc.clearWindy': 'Ясно, ветрено',
+    'condDesc.partlyCloudy': 'Малая облачность',
+    'condDesc.cloudy': 'Сплошная облачность',
+    'condDesc.overcast': 'Пасмурно весь день',
+    'condDesc.fog': 'Туманно, плохая видимость',
+    'condDesc.rainLight': 'Возможны небольшие осадки',
+    'condDesc.rain': 'Дождь, временами интенсивный',
+    'condDesc.heavyRain': 'Ливневые осадки, ожидается значительное количество воды',
+    'condDesc.snow': 'Снегопад',
+    'condDesc.thunderstorm': 'Гроза, возможен ливень с грозовыми разрядами',
+    'condDesc.windAddition': ', сильный {dir} ветер',
     'uvLabel.low': 'Низкий',
     'uvLabel.moderate': 'Умеренный',
     'uvLabel.high': 'Высокий',
@@ -940,10 +954,12 @@ const I18N = {
     'header.editHint': 'Натисніть щоб змінити',
     'header.sourceLabel': 'Джерело даних',
     'hero.label': 'Зараз',
-    'hero.feels': 'Відчувається як {feels} · Захід був о {sunset}',
-    'hero.feelsNoSunset': 'Відчувається як {feels}',
+    'hero.feels': 'Відчувається як {feels}',
+    'hero.feelsBeforeSunrise': 'Відчувається як {feels} · Схід о {sunrise}',
+    'hero.feelsBeforeSunset':  'Відчувається як {feels} · Захід о {sunset}',
+    'hero.feelsAfterSunset':   'Відчувається як {feels} · Захід був о {sunset}',
     'hero.sourceNote': 'За даними {name}',
-    'hero.sourceAvg': 'усереднення 10 моделей',
+    'hero.sourceAvg': 'усереднення 7 моделей',
     'metric.wind': 'Вітер',
     'metric.rain': 'Опади',
     'metric.pressure': 'Тиск',
@@ -976,7 +992,7 @@ const I18N = {
     'sources.avgShort': 'Середнє по 7 моделях',
     'sources.dividerOr': 'або конкретне джерело',
     'footer.refresh': 'Оновити',
-    'footer.updated': 'оновлено: {time} UTC+3 · v0.5-i18n',
+    'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
     'modal.day.forecast': 'Прогноз',
     'modal.day.today': 'Сьогодні',
@@ -1053,6 +1069,18 @@ const I18N = {
     'condDesc.day2': 'Циклон відходить, залишкова хмарність',
     'condDesc.day3': 'Антициклон, сонячний день',
     'condDesc.day4': 'Слабкий вітер, мінлива хмарність',
+    'condDesc.clear': 'Ясний сонячний день',
+    'condDesc.clearWindy': 'Ясно, вітряно',
+    'condDesc.partlyCloudy': 'Невелика хмарність',
+    'condDesc.cloudy': 'Суцільна хмарність',
+    'condDesc.overcast': 'Похмуро увесь день',
+    'condDesc.fog': 'Туманно, погана видимість',
+    'condDesc.rainLight': 'Можливі невеликі опади',
+    'condDesc.rain': 'Дощ, часом інтенсивний',
+    'condDesc.heavyRain': 'Зливові опади, очікується значна кількість води',
+    'condDesc.snow': 'Снігопад',
+    'condDesc.thunderstorm': 'Гроза, можлива злива з блискавками',
+    'condDesc.windAddition': ', сильний {dir} вітер',
     'uvLabel.low': 'Низький',
     'uvLabel.moderate': 'Помірний',
     'uvLabel.high': 'Високий',
@@ -1093,10 +1121,12 @@ const I18N = {
     'header.editHint': 'Click to change',
     'header.sourceLabel': 'Data source',
     'hero.label': 'Now',
-    'hero.feels': 'Feels like {feels} · Sunset was at {sunset}',
-    'hero.feelsNoSunset': 'Feels like {feels}',
+    'hero.feels': 'Feels like {feels}',
+    'hero.feelsBeforeSunrise': 'Feels like {feels} · Sunrise at {sunrise}',
+    'hero.feelsBeforeSunset':  'Feels like {feels} · Sunset at {sunset}',
+    'hero.feelsAfterSunset':   'Feels like {feels} · Sunset was at {sunset}',
     'hero.sourceNote': 'Source: {name}',
-    'hero.sourceAvg': 'average of 10 models',
+    'hero.sourceAvg': 'average of 7 models',
     'metric.wind': 'Wind',
     'metric.rain': 'Precipitation',
     'metric.pressure': 'Pressure',
@@ -1129,7 +1159,7 @@ const I18N = {
     'sources.avgShort': 'Average of 7 models',
     'sources.dividerOr': 'or a specific source',
     'footer.refresh': 'Refresh',
-    'footer.updated': 'updated: {time} UTC+3 · v0.5-i18n',
+    'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
     'modal.day.forecast': 'Forecast',
     'modal.day.today': 'Today',
@@ -1206,6 +1236,18 @@ const I18N = {
     'condDesc.day2': 'Cyclone leaving, residual clouds',
     'condDesc.day3': 'Anticyclone, sunny day',
     'condDesc.day4': 'Light wind, variable clouds',
+    'condDesc.clear': 'Clear sunny day',
+    'condDesc.clearWindy': 'Clear and windy',
+    'condDesc.partlyCloudy': 'Partly cloudy',
+    'condDesc.cloudy': 'Mostly cloudy',
+    'condDesc.overcast': 'Overcast all day',
+    'condDesc.fog': 'Foggy, poor visibility',
+    'condDesc.rainLight': 'Light precipitation possible',
+    'condDesc.rain': 'Rain, occasionally intense',
+    'condDesc.heavyRain': 'Heavy showers, significant rainfall expected',
+    'condDesc.snow': 'Snowfall',
+    'condDesc.thunderstorm': 'Thunderstorm with lightning possible',
+    'condDesc.windAddition': ', strong {dir} wind',
     'uvLabel.low': 'Low',
     'uvLabel.moderate': 'Moderate',
     'uvLabel.high': 'High',
@@ -1992,10 +2034,23 @@ function renderHeroAndMetrics(forecast) {
   document.getElementById('heroTempUnit').textContent = unitTemp();
   document.getElementById('heroCondition').textContent = localizeCondLabel(today.condLabel);
 
-  const feelsC = nowH.t - Math.max(0, nowH.w - 2) * 0.5;
+  // Feels-like: предпочитаем apparent_temperature из API, fallback на грубую формулу
+  const feelsC = (nowH.feels != null) ? nowH.feels : (nowH.t - Math.max(0, nowH.w - 2) * 0.5);
   const feelsStr = `<strong>${fmtTemp(feelsC)}</strong>`;
+  // Выбираем строку в зависимости от времени дня (до восхода / днём / после заката)
+  const hhmmToMin = (s) => { if (!s || typeof s !== 'string') return null; const [h,m] = s.split(':').map(Number); return (h|0)*60 + (m|0); };
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const riseMin = hhmmToMin(today.sunrise);
+  const setMin  = hhmmToMin(today.sunset);
+  let feelsKey = 'hero.feels';
+  if (riseMin != null && setMin != null) {
+    if (nowMin < riseMin)      feelsKey = 'hero.feelsBeforeSunrise';
+    else if (nowMin > setMin)  feelsKey = 'hero.feelsAfterSunset';
+    else                       feelsKey = 'hero.feelsBeforeSunset';
+  }
   document.getElementById('heroFeelsLine').innerHTML =
-    t('hero.feels', { feels: feelsStr, sunset: today.sunset });
+    t(feelsKey, { feels: feelsStr, sunrise: today.sunrise, sunset: today.sunset });
 
   const srcName = `<span class="src-name">${localizeSourceFullName(s)}</span>`;
   document.getElementById('heroSourceNote').innerHTML =
@@ -2004,7 +2059,7 @@ function renderHeroAndMetrics(forecast) {
   document.getElementById('metricWind').innerHTML =
     `${fmtWind(today.wind, {withUnit:false})}<span>${unitWind()}</span>`;
   document.getElementById('metricWindSub').textContent =
-    t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust, {withUnit:false}) });
+    t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust) });
 
   document.getElementById('metricRain').innerHTML = `${today.precip}<span>%</span>`;
   const mm = Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
@@ -2013,10 +2068,10 @@ function renderHeroAndMetrics(forecast) {
 
   document.getElementById('metricPressure').innerHTML =
     `${fmtPressure(today.pressure, {withUnit:false})}<span>${unitPressure()}</span>`;
-  const pKey = today.pressure < 755 ? 'metric.pressure.falling'
-             : today.pressure > 760 ? 'metric.pressure.rising'
-             : 'metric.pressure.stable';
-  document.getElementById('metricPressureSub').textContent = t(pKey);
+  // Тренд берём из API (изменение давления за 6 часов), fallback на абсолютное значение
+  const trend = today.pressureTrend
+    || (today.pressure < 755 ? 'falling' : today.pressure > 760 ? 'rising' : 'stable');
+  document.getElementById('metricPressureSub').textContent = t('metric.pressure.' + trend);
 
   document.getElementById('metricHumidity').innerHTML = `${today.humidity}<span>%</span>`;
   document.getElementById('metricHumiditySub').textContent =
@@ -2187,7 +2242,7 @@ function openModal(dayId) {
           <span class="modal-lo">${fmtTempNum(d.min)}°</span>
         </div>
         <div class="modal-cond">${localizeCondLabel(d.condLabel)}</div>
-        <div class="modal-cond-sub">${localizeCondDescByDayId(d.id)}</div>
+        <div class="modal-cond-sub">${d.condDescKey ? t(d.condDescKey) : localizeCondDescByDayId(d.id)}</div>
       </div>
     </div>
 
@@ -2348,14 +2403,36 @@ function renderStaticAstro() {
 }
 
 function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
   const el = document.getElementById('clockLine');
-  if (el) el.textContent = t('footer.updated', { time: `${h}:${m}:${s}` });
+  if (!el) return;
+  // Время реального успешного fetch (или системное время, пока не было fetch)
+  const ts = API_STATE.lastSuccess || new Date();
+  const h = String(ts.getHours()).padStart(2,'0');
+  const m = String(ts.getMinutes()).padStart(2,'0');
+  el.textContent = t('footer.updated', { time: `${h}:${m}` });
 }
-setInterval(updateClock, 1000);
+setInterval(updateClock, 30_000);
+
+// Дата + время в шапке. Обновляется при applyAll() и каждую минуту.
+function updateDateLine() {
+  const el = document.getElementById('dateLine');
+  if (!el) return;
+  const now = new Date();
+  const dayNamesFullRu = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+  const dayRu = dayNamesFullRu[now.getDay()];
+  const dayFull = localizeDayFull(dayRu);
+  const dateStr = formatDateLocale(formatDateDDMMYYYY(now));
+  const hh = String(now.getHours()).padStart(2, '0');
+  const mm = String(now.getMinutes()).padStart(2, '0');
+  // UTC offset (например, "UTC+3" для Киева)
+  const offsetMin = -now.getTimezoneOffset();
+  const sign = offsetMin >= 0 ? '+' : '-';
+  const offsetH = Math.abs(Math.trunc(offsetMin / 60));
+  const offsetMM = Math.abs(offsetMin % 60);
+  const utcStr = offsetMM === 0 ? `UTC${sign}${offsetH}` : `UTC${sign}${offsetH}:${String(offsetMM).padStart(2,'0')}`;
+  el.textContent = `${dayFull}, ${dateStr} · ${hh}:${mm} ${utcStr}`;
+}
+setInterval(updateDateLine, 60_000);
 
 /* ============================================
    LOCATION / CITY PICKER
@@ -2738,7 +2815,7 @@ function updateChip() {
   document.getElementById('chipWind').textContent = unitWind();
 }
 
-// Перерисовать ВСЁ: переводы DOM + чип + активные кнопки + локация + астро + погода + часы + открытые модалки
+// Перерисовать ВСЁ: переводы DOM + чип + активные кнопки + локация + астро + погода + часы + дата + открытые модалки
 function applyAll() {
   applyTranslations();
   updateChip();
@@ -2748,6 +2825,7 @@ function applyAll() {
   renderSourceButtons();
   renderAll();
   updateClock();
+  updateDateLine();
   if (modal.classList.contains('open')) closeModal();
   if (cityModal.classList.contains('open')) {
     const q = citySearchInput.value;
@@ -2807,6 +2885,24 @@ function codeToCondLabelRu(code) {
   if (code >= 85 && code <= 86) return 'Снег';
   if (code >= 95 && code <= 99) return 'Гроза';
   return 'Облачно';
+}
+
+// WMO weather_code → i18n-ключ описания (condDesc.*).
+// Учитывается сила ветра: если > 7 м/с — добавим уточнение про сильный ветер при render.
+function codeToCondDescKey(code, windMs) {
+  if (code == null) return 'condDesc.cloudy';
+  if (code === 0) return (windMs && windMs >= 7) ? 'condDesc.clearWindy' : 'condDesc.clear';
+  if (code <= 2) return 'condDesc.partlyCloudy';
+  if (code === 3) return 'condDesc.cloudy';
+  if (code === 45 || code === 48) return 'condDesc.fog';
+  if (code >= 51 && code <= 57) return 'condDesc.rainLight';
+  if (code >= 61 && code <= 65) return 'condDesc.rain';
+  if (code >= 66 && code <= 67) return 'condDesc.rain';
+  if (code >= 71 && code <= 77) return 'condDesc.snow';
+  if (code >= 80 && code <= 82) return 'condDesc.heavyRain';
+  if (code >= 85 && code <= 86) return 'condDesc.snow';
+  if (code >= 95 && code <= 99) return 'condDesc.thunderstorm';
+  return 'condDesc.cloudy';
 }
 
 // UV-значение → русский label (совместим с UV_LABEL_TO_KEY)
@@ -2891,6 +2987,64 @@ const API_STATE = {
   lastSuccess: null,      // Date — успешного fetch
   abortController: null   // для отмены текущего запроса
 };
+
+// === Кэш прогноза (localStorage, TTL 15 минут) ===
+// Ключ зависит от координат — каждый город свой кэш.
+const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
+function forecastCacheKey(lat, lon) {
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v1`;
+}
+function loadForecastCache(lat, lon) {
+  try {
+    const raw = localStorage.getItem(forecastCacheKey(lat, lon));
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || typeof obj.timestamp !== 'number' || !obj.byModel) return null;
+    if (Date.now() - obj.timestamp > FORECAST_CACHE_TTL_MS) return null;
+    return obj;
+  } catch (e) { return null; }
+}
+function saveForecastCache(lat, lon, byModel) {
+  try {
+    localStorage.setItem(forecastCacheKey(lat, lon), JSON.stringify({ timestamp: Date.now(), byModel }));
+  } catch (e) { /* localStorage переполнен / отключён — не критично */ }
+}
+
+// Запрос к Air Quality API (отдельный домен, тот же провайдер Open-Meteo).
+// Возвращает european_aqi + pm2_5 + pm10 на 5 дней (часовые).
+// Не падает при ошибке — возвращает null, чтобы основной forecast мог отрисоваться без AQI.
+async function fetchAirQuality(lat, lon, signal = null) {
+  const params = new URLSearchParams({
+    latitude: lat.toFixed(4),
+    longitude: lon.toFixed(4),
+    hourly: 'european_aqi,pm2_5,pm10',
+    current: 'european_aqi,pm2_5,pm10',
+    timezone: 'auto',
+    forecast_days: '5'
+  });
+  const url = `https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`;
+  try {
+    const resp = await fetch(url, signal ? { signal } : {});
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (e) {
+    return null; // не критично — UI должен работать даже без AQI
+  }
+}
+
+// Из часового массива european_aqi считаем среднее за каждый из 5 дней.
+// Возвращает массив [aqiDay0, aqiDay1, ...] длиной до 5.
+function parseAqiByDay(aqiData) {
+  if (!aqiData || !aqiData.hourly || !Array.isArray(aqiData.hourly.european_aqi)) return [];
+  const arr = aqiData.hourly.european_aqi;
+  const result = [];
+  for (let i = 0; i < 5; i++) {
+    const slice = arr.slice(i * 24, i * 24 + 24).filter(v => typeof v === 'number' && !Number.isNaN(v));
+    if (slice.length === 0) { result.push(null); continue; }
+    result.push(Math.round(slice.reduce((a, b) => a + b, 0) / slice.length));
+  }
+  return result;
+}
 
 // Один запрос — все модели сразу. Поля в ответе получают суффикс _<model>, например temperature_2m_ecmwf_ifs025.
 // models = массив строк (имена моделей Open-Meteo) либо null/[] для best_match (без суффиксов).
@@ -3015,6 +3169,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   const hPr  = hPick('surface_pressure');
   const hWc  = hPick('weather_code');
   const hDp  = hPick('dew_point_2m');
+  const hAp  = hPick('apparent_temperature');
 
   // Если у модели вообще нет температуры — отбраковываем (модель не покрывает регион)
   if (!tMax || tMax.every(v => v == null)) return null;
@@ -3028,7 +3183,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
     const moon       = moonPhaseInfo(date);
     const wcDaily    = wcDay ? wcDay[i] : null;
 
-    // Часовые данные: 24 часа на день
+    // Часовые данные: 24 часа на день. apparent_temperature кладём в feels.
     const hourly = [];
     for (let k = 0; k < 24; k++) {
       const idx = i * 24 + k;
@@ -3039,7 +3194,8 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         t: hT && hT[idx] != null ? Math.round(hT[idx]) : 0,
         p: hPp && hPp[idx] != null ? Math.round(hPp[idx]) : 0,
         w: hW && hW[idx] != null ? Math.round(hW[idx]) : 0,
-        c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy'
+        c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy',
+        feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null
       });
     }
 
@@ -3048,7 +3204,21 @@ function parseOpenMeteoToForecast(data, suffix = '') {
     const noonPres = hPr  && hPr[noonIdx]  != null ? hPaToMmHg(hPr[noonIdx])    : 760;
     const noonDew  = hDp  && hDp[noonIdx]  != null ? Math.round(hDp[noonIdx])   : 10;
 
+    // Тренд давления: сравниваем полуденное значение с тем, что было 6 часов назад (или start-of-day).
+    let pressureTrend = 'stable';
+    if (hPr) {
+      const prevIdx = Math.max(0, noonIdx - 6);
+      const prev = hPr[prevIdx];
+      const cur = hPr[noonIdx];
+      if (typeof prev === 'number' && typeof cur === 'number') {
+        const delta = (cur - prev) * 0.750062; // hPa → мм рт.ст.
+        if (delta < -1) pressureTrend = 'falling';
+        else if (delta > 1) pressureTrend = 'rising';
+      }
+    }
+
     const uv = uvMax && uvMax[i] != null ? Math.round(uvMax[i]) : 0;
+    const dayWind = wMax && wMax[i] != null ? Math.round(wMax[i]) : 0;
 
     days.push({
       id: i,
@@ -3057,15 +3227,17 @@ function parseOpenMeteoToForecast(data, suffix = '') {
       date: formatDateDDMMYYYY(date),
       condition: codeToCondition(wcDaily),
       condLabel: codeToCondLabelRu(wcDaily),
+      condDescKey: codeToCondDescKey(wcDaily, dayWind),
       condDesc: '',
       max: tMax[i] != null ? Math.round(tMax[i]) : 0,
       min: tMin && tMin[i] != null ? Math.round(tMin[i]) : 0,
       precip: pMax && pMax[i] != null ? Math.round(pMax[i]) : 0,
-      wind: wMax && wMax[i] != null ? Math.round(wMax[i]) : 0,
+      wind: dayWind,
       windDir: wDir && wDir[i] != null ? degreesToCardinal(wDir[i]) : 'N',
       windGust: wGust && wGust[i] != null ? Math.round(wGust[i]) : 0,
       humidity: noonHum,
       pressure: noonPres,
+      pressureTrend,
       dewPoint: noonDew,
       sunrise: isoTimeToHHMM(sunriseIso),
       sunset:  isoTimeToHHMM(sunsetIso),
@@ -3126,22 +3298,30 @@ function computeAverageForecast(forecasts) {
     if (days.length === 0) continue;
     const first = days[0];
 
-    // Усреднение часовых
+    // Усреднение часовых (включая feels-like — apparent_temperature)
     const hourly = [];
     const numHours = Math.min(...days.map(d => d.hourly.length));
     for (let k = 0; k < numHours; k++) {
       const hours = days.map(d => d.hourly[k]).filter(Boolean);
       if (hours.length === 0) continue;
+      const feelsVals = hours.map(o => o.feels).filter(v => typeof v === 'number');
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
         p: Math.round(meanOf(hours, 'p')),
         w: Math.round(meanOf(hours, 'w')),
-        c: hours[0].c
+        c: hours[0].c,
+        feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null
       });
     }
 
     const avgUv = Math.round(meanOf(days, 'uv'));
+    const avgWind = Math.round(meanOf(days, 'wind'));
+    // Тренд давления — берём наиболее частый из моделей (mode)
+    const trendCounts = {};
+    days.forEach(d => { if (d.pressureTrend) trendCounts[d.pressureTrend] = (trendCounts[d.pressureTrend]||0) + 1; });
+    const avgTrend = Object.keys(trendCounts).sort((a,b) => trendCounts[b] - trendCounts[a])[0] || 'stable';
+
     result.push({
       id: first.id,
       name: first.name,
@@ -3149,15 +3329,17 @@ function computeAverageForecast(forecasts) {
       date: first.date,
       condition: first.condition,
       condLabel: first.condLabel,
+      condDescKey: codeToCondDescKey(null, avgWind) === 'condDesc.cloudy' ? first.condDescKey : first.condDescKey,
       condDesc: first.condDesc,
       max: Math.round(meanOf(days, 'max')),
       min: Math.round(meanOf(days, 'min')),
       precip: Math.round(meanOf(days, 'precip')),
-      wind: Math.round(meanOf(days, 'wind')),
+      wind: avgWind,
       windDir: first.windDir,
       windGust: Math.round(meanOf(days, 'windGust')),
       humidity: Math.round(meanOf(days, 'humidity')),
       pressure: Math.round(meanOf(days, 'pressure')),
+      pressureTrend: avgTrend,
       dewPoint: Math.round(meanOf(days, 'dewPoint')),
       sunrise: first.sunrise,
       sunset: first.sunset,
@@ -3208,26 +3390,64 @@ function hideLoader() {
 }
 
 // === Главная функция обновления прогноза ===
-async function refreshForecast() {
+// force=true пропускает кэш (для кнопки «Обновить»).
+async function refreshForecast(force = false) {
   if (API_STATE.loading) return;
   if (!currentLocation || typeof currentLocation.lat !== 'number' || typeof currentLocation.lon !== 'number') return;
+
+  // Текущий час — обязательно до рендера. Раньше обновлялся только в сетевой ветке,
+  // из-за чего после кэша hero показывал данные на 23:00 (захардкоженное значение).
+  NOW_HOUR = new Date().getHours();
+
+  // Попытка отдать из кэша (мгновенно, без сети)
+  if (!force) {
+    const cached = loadForecastCache(currentLocation.lat, currentLocation.lon);
+    if (cached) {
+      ACTIVE_FORECAST_BY_MODEL = cached.byModel;
+      API_STATE.lastSuccess = new Date(cached.timestamp);
+      renderStaticAstro();
+      renderAll();
+      updateClock();
+      return; // кэш свежий — не делаем сетевой запрос
+    }
+  }
+
   API_STATE.loading = true;
   hideApiError();
   showLoader();
-  NOW_HOUR = new Date().getHours();
 
   // Список реальных моделей Open-Meteo, для которых будем запрашивать данные.
   const modelIds = SOURCES.filter(s => s.model).map(s => s.model);
 
   try {
-    const data = await fetchOpenMeteo(currentLocation.lat, currentLocation.lon, modelIds);
+    // Параллельно запрашиваем основной прогноз и качество воздуха. AQI не критичен — если упадёт, продолжаем.
+    const [data, aqiData] = await Promise.all([
+      fetchOpenMeteo(currentLocation.lat, currentLocation.lon, modelIds),
+      fetchAirQuality(currentLocation.lat, currentLocation.lon)
+    ]);
     const byModel = parseAllModels(data, SOURCES);
     if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
     }
+
+    // Подмешиваем реальный AQI в каждый день каждой модели
+    const aqiByDay = parseAqiByDay(aqiData);
+    if (aqiByDay.length > 0) {
+      for (const sourceId of Object.keys(byModel)) {
+        byModel[sourceId].forEach((day, i) => {
+          if (aqiByDay[i] != null) {
+            day.aqi = aqiByDay[i];
+            day.aqiLabel = aqiLabelFromValue(aqiByDay[i]);
+          }
+        });
+      }
+    }
+
     ACTIVE_FORECAST_BY_MODEL = byModel;
     API_STATE.lastSuccess = new Date();
     API_STATE.lastError = null;
+    // Кэш в localStorage — мгновенный показ при следующем открытии в течение 15 минут
+    saveForecastCache(currentLocation.lat, currentLocation.lon, byModel);
     renderStaticAstro();
     renderAll();
     updateClock();
@@ -3265,13 +3485,13 @@ loadInitialLocation();
 setupSegmentedHandlers();
 applyAll();
 
-// Refresh-кнопка в footer — вручную перезапросить прогноз
+// Refresh-кнопка в footer — принудительно обновить прогноз (пропуская кэш)
 const btnRefresh = document.getElementById('btnRefresh');
 if (btnRefresh) {
   btnRefresh.addEventListener('click', () => {
     btnRefresh.style.transform = 'scale(0.94)';
     setTimeout(() => { btnRefresh.style.transform = ''; }, 150);
-    refreshForecast();
+    refreshForecast(true);
   });
 }
 
