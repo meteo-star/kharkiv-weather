@@ -447,6 +447,57 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .api-error-banner .err-retry{width:100%;margin-top:4px;padding:9px}
 }
 
+/* ============================================
+   ASTRO / PHOTO CARD (В1)
+   ============================================ */
+.astro-photo{padding:22px;margin-bottom:18px}
+.astro-photo .card-title{margin-bottom:14px}
+.astro-photo h2{font-size:14px;font-weight:600;color:#fff;letter-spacing:-0.005em;display:flex;align-items:center;gap:8px}
+.astro-photo h2 .ap-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(255,200,80,0.5))}
+.astro-photo .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px}
+
+.astro-photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.ap-cell{padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;display:flex;flex-direction:column;gap:8px;transition:all 0.25s;position:relative;overflow:hidden}
+.ap-cell:hover{border-color:rgba(255,200,80,0.25);transform:translateY(-1px)}
+.ap-cell::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;background:radial-gradient(circle at top right,var(--ap-glow,rgba(255,200,80,0.2)) 0%,transparent 70%);pointer-events:none;opacity:0.6}
+.ap-cell.golden{--ap-glow:rgba(255,200,80,0.3)}
+.ap-cell.blue{--ap-glow:rgba(96,165,250,0.3)}
+.ap-cell.sunset{--ap-glow:rgba(255,120,120,0.3)}
+.ap-cell.stars{--ap-glow:rgba(167,139,250,0.3)}
+
+.ap-cell .ap-head{display:flex;align-items:center;gap:8px}
+.ap-cell .ap-icon{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:7px;background:rgba(255,255,255,0.05)}
+.ap-cell.golden .ap-icon{background:rgba(255,200,80,0.12);box-shadow:inset 0 0 8px rgba(255,200,80,0.2)}
+.ap-cell.blue .ap-icon{background:rgba(96,165,250,0.12);box-shadow:inset 0 0 8px rgba(96,165,250,0.2)}
+.ap-cell.sunset .ap-icon{background:rgba(255,120,120,0.12);box-shadow:inset 0 0 8px rgba(255,120,120,0.2)}
+.ap-cell.stars .ap-icon{background:rgba(167,139,250,0.12);box-shadow:inset 0 0 8px rgba(167,139,250,0.2)}
+.ap-cell .ap-label{font-size:10px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:600}
+
+.ap-cell .ap-times{display:flex;flex-direction:column;gap:3px;font-feature-settings:'tnum';font-family:'JetBrains Mono',monospace}
+.ap-cell .ap-time-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.ap-cell .ap-time-row .lbl{font-size:10px;color:rgba(232,240,255,0.45);text-transform:uppercase;letter-spacing:0.06em}
+.ap-cell .ap-time-row .val{font-size:13px;color:#fff;font-weight:600}
+
+.ap-cell .ap-status{font-size:14px;font-weight:600;color:#fff;letter-spacing:-0.01em}
+.ap-cell .ap-status.dramatic{color:#fb923c}
+.ap-cell .ap-status.normal{color:#facc15}
+.ap-cell .ap-status.dull{color:rgba(232,240,255,0.55)}
+.ap-cell .ap-status.excellent{color:#a78bfa}
+.ap-cell .ap-status.good{color:#5eead4}
+.ap-cell .ap-status.moderate{color:#facc15}
+.ap-cell .ap-status.poor{color:#fb923c}
+.ap-cell .ap-status.veryPoor{color:rgba(232,240,255,0.55)}
+.ap-cell .ap-stars{display:flex;gap:2px;font-size:13px;letter-spacing:-1px}
+.ap-cell .ap-stars .s{filter:drop-shadow(0 0 4px rgba(167,139,250,0.6))}
+.ap-cell .ap-stars .s.off{opacity:0.18;filter:none}
+.ap-cell .ap-hint{font-size:10px;color:rgba(232,240,255,0.45);font-feature-settings:'tnum'}
+
+@media (max-width: 640px){
+  .astro-photo{padding:18px}
+  .astro-photo-grid{grid-template-columns:1fr;gap:8px}
+  .ap-cell{padding:12px}
+}
+
 </style>
 </head>
 <body>
@@ -591,6 +642,42 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       <div class="aqi-status" id="aqiStatus" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)">Хорошее</div>
       <div class="aqi-bar"><div class="aqi-marker" id="aqiMarker" style="left:8.4%"></div></div>
       <div class="aqi-scale"><span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300+</span></div>
+    </div>
+  </div>
+
+  <div class="glass astro-photo" id="astroPhotoCard">
+    <div class="card-title">
+      <div>
+        <h2><span class="ap-emoji">📸</span><span data-i18n="astro.photoTitle">Для фотографа и астронома</span></h2>
+        <div class="sub" data-i18n="astro.photoSub">Золотой / синий час, качество заката, видимость звёзд</div>
+      </div>
+    </div>
+    <div class="astro-photo-grid">
+      <div class="ap-cell golden">
+        <div class="ap-head"><span class="ap-icon">🌅</span><span class="ap-label" data-i18n="astro.goldenHour">Золотой час</span></div>
+        <div class="ap-times">
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.morning">Утром</span><span class="val" id="apGoldenMorning">—</span></div>
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.evening">Вечером</span><span class="val" id="apGoldenEvening">—</span></div>
+        </div>
+      </div>
+      <div class="ap-cell blue">
+        <div class="ap-head"><span class="ap-icon">🌆</span><span class="ap-label" data-i18n="astro.blueHour">Синий час</span></div>
+        <div class="ap-times">
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.morning">Утром</span><span class="val" id="apBlueMorning">—</span></div>
+          <div class="ap-time-row"><span class="lbl" data-i18n="astro.evening">Вечером</span><span class="val" id="apBlueEvening">—</span></div>
+        </div>
+      </div>
+      <div class="ap-cell sunset">
+        <div class="ap-head"><span class="ap-icon">🌇</span><span class="ap-label" data-i18n="astro.sunsetQuality">Закат сегодня</span></div>
+        <div class="ap-status" id="apSunsetStatus">—</div>
+        <div class="ap-hint" id="apSunsetHint">—</div>
+      </div>
+      <div class="ap-cell stars">
+        <div class="ap-head"><span class="ap-icon">⭐</span><span class="ap-label" data-i18n="astro.stars">Видимость звёзд</span></div>
+        <div class="ap-stars" id="apStarsRating"></div>
+        <div class="ap-status" id="apStarsStatus">—</div>
+        <div class="ap-hint" id="apStarsHint">—</div>
+      </div>
     </div>
   </div>
 
@@ -813,6 +900,24 @@ const I18N = {
     'astro.uv': 'УФ-индекс',
     'astro.aqi': 'Качество воздуха',
     'astro.dayLen': '{h}ч {m}мин',
+    'astro.photoTitle': 'Для фотографа и астронома',
+    'astro.photoSub': 'Золотой / синий час, качество заката, видимость звёзд',
+    'astro.goldenHour': 'Золотой час',
+    'astro.blueHour': 'Синий час',
+    'astro.morning': 'Утром',
+    'astro.evening': 'Вечером',
+    'astro.sunsetQuality': 'Закат сегодня',
+    'astro.sunset.dramatic': 'Эффектный',
+    'astro.sunset.normal': 'Обычный',
+    'astro.sunset.dull': 'Тусклый',
+    'astro.sunset.cloudHint': 'облачность {cl}%',
+    'astro.stars': 'Видимость звёзд',
+    'astro.stars.excellent': 'Отлично',
+    'astro.stars.good': 'Хорошо',
+    'astro.stars.moderate': 'Средне',
+    'astro.stars.poor': 'Плохо',
+    'astro.stars.veryPoor': 'Очень плохо',
+    'astro.stars.hint': 'облачность {cl}% · луна {moon}%',
     'chart.title': 'Сегодня · почасовой прогноз',
     'chart.sub.avg': 'Усреднено по 10 моделям',
     'chart.sub.named': 'Прогноз {name}',
@@ -980,6 +1085,24 @@ const I18N = {
     'astro.uv': 'УФ-індекс',
     'astro.aqi': 'Якість повітря',
     'astro.dayLen': '{h}год {m}хв',
+    'astro.photoTitle': 'Для фотографа та астронома',
+    'astro.photoSub': 'Золота / синя година, якість заходу, видимість зірок',
+    'astro.goldenHour': 'Золота година',
+    'astro.blueHour': 'Синя година',
+    'astro.morning': 'Вранці',
+    'astro.evening': 'Ввечері',
+    'astro.sunsetQuality': 'Захід сьогодні',
+    'astro.sunset.dramatic': 'Ефектний',
+    'astro.sunset.normal': 'Звичайний',
+    'astro.sunset.dull': 'Тьмяний',
+    'astro.sunset.cloudHint': 'хмарність {cl}%',
+    'astro.stars': 'Видимість зірок',
+    'astro.stars.excellent': 'Відмінно',
+    'astro.stars.good': 'Добре',
+    'astro.stars.moderate': 'Середньо',
+    'astro.stars.poor': 'Погано',
+    'astro.stars.veryPoor': 'Дуже погано',
+    'astro.stars.hint': 'хмарність {cl}% · місяць {moon}%',
     'chart.title': 'Сьогодні · погодинний прогноз',
     'chart.sub.avg': 'Усереднено по 10 моделях',
     'chart.sub.named': 'Прогноз {name}',
@@ -1147,6 +1270,24 @@ const I18N = {
     'astro.uv': 'UV index',
     'astro.aqi': 'Air quality',
     'astro.dayLen': '{h}h {m}min',
+    'astro.photoTitle': 'For photo & stargazing',
+    'astro.photoSub': 'Golden / blue hour, sunset quality, star visibility',
+    'astro.goldenHour': 'Golden hour',
+    'astro.blueHour': 'Blue hour',
+    'astro.morning': 'Morning',
+    'astro.evening': 'Evening',
+    'astro.sunsetQuality': 'Sunset today',
+    'astro.sunset.dramatic': 'Dramatic',
+    'astro.sunset.normal': 'Normal',
+    'astro.sunset.dull': 'Dull',
+    'astro.sunset.cloudHint': 'clouds {cl}%',
+    'astro.stars': 'Star visibility',
+    'astro.stars.excellent': 'Excellent',
+    'astro.stars.good': 'Good',
+    'astro.stars.moderate': 'Moderate',
+    'astro.stars.poor': 'Poor',
+    'astro.stars.veryPoor': 'Very poor',
+    'astro.stars.hint': 'clouds {cl}% · moon {moon}%',
     'chart.title': 'Today · hourly forecast',
     'chart.sub.avg': 'Averaged across 10 models',
     'chart.sub.named': 'Forecast by {name}',
@@ -2373,6 +2514,109 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.cl
    INIT
    ============================================ */
 
+/* ============================================
+   ASTRO / PHOTO MODE (Фаза В1)
+   Golden hour, Blue hour, качество заката, видимость звёзд.
+   Все расчёты — из текущих forecast-данных (sunrise/sunset + hourly.cl + moonIllum).
+   ============================================ */
+
+// "HH:MM" → минуты от полуночи. null если неверный.
+function hhmmToMinutes(s) {
+  if (!s || typeof s !== 'string' || !/^\d{2}:\d{2}$/.test(s)) return null;
+  const [h, m] = s.split(':').map(Number);
+  return h * 60 + m;
+}
+// Минуты от полуночи → "HH:MM"
+function minutesToHHMM(m) {
+  const norm = ((m % (24*60)) + (24*60)) % (24*60);
+  const h = Math.floor(norm / 60);
+  const mm = norm % 60;
+  return `${String(h).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+}
+
+function renderAstroPhoto() {
+  const fc = getActiveForecast();
+  if (!fc || !fc[0]) return;
+  const today = fc[0];
+  const riseMin = hhmmToMinutes(today.sunrise);
+  const setMin  = hhmmToMinutes(today.sunset);
+
+  // === Golden hour: -15 / +60 у восхода и -60 / +15 у заката ===
+  if (riseMin != null) {
+    document.getElementById('apGoldenMorning').textContent =
+      `${minutesToHHMM(riseMin - 15)} — ${minutesToHHMM(riseMin + 60)}`;
+  }
+  if (setMin != null) {
+    document.getElementById('apGoldenEvening').textContent =
+      `${minutesToHHMM(setMin - 60)} — ${minutesToHHMM(setMin + 15)}`;
+  }
+
+  // === Blue hour: -30 у восхода (утром) и +30 у заката (вечером) ===
+  if (riseMin != null) {
+    document.getElementById('apBlueMorning').textContent =
+      `${minutesToHHMM(riseMin - 30)} — ${minutesToHHMM(riseMin)}`;
+  }
+  if (setMin != null) {
+    document.getElementById('apBlueEvening').textContent =
+      `${minutesToHHMM(setMin)} — ${minutesToHHMM(setMin + 30)}`;
+  }
+
+  // === Качество заката: облачность за час до заката ===
+  // Эффектный закат — когда есть облака (30-70%), которые подсвечиваются солнцем.
+  let sunsetStatus = 'normal';
+  let sunsetCloudPct = null;
+  if (setMin != null && Array.isArray(today.hourly)) {
+    const targetHour = Math.floor((setMin - 30) / 60);
+    const slot = today.hourly.find(h => h.h === targetHour) || today.hourly[Math.max(0, Math.min(23, targetHour))];
+    if (slot && typeof slot.cl === 'number') {
+      sunsetCloudPct = slot.cl;
+      if (slot.cl >= 30 && slot.cl <= 70) sunsetStatus = 'dramatic';
+      else if (slot.cl > 70) sunsetStatus = 'dull';
+      else sunsetStatus = 'normal';
+    }
+  }
+  const sunsetEl = document.getElementById('apSunsetStatus');
+  const sunsetHintEl = document.getElementById('apSunsetHint');
+  sunsetEl.className = 'ap-status ' + sunsetStatus;
+  sunsetEl.textContent = t('astro.sunset.' + sunsetStatus);
+  sunsetHintEl.textContent = sunsetCloudPct != null
+    ? t('astro.sunset.cloudHint', { cl: sunsetCloudPct })
+    : '';
+
+  // === Видимость звёзд: средняя облачность ночью (00-04) и фаза луны ===
+  let nightCloud = null;
+  if (Array.isArray(today.hourly)) {
+    const nightSlots = today.hourly.filter(h => h.h >= 0 && h.h <= 4 && typeof h.cl === 'number');
+    if (nightSlots.length > 0) {
+      nightCloud = Math.round(nightSlots.reduce((a, b) => a + b.cl, 0) / nightSlots.length);
+    }
+  }
+  const moonIllum = typeof today.moonIllum === 'number' ? today.moonIllum : 50;
+  // starScore от 0 до 1: ясное небо и тёмная луна = 1, облачно или полнолуние = 0
+  const cloudFactor = nightCloud != null ? (1 - nightCloud / 100) : 0.5;
+  const moonFactor = 1 - moonIllum / 100;
+  const starScore = cloudFactor * (0.4 + 0.6 * moonFactor); // луна влияет умеренно
+  let starStatus, starCount;
+  if (starScore > 0.7)      { starStatus = 'excellent'; starCount = 5; }
+  else if (starScore > 0.5) { starStatus = 'good';      starCount = 4; }
+  else if (starScore > 0.3) { starStatus = 'moderate';  starCount = 3; }
+  else if (starScore > 0.15){ starStatus = 'poor';      starCount = 2; }
+  else                      { starStatus = 'veryPoor';  starCount = 1; }
+  const starsEl = document.getElementById('apStarsRating');
+  starsEl.innerHTML = '';
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement('span');
+    s.className = 's' + (i > starCount ? ' off' : '');
+    s.textContent = '★';
+    starsEl.appendChild(s);
+  }
+  const starsStatusEl = document.getElementById('apStarsStatus');
+  const starsHintEl = document.getElementById('apStarsHint');
+  starsStatusEl.className = 'ap-status ' + starStatus;
+  starsStatusEl.textContent = t('astro.stars.' + starStatus);
+  starsHintEl.textContent = t('astro.stars.hint', { cl: nightCloud != null ? nightCloud : '?', moon: moonIllum });
+}
+
 // Astro / UV / AQI плашки в шапке — статика по getActiveForecast()[0] (avg или fallback BASELINE).
 // Вызывается из applyAll() при загрузке и при смене языка.
 function renderStaticAstro() {
@@ -2832,6 +3076,7 @@ function applyAll() {
   refreshSegmentedActive();
   renderLocationHeader();
   renderStaticAstro();
+  renderAstroPhoto();
   renderSourceButtons();
   renderAll();
   updateClock();
@@ -3002,7 +3247,8 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v1`;
+  // v2: после В1 в hourly добавилось поле cl (cloud_cover). Версию подняли, чтобы старый кэш игнорировался.
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v2`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -3011,6 +3257,10 @@ function loadForecastCache(lat, lon) {
     const obj = JSON.parse(raw);
     if (!obj || typeof obj.timestamp !== 'number' || !obj.byModel) return null;
     if (Date.now() - obj.timestamp > FORECAST_CACHE_TTL_MS) return null;
+    // Структурная валидация: в hourly должно быть поле cl (cloud_cover, добавлено в В1).
+    // Если его нет — кэш создан более старой версией кода, игнорируем.
+    const avg = obj.byModel.avg;
+    if (avg && avg[0] && avg[0].hourly && avg[0].hourly[0] && avg[0].hourly[0].cl === undefined) return null;
     return obj;
   } catch (e) { return null; }
 }
@@ -3080,7 +3330,8 @@ async function fetchOpenMeteo(lat, lon, models = null) {
       'surface_pressure',
       'weather_code',
       'dew_point_2m',
-      'apparent_temperature'
+      'apparent_temperature',
+      'cloud_cover'
     ].join(','),
     daily: [
       'temperature_2m_max',
@@ -3180,6 +3431,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   const hWc  = hPick('weather_code');
   const hDp  = hPick('dew_point_2m');
   const hAp  = hPick('apparent_temperature');
+  const hCl  = hPick('cloud_cover');
 
   // Если у модели вообще нет температуры — отбраковываем (модель не покрывает регион)
   if (!tMax || tMax.every(v => v == null)) return null;
@@ -3205,7 +3457,8 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         p: hPp && hPp[idx] != null ? Math.round(hPp[idx]) : 0,
         w: hW && hW[idx] != null ? Math.round(hW[idx]) : 0,
         c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy',
-        feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null
+        feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null,
+        cl: hCl && hCl[idx] != null ? Math.round(hCl[idx]) : null
       });
     }
 
@@ -3317,13 +3570,15 @@ function computeAverageForecast(forecasts) {
       const hours = days.map(d => d.hourly[k]).filter(Boolean);
       if (hours.length === 0) continue;
       const feelsVals = hours.map(o => o.feels).filter(v => typeof v === 'number');
+      const clVals = hours.map(o => o.cl).filter(v => typeof v === 'number');
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
         p: Math.round(meanOf(hours, 'p')),
         w: Math.round(meanOf(hours, 'w')),
         c: hours[0].c,
-        feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null
+        feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
+        cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null
       });
     }
 
@@ -3420,6 +3675,7 @@ async function refreshForecast(force = false) {
       ACTIVE_FORECAST_BY_MODEL = cached.byModel;
       API_STATE.lastSuccess = new Date(cached.timestamp);
       renderStaticAstro();
+      renderAstroPhoto();
       renderAll();
       updateClock();
       return; // кэш свежий — не делаем сетевой запрос
@@ -3473,6 +3729,7 @@ async function refreshForecast(force = false) {
     if (Object.keys(ACTIVE_FORECAST_BY_MODEL).length === 0 && !API_STATE.lastSuccess) {
       // Не получили ничего реального — оставляем пустой map, getForecast вернёт BASELINE
       renderStaticAstro();
+      renderAstroPhoto();
       renderAll();
     }
   } finally {
