@@ -820,7 +820,7 @@ const I18N = {
     'sources.sub': 'Выбери источник или используй среднее по всем 10 моделям',
     'sources.avgTitle': 'Среднее по всем сервисам',
     'sources.avgSub': 'Агрегация 10 моделей · ансамблевый прогноз',
-    'sources.avgShort': 'Среднее по 10 источникам',
+    'sources.avgShort': 'Среднее по 7 моделям',
     'sources.dividerOr': 'или конкретный источник',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено: {time} UTC+3 · v0.5-i18n',
@@ -973,7 +973,7 @@ const I18N = {
     'sources.sub': 'Обери джерело або використовуй середнє по 10 моделях',
     'sources.avgTitle': 'Середнє по всіх сервісах',
     'sources.avgSub': 'Агрегація 10 моделей · ансамблевий прогноз',
-    'sources.avgShort': 'Середнє по 10 джерелах',
+    'sources.avgShort': 'Середнє по 7 моделях',
     'sources.dividerOr': 'або конкретне джерело',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено: {time} UTC+3 · v0.5-i18n',
@@ -1126,7 +1126,7 @@ const I18N = {
     'sources.sub': 'Pick a source or use the average of all 10 models',
     'sources.avgTitle': 'Average of all services',
     'sources.avgSub': 'Aggregation of 10 models · ensemble forecast',
-    'sources.avgShort': 'Average of 10 sources',
+    'sources.avgShort': 'Average of 7 models',
     'sources.dividerOr': 'or a specific source',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated: {time} UTC+3 · v0.5-i18n',
@@ -1821,18 +1821,16 @@ function uvGauge(value) {
    SOURCES & BIAS
    ============================================ */
 
+// 7 бесплатных глобальных моделей Open-Meteo + ансамблевое среднее
 const SOURCES = [
-  { id: 'avg', name: 'Среднее по всем сервисам', shortName: 'Среднее по 10 источникам', tag: 'AVG', color: '#00d4ff', bias: null },
-  { id: 'ecmwf', name: 'Open-Meteo ECMWF', shortName: 'Open-Meteo ECMWF', tag: 'ECMWF', color: '#60a5fa', bias: { t: 0.0, p: -5, w: 0.0, pr: 0.5, h: -2, max: 0.0, min: 0.5 } },
-  { id: 'gfs', name: 'Open-Meteo GFS', shortName: 'Open-Meteo GFS', tag: 'GFS', color: '#a78bfa', bias: { t: 0.5, p: 8, w: 0.3, pr: -1, h: 3, max: 1.0, min: 0.0 } },
-  { id: 'icon', name: 'Open-Meteo ICON', shortName: 'Open-Meteo ICON', tag: 'ICON', color: '#5eead4', bias: { t: -0.2, p: -2, w: 0.0, pr: 0.0, h: 0, max: 0.0, min: -0.5 } },
-  { id: 'metno', name: 'MET Norway', shortName: 'MET Norway', tag: 'MET-NO', color: '#fb923c', bias: { t: -0.8, p: 5, w: 0.5, pr: 0.0, h: 2, max: -1.0, min: -1.0 } },
-  { id: 'owm', name: 'OpenWeatherMap', shortName: 'OpenWeatherMap', tag: 'OWM', color: '#f472b6', bias: { t: 0.3, p: 0, w: 0.0, pr: 0.0, h: 0, max: 0.5, min: 0.0 } },
-  { id: 'wapi', name: 'WeatherAPI.com', shortName: 'WeatherAPI', tag: 'WAPI', color: '#facc15', bias: { t: 0.5, p: -3, w: 0.0, pr: 0.0, h: -1, max: 0.5, min: 0.5 } },
-  { id: 'vc', name: 'Visual Crossing', shortName: 'Visual Crossing', tag: 'VC', color: '#4ade80', bias: { t: 0.0, p: -2, w: 0.0, pr: 1, h: 0, max: 0.0, min: 0.0 } },
-  { id: 'ventusky', name: 'Ventusky', shortName: 'Ventusky', tag: 'VTSK', color: '#06b6d4', bias: { t: -0.3, p: -4, w: -0.2, pr: 0.0, h: -1, max: -0.5, min: 0.0 } },
-  { id: 'accu', name: 'AccuWeather', shortName: 'AccuWeather', tag: 'ACCU', color: '#ef4444', bias: { t: -0.5, p: 12, w: 0.5, pr: -2, h: 4, max: -1.0, min: -1.0 } },
-  { id: 'ugmc', name: 'Укргідрометцентр', shortName: 'Укргідрометцентр', tag: 'UGMC', color: '#fbbf24', bias: { t: 0.2, p: 3, w: 0.0, pr: 0.0, h: 1, max: 0.0, min: 0.0 } }
+  { id: 'avg',   name: 'Среднее по всем моделям', shortName: 'Среднее по 7 моделям', tag: 'AVG',   color: '#00d4ff', model: null },
+  { id: 'ecmwf', name: 'ECMWF IFS 0.25°',          shortName: 'ECMWF',                tag: 'ECMWF', color: '#60a5fa', model: 'ecmwf_ifs025' },
+  { id: 'gfs',   name: 'NOAA GFS',                 shortName: 'GFS',                  tag: 'GFS',   color: '#a78bfa', model: 'gfs_seamless' },
+  { id: 'icon',  name: 'DWD ICON',                 shortName: 'ICON',                 tag: 'ICON',  color: '#5eead4', model: 'icon_seamless' },
+  { id: 'gem',   name: 'CMC GEM (Канада)',         shortName: 'GEM',                  tag: 'GEM',   color: '#fb923c', model: 'gem_seamless' },
+  { id: 'jma',   name: 'JMA (Япония)',             shortName: 'JMA',                  tag: 'JMA',   color: '#facc15', model: 'jma_seamless' },
+  { id: 'mf',    name: 'Météo-France',             shortName: 'Météo-France',         tag: 'MF',    color: '#f472b6', model: 'meteofrance_seamless' },
+  { id: 'ukmo',  name: 'UK Met Office',            shortName: 'UKMO',                 tag: 'UKMO',  color: '#4ade80', model: 'ukmo_seamless' }
 ];
 
 function getSrc(id) { return SOURCES.find(s => s.id === id) || SOURCES[0]; }
@@ -1918,45 +1916,29 @@ const BASELINE = [
 // Захардкоженное значение 23 нужно только до первого applyAll() (рендер не должен упасть).
 let NOW_HOUR = 23;
 
-// ACTIVE_FORECAST — источник данных для всех render-функций.
-// До успешного fetch Open-Meteo это BASELINE (демо). После fetch — реальные данные.
-let ACTIVE_FORECAST = BASELINE;
+// ACTIVE_FORECAST_BY_MODEL — { sourceId: forecast[5days] }
+// Заполняется после fetch Open-Meteo (parseAllModels).
+// До первого успешного fetch все источники возвращают BASELINE.
+let ACTIVE_FORECAST_BY_MODEL = {};
 
 /* ============================================
    DERIVE PER-SOURCE DATA
    ============================================ */
 
 function getForecast(sourceId) {
-  const src = getSrc(sourceId);
-  if (!src.bias) return ACTIVE_FORECAST.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))})); // deep copy avg
-  const b = src.bias;
-  const srcIdx = SOURCES.indexOf(src);
+  const data = ACTIVE_FORECAST_BY_MODEL[sourceId];
+  if (data && data.length > 0) {
+    return data.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))}));
+  }
+  // fallback: avg или BASELINE
+  const fb = ACTIVE_FORECAST_BY_MODEL.avg || BASELINE;
+  return fb.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))}));
+}
 
-  return ACTIVE_FORECAST.map((day, dayIdx) => {
-    const dseed = (srcIdx + 1) * 100 + dayIdx;
-    const tn = pseudo(dseed) * 0.4;
-    const pn = pseudo(dseed + 7) * 4;
-
-    return {
-      ...day,
-      max: Math.round(day.max + b.max + tn),
-      min: Math.round(day.min + b.min + tn * 0.5),
-      precip: clamp(Math.round(day.precip + b.p + pn), 0, 100),
-      wind: Math.max(0, Math.round((day.wind + b.w) * 10) / 10),
-      windGust: Math.max(0, Math.round(day.windGust + b.w * 2)),
-      humidity: clamp(Math.round(day.humidity + b.h), 10, 100),
-      pressure: Math.round(day.pressure + b.pr + pseudo(dseed + 13) * 1),
-      hourly: day.hourly.map((h, hi) => {
-        const hseed = dseed * 100 + hi;
-        return {
-          ...h,
-          t: Math.round(h.t + b.t + pseudo(hseed) * 0.4),
-          p: clamp(Math.round(h.p + b.p + pseudo(hseed + 1) * 4), 0, 100),
-          w: Math.max(0, Math.round(((h.w + b.w) + pseudo(hseed + 2) * 0.2) * 10) / 10)
-        };
-      })
-    };
-  });
+// Совместимость: некоторые места кода ссылаются на ACTIVE_FORECAST как на главный массив (демо или avg).
+// Возвращаем avg если есть, иначе BASELINE.
+function getActiveForecast() {
+  return ACTIVE_FORECAST_BY_MODEL.avg || BASELINE;
 }
 
 function colorForAQI(v) {
@@ -2326,10 +2308,10 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.cl
    INIT
    ============================================ */
 
-// Astro / UV / AQI плашки в шапке — статика по ACTIVE_FORECAST[0], но текстовые подписи зависят от языка.
+// Astro / UV / AQI плашки в шапке — статика по getActiveForecast()[0] (avg или fallback BASELINE).
 // Вызывается из applyAll() при загрузке и при смене языка.
 function renderStaticAstro() {
-  const d = ACTIVE_FORECAST[0];
+  const d = getActiveForecast()[0];
   const sunArcEl = document.getElementById('sunArc');
   if (sunArcEl) sunArcEl.innerHTML = sunArc(d.sunrise, d.sunset, '23:10');
   const moonIconEl = document.getElementById('moonIcon');
@@ -2910,18 +2892,16 @@ const API_STATE = {
   abortController: null   // для отмены текущего запроса
 };
 
-// Сам fetch. На Шаге Б2 используем best_match (Open-Meteo сам выбирает лучшую модель для каждого поля).
-// В Шаге Б3 переключимся на явный список моделей с корректными суффиксами полей.
-async function fetchOpenMeteo(lat, lon, model = null) {
-  // Отменим предыдущий незавершённый запрос (например при быстрой смене города)
+// Один запрос — все модели сразу. Поля в ответе получают суффикс _<model>, например temperature_2m_ecmwf_ifs025.
+// models = массив строк (имена моделей Open-Meteo) либо null/[] для best_match (без суффиксов).
+async function fetchOpenMeteo(lat, lon, models = null) {
   if (API_STATE.abortController) {
     try { API_STATE.abortController.abort(); } catch (_) {}
   }
   API_STATE.abortController = new AbortController();
   const ctrl = API_STATE.abortController;
 
-  // Таймаут 12 сек — отменим, если Open-Meteo не ответил
-  const timeoutId = setTimeout(() => { try { ctrl.abort('timeout'); } catch (_) {} }, 12000);
+  const timeoutId = setTimeout(() => { try { ctrl.abort('timeout'); } catch (_) {} }, 15000);
 
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
@@ -2954,7 +2934,11 @@ async function fetchOpenMeteo(lat, lon, model = null) {
     wind_speed_unit: 'ms',
     forecast_days: '5'
   });
-  if (model) params.set('models', model);
+  if (Array.isArray(models) && models.length > 0) {
+    params.set('models', models.join(','));
+  } else if (typeof models === 'string' && models) {
+    params.set('models', models);
+  }
 
   const url = `https://api.open-meteo.com/v1/forecast?${params.toString()}`;
   try {
@@ -2986,7 +2970,9 @@ async function fetchOpenMeteo(lat, lon, model = null) {
 // Превращаем JSON Open-Meteo в массив 5 дней в нашем внутреннем формате (как BASELINE).
 // Bы будем хранить русские строки в полях condLabel/uvLabel/aqiLabel/moonName/windDir чтобы
 // существующие локализаторы (localizeCondLabel, localizeUvLabel и т.д.) работали без изменений.
-function parseOpenMeteoToForecast(data) {
+// Параметр suffix — пустая строка для best_match, или '_<model_name>' для конкретной модели.
+// При отсутствующих полях у модели — fallback на best_match (поле без суффикса), затем default.
+function parseOpenMeteoToForecast(data, suffix = '') {
   if (!data || !data.daily || !data.hourly) {
     const err = new Error('Invalid response shape');
     err.code = 'parse';
@@ -2994,36 +2980,75 @@ function parseOpenMeteoToForecast(data) {
   }
   const d  = data.daily;
   const h  = data.hourly;
+  // Поля могут существовать только в варианте с суффиксом или только без — пробуем оба
+  const dPick = (key) => {
+    if (suffix && d[key + suffix] !== undefined) return d[key + suffix];
+    if (d[key] !== undefined) return d[key];
+    return null;
+  };
+  const hPick = (key) => {
+    if (suffix && h[key + suffix] !== undefined) return h[key + suffix];
+    if (h[key] !== undefined) return h[key];
+    return null;
+  };
+  const dailyTime = d.time;
+  const hourlyTime = h.time;
+  if (!Array.isArray(dailyTime) || !Array.isArray(hourlyTime)) {
+    const err = new Error('Invalid time arrays'); err.code = 'parse'; throw err;
+  }
+
+  const tMax  = dPick('temperature_2m_max');
+  const tMin  = dPick('temperature_2m_min');
+  const pMax  = dPick('precipitation_probability_max');
+  const wcDay = dPick('weather_code');
+  const sunR  = dPick('sunrise');
+  const sunS  = dPick('sunset');
+  const uvMax = dPick('uv_index_max');
+  const wMax  = dPick('wind_speed_10m_max');
+  const wGust = dPick('wind_gusts_10m_max');
+  const wDir  = dPick('wind_direction_10m_dominant');
+
+  const hT   = hPick('temperature_2m');
+  const hPp  = hPick('precipitation_probability');
+  const hW   = hPick('wind_speed_10m');
+  const hHum = hPick('relative_humidity_2m');
+  const hPr  = hPick('surface_pressure');
+  const hWc  = hPick('weather_code');
+  const hDp  = hPick('dew_point_2m');
+
+  // Если у модели вообще нет температуры — отбраковываем (модель не покрывает регион)
+  if (!tMax || tMax.every(v => v == null)) return null;
+
   const days = [];
-
-  for (let i = 0; i < Math.min(5, d.time.length); i++) {
-    const date = new Date(d.time[i] + 'T12:00:00');
-    const sunriseIso = d.sunrise[i];
-    const sunsetIso  = d.sunset[i];
-    const dayLenMin  = dayLengthMinutes(sunriseIso, sunsetIso);
+  for (let i = 0; i < Math.min(5, dailyTime.length); i++) {
+    const date = new Date(dailyTime[i] + 'T12:00:00');
+    const sunriseIso = sunR ? sunR[i] : null;
+    const sunsetIso  = sunS ? sunS[i] : null;
+    const dayLenMin  = sunriseIso && sunsetIso ? dayLengthMinutes(sunriseIso, sunsetIso) : 0;
     const moon       = moonPhaseInfo(date);
-    const wcDaily    = d.weather_code[i];
+    const wcDaily    = wcDay ? wcDay[i] : null;
 
-    // Срез часовых данных на этот день: 24 часа подряд начиная с i*24
+    // Часовые данные: 24 часа на день
     const hourly = [];
     for (let k = 0; k < 24; k++) {
       const idx = i * 24 + k;
-      if (idx >= h.time.length) break;
-      const hourDate = new Date(h.time[idx]);
+      if (idx >= hourlyTime.length) break;
+      const hourDate = new Date(hourlyTime[idx]);
       hourly.push({
         h: hourDate.getHours(),
-        t: Math.round(h.temperature_2m[idx]),
-        p: Math.round(h.precipitation_probability[idx] || 0),
-        w: Math.round(h.wind_speed_10m[idx] || 0),
-        c: codeToCondition(h.weather_code[idx])
+        t: hT && hT[idx] != null ? Math.round(hT[idx]) : 0,
+        p: hPp && hPp[idx] != null ? Math.round(hPp[idx]) : 0,
+        w: hW && hW[idx] != null ? Math.round(hW[idx]) : 0,
+        c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy'
       });
     }
 
-    // Полуденные значения (12:00) — компактная сводка для дня
     const noonIdx = i * 24 + 12;
-    const noonHum  = h.relative_humidity_2m[noonIdx] != null ? Math.round(h.relative_humidity_2m[noonIdx]) : 60;
-    const noonPres = h.surface_pressure[noonIdx]     != null ? hPaToMmHg(h.surface_pressure[noonIdx])     : 760;
-    const noonDew  = h.dew_point_2m[noonIdx]         != null ? Math.round(h.dew_point_2m[noonIdx])        : 10;
+    const noonHum  = hHum && hHum[noonIdx] != null ? Math.round(hHum[noonIdx]) : 60;
+    const noonPres = hPr  && hPr[noonIdx]  != null ? hPaToMmHg(hPr[noonIdx])    : 760;
+    const noonDew  = hDp  && hDp[noonIdx]  != null ? Math.round(hDp[noonIdx])   : 10;
+
+    const uv = uvMax && uvMax[i] != null ? Math.round(uvMax[i]) : 0;
 
     days.push({
       id: i,
@@ -3032,30 +3057,122 @@ function parseOpenMeteoToForecast(data) {
       date: formatDateDDMMYYYY(date),
       condition: codeToCondition(wcDaily),
       condLabel: codeToCondLabelRu(wcDaily),
-      condDesc: '',                                  // в Б4 добавим осмысленный desc
-      max: Math.round(d.temperature_2m_max[i]),
-      min: Math.round(d.temperature_2m_min[i]),
-      precip: Math.round(d.precipitation_probability_max[i] || 0),
-      wind: Math.round(d.wind_speed_10m_max[i] || 0),
-      windDir: degreesToCardinal(d.wind_direction_10m_dominant[i]),
-      windGust: Math.round(d.wind_gusts_10m_max[i] || 0),
+      condDesc: '',
+      max: tMax[i] != null ? Math.round(tMax[i]) : 0,
+      min: tMin && tMin[i] != null ? Math.round(tMin[i]) : 0,
+      precip: pMax && pMax[i] != null ? Math.round(pMax[i]) : 0,
+      wind: wMax && wMax[i] != null ? Math.round(wMax[i]) : 0,
+      windDir: wDir && wDir[i] != null ? degreesToCardinal(wDir[i]) : 'N',
+      windGust: wGust && wGust[i] != null ? Math.round(wGust[i]) : 0,
       humidity: noonHum,
       pressure: noonPres,
       dewPoint: noonDew,
       sunrise: isoTimeToHHMM(sunriseIso),
       sunset:  isoTimeToHHMM(sunsetIso),
-      dayLen: fmtDayLen(dayLenMin),                  // уже локализованная строка через fmtDayLen
+      dayLen: fmtDayLen(dayLenMin),
       moonIllum: moon.illum,
       moonName: moon.name,
       moonWaxing: moon.waxing,
-      uv: Math.round(d.uv_index_max[i] || 0),
-      uvLabel: uvLabelFromValue(d.uv_index_max[i]),
-      aqi: 42,                                       // плейсхолдер до Б4 (AQI отдельным запросом)
+      uv: uv,
+      uvLabel: uvLabelFromValue(uv),
+      aqi: 42,
       aqiLabel: aqiLabelFromValue(42),
       hourly
     });
   }
   return days;
+}
+
+// Парсит ответ Open-Meteo (который содержит данные по всем 7 моделям) в объект:
+//   { 'ecmwf': [5 days], 'gfs': [5 days], ..., 'avg': [5 days] }
+function parseAllModels(data, sources) {
+  const result = {};
+  const validForecasts = [];
+
+  for (const src of sources) {
+    if (!src.model) continue; // 'avg' пропускаем — вычисляем отдельно
+    try {
+      const forecast = parseOpenMeteoToForecast(data, '_' + src.model);
+      if (forecast && forecast.length > 0) {
+        result[src.id] = forecast;
+        validForecasts.push(forecast);
+      }
+    } catch (e) {
+      console.warn('Не удалось распарсить модель', src.model, e);
+    }
+  }
+
+  if (validForecasts.length > 0) {
+    result.avg = computeAverageForecast(validForecasts);
+  }
+  return result;
+}
+
+// Среднее по N моделям — для каждого дня и каждого часа берём арифметическое среднее.
+// Категориальные поля (направление ветра, иконка, фаза луны) берём из первой модели.
+function computeAverageForecast(forecasts) {
+  if (!forecasts || forecasts.length === 0) return [];
+  const numDays = Math.min(...forecasts.map(f => f.length));
+  const result = [];
+
+  const meanOf = (arr, field) => {
+    const vals = arr.map(o => o[field]).filter(v => typeof v === 'number' && !Number.isNaN(v));
+    if (vals.length === 0) return 0;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  };
+
+  for (let i = 0; i < numDays; i++) {
+    const days = forecasts.map(f => f[i]).filter(Boolean);
+    if (days.length === 0) continue;
+    const first = days[0];
+
+    // Усреднение часовых
+    const hourly = [];
+    const numHours = Math.min(...days.map(d => d.hourly.length));
+    for (let k = 0; k < numHours; k++) {
+      const hours = days.map(d => d.hourly[k]).filter(Boolean);
+      if (hours.length === 0) continue;
+      hourly.push({
+        h: hours[0].h,
+        t: Math.round(meanOf(hours, 't')),
+        p: Math.round(meanOf(hours, 'p')),
+        w: Math.round(meanOf(hours, 'w')),
+        c: hours[0].c
+      });
+    }
+
+    const avgUv = Math.round(meanOf(days, 'uv'));
+    result.push({
+      id: first.id,
+      name: first.name,
+      dayName: first.dayName,
+      date: first.date,
+      condition: first.condition,
+      condLabel: first.condLabel,
+      condDesc: first.condDesc,
+      max: Math.round(meanOf(days, 'max')),
+      min: Math.round(meanOf(days, 'min')),
+      precip: Math.round(meanOf(days, 'precip')),
+      wind: Math.round(meanOf(days, 'wind')),
+      windDir: first.windDir,
+      windGust: Math.round(meanOf(days, 'windGust')),
+      humidity: Math.round(meanOf(days, 'humidity')),
+      pressure: Math.round(meanOf(days, 'pressure')),
+      dewPoint: Math.round(meanOf(days, 'dewPoint')),
+      sunrise: first.sunrise,
+      sunset: first.sunset,
+      dayLen: first.dayLen,
+      moonIllum: first.moonIllum,
+      moonName: first.moonName,
+      moonWaxing: first.moonWaxing,
+      uv: avgUv,
+      uvLabel: uvLabelFromValue(avgUv),
+      aqi: first.aqi,
+      aqiLabel: first.aqiLabel,
+      hourly
+    });
+  }
+  return result;
 }
 
 // === Error banner (показ/скрытие/локализация) ===
@@ -3099,13 +3216,16 @@ async function refreshForecast() {
   showLoader();
   NOW_HOUR = new Date().getHours();
 
+  // Список реальных моделей Open-Meteo, для которых будем запрашивать данные.
+  const modelIds = SOURCES.filter(s => s.model).map(s => s.model);
+
   try {
-    const data = await fetchOpenMeteo(currentLocation.lat, currentLocation.lon);
-    const parsed = parseOpenMeteoToForecast(data);
-    if (!parsed || parsed.length === 0) {
+    const data = await fetchOpenMeteo(currentLocation.lat, currentLocation.lon, modelIds);
+    const byModel = parseAllModels(data, SOURCES);
+    if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
     }
-    ACTIVE_FORECAST = parsed;
+    ACTIVE_FORECAST_BY_MODEL = byModel;
     API_STATE.lastSuccess = new Date();
     API_STATE.lastError = null;
     renderStaticAstro();
@@ -3116,8 +3236,8 @@ async function refreshForecast() {
     console.warn('Open-Meteo error:', err.code, err.message);
     API_STATE.lastError = { code: err.code || 'cors', detail: err.httpStatus };
     showApiError(API_STATE.lastError.code, API_STATE.lastError.detail);
-    if (ACTIVE_FORECAST !== BASELINE && !API_STATE.lastSuccess) {
-      ACTIVE_FORECAST = BASELINE;
+    if (Object.keys(ACTIVE_FORECAST_BY_MODEL).length === 0 && !API_STATE.lastSuccess) {
+      // Не получили ничего реального — оставляем пустой map, getForecast вернёт BASELINE
       renderStaticAstro();
       renderAll();
     }
