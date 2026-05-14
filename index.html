@@ -304,6 +304,88 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 }
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ============================================
+   LOCATION / CITY PICKER
+   ============================================ */
+.location-block{cursor:pointer;border-radius:14px;padding:4px;margin:-4px;transition:background 0.2s}
+.location-block:hover{background:rgba(255,255,255,0.04)}
+.location-block:hover .location-text h1{color:#00d4ff}
+.location-text h1{transition:color 0.2s}
+.location-edit-hint{font-size:9px;color:rgba(0,212,255,0.55);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-top:3px;display:flex;align-items:center;gap:4px}
+.geo-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(94,234,212,0.85);background:rgba(94,234,212,0.1);border:1px solid rgba(94,234,212,0.25);padding:2px 7px;border-radius:100px;font-weight:500;margin-left:6px;vertical-align:middle}
+.geo-tag.manual{color:rgba(167,139,250,0.85);background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.25)}
+
+/* City modal — uses .modal-backdrop / .modal base styles, adds its own internal layout */
+.city-modal .modal-day-label{color:#00d4ff}
+.city-modal .modal-day-title{margin-bottom:14px}
+.city-geo-btn{width:100%;padding:14px 18px;background:linear-gradient(135deg,rgba(94,234,212,0.12) 0%,rgba(0,212,255,0.06) 100%);border:1.5px solid rgba(94,234,212,0.3);border-radius:14px;color:#5eead4;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.2s;margin-bottom:14px;text-align:left}
+.city-geo-btn:hover{background:linear-gradient(135deg,rgba(94,234,212,0.18) 0%,rgba(0,212,255,0.1) 100%);border-color:rgba(94,234,212,0.5);transform:translateY(-1px);box-shadow:0 8px 24px rgba(94,234,212,0.15)}
+.city-geo-btn:active{transform:scale(0.99)}
+.city-geo-btn.loading{opacity:0.6;cursor:wait}
+.city-geo-btn .geo-icon{width:36px;height:36px;flex-shrink:0;background:rgba(94,234,212,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 12px rgba(94,234,212,0.2)}
+.city-geo-btn .geo-text{flex:1}
+.city-geo-btn .geo-text .t{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.city-geo-btn .geo-text .s{font-size:11px;color:rgba(232,240,255,0.55);font-weight:400}
+.city-geo-btn .geo-spinner{width:18px;height:18px;border:2px solid rgba(94,234,212,0.3);border-top-color:#5eead4;border-radius:50%;animation:spin 0.8s linear infinite;display:none}
+.city-geo-btn.loading .geo-spinner{display:block}
+.city-geo-btn.loading .geo-icon{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.city-search-wrap{position:relative;margin-bottom:14px}
+.city-search-input{width:100%;padding:14px 44px 14px 44px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:#fff;font-family:inherit;font-size:14px;outline:none;transition:all 0.2s;backdrop-filter:blur(10px)}
+.city-search-input::placeholder{color:rgba(232,240,255,0.4)}
+.city-search-input:focus{border-color:rgba(0,212,255,0.5);background:rgba(255,255,255,0.06);box-shadow:0 0 0 3px rgba(0,212,255,0.1)}
+.city-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(232,240,255,0.5);pointer-events:none}
+.city-search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:none;background:rgba(255,255,255,0.06);border-radius:50%;color:rgba(232,240,255,0.6);cursor:pointer;display:none;align-items:center;justify-content:center;transition:all 0.2s}
+.city-search-clear:hover{background:rgba(255,80,80,0.15);color:#ff8080}
+.city-search-clear.visible{display:flex}
+
+.city-list-header{font-size:10px;color:rgba(232,240,255,0.45);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin:14px 4px 8px;display:flex;align-items:center;gap:8px}
+.city-list-header::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06)}
+.city-list{max-height:50vh;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding-right:4px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) transparent}
+.city-list::-webkit-scrollbar{width:6px}
+.city-list::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.city-item{padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s;font-family:inherit;text-align:left;width:100%;color:inherit}
+.city-item:hover{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.3);transform:translateX(2px)}
+.city-item.active{background:linear-gradient(135deg,rgba(0,212,255,0.12) 0%,rgba(167,139,250,0.06) 100%);border-color:rgba(0,212,255,0.4);box-shadow:0 0 16px rgba(0,212,255,0.15)}
+.city-item .city-pin{width:28px;height:28px;flex-shrink:0;background:rgba(0,212,255,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#00d4ff}
+.city-item.active .city-pin{background:rgba(0,212,255,0.2);color:#fff;box-shadow:0 0 12px rgba(0,212,255,0.3)}
+.city-item .city-text{flex:1;min-width:0}
+.city-item .city-name{font-size:14px;font-weight:600;color:#fff;line-height:1.2;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.city-item .city-region{font-size:11px;color:rgba(232,240,255,0.5);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.city-item .city-active-check{flex-shrink:0;color:#00d4ff;font-size:16px;display:none}
+.city-item.active .city-active-check{display:block}
+
+.city-empty{padding:30px 16px;text-align:center;color:rgba(232,240,255,0.45);font-size:13px}
+.city-empty .empty-icon{font-size:32px;margin-bottom:8px;opacity:0.5}
+
+.city-loading{padding:20px;text-align:center;color:rgba(232,240,255,0.5);font-size:12px;display:flex;align-items:center;justify-content:center;gap:10px}
+.city-loading .geo-spinner{width:16px;height:16px;border:2px solid rgba(0,212,255,0.3);border-top-color:#00d4ff;border-radius:50%;animation:spin 0.8s linear infinite}
+
+.city-error{padding:14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;color:#fca5a5;font-size:12px;margin-top:10px;display:flex;align-items:flex-start;gap:10px}
+.city-error .err-icon{flex-shrink:0;color:#ef4444}
+
+/* First-run hint banner */
+.geo-hint{padding:14px 16px;background:linear-gradient(135deg,rgba(94,234,212,0.1) 0%,rgba(0,212,255,0.05) 100%);border:1px solid rgba(94,234,212,0.25);border-radius:14px;display:flex;align-items:center;gap:12px;margin-bottom:18px;animation:slideDown 0.4s ease}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.geo-hint .hint-icon{width:36px;height:36px;flex-shrink:0;background:rgba(94,234,212,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#5eead4}
+.geo-hint .hint-text{flex:1;font-size:12px;color:#e8f0ff;line-height:1.4}
+.geo-hint .hint-text strong{color:#5eead4;font-weight:600}
+.geo-hint .hint-actions{display:flex;gap:8px;flex-shrink:0}
+.geo-hint button{padding:8px 14px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);border-radius:10px;color:#e8f0ff;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s}
+.geo-hint button.primary{background:rgba(94,234,212,0.15);border-color:rgba(94,234,212,0.4);color:#5eead4}
+.geo-hint button.primary:hover{background:rgba(94,234,212,0.25);border-color:rgba(94,234,212,0.6)}
+.geo-hint button:hover{background:rgba(255,255,255,0.08)}
+
+@media (max-width: 640px){
+  .geo-hint{flex-direction:column;align-items:stretch;text-align:left}
+  .geo-hint .hint-actions{justify-content:stretch}
+  .geo-hint .hint-actions button{flex:1}
+  .city-geo-btn{padding:12px 14px}
+  .city-search-input{font-size:13px;padding:12px 40px}
+}
+
 </style>
 </head>
 <body>
