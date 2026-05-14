@@ -537,6 +537,49 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .confidence-chip .cc-label{display:none}
 }
 
+/* ============================================
+   ACTIVITY WINDOWS (В3) — окна возможностей
+   ============================================ */
+.activity-windows{padding:22px;margin-bottom:18px}
+.activity-windows h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.activity-windows h2 .aw-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(94,234,212,0.55))}
+.activity-windows .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px;margin-bottom:14px}
+
+.aw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.aw-cell{position:relative;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px;display:flex;flex-direction:column;gap:8px;transition:all 0.25s;overflow:hidden}
+.aw-cell:hover{transform:translateY(-1px);border-color:rgba(94,234,212,0.25)}
+.aw-cell::before{content:'';position:absolute;left:0;right:0;top:0;height:2px;background:var(--aw-accent,#5eead4);opacity:0.7}
+.aw-cell.aw-found::before{background:var(--aw-accent,#5eead4)}
+.aw-cell.aw-not-found::before{background:rgba(255,255,255,0.12)}
+.aw-cell.aw-not-found{opacity:0.7}
+
+.aw-head{display:flex;align-items:center;gap:10px}
+.aw-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:9px;background:rgba(255,255,255,0.05);box-shadow:inset 0 0 8px rgba(255,255,255,0.05);flex-shrink:0}
+.aw-cell.aw-found .aw-icon{background:var(--aw-glow,rgba(94,234,212,0.12));box-shadow:inset 0 0 10px var(--aw-glow,rgba(94,234,212,0.2))}
+.aw-title{font-size:12px;font-weight:600;color:#fff;letter-spacing:-0.01em;line-height:1.2}
+
+.aw-result{font-size:14px;font-weight:600;color:#fff;font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum';line-height:1.25}
+.aw-cell.aw-found .aw-result{color:var(--aw-accent,#5eead4)}
+.aw-cell.aw-not-found .aw-result{color:rgba(232,240,255,0.55);font-family:'Onest',sans-serif;font-size:12px;font-weight:500}
+.aw-hint{font-size:10px;color:rgba(232,240,255,0.5);font-family:'JetBrains Mono',monospace}
+
+/* Цветовые акценты разных активностей */
+.aw-cell.aw-jogging  { --aw-accent:#4ade80; --aw-glow:rgba(74,222,128,0.15)  }
+.aw-cell.aw-kids     { --aw-accent:#a78bfa; --aw-glow:rgba(167,139,250,0.15) }
+.aw-cell.aw-bbq      { --aw-accent:#fb923c; --aw-glow:rgba(251,146,60,0.15)  }
+.aw-cell.aw-laundry  { --aw-accent:#5eead4; --aw-glow:rgba(94,234,212,0.15)  }
+.aw-cell.aw-carwash  { --aw-accent:#60a5fa; --aw-glow:rgba(96,165,250,0.15)  }
+.aw-cell.aw-watering { --aw-accent:#facc15; --aw-glow:rgba(250,204,21,0.15)  }
+
+@media (max-width: 900px){
+  .aw-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width: 640px){
+  .activity-windows{padding:18px}
+  .aw-grid{grid-template-columns:1fr;gap:8px}
+  .aw-cell{padding:12px}
+}
+
 </style>
 </head>
 <body>
@@ -718,6 +761,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         <div class="ap-hint" id="apStarsHint">—</div>
       </div>
     </div>
+  </div>
+
+  <div class="glass activity-windows" id="activityWindowsCard">
+    <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
+    <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 48 часов</div>
+    <div class="aw-grid" id="activityWindowsGrid"></div>
   </div>
 
   <div class="glass chart-card">
@@ -985,6 +1034,22 @@ const I18N = {
     'confidence.veryLow': 'плохое',
     'confidence.tooltip': '{n} моделей · разброс ±{range}°C по максимальной температуре сегодня',
     'chart.spreadLabel': 'Разброс между 7 моделями',
+    'windows.title': 'Окна возможностей',
+    'windows.sub': 'Лучшее время для бытовых задач в ближайшие 48 часов',
+    'windows.preset.jogging': 'Пробежка',
+    'windows.preset.kids': 'Прогулка с ребёнком',
+    'windows.preset.bbq': 'Шашлык / дача',
+    'windows.preset.laundry': 'Сушить бельё',
+    'windows.preset.carwash': 'Помыть машину',
+    'windows.preset.watering': 'Полив огорода',
+    'windows.today': 'Сегодня',
+    'windows.tomorrow': 'Завтра',
+    'windows.range': '{day} {start}–{end}',
+    'windows.crossDay': '{startDay} {start} — {endDay} {end}',
+    'windows.duration': 'длительность {h} ч',
+    'windows.noWindow': 'Нет окна в ближайшие 48 ч',
+    'windows.carwash.dry': 'Сухо {h} ч подряд',
+    'windows.carwash.notRec': 'Не рекомендуется · ожидается дождь',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
@@ -1177,6 +1242,22 @@ const I18N = {
     'confidence.veryLow': 'погана',
     'confidence.tooltip': '{n} моделей · розкид ±{range}°C по максимальній температурі сьогодні',
     'chart.spreadLabel': 'Розкид між 7 моделями',
+    'windows.title': 'Вікна можливостей',
+    'windows.sub': 'Найкращий час для побутових справ у наступні 48 годин',
+    'windows.preset.jogging': 'Пробіжка',
+    'windows.preset.kids': 'Прогулянка з дитиною',
+    'windows.preset.bbq': 'Шашлик / дача',
+    'windows.preset.laundry': 'Сушити білизну',
+    'windows.preset.carwash': 'Помити машину',
+    'windows.preset.watering': 'Полив городу',
+    'windows.today': 'Сьогодні',
+    'windows.tomorrow': 'Завтра',
+    'windows.range': '{day} {start}–{end}',
+    'windows.crossDay': '{startDay} {start} — {endDay} {end}',
+    'windows.duration': 'тривалість {h} год',
+    'windows.noWindow': 'Немає вікна у найближчі 48 год',
+    'windows.carwash.dry': 'Сухо {h} год поспіль',
+    'windows.carwash.notRec': 'Не рекомендується · очікується дощ',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
@@ -1369,6 +1450,22 @@ const I18N = {
     'confidence.veryLow': 'poor',
     'confidence.tooltip': '{n} models · spread ±{range}°C on today\'s max temperature',
     'chart.spreadLabel': 'Spread across 7 models',
+    'windows.title': 'Activity windows',
+    'windows.sub': 'Best time for everyday tasks in the next 48 hours',
+    'windows.preset.jogging': 'Jogging',
+    'windows.preset.kids': 'Walk with a child',
+    'windows.preset.bbq': 'BBQ / outdoors',
+    'windows.preset.laundry': 'Dry laundry outside',
+    'windows.preset.carwash': 'Wash the car',
+    'windows.preset.watering': 'Watering plants',
+    'windows.today': 'Today',
+    'windows.tomorrow': 'Tomorrow',
+    'windows.range': '{day} {start}–{end}',
+    'windows.crossDay': '{startDay} {start} — {endDay} {end}',
+    'windows.duration': 'duration {h} h',
+    'windows.noWindow': 'No suitable window in the next 48 h',
+    'windows.carwash.dry': 'Dry for {h} h straight',
+    'windows.carwash.notRec': 'Not recommended · rain expected',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
@@ -2766,7 +2863,165 @@ function renderAstroPhoto() {
   const starsHintEl = document.getElementById('apStarsHint');
   starsStatusEl.className = 'ap-status ' + starStatus;
   starsStatusEl.textContent = t('astro.stars.' + starStatus);
-  starsHintEl.textContent = t('astro.stars.hint', { cl: nightCloud != null ? nightCloud : '?', moon: moonIllum });
+  starsHintEl.textContent = t('astro.stars.hint', { cl: nightCloud != null ? nightCloud : '—', moon: moonIllum });
+}
+
+/* ============================================
+   ACTIVITY WINDOWS (В3) — окна возможностей для бытовых задач
+   ============================================ */
+
+// Пресеты. Все температурные пороги в °C (база). Часы в локальном времени из API.
+// minDuration — минимум подряд идущих часов, удовлетворяющих условию.
+const ACTIVITY_PRESETS = [
+  {
+    id: 'jogging',
+    minDuration: 1,
+    check: (h) => {
+      const t = h.feels != null ? h.feels : h.t;
+      return t >= 5 && t <= 22 && h.w <= 5 && h.p < 30;
+    }
+  },
+  {
+    id: 'kids',
+    minDuration: 1,
+    check: (h) => {
+      const t = h.feels != null ? h.feels : h.t;
+      return t >= 12 && t <= 24 && h.w < 5 && h.p < 25 && h.h >= 8 && h.h <= 20;
+    }
+  },
+  {
+    id: 'bbq',
+    minDuration: 3,
+    check: (h) => h.t > 15 && h.w < 5 && h.p < 20 && h.h >= 12 && h.h <= 22
+  },
+  {
+    id: 'laundry',
+    minDuration: 6,
+    check: (h) => h.p < 15 && h.w >= 2 && h.h >= 8 && h.h <= 22
+  },
+  {
+    id: 'carwash',
+    minDuration: 24,
+    check: (h) => h.p < 30
+  },
+  {
+    id: 'watering',
+    minDuration: 1,
+    check: (h) => h.p < 20 && h.h >= 18 && h.h <= 22
+  }
+];
+
+// Собрать все часовые слоты из 2 ближайших дней (сегодня + завтра) начиная с текущего часа.
+function collectUpcomingHours(forecast) {
+  const out = [];
+  for (let dayIdx = 0; dayIdx < Math.min(2, forecast.length); dayIdx++) {
+    const day = forecast[dayIdx];
+    if (!day || !day.hourly) continue;
+    for (const h of day.hourly) {
+      // Сегодня — отсекаем уже прошедшие часы
+      if (dayIdx === 0 && h.h < NOW_HOUR) continue;
+      out.push({ ...h, dayId: dayIdx });
+    }
+  }
+  return out;
+}
+
+// Найти ближайшее окно длиной >= minDuration, удовлетворяющее check.
+// Возвращает { dayId, startH, endH, endDayId, duration } или null.
+function findActivityWindow(hours, check, minDuration) {
+  let runStart = null;
+  for (let i = 0; i < hours.length; i++) {
+    const ok = check(hours[i]);
+    if (ok && runStart === null) runStart = i;
+    if ((!ok || i === hours.length - 1) && runStart !== null) {
+      const runEnd = ok ? i : i - 1;
+      const len = runEnd - runStart + 1;
+      if (len >= minDuration) {
+        return {
+          dayId: hours[runStart].dayId,
+          startH: hours[runStart].h,
+          endH: hours[runEnd].h,
+          endDayId: hours[runEnd].dayId,
+          duration: len
+        };
+      }
+      runStart = null;
+    }
+  }
+  return null;
+}
+
+// Форматирование результата для отображения
+function formatActivityWindow(win) {
+  if (!win) return { text: t('windows.noWindow'), found: false, hint: '' };
+  const startDay = win.dayId === 0 ? t('windows.today') : t('windows.tomorrow');
+  const endDay = win.endDayId === 0 ? t('windows.today') : t('windows.tomorrow');
+  const sh = String(win.startH).padStart(2,'0') + ':00';
+  const eh = String((win.endH + 1) % 24).padStart(2,'0') + ':00';
+  let text;
+  if (win.dayId === win.endDayId) {
+    text = t('windows.range', { day: startDay, start: sh, end: eh });
+  } else {
+    text = t('windows.crossDay', { startDay, start: sh, endDay, end: eh });
+  }
+  return { text, found: true, hint: t('windows.duration', { h: win.duration }) };
+}
+
+function renderActivityWindows() {
+  const grid = document.getElementById('activityWindowsGrid');
+  if (!grid) return;
+  // Используем AVG-прогноз (даже если выбран отдельный источник — окна показываем по среднему, оно надёжнее)
+  const fc = ACTIVITY_PRESETS_FORECAST_SOURCE();
+  const hours = collectUpcomingHours(fc);
+  grid.innerHTML = '';
+
+  ACTIVITY_PRESETS.forEach(preset => {
+    let result;
+    if (preset.id === 'carwash') {
+      // Спецлогика: смотрим вперёд 24 часа, ищем самую длинную сухую полосу с начала
+      let dry = 0;
+      for (let i = 0; i < Math.min(24, hours.length); i++) {
+        if (preset.check(hours[i])) dry++;
+        else break;
+      }
+      if (dry >= 24) {
+        result = { text: t('windows.carwash.dry', { h: dry }), found: true, hint: '' };
+      } else if (dry >= 6) {
+        result = { text: t('windows.carwash.dry', { h: dry }), found: true, hint: '' };
+      } else {
+        result = { text: t('windows.carwash.notRec'), found: false, hint: '' };
+      }
+    } else {
+      const win = findActivityWindow(hours, preset.check, preset.minDuration);
+      result = formatActivityWindow(win);
+    }
+
+    const cell = document.createElement('div');
+    cell.className = `aw-cell aw-${preset.id} ${result.found ? 'aw-found' : 'aw-not-found'}`;
+    cell.innerHTML = `
+      <div class="aw-head">
+        <span class="aw-icon">${ACTIVITY_ICONS[preset.id]}</span>
+        <span class="aw-title">${t('windows.preset.' + preset.id)}</span>
+      </div>
+      <div class="aw-result">${escapeHtml(result.text)}</div>
+      ${result.hint ? `<div class="aw-hint">${escapeHtml(result.hint)}</div>` : ''}
+    `;
+    grid.appendChild(cell);
+  });
+}
+
+const ACTIVITY_ICONS = {
+  jogging:  '🏃',
+  kids:     '👶',
+  bbq:      '🔥',
+  laundry:  '🧺',
+  carwash:  '🚗',
+  watering: '🌱'
+};
+
+// Источник прогноза для окон — всегда AVG (или fallback). Конкретные модели тут не дают пользы.
+function ACTIVITY_PRESETS_FORECAST_SOURCE() {
+  return ACTIVE_FORECAST_BY_MODEL.avg || BASELINE;
 }
 
 // Astro / UV / AQI плашки в шапке — статика по getActiveForecast()[0] (avg или fallback BASELINE).
@@ -3229,6 +3484,7 @@ function applyAll() {
   renderLocationHeader();
   renderStaticAstro();
   renderAstroPhoto();
+  renderActivityWindows();
   renderSourceButtons();
   renderAll();
   updateClock();
@@ -3847,6 +4103,7 @@ async function refreshForecast(force = false) {
       API_STATE.lastSuccess = new Date(cached.timestamp);
       renderStaticAstro();
       renderAstroPhoto();
+      renderActivityWindows();
       renderAll();
       updateClock();
       return; // кэш свежий — не делаем сетевой запрос
@@ -3901,6 +4158,7 @@ async function refreshForecast(force = false) {
       // Не получили ничего реального — оставляем пустой map, getForecast вернёт BASELINE
       renderStaticAstro();
       renderAstroPhoto();
+      renderActivityWindows();
       renderAll();
     }
   } finally {
