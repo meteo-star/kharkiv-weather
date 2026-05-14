@@ -4,7 +4,7 @@
 > Содержит актуальное состояние проекта, что уже сделано, что осталось.
 >
 > **Дата обновления:** 14 мая 2026
-> **Текущая версия:** v1.4-pollen
+> **Текущая версия:** v1.5-storm
 > **Live URL:** https://meteo-star.github.io/kharkiv-weather/
 > **GitHub:** https://github.com/meteo-star/kharkiv-weather
 
@@ -52,7 +52,7 @@
 <head>
   <style>
     [глобальные стили]
-    [стили для каждой фичи: settings, location, astro-photo, activity-windows, climate, pollen, ...]
+    [стили для каждой фичи: settings, location, astro-photo, activity-windows, climate, pollen, storm, ...]
   </style>
 </head>
 <body>
@@ -64,6 +64,7 @@
     [astro-photo — Astro/Photographer mode]
     [activity-windows — окна возможностей]
     [pollen-card — пыльца]
+    [storm-card — гроза-индикатор на 48ч]
     [climate-card — климатический контекст]
     [chart-card — почасовой график]
     [days — 5-дневный прогноз]
@@ -111,10 +112,10 @@
 |---|---|---|
 | `kw:settings:v1` | `{ lang, units: { temp, wind, pressure } }` | бессрочно |
 | `kw:location:v1` | `{ name, region, lat, lon, source }` | бессрочно |
-| `kw:forecast-cache:LAT_LON:v3` | Прогноз 7 моделей | 15 минут |
+| `kw:forecast-cache:LAT_LON:v4` | Прогноз 7 моделей | 15 минут |
 | `kw:climate-cache:LAT_LON:v1` | Климатическая норма за 5 лет | 30 дней |
 
-При структурных изменениях в hourly/daily ОБЯЗАТЕЛЬНО поднимай версию ключа forecast-cache (сейчас `:v3`).
+При структурных изменениях в hourly/daily ОБЯЗАТЕЛЬНО поднимай версию ключа forecast-cache (сейчас `:v4`).
 
 ---
 
@@ -122,7 +123,7 @@
 
 | API | Что даёт | Когда вызывается |
 |---|---|---|
-| `api.open-meteo.com/v1/forecast` | 7 моделей: ECMWF, GFS, ICON, GEM, JMA, MF, UKMO. Поля: temperature, precipitation_probability, wind, humidity, pressure, weather_code, dew_point, apparent_temperature, cloud_cover, uv_index_max | при init, смене города, кнопке «Обновить» |
+| `api.open-meteo.com/v1/forecast` | 7 моделей: ECMWF, GFS, ICON, GEM, JMA, MF, UKMO. Поля: temperature, precipitation_probability, wind, humidity, pressure, weather_code, dew_point, apparent_temperature, cloud_cover, uv_index_max, cape, lifted_index | при init, смене города, кнопке «Обновить» |
 | `air-quality-api.open-meteo.com/v1/air-quality` | AQI European + PM2.5/PM10 + пыльца (alder, birch, grass, mugwort, olive, ragweed) | параллельно с основным forecast |
 | `archive-api.open-meteo.com/v1/archive` | Исторические данные за 5 лет для климатической нормы | при смене города (кэш на 30 дней) |
 | `geocoding-api.open-meteo.com/v1/search` | Поиск городов по названию (live search в модалке города) | при вводе пользователя |
@@ -157,24 +158,11 @@
 | В3 | `v1.2-activity-windows` | **Окна возможностей** – 6 пресетов (пробежка, прогулка, шашлык, бельё, мойка авто, полив) с автоматическим поиском подходящих часов в ближайших 48ч |
 | В4 | `v1.3-climate` | **Климатический контекст** – сравнение с 5-летней нормой через Archive API + SVG-спарклайн «в этот день в прошлые годы» |
 | В5 | `v1.4-pollen` | **Прогноз пыльцы** – 6 аллергенов с цветовыми уровнями |
+| В6 | `v1.5-storm` | **Гроза-индикатор** – heatmap 48 часов риска грозы из Open-Meteo (weather_code + CAPE + lifted_index), статус-строка с цветной пилюлёй, тревожный баннер при риске ≥2 в ближайшие 6ч |
 
 ---
 
-## 6. ОСТАЛОСЬ СДЕЛАТЬ – Фаза В (2 шага)
-
-### В6: Гроза-трекер (Blitzortung)
-**Идея:** Мини-карта со светящимися точками молний в реальном времени в радиусе 100 км. Если рядом гроза – баннер «Гроза в 18 км к северу, приближается».
-
-**Источник данных:** Blitzortung.org – открытые WebSocket-фиды для молний в реальном времени.
-
-**Технические детали:**
-- WebSocket-соединение к Blitzortung
-- Парсинг сообщений о ударах молний (timestamp, lat, lon)
-- Фильтрация по радиусу от currentLocation
-- Мини-карта Leaflet.js (если хочется тайлы) или просто SVG с точками относительно центра локации
-- Тревожный баннер если удар ближе 30 км
-
-**Нюанс по безопасности:** Blitzortung видит IP пользователя. Уже отражено в `SECURITY.md`.
+## 6. ОСТАЛОСЬ СДЕЛАТЬ – Фаза В (1 шаг)
 
 ### В7: Самооценка точности источников
 **Идея:** Раз в день в фоне сохраняем в localStorage вчерашний прогноз каждого из 7 источников на сегодня. Через сутки сравниваем с фактом. Через 2–3 недели получается **живой рейтинг точности** именно для текущей локации: «За последние 30 дней по температуре точнее всех ECMWF (MAE 0.8°), хуже всех – GFS (MAE 2.1°)».
@@ -278,5 +266,8 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 
 ---
 
-*Документ обновлён: 14 мая 2026 после закрытия Шага В5 (v1.4-pollen).*
-*Следующий шаг: В6 (Гроза-трекер Blitzortung).*
+*Документ обновлён: 14 мая 2026 после закрытия Шага В6 (v1.5-storm).*
+*Следующий шаг: В7 (Самооценка точности источников).*
+
+### Заметка по В6
+По итогам обсуждения от прямого WebSocket к Blitzortung отказались (закрытое API, нестабильный handshake, требует прокси). Вместо этого реализован **прогнозный** индикатор грозы на 48ч из Open-Meteo с использованием `weather_code` (95/96/99), `cape` и `lifted_index`. Real-time трекер молний может вернуться отдельной фичей В6.5 через Cloudflare Worker-прокси, если возникнет потребность.
