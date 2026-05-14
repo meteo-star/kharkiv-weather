@@ -619,6 +619,50 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .climate-metric{padding:10px 12px}
 }
 
+/* ============================================
+   POLLEN CARD (В5)
+   ============================================ */
+.pollen-card{padding:22px;margin-bottom:18px}
+.pollen-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.pollen-card h2 .pl-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(250,204,21,0.5))}
+.pollen-card .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px;margin-bottom:14px}
+
+.pollen-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pollen-cell{position:relative;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;display:flex;flex-direction:column;gap:6px;transition:all 0.25s;overflow:hidden}
+.pollen-cell:hover{border-color:var(--pl-color,rgba(94,234,212,0.3));transform:translateY(-1px)}
+.pollen-cell.pl-none{opacity:0.55}
+
+.pollen-head{display:flex;align-items:center;gap:10px}
+.pollen-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:16px;border-radius:8px;background:rgba(255,255,255,0.05);flex-shrink:0;transition:all 0.25s}
+.pollen-cell.pl-low .pollen-icon{background:rgba(74,222,128,0.12);box-shadow:inset 0 0 8px rgba(74,222,128,0.2)}
+.pollen-cell.pl-mid .pollen-icon{background:rgba(250,204,21,0.12);box-shadow:inset 0 0 8px rgba(250,204,21,0.2)}
+.pollen-cell.pl-high .pollen-icon{background:rgba(251,146,60,0.12);box-shadow:inset 0 0 8px rgba(251,146,60,0.2)}
+.pollen-cell.pl-veryHigh .pollen-icon{background:rgba(239,68,68,0.12);box-shadow:inset 0 0 8px rgba(239,68,68,0.2)}
+.pollen-title{font-size:12px;font-weight:600;color:#fff;letter-spacing:-0.01em;line-height:1.2}
+
+.pollen-level{font-size:13px;font-weight:600;color:#fff;line-height:1.1}
+.pollen-cell.pl-none .pollen-level{color:rgba(232,240,255,0.45)}
+.pollen-cell.pl-low .pollen-level     { color:#4ade80 }
+.pollen-cell.pl-mid .pollen-level     { color:#facc15 }
+.pollen-cell.pl-high .pollen-level    { color:#fb923c }
+.pollen-cell.pl-veryHigh .pollen-level{ color:#ef4444 }
+
+.pollen-bar{position:relative;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;overflow:hidden;margin-top:2px}
+.pollen-bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--pl-color,#4ade80);box-shadow:0 0 8px var(--pl-color,#4ade80);border-radius:2px;transition:width 0.4s ease}
+.pollen-cell.pl-low      { --pl-color:#4ade80 }
+.pollen-cell.pl-mid      { --pl-color:#facc15 }
+.pollen-cell.pl-high     { --pl-color:#fb923c }
+.pollen-cell.pl-veryHigh { --pl-color:#ef4444 }
+
+.pollen-hint{font-size:10px;color:rgba(232,240,255,0.5);font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum'}
+
+@media (max-width: 900px){ .pollen-grid{grid-template-columns:repeat(2,1fr)} }
+@media (max-width: 640px){
+  .pollen-card{padding:18px}
+  .pollen-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .pollen-cell{padding:10px}
+}
+
 </style>
 </head>
 <body>
@@ -806,6 +850,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
     <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 48 часов</div>
     <div class="aw-grid" id="activityWindowsGrid"></div>
+  </div>
+
+  <div class="glass pollen-card" id="pollenCard">
+    <h2><span class="pl-emoji">🌼</span><span data-i18n="pollen.title">Пыльца сегодня</span></h2>
+    <div class="sub" data-i18n="pollen.sub">Концентрация аллергенов в воздухе</div>
+    <div class="pollen-grid" id="pollenGrid"></div>
   </div>
 
   <div class="glass climate-card" id="climateCard">
@@ -1143,6 +1193,19 @@ const I18N = {
     'climate.sparkTitle': 'В этот день в прошлые годы',
     'climate.sparkEmpty': 'Архивные данные недоступны',
     'climate.loading': 'Загрузка истории...',
+    'pollen.title': 'Пыльца сегодня',
+    'pollen.sub': 'Концентрация аллергенов в воздухе (частиц/м³)',
+    'pollen.alder': 'Ольха',
+    'pollen.birch': 'Берёза',
+    'pollen.grass': 'Злаки',
+    'pollen.mugwort': 'Полынь',
+    'pollen.olive': 'Олива',
+    'pollen.ragweed': 'Амброзия',
+    'pollen.level.none': 'Не обнаружено',
+    'pollen.level.low': 'Низкая',
+    'pollen.level.mid': 'Средняя',
+    'pollen.level.high': 'Высокая',
+    'pollen.level.veryHigh': 'Очень высокая',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
@@ -1365,6 +1428,19 @@ const I18N = {
     'climate.sparkTitle': 'У цей день у минулі роки',
     'climate.sparkEmpty': 'Архівні дані недоступні',
     'climate.loading': 'Завантаження історії...',
+    'pollen.title': 'Пилок сьогодні',
+    'pollen.sub': 'Концентрація алергенів у повітрі (частинок/м³)',
+    'pollen.alder': 'Вільха',
+    'pollen.birch': 'Береза',
+    'pollen.grass': 'Злаки',
+    'pollen.mugwort': 'Полин',
+    'pollen.olive': 'Олива',
+    'pollen.ragweed': 'Амброзія',
+    'pollen.level.none': 'Не виявлено',
+    'pollen.level.low': 'Низька',
+    'pollen.level.mid': 'Середня',
+    'pollen.level.high': 'Висока',
+    'pollen.level.veryHigh': 'Дуже висока',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
@@ -1587,6 +1663,19 @@ const I18N = {
     'climate.sparkTitle': 'On this date in past years',
     'climate.sparkEmpty': 'Archive data unavailable',
     'climate.loading': 'Loading history...',
+    'pollen.title': 'Pollen today',
+    'pollen.sub': 'Allergen concentration in the air (grains/m³)',
+    'pollen.alder': 'Alder',
+    'pollen.birch': 'Birch',
+    'pollen.grass': 'Grass',
+    'pollen.mugwort': 'Mugwort',
+    'pollen.olive': 'Olive',
+    'pollen.ragweed': 'Ragweed',
+    'pollen.level.none': 'Not detected',
+    'pollen.level.low': 'Low',
+    'pollen.level.mid': 'Moderate',
+    'pollen.level.high': 'High',
+    'pollen.level.veryHigh': 'Very high',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
@@ -2988,6 +3077,63 @@ function renderAstroPhoto() {
 }
 
 /* ============================================
+   POLLEN (В5) — пыльца аллергенов
+   ============================================ */
+
+const POLLEN_DATA = { today: undefined }; // undefined = ещё не запрашивали; null = запрос упал; объект = есть данные
+
+const POLLEN_TYPES = [
+  { id: 'alder',   icon: '🌳' },
+  { id: 'birch',   icon: '🌿' },
+  { id: 'grass',   icon: '🌾' },
+  { id: 'mugwort', icon: '🌱' },
+  { id: 'olive',   icon: '🫒' },
+  { id: 'ragweed', icon: '🥀' }
+];
+
+function renderPollen() {
+  const card = document.getElementById('pollenCard');
+  const grid = document.getElementById('pollenGrid');
+  if (!card || !grid) return;
+
+  // Карточка всегда видна.
+  card.style.display = '';
+  // Подзаголовок меняем в зависимости от состояния
+  const subEl = card.querySelector('.sub');
+  if (subEl) {
+    if (POLLEN_DATA.today === null) {
+      subEl.textContent = '⚠ Данные пыльцы не получены (возможно, блокирует расширение)';
+    } else if (POLLEN_DATA.today === undefined) {
+      subEl.textContent = '⏳ Загрузка...';
+    } else {
+      subEl.textContent = t('pollen.sub');
+    }
+  }
+  const data = POLLEN_DATA.today || {};
+  grid.innerHTML = '';
+
+  POLLEN_TYPES.forEach(p => {
+    const value = data[p.id];
+    const level = pollenLevel(value);
+    const cell = document.createElement('div');
+    cell.className = `pollen-cell pl-${level}`;
+    // Заполнение полоски: 0..50 ч/м³ -> 0..100%
+    const fillPct = level === 'none' ? 0 : Math.min(100, Math.round((value / 50) * 100));
+    const valueStr = value != null ? `${value} ч/м³` : '—';
+    cell.innerHTML = `
+      <div class="pollen-head">
+        <span class="pollen-icon">${p.icon}</span>
+        <span class="pollen-title">${t('pollen.' + p.id)}</span>
+      </div>
+      <div class="pollen-level">${t('pollen.level.' + level)}</div>
+      <div class="pollen-bar"><div class="pollen-bar-fill" style="width:${fillPct}%"></div></div>
+      <div class="pollen-hint">${escapeHtml(valueStr)}</div>
+    `;
+    grid.appendChild(cell);
+  });
+}
+
+/* ============================================
    CLIMATE CONTEXT (В4) — сравнение с 5-летней нормой
    Один запрос к Open-Meteo Archive API на последние 5 лет, плюс кэш на 30 дней.
    ============================================ */
@@ -3831,6 +3977,7 @@ function applyAll() {
   renderAstroPhoto();
   renderActivityWindows();
   renderClimateContext();
+  renderPollen();
   renderSourceButtons();
   renderAll();
   updateClock();
@@ -4031,8 +4178,8 @@ async function fetchAirQuality(lat, lon, signal = null) {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
-    hourly: 'european_aqi,pm2_5,pm10',
-    current: 'european_aqi,pm2_5,pm10',
+    hourly: 'european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen',
+    current: 'european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen',
     timezone: 'auto',
     forecast_days: '5'
   });
@@ -4044,6 +4191,33 @@ async function fetchAirQuality(lat, lon, signal = null) {
   } catch (e) {
     return null; // не критично — UI должен работать даже без AQI
   }
+}
+
+// Из ответа Air Quality берём дневное среднее для каждого вида пыльцы.
+// Возвращает { alder, birch, grass, mugwort, olive, ragweed } со значениями частиц/м³ за сегодня (0..i*24+24).
+function parsePollenToday(aqiData) {
+  if (!aqiData || !aqiData.hourly) return null;
+  const TYPES = ['alder_pollen','birch_pollen','grass_pollen','mugwort_pollen','olive_pollen','ragweed_pollen'];
+  const out = {};
+  TYPES.forEach(type => {
+    const arr = aqiData.hourly[type];
+    if (!Array.isArray(arr)) { out[type.replace('_pollen','')] = null; return; }
+    const today = arr.slice(0, 24).filter(v => typeof v === 'number' && !Number.isNaN(v));
+    if (today.length === 0) { out[type.replace('_pollen','')] = null; return; }
+    const mean = today.reduce((a, b) => a + b, 0) / today.length;
+    out[type.replace('_pollen','')] = Math.round(mean * 10) / 10;
+  });
+  return out;
+}
+
+// Концентрация пыльцы (частиц/м³) → уровень (для UI).
+// Пороги адаптированы под реальные данные Open-Meteo CAMS, где значения часто сотых-десятых долей.
+function pollenLevel(value) {
+  if (value == null || value < 0.1) return 'none';
+  if (value < 5)  return 'low';
+  if (value < 20) return 'mid';
+  if (value < 50) return 'high';
+  return 'veryHigh';
 }
 
 // Из часового массива european_aqi считаем среднее за каждый из 5 дней.
@@ -4462,10 +4636,17 @@ async function refreshForecast(force = false) {
         }).catch(() => {});
       }
 
+      // AQI / Pollen — fetch в фоне, пыльца в forecast-кэше не хранится
+      fetchAirQuality(currentLocation.lat, currentLocation.lon).then(aqi => {
+        POLLEN_DATA.today = aqi ? parsePollenToday(aqi) : null;
+        renderPollen();
+      }).catch(() => { POLLEN_DATA.today = null; renderPollen(); });
+
       renderStaticAstro();
       renderAstroPhoto();
       renderActivityWindows();
       renderClimateContext();
+      renderPollen();
       renderAll();
       updateClock();
       return; // кэш свежий — основной сетевой запрос не делаем
@@ -4507,6 +4688,9 @@ async function refreshForecast(force = false) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
     }
 
+    // Пыльца на сегодня (отдельно от AQI, тот же ответ Air Quality API)
+    POLLEN_DATA.today = aqiData ? parsePollenToday(aqiData) : null;
+
     // Подмешиваем реальный AQI в каждый день каждой модели
     const aqiByDay = parseAqiByDay(aqiData);
     if (aqiByDay.length > 0) {
@@ -4539,6 +4723,7 @@ async function refreshForecast(force = false) {
       renderAstroPhoto();
       renderActivityWindows();
       renderClimateContext();
+      renderPollen();
       renderAll();
     }
   } finally {
