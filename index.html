@@ -1970,7 +1970,17 @@ let ACTIVE_FORECAST_BY_MODEL = {};
 function getForecast(sourceId) {
   const data = ACTIVE_FORECAST_BY_MODEL[sourceId];
   if (data && data.length > 0) {
-    return data.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))}));
+    const avg = ACTIVE_FORECAST_BY_MODEL.avg;
+    // Глубокая копия с подмешиванием UV из avg, если у этой модели его нет
+    // (только GFS из 7 бесплатных моделей выдаёт UV — для остальных он null)
+    return data.map((d, i) => {
+      const out = {...d, hourly: d.hourly.map(h => ({...h}))};
+      if (out.uv == null && avg && avg[i] && avg[i].uv != null) {
+        out.uv = avg[i].uv;
+        out.uvLabel = avg[i].uvLabel;
+      }
+      return out;
+    });
   }
   // fallback: avg или BASELINE
   const fb = ACTIVE_FORECAST_BY_MODEL.avg || BASELINE;
@@ -3217,7 +3227,9 @@ function parseOpenMeteoToForecast(data, suffix = '') {
       }
     }
 
-    const uv = uvMax && uvMax[i] != null ? Math.round(uvMax[i]) : 0;
+    // UV: не все модели его выдают (только GFS из бесплатных) — пусть будет null если данных нет,
+    // тогда computeAverageForecast корректно его игнорирует, а render возьмёт значение из avg.
+    const uv = uvMax && uvMax[i] != null ? Math.round(uvMax[i]) : null;
     const dayWind = wMax && wMax[i] != null ? Math.round(wMax[i]) : 0;
 
     days.push({
@@ -3246,7 +3258,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
       moonName: moon.name,
       moonWaxing: moon.waxing,
       uv: uv,
-      uvLabel: uvLabelFromValue(uv),
+      uvLabel: uv != null ? uvLabelFromValue(uv) : null,
       aqi: 42,
       aqiLabel: aqiLabelFromValue(42),
       hourly
@@ -3315,7 +3327,9 @@ function computeAverageForecast(forecasts) {
       });
     }
 
-    const avgUv = Math.round(meanOf(days, 'uv'));
+    // UV: считаем mean только из моделей, реально вернувших значение (null игнорируется в meanOf автоматически).
+    const uvVals = days.map(o => o.uv).filter(v => typeof v === 'number' && !Number.isNaN(v));
+    const avgUv = uvVals.length > 0 ? Math.round(uvVals.reduce((a,b) => a+b, 0) / uvVals.length) : null;
     const avgWind = Math.round(meanOf(days, 'wind'));
     // Тренд давления — берём наиболее частый из моделей (mode)
     const trendCounts = {};
@@ -3348,7 +3362,7 @@ function computeAverageForecast(forecasts) {
       moonName: first.moonName,
       moonWaxing: first.moonWaxing,
       uv: avgUv,
-      uvLabel: uvLabelFromValue(avgUv),
+      uvLabel: avgUv != null ? uvLabelFromValue(avgUv) : null,
       aqi: first.aqi,
       aqiLabel: first.aqiLabel,
       hourly
