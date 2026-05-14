@@ -16,7 +16,7 @@
 
 ## Демо
 
-https://stanislavperec-ua.github.io/kharkiv-weather/
+https://meteo-star.github.io/kharkiv-weather/
 
 ## Технологии
 
