@@ -498,6 +498,45 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .ap-cell{padding:12px}
 }
 
+/* ============================================
+   FORECAST CONFIDENCE (В2) — индекс согласия моделей
+   ============================================ */
+.confidence-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid var(--conf-color,rgba(74,222,128,0.4));font-family:'JetBrains Mono',monospace;font-size:11px;color:#fff;backdrop-filter:blur(8px);transition:all 0.25s ease;cursor:help}
+.confidence-chip:hover{box-shadow:0 0 16px var(--conf-glow,rgba(74,222,128,0.25));transform:translateY(-1px)}
+.confidence-chip .cc-dot{width:7px;height:7px;border-radius:50%;background:var(--conf-color,#4ade80);box-shadow:0 0 8px var(--conf-color,#4ade80);flex-shrink:0}
+.confidence-chip .cc-label{font-size:10px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.06em;font-family:'Onest',sans-serif;font-weight:500}
+.confidence-chip .cc-val{font-weight:700;color:var(--conf-color,#4ade80);font-size:13px}
+.confidence-chip .cc-status{font-size:11px;color:rgba(232,240,255,0.7);font-family:'Onest',sans-serif;font-weight:500}
+
+/* Cветовые кодировки уровня согласия */
+.cc-high   { --conf-color: #4ade80; --conf-glow: rgba(74,222,128,0.25); }
+.cc-mid    { --conf-color: #facc15; --conf-glow: rgba(250,204,21,0.22); }
+.cc-low    { --conf-color: #fb923c; --conf-glow: rgba(251,146,60,0.22); }
+.cc-veryLow{ --conf-color: #ef4444; --conf-glow: rgba(239,68,68,0.22); }
+
+/* Цветная риска внизу карточки дня — индикатор согласия для этого дня */
+.day{position:relative}
+.day-confidence-bar{position:absolute;left:10%;right:10%;bottom:6px;height:3px;border-radius:2px;background:var(--day-conf-color,rgba(74,222,128,0.5));box-shadow:0 0 8px var(--day-conf-color,rgba(74,222,128,0.4));opacity:0.85;pointer-events:none}
+.day-confidence-bar.high   { --day-conf-color:#4ade80 }
+.day-confidence-bar.mid    { --day-conf-color:#facc15 }
+.day-confidence-bar.low    { --day-conf-color:#fb923c }
+.day-confidence-bar.veryLow{ --day-conf-color:#ef4444 }
+
+/* Inline-чип согласия моделей в hero (рядом с "По данным усреднения 7 моделей") */
+.hero-conf{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,0.05);border:1px solid var(--conf-color,#4ade80);font-family:'JetBrains Mono',monospace;font-size:10px;color:#fff;font-weight:600;margin-left:6px;vertical-align:middle;cursor:help;transition:all 0.2s}
+.hero-conf:hover{box-shadow:0 0 10px var(--conf-glow,rgba(74,222,128,0.3))}
+.hero-conf .hc-dot{width:5px;height:5px;border-radius:50%;background:var(--conf-color,#4ade80);box-shadow:0 0 6px var(--conf-color,#4ade80)}
+.hero-conf .hc-val{color:var(--conf-color,#4ade80)}
+
+.sources-card .card-title{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.sources-card h2{margin-bottom:0}
+.sources-card .sources-sub{margin-bottom:0}
+
+@media (max-width: 640px){
+  .confidence-chip{font-size:10px;padding:5px 10px;gap:6px}
+  .confidence-chip .cc-label{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -699,8 +738,18 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
   <!-- SOURCES CARD with picker -->
   <div class="glass sources-card">
-    <h2 data-i18n="sources.title">Источник прогноза</h2>
-    <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 10 моделям</div>
+    <div class="card-title">
+      <div>
+        <h2 data-i18n="sources.title">Источник прогноза</h2>
+        <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 10 моделям</div>
+      </div>
+      <div class="confidence-chip" id="confidenceChip" style="display:none" title="">
+        <span class="cc-dot"></span>
+        <span class="cc-label" data-i18n="confidence.label">Согласие моделей</span>
+        <span class="cc-val" id="confidenceVal">—</span>
+        <span class="cc-status" id="confidenceStatus">—</span>
+      </div>
+    </div>
 
     <button class="main-source-btn active" id="mainSrcBtn" data-source="avg">
       <div class="msb-left">
@@ -929,6 +978,13 @@ const I18N = {
     'sources.avgSub': 'Агрегация 10 моделей · ансамблевый прогноз',
     'sources.avgShort': 'Среднее по 7 моделям',
     'sources.dividerOr': 'или конкретный источник',
+    'confidence.label': 'Согласие моделей',
+    'confidence.high': 'высокое',
+    'confidence.mid': 'среднее',
+    'confidence.low': 'низкое',
+    'confidence.veryLow': 'плохое',
+    'confidence.tooltip': '{n} моделей · разброс ±{range}°C по максимальной температуре сегодня',
+    'chart.spreadLabel': 'Разброс между 7 моделями',
     'footer.refresh': 'Обновить',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
@@ -1114,6 +1170,13 @@ const I18N = {
     'sources.avgSub': 'Агрегація 10 моделей · ансамблевий прогноз',
     'sources.avgShort': 'Середнє по 7 моделях',
     'sources.dividerOr': 'або конкретне джерело',
+    'confidence.label': 'Згода моделей',
+    'confidence.high': 'висока',
+    'confidence.mid': 'середня',
+    'confidence.low': 'низька',
+    'confidence.veryLow': 'погана',
+    'confidence.tooltip': '{n} моделей · розкид ±{range}°C по максимальній температурі сьогодні',
+    'chart.spreadLabel': 'Розкид між 7 моделями',
     'footer.refresh': 'Оновити',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
@@ -1299,6 +1362,13 @@ const I18N = {
     'sources.avgSub': 'Aggregation of 10 models · ensemble forecast',
     'sources.avgShort': 'Average of 7 models',
     'sources.dividerOr': 'or a specific source',
+    'confidence.label': 'Model agreement',
+    'confidence.high': 'high',
+    'confidence.mid': 'moderate',
+    'confidence.low': 'low',
+    'confidence.veryLow': 'poor',
+    'confidence.tooltip': '{n} models · spread ±{range}°C on today\'s max temperature',
+    'chart.spreadLabel': 'Spread across 7 models',
     'footer.refresh': 'Refresh',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
@@ -2204,8 +2274,17 @@ function renderHeroAndMetrics(forecast) {
     t(feelsKey, { feels: feelsStr, sunrise: today.sunrise, sunset: today.sunset });
 
   const srcName = `<span class="src-name">${localizeSourceFullName(s)}</span>`;
-  document.getElementById('heroSourceNote').innerHTML =
-    t('hero.sourceNote', { name: srcName });
+  let sourceNoteHtml = t('hero.sourceNote', { name: srcName });
+  // Если выбрано "Среднее" — рядом показываем согласие моделей. Для конкретной модели метрика бессмысленна.
+  if (s.id === 'avg') {
+    const avgToday = ACTIVE_FORECAST_BY_MODEL.avg && ACTIVE_FORECAST_BY_MODEL.avg[0];
+    if (avgToday && avgToday.confidence != null) {
+      const cls = confidenceClass(avgToday.confidence);
+      const tooltipText = t('confidence.tooltip', { n: avgToday.modelCount || 7, range: avgToday.tempRange != null ? avgToday.tempRange : '?' });
+      sourceNoteHtml += ` <span class="hero-conf cc-${cls}" title="${tooltipText}"><span class="hc-dot"></span><span class="hc-val">${avgToday.confidence}%</span></span>`;
+    }
+  }
+  document.getElementById('heroSourceNote').innerHTML = sourceNoteHtml;
 
   document.getElementById('metricWind').innerHTML =
     `${fmtWind(today.wind, {withUnit:false})}<span>${unitWind()}</span>`;
@@ -2229,13 +2308,25 @@ function renderHeroAndMetrics(forecast) {
     t('metric.humidity.dewPoint', { t: fmtTemp(today.dewPoint) });
 }
 
+// confidence (0..100) → класс из ['high','mid','low','veryLow']
+function confidenceClass(conf) {
+  if (conf == null) return null;
+  if (conf >= 80) return 'high';
+  if (conf >= 65) return 'mid';
+  if (conf >= 50) return 'low';
+  return 'veryLow';
+}
+
 function renderDays(forecast) {
   const grid = document.getElementById('daysGrid');
   grid.innerHTML = '';
+  // Confidence показываем только когда смотрим AVG (для конкретной модели спред бессмыслен).
+  const showConf = currentSourceId === 'avg';
   forecast.forEach((d, i) => {
     const card = document.createElement('div');
     card.className = 'glass day' + (i === 0 ? ' today' : '');
     const dayLabel = d.id === 0 ? t('day.today') : localizeDayShort(d.name);
+    const confCls = showConf ? confidenceClass(d.confidence) : null;
     card.innerHTML = `
       <div class="day-name">${dayLabel}</div>
       <div class="day-date">${d.date.slice(0,5)}</div>
@@ -2244,10 +2335,30 @@ function renderDays(forecast) {
       <div class="day-prec"><svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>${d.precip}%</div>
       <div class="day-wind">${fmtWind(d.wind)} ${localizeWindDirShort(d.windDir)}</div>
       <div class="day-tap">${t('day.tap')} ↑</div>
+      ${confCls ? `<div class="day-confidence-bar ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></div>` : ''}
     `;
     card.addEventListener('click', () => openModal(d.id));
     grid.appendChild(card);
   });
+}
+
+// Чип "Согласие моделей" в карточке источника. Показываем только когда сейчас AVG и есть реальные данные.
+function renderConfidenceChip() {
+  const chip = document.getElementById('confidenceChip');
+  if (!chip) return;
+  const avg = ACTIVE_FORECAST_BY_MODEL.avg;
+  if (currentSourceId !== 'avg' || !avg || !avg[0] || avg[0].confidence == null) {
+    chip.style.display = 'none';
+    return;
+  }
+  const day = avg[0];
+  const cls = confidenceClass(day.confidence);
+  chip.style.display = '';
+  chip.classList.remove('cc-high','cc-mid','cc-low','cc-veryLow');
+  chip.classList.add('cc-' + cls);
+  document.getElementById('confidenceVal').textContent = day.confidence + '%';
+  document.getElementById('confidenceStatus').textContent = t('confidence.' + cls);
+  chip.title = t('confidence.tooltip', { n: day.modelCount || 7, range: day.tempRange != null ? day.tempRange : '?' });
 }
 
 function renderMainChart(forecast) {
@@ -2256,10 +2367,19 @@ function renderMainChart(forecast) {
   const tempsC = today.hourly.map(h => h.t);
   const temps = tempsC.map(c => convertTemp(c, state.units.temp));
   const precs = today.hourly.map(h => h.p);
-  const minT = Math.min(...temps), maxT = Math.max(...temps);
+
+  // Полоса разброса между моделями (только для AVG: tMin/tMax есть только в среднем)
+  const showSpread = currentSourceId === 'avg' && today.hourly.every(h => typeof h.tMin === 'number' && typeof h.tMax === 'number');
+  const spreadMin = showSpread ? today.hourly.map(h => convertTemp(h.tMin, state.units.temp)) : null;
+  const spreadMax = showSpread ? today.hourly.map(h => convertTemp(h.tMax, state.units.temp)) : null;
+
   const tUnit = unitTemp();
   const labelTemp = t('chart.legendTemp');
   const labelPrecip = t('chart.legendPrecip');
+  const labelSpread = t('chart.spreadLabel');
+
+  const allTemps = showSpread ? [...temps, ...spreadMin, ...spreadMax] : temps;
+  const minT = Math.min(...allTemps), maxT = Math.max(...allTemps);
 
   const ctx = document.getElementById('hourlyChart').getContext('2d');
   if (mainChartInstance) mainChartInstance.destroy();
@@ -2269,20 +2389,39 @@ function renderMainChart(forecast) {
   grad.addColorStop(0.5, 'rgba(77,171,247,0.15)');
   grad.addColorStop(1, 'rgba(0,212,255,0.0)');
 
+  const datasets = [];
+  // Полоса разброса: два line-dataset'а min/max, между ними полупрозрачная заливка.
+  // Рисуем первыми чтобы основная температурная линия была сверху.
+  if (showSpread) {
+    datasets.push({
+      type: 'line', label: labelSpread + ' max', data: spreadMax,
+      borderColor: 'rgba(0,212,255,0.18)', borderWidth: 0,
+      pointRadius: 0, pointHoverRadius: 0,
+      fill: '+1', backgroundColor: 'rgba(0,212,255,0.08)',
+      tension: 0.45, yAxisID: 'yT', order: 0
+    });
+    datasets.push({
+      type: 'line', label: labelSpread + ' min', data: spreadMin,
+      borderColor: 'rgba(0,212,255,0.18)', borderWidth: 0,
+      pointRadius: 0, pointHoverRadius: 0,
+      fill: false, tension: 0.45, yAxisID: 'yT', order: 0
+    });
+  }
+  datasets.push({
+    type: 'line', label: labelTemp, data: temps, borderColor: '#00d4ff', backgroundColor: grad, borderWidth: 2.5,
+    pointRadius: hours.map((_,i) => i === NOW_HOUR ? 6 : 0),
+    pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2,
+    pointHoverRadius: 6, fill: true, tension: 0.45, yAxisID: 'yT', order: 1
+  });
+  datasets.push({
+    type: 'bar', label: labelPrecip, data: precs,
+    backgroundColor: hours.map((_,i) => i === NOW_HOUR ? 'rgba(167,139,250,0.85)' : 'rgba(167,139,250,0.4)'),
+    borderRadius: 4, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.65, categoryPercentage: 0.85
+  });
+
   mainChartInstance = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: hours,
-      datasets: [
-        { type: 'line', label: labelTemp, data: temps, borderColor: '#00d4ff', backgroundColor: grad, borderWidth: 2.5,
-          pointRadius: hours.map((_,i) => i === NOW_HOUR ? 6 : 0),
-          pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2,
-          pointHoverRadius: 6, fill: true, tension: 0.45, yAxisID: 'yT', order: 1 },
-        { type: 'bar', label: labelPrecip, data: precs,
-          backgroundColor: hours.map((_,i) => i === NOW_HOUR ? 'rgba(167,139,250,0.85)' : 'rgba(167,139,250,0.4)'),
-          borderRadius: 4, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.65, categoryPercentage: 0.85 }
-      ]
-    },
+    data: { labels: hours, datasets: datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
@@ -2293,11 +2432,23 @@ function renderMainChart(forecast) {
           borderColor: 'rgba(0,212,255,0.3)', borderWidth: 1, padding: 12, cornerRadius: 12,
           titleFont: { family: 'Onest', size: 13, weight: '600' },
           bodyFont: { family: 'Onest', size: 12 },
+          filter: (item) => item.dataset.label === labelTemp || item.dataset.label === labelPrecip,
           callbacks: {
-            title: (items) => items[0].label + ':00',
+            title: (items) => {
+              const hourIdx = items[0].dataIndex;
+              const head = items[0].label + ':00';
+              if (showSpread && spreadMin && spreadMax) {
+                const lo = Math.round(spreadMin[hourIdx]);
+                const hi = Math.round(spreadMax[hourIdx]);
+                return `${head}  ·  ${lo}–${hi}${tUnit}`;
+              }
+              return head;
+            },
             label: (ctx) => {
               const v = Math.round(ctx.parsed.y);
-              return ctx.datasetIndex === 0 ? ` ${labelTemp}: ${v}${tUnit}` : ` ${labelPrecip}: ${v}%`;
+              if (ctx.dataset.label === labelTemp)   return ` ${labelTemp}: ${v}${tUnit}`;
+              if (ctx.dataset.label === labelPrecip) return ` ${labelPrecip}: ${v}%`;
+              return null;
             }
           }
         }
@@ -2318,6 +2469,7 @@ function renderAll() {
   renderHeroAndMetrics(forecast);
   renderDays(forecast);
   renderMainChart(forecast);
+  renderConfidenceChip();
 }
 
 /* ============================================
@@ -3247,8 +3399,8 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v2: после В1 в hourly добавилось поле cl (cloud_cover). Версию подняли, чтобы старый кэш игнорировался.
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v2`;
+  // v3: после В2 в hourly добавились tMin/tMax (полоса разброса), у дня — confidence/tempRange/modelCount.
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v3`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -3563,7 +3715,7 @@ function computeAverageForecast(forecasts) {
     if (days.length === 0) continue;
     const first = days[0];
 
-    // Усреднение часовых (включая feels-like — apparent_temperature)
+    // Усреднение часовых (включая feels-like, cloud_cover, а также min/max температуры среди моделей — для полосы разброса на графике)
     const hourly = [];
     const numHours = Math.min(...days.map(d => d.hourly.length));
     for (let k = 0; k < numHours; k++) {
@@ -3571,6 +3723,7 @@ function computeAverageForecast(forecasts) {
       if (hours.length === 0) continue;
       const feelsVals = hours.map(o => o.feels).filter(v => typeof v === 'number');
       const clVals = hours.map(o => o.cl).filter(v => typeof v === 'number');
+      const tVals = hours.map(o => o.t).filter(v => typeof v === 'number');
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
@@ -3578,7 +3731,9 @@ function computeAverageForecast(forecasts) {
         w: Math.round(meanOf(hours, 'w')),
         c: hours[0].c,
         feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
-        cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null
+        cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null,
+        tMin: tVals.length > 0 ? Math.min(...tVals) : null,
+        tMax: tVals.length > 0 ? Math.max(...tVals) : null
       });
     }
 
@@ -3590,6 +3745,19 @@ function computeAverageForecast(forecasts) {
     const trendCounts = {};
     days.forEach(d => { if (d.pressureTrend) trendCounts[d.pressureTrend] = (trendCounts[d.pressureTrend]||0) + 1; });
     const avgTrend = Object.keys(trendCounts).sort((a,b) => trendCounts[b] - trendCounts[a])[0] || 'stable';
+
+    // === Индекс согласия моделей (confidence) ===
+    // Считаем как разброс max-температуры дня среди моделей.
+    // range = 0°C → 99%, range = 5°C → 50%, дальше плоско на 30%.
+    const dayMaxes = days.map(d => d.max).filter(v => typeof v === 'number');
+    const dayMins  = days.map(d => d.min).filter(v => typeof v === 'number');
+    const maxRange = dayMaxes.length > 1 ? Math.max(...dayMaxes) - Math.min(...dayMaxes) : 0;
+    const minRange = dayMins.length > 1  ? Math.max(...dayMins)  - Math.min(...dayMins)  : 0;
+    const tempRange = Math.max(maxRange, minRange);
+    let confidence = Math.round(99 - (tempRange / 5) * 49);
+    if (confidence > 99) confidence = 99;
+    if (confidence < 30) confidence = 30;
+    const modelCount = days.length;
 
     result.push({
       id: first.id,
@@ -3620,6 +3788,9 @@ function computeAverageForecast(forecasts) {
       uvLabel: avgUv != null ? uvLabelFromValue(avgUv) : null,
       aqi: first.aqi,
       aqiLabel: first.aqiLabel,
+      confidence,
+      tempRange: Math.round(tempRange * 10) / 10,
+      modelCount,
       hourly
     });
   }
