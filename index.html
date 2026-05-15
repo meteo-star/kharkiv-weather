@@ -63,8 +63,58 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .glass{background:linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);border-radius:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.1),inset 0 -1px 0 rgba(0,0,0,0.2),0 8px 32px rgba(0,0,0,0.3);position:relative;overflow:hidden}
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);pointer-events:none}
 
-.hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+.hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:relative;isolation:isolate;min-height:220px}
+.hero-scene{position:absolute;inset:0;z-index:0;border-radius:24px;overflow:hidden;background-color:#0a1838;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.6s ease-in-out}
+.hero-overlay{position:absolute;inset:0;z-index:1;border-radius:24px;background:linear-gradient(90deg,rgba(5,10,38,0.78) 0%,rgba(5,10,38,0.55) 35%,rgba(5,10,38,0.22) 70%,rgba(5,10,38,0.05) 100%);pointer-events:none;transition:background 0.6s ease}
 .hero-info{position:relative;z-index:2}
+/* Адаптация overlay под палитру time-of-day (фото уже несёт цвет — оверлей только подкрашивает левую часть для читаемости) */
+.hero[data-tod="night"] .hero-overlay{background:linear-gradient(90deg,rgba(4,8,31,0.85) 0%,rgba(4,8,31,0.6) 35%,rgba(4,8,31,0.2) 70%,rgba(4,8,31,0.05) 100%)}
+.hero[data-tod="dusk"]  .hero-overlay{background:linear-gradient(90deg,rgba(35,12,40,0.78) 0%,rgba(35,12,40,0.5) 35%,rgba(35,12,40,0.15) 75%,rgba(35,12,40,0.02) 100%)}
+.hero[data-tod="dawn"]  .hero-overlay{background:linear-gradient(90deg,rgba(40,20,55,0.72) 0%,rgba(40,20,55,0.45) 35%,rgba(40,20,55,0.12) 75%,rgba(40,20,55,0.02) 100%)}
+.hero[data-tod="day"]   .hero-overlay{background:linear-gradient(90deg,rgba(8,20,55,0.7) 0%,rgba(8,20,55,0.42) 35%,rgba(8,20,55,0.12) 75%,rgba(8,20,55,0) 100%)}
+/* Слои погодных частиц (Этап 2) */
+.hs-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;border-radius:24px}
+.hs-celestial{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:24px;overflow:hidden}
+/* Дождь — три варианта по ветру: штиль / ветрено / шторм */
+.hs-raindrop{position:absolute;top:-20px;width:1.5px;height:16px;background:linear-gradient(180deg,rgba(180,220,255,0.85) 0%,rgba(180,220,255,0) 100%);border-radius:1px;animation:hs-rain-calm linear infinite;will-change:transform}
+@keyframes hs-rain-calm{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-4px)}}
+@keyframes hs-rain-wind{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-32px)}}
+@keyframes hs-rain-storm{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-72px)}}
+.hs-bg[data-wind="windy"] .hs-raindrop{animation-name:hs-rain-wind;height:20px}
+.hs-bg[data-wind="storm"] .hs-raindrop{animation-name:hs-rain-storm;height:24px;width:2px}
+/* Снег — амплитуда и снос растут с ветром */
+.hs-snowflake{position:absolute;top:-12px;border-radius:50%;background:radial-gradient(circle,#fff 0%,rgba(255,255,255,0.7) 60%,transparent 100%);box-shadow:0 0 4px rgba(255,255,255,0.6);animation:hs-snowfall-calm linear infinite,hs-snowsway-calm ease-in-out infinite alternate;will-change:transform}
+@keyframes hs-snowfall-calm{0%{transform:translateY(0)}100%{transform:translateY(260px)}}
+@keyframes hs-snowfall-wind{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-50px)}}
+@keyframes hs-snowfall-storm{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-110px)}}
+@keyframes hs-snowsway-calm{0%{margin-left:-14px}100%{margin-left:14px}}
+@keyframes hs-snowsway-wind{0%{margin-left:-22px}100%{margin-left:22px}}
+.hs-bg[data-wind="windy"] .hs-snowflake{animation-name:hs-snowfall-wind,hs-snowsway-wind}
+.hs-bg[data-wind="storm"] .hs-snowflake{animation-name:hs-snowfall-storm,hs-snowsway-wind}
+/* Стрики ветра при штормовом ветре (>12 м/с) — независимый слой, появляется для любой сцены */
+.hs-windstreak{position:absolute;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(220,230,255,0.55) 50%,rgba(255,255,255,0) 100%);animation:hs-streak linear infinite;will-change:transform}
+@keyframes hs-streak{0%{transform:translateX(110%)}100%{transform:translateX(-110%)}}
+/* Туман — три плывущих горизонтальных слоя */
+.hs-fogband{position:absolute;left:-30%;width:160%;height:60px;background:linear-gradient(90deg,transparent 0%,rgba(220,225,230,0.45) 25%,rgba(220,225,230,0.55) 50%,rgba(220,225,230,0.45) 75%,transparent 100%);filter:blur(8px);animation:hs-fogdrift linear infinite;will-change:transform}
+@keyframes hs-fogdrift{0%{transform:translateX(0)}100%{transform:translateX(20%)}}
+/* Молнии — overlay-вспышка (центральная, для грозового condition) */
+.hs-lightning{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 25%,rgba(255,255,210,0.9) 0%,rgba(255,250,180,0.4) 25%,rgba(255,250,180,0) 60%);opacity:0;mix-blend-mode:screen;animation:hs-flash 7s steps(1,end) infinite;will-change:opacity}
+@keyframes hs-flash{
+  0%,100%{opacity:0}
+  2%{opacity:0.95}3%{opacity:0.3}3.4%{opacity:0.8}4%{opacity:0}
+  /* пауза */
+  60%{opacity:0}62%{opacity:0.85}62.5%{opacity:0.2}63%{opacity:0.6}64%{opacity:0}
+}
+/* Далёкая гроза — тусклее, реже, смещена в верхний угол (Этап 4) */
+.hs-lightning-distant{position:absolute;top:0;left:0;right:0;height:65%;background:radial-gradient(ellipse at 80% 22%,rgba(255,250,200,0.55) 0%,rgba(255,250,180,0.2) 28%,rgba(255,250,180,0) 60%);opacity:0;mix-blend-mode:screen;animation:hs-flash-distant 22s steps(1,end) infinite;will-change:opacity}
+@keyframes hs-flash-distant{
+  0%,100%{opacity:0}
+  3%{opacity:var(--ld-int,0.5)}3.3%{opacity:0.15}3.6%{opacity:calc(var(--ld-int,0.5) * 0.7)}4%{opacity:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .hero-scene,.hero-overlay{transition:none}
+  .hs-raindrop,.hs-snowflake,.hs-fogband,.hs-lightning{animation:none;opacity:0}
+}
 .hero-label{font-size:12px;font-weight:500;color:rgba(232,240,255,0.5);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px}
 .hero-temp{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;transition:opacity 0.3s}
 .hero-temp-num{font-size:96px;font-weight:300;letter-spacing:-0.06em;line-height:0.9;color:#fff;text-shadow:0 0 40px rgba(0,212,255,0.3);font-feature-settings:'tnum'}
@@ -74,7 +124,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-feels strong{color:#00d4ff;font-weight:500}
 .hero-source-note{font-size:11px;color:rgba(232,240,255,0.4);margin-top:6px;font-family:'JetBrains Mono',monospace}
 .hero-source-note .src-name{color:var(--src-color,#00d4ff);font-weight:500}
-.weather-icon-3d{width:170px;height:170px;animation:floatIcon 4s ease-in-out infinite}
+.weather-icon-3d{width:170px;height:170px;animation:floatIcon 4s ease-in-out infinite;position:relative;z-index:2}
+.hero .weather-icon-3d{display:none}
 @keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
@@ -1189,7 +1240,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <button class="err-retry" id="apiErrorRetry" type="button">Повторить</button>
   </div>
 
-  <div class="glass hero" id="heroBlock">
+  <div class="glass hero" id="heroBlock" data-tod="night">
+    <div class="hero-scene">
+      <div class="hs-bg" id="heroSceneBg"></div>
+      <div class="hs-celestial" id="heroSceneCel"></div>
+    </div>
+    <div class="hero-overlay"></div>
     <div class="hero-info">
       <div class="hero-label" data-i18n="hero.label">Сейчас</div>
       <div class="hero-temp"><span class="hero-temp-num" id="heroTempNum">16</span><span class="hero-temp-unit" id="heroTempUnit">°C</span></div>
@@ -3613,10 +3669,213 @@ function renderSourceIndicator() {
     s.id === 'avg' ? t('chart.sub.avg') : t('chart.sub.named', { name: s.name });
 }
 
+// === Hero scene (Этап 1: фоновая сцена по времени суток) ===
+// Вычисляет time-of-day из sunrise/sunset и применяет соответствующий фон + светило.
+function computeTimeOfDay(today) {
+  const hhmmToMin = (s) => { if (!s || typeof s !== 'string') return null; const [h,m] = s.split(':').map(Number); return (h|0)*60 + (m|0); };
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes();
+  const riseMin = hhmmToMin(today.sunrise) ?? 360;
+  const setMin  = hhmmToMin(today.sunset)  ?? 1200;
+  // dawn: за 60 мин до восхода → +90 мин после; dusk: за 90 мин до заката → +60 мин после
+  if (nowMin >= riseMin - 60 && nowMin < riseMin + 90) return { tod: 'dawn', nowMin, riseMin, setMin };
+  if (nowMin >= riseMin + 90 && nowMin < setMin - 90)  return { tod: 'day', nowMin, riseMin, setMin };
+  if (nowMin >= setMin - 90 && nowMin < setMin + 60)   return { tod: 'dusk', nowMin, riseMin, setMin };
+  return { tod: 'night', nowMin, riseMin, setMin };
+}
+
+// Детерминированные «случайные» точки для звёзд (mulberry32 seed)
+function seededRand(seed) {
+  let s = seed >>> 0;
+  return () => { s = (s + 0x6D2B79F5) | 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
+// Группировка condition → фото-сцена. Сейчас два варианта: clear (ясно) и cloudy (всё остальное).
+function conditionGroup(cond) {
+  if (cond === 'clear' || cond === 'partly-cloudy') return 'clear';
+  return 'cloudy';
+}
+
+// Тип погодных частиц поверх фото (Этап 2)
+function precipitationType(cond) {
+  if (cond === 'rain' || cond === 'heavy-rain') return 'rain';
+  if (cond === 'snow') return 'snow';
+  if (cond === 'fog') return 'fog';
+  if (cond === 'thunderstorm') return 'thunderstorm';
+  return null;
+}
+
+// Генераторы частиц. Каждый возвращает HTML-фрагмент для .hs-bg.
+function rainHtml(count, speedMult = 1.0) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * 100;
+    const dur = (0.55 + Math.random() * 0.45) * speedMult;
+    const delay = -Math.random() * dur;
+    const opacity = 0.6 + Math.random() * 0.4;
+    html += `<div class="hs-raindrop" style="left:${x.toFixed(1)}%;animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s;opacity:${opacity.toFixed(2)}"></div>`;
+  }
+  return html;
+}
+
+function snowHtml(count, speedMult = 1.0) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * 100;
+    const size = 3 + Math.random() * 4;
+    const fallDur = (5 + Math.random() * 4) * speedMult;
+    const swayDur = 2 + Math.random() * 2;
+    const fallDelay = -Math.random() * fallDur;
+    const swayDelay = -Math.random() * swayDur;
+    const opacity = 0.55 + Math.random() * 0.4;
+    html += `<div class="hs-snowflake" style="left:${x.toFixed(1)}%;width:${size.toFixed(1)}px;height:${size.toFixed(1)}px;animation-duration:${fallDur.toFixed(2)}s,${swayDur.toFixed(2)}s;animation-delay:${fallDelay.toFixed(2)}s,${swayDelay.toFixed(2)}s;opacity:${opacity.toFixed(2)}"></div>`;
+  }
+  return html;
+}
+
+function fogHtml() {
+  // 3 слоя на разных высотах и скоростях для глубины
+  return `
+    <div class="hs-fogband" style="top:30%;animation-duration:24s"></div>
+    <div class="hs-fogband" style="top:55%;height:80px;opacity:0.85;animation-duration:32s;animation-direction:reverse"></div>
+    <div class="hs-fogband" style="top:75%;height:50px;opacity:0.75;animation-duration:18s"></div>
+  `;
+}
+
+function lightningHtml() {
+  return `<div class="hs-lightning"></div>`;
+}
+
+// Далёкая гроза — для condition не "thunderstorm", но при высоком грозовом риске.
+// intensity 0..1: чем выше risk (3 или 4), тем ярче вспышка.
+function distantLightningHtml(intensity = 0.55) {
+  return `<div class="hs-lightning-distant" style="--ld-int:${intensity.toFixed(2)}"></div>`;
+}
+
+// Горизонтальные стрики ветра (для штормового ветра >12 м/с)
+function windStreaksHtml(count = 8) {
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const y = 8 + Math.random() * 75;
+    const width = 60 + Math.random() * 140;
+    const dur = 0.4 + Math.random() * 0.6;
+    const delay = -Math.random() * dur;
+    const opacity = 0.4 + Math.random() * 0.5;
+    html += `<div class="hs-windstreak" style="top:${y.toFixed(1)}%;width:${width.toFixed(0)}px;animation-duration:${dur.toFixed(2)}s;animation-delay:${delay.toFixed(2)}s;opacity:${opacity.toFixed(2)}"></div>`;
+  }
+  return html;
+}
+
+// Этап 3: уровни интенсивности и ветра из API
+function precipIntensityLevel(mmPerHour) {
+  if (mmPerHour >= 10) return 'heavy';   // ливень
+  if (mmPerHour >= 4)  return 'moderate';// умеренный
+  return 'light';
+}
+function windLevel(ms) {
+  if (ms >= 12) return 'storm';
+  if (ms >= 6)  return 'windy';
+  return 'calm';
+}
+// Множители количества частиц по интенсивности
+const INTENSITY_MULT = { light: 1.0, moderate: 1.5, heavy: 2.0 };
+// Множитель длительности падения (меньше = быстрее)
+const INTENSITY_SPEED = { light: 1.0, moderate: 0.77, heavy: 0.65 };
+
+function renderHeroScene(today) {
+  const sceneEl = document.querySelector('#heroBlock .hero-scene');
+  const bgEl = document.getElementById('heroSceneBg');
+  const heroEl = document.getElementById('heroBlock');
+  if (!sceneEl || !bgEl || !heroEl) return;
+  const auto = computeTimeOfDay(today).tod;
+  const tod = window.__heroTodOverride || auto;
+  if (heroEl.dataset.tod !== tod) heroEl.dataset.tod = tod;
+  const grp = window.__heroCondOverride || conditionGroup(today.condition);
+  if (heroEl.dataset.cond !== grp) heroEl.dataset.cond = grp;
+  sceneEl.style.backgroundImage = `url('assets/scenes/${tod}-${grp}.webp')`;
+  // Данные текущего часа для интенсивности и ветра
+  const nowH = (today.hourly && today.hourly[NOW_HOUR]) || {};
+  const mmH = (typeof nowH.pmm === 'number') ? nowH.pmm : 0;
+  const windMs = (typeof nowH.w === 'number') ? nowH.w : (today.wind || 0);
+  const intensity = window.__heroIntensityOverride || precipIntensityLevel(mmH);
+  const wind = window.__heroWindOverride || windLevel(windMs);
+  // Мобильная оптимизация — меньше частиц на узких экранах
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 680px)').matches;
+  const mobileMult = isMobile ? 0.6 : 1.0;
+  bgEl.dataset.wind = wind;
+  bgEl.dataset.intensity = intensity;
+  // Тип частиц
+  const precip = window.__heroPrecipOverride || precipitationType(today.condition);
+  const mult = INTENSITY_MULT[intensity] * mobileMult;
+  const speedMult = INTENSITY_SPEED[intensity];
+  let particlesHtml = '';
+  if (precip === 'rain')               particlesHtml = rainHtml(Math.round(45 * mult), speedMult);
+  else if (precip === 'snow')          particlesHtml = snowHtml(Math.round(40 * mult), speedMult);
+  else if (precip === 'fog')           particlesHtml = fogHtml();
+  else if (precip === 'thunderstorm')  particlesHtml = rainHtml(Math.round(50 * mult), speedMult) + lightningHtml();
+  // Этап 4: молнии-предчувствие. Если condition НЕ гроза, но грозовой риск ≥3 — добавляем редкие далёкие вспышки.
+  const stormRiskRaw = (typeof stormRiskLevel === 'function') ? stormRiskLevel(nowH) : 0;
+  const risk = (window.__heroStormRiskOverride != null) ? window.__heroStormRiskOverride : stormRiskRaw;
+  if (precip !== 'thunderstorm' && risk >= 3) {
+    const flashInt = risk >= 4 ? 0.8 : 0.55;
+    particlesHtml += distantLightningHtml(flashInt);
+  }
+  // Стрики ветра — независимый слой, для любых сцен при штормовом ветре
+  if (wind === 'storm') particlesHtml += windStreaksHtml(isMobile ? 6 : 10);
+  bgEl.innerHTML = particlesHtml;
+}
+
+// Debug helpers для DevTools.
+// previewHero('night'|'dawn'|'day'|'dusk'|'auto') — подмена time-of-day
+// previewCond('clear'|'cloudy'|'auto') — подмена condition-группы
+window.previewHero = function(tod) {
+  window.__heroTodOverride = (tod === 'auto' || !tod) ? null : tod;
+  const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
+  if (af && af[0]) renderHeroScene(af[0]);
+  console.log('Hero TOD →', window.__heroTodOverride || 'auto');
+};
+window.previewCond = function(grp) {
+  window.__heroCondOverride = (grp === 'auto' || !grp) ? null : grp;
+  const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
+  if (af && af[0]) renderHeroScene(af[0]);
+  console.log('Hero cond-group →', window.__heroCondOverride || 'auto');
+};
+// previewPrecip('rain'|'snow'|'fog'|'thunderstorm'|'none'|'auto') — подмена типа частиц
+window.previewPrecip = function(precip) {
+  if (precip === 'auto' || !precip) window.__heroPrecipOverride = null;
+  else if (precip === 'none') window.__heroPrecipOverride = 'none';
+  else window.__heroPrecipOverride = precip;
+  const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
+  if (af && af[0]) renderHeroScene(af[0]);
+  console.log('Hero precip →', window.__heroPrecipOverride || 'auto');
+};
+// previewIntensity('light'|'moderate'|'heavy'|'auto') — плотность и скорость
+window.previewIntensity = function(level) {
+  window.__heroIntensityOverride = (level === 'auto' || !level) ? null : level;
+  const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
+  if (af && af[0]) renderHeroScene(af[0]);
+  console.log('Hero intensity →', window.__heroIntensityOverride || 'auto');
+};
+// previewWind('calm'|'windy'|'storm'|'auto') — наклон + стрики
+window.previewWind = function(level) {
+  window.__heroWindOverride = (level === 'auto' || !level) ? null : level;
+  const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
+  if (af && af[0]) renderHeroScene(af[0]);
+  console.log('Hero wind →', window.__heroWindOverride || 'auto');
+};
+// previewStorm(0..4 | 'auto') — грозовой риск для теста далёких вспышек
+window.previewStorm = function(risk) {
+  window.__heroStormRiskOverride = (risk === 'auto' || risk == null) ? null : Number(risk);
+  const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
+  if (af && af[0]) renderHeroScene(af[0]);
+  console.log('Hero storm risk →', window.__heroStormRiskOverride != null ? window.__heroStormRiskOverride : 'auto');
+};
+
 function renderHeroAndMetrics(forecast) {
   const s = getCurrentSource();
   const today = forecast[0];
   const nowH = today.hourly[NOW_HOUR];
+  renderHeroScene(today);
   document.getElementById('heroIcon').innerHTML = weatherIcon(today.condition, 170);
 
   document.getElementById('heroTempNum').textContent = fmtTempNum(nowH.t);
