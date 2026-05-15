@@ -320,6 +320,57 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .scroll-arrow.hdm-arrow.right{right:14px;left:auto}
 .scroll-arrow.hdm-arrow:hover{background:rgba(0,212,255,0.28);border-color:rgba(0,212,255,0.85);box-shadow:0 8px 28px rgba(0,212,255,0.35)}
 
+/* ===== Search Modal (Inverse search — «когда будет ...») ===== */
+.search-modal{max-width:680px}
+.search-modal .modal-day-label{color:#00d4ff}
+.search-input-row{display:flex;gap:10px;margin-bottom:18px}
+.search-input-wrap{flex:1;position:relative;display:flex;align-items:center}
+.search-input-icon{position:absolute;left:14px;color:rgba(0,212,255,0.8);display:flex;align-items:center;pointer-events:none}
+.search-input{width:100%;padding:13px 40px 13px 40px;background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.28);border-radius:14px;font-family:'Onest',sans-serif;font-size:14px;color:#fff;outline:none;transition:all 0.2s ease}
+.search-input::placeholder{color:rgba(232,240,255,0.4)}
+.search-input:focus{border-color:rgba(0,212,255,0.65);background:rgba(0,212,255,0.06);box-shadow:0 0 16px rgba(0,212,255,0.12)}
+.search-clear-btn{position:absolute;right:10px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:rgba(232,240,255,0.55);cursor:pointer;font-size:18px;line-height:1;font-family:'Onest',sans-serif;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.15s ease}
+.search-clear-btn:hover{background:rgba(255,80,80,0.18);color:#ff8080}
+.search-submit-btn{padding:13px 22px;background:linear-gradient(135deg,rgba(0,212,255,0.35) 0%,rgba(0,212,255,0.18) 100%);border:1px solid rgba(0,212,255,0.55);border-radius:14px;color:#fff;font-family:'Onest',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;box-shadow:0 4px 16px rgba(0,212,255,0.18)}
+.search-submit-btn:hover{background:linear-gradient(135deg,rgba(0,212,255,0.5) 0%,rgba(0,212,255,0.28) 100%);box-shadow:0 6px 20px rgba(0,212,255,0.32);transform:translateY(-1px)}
+.search-submit-btn:active{transform:translateY(0) scale(0.97)}
+
+.search-presets-title{font-size:11px;color:rgba(232,240,255,0.5);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-bottom:10px}
+.search-presets-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.search-preset{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:100px;color:rgba(232,240,255,0.85);font-family:'Onest',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s ease;user-select:none}
+.search-preset:hover{background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.4);color:#fff;transform:translateY(-1px)}
+.search-preset:active{transform:translateY(0) scale(0.97)}
+.search-preset-emoji{font-size:14px}
+
+.search-results{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+.search-results:empty{display:none}
+.search-result-card{padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(0,212,255,0.18);border-radius:14px;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;gap:14px}
+.search-result-card:hover{background:rgba(0,212,255,0.06);border-color:rgba(0,212,255,0.4);transform:translateX(3px)}
+.search-result-icon{width:46px;height:46px;flex-shrink:0}
+.search-result-body{flex:1;min-width:0}
+.search-result-head{display:flex;align-items:baseline;gap:8px;font-size:14px;color:#fff;font-weight:600;margin-bottom:3px}
+.search-result-head .sr-day{color:#00d4ff}
+.search-result-head .sr-range{font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum'}
+.search-result-sub{font-size:12px;color:rgba(232,240,255,0.6);margin-bottom:4px}
+.search-result-meta{font-size:11px;color:rgba(232,240,255,0.5);display:flex;gap:10px;flex-wrap:wrap;font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum'}
+.search-result-arrow{color:rgba(0,212,255,0.5);font-size:18px;flex-shrink:0;transition:transform 0.2s ease}
+.search-result-card:hover .search-result-arrow{transform:translateX(3px);color:#00d4ff}
+
+.search-empty{padding:24px 16px;text-align:center;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:14px;color:rgba(232,240,255,0.65)}
+.search-empty-icon{font-size:32px;margin-bottom:8px;opacity:0.6}
+.search-empty-title{font-size:14px;color:#fff;font-weight:500;margin-bottom:4px}
+.search-empty-hint{font-size:12px;color:rgba(232,240,255,0.5)}
+
+.search-error{padding:14px 16px;background:rgba(255,100,100,0.08);border:1px solid rgba(255,100,100,0.3);border-radius:12px;color:#ffb0b0;font-size:13px}
+
+@media (max-width: 640px){
+  .search-input-row{flex-direction:column;gap:8px}
+  .search-submit-btn{width:100%}
+  .search-result-icon{width:38px;height:38px}
+  .search-result-head{font-size:13px}
+  .search-result-sub{font-size:11px}
+}
+
 @media (max-width: 640px){
   .hdm-top{padding:12px 14px}
   .hdm-title{font-size:15px;margin-right:30px}
@@ -521,6 +572,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
    ============================================ */
 .header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
 
+.search-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(0,212,255,0.32);border-radius:100px;font-family:'Onest',sans-serif;font-size:12px;color:#e8f0ff;font-weight:500;cursor:pointer;transition:all 0.25s ease;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(0,212,255,0.1);margin-right:8px;white-space:nowrap}
+.search-chip:hover{border-color:rgba(0,212,255,0.6);background:rgba(0,212,255,0.08);box-shadow:0 0 24px rgba(0,212,255,0.22);transform:translateY(-1px)}
+.search-chip:active{transform:translateY(0) scale(0.98)}
+.search-chip .search-icon{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:#00d4ff;transition:transform 0.3s ease}
+.search-chip:hover .search-icon{transform:scale(1.15)}
+
 .settings-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(167,139,250,0.3);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e8f0ff;font-weight:500;cursor:pointer;transition:all 0.25s ease;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(167,139,250,0.1)}
 .settings-chip:hover{border-color:rgba(167,139,250,0.55);background:rgba(255,255,255,0.06);box-shadow:0 0 24px rgba(167,139,250,0.2);transform:translateY(-1px)}
 .settings-chip:active{transform:translateY(0) scale(0.98)}
@@ -547,6 +604,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @media (max-width: 640px){
   .settings-chip{font-size:10px;padding:6px 10px;gap:6px}
   .settings-chip .val:nth-of-type(n+3),.settings-chip .sep:nth-of-type(n+2){display:none}
+  .search-chip{padding:6px 10px;gap:5px;font-size:11px;margin-right:6px}
+  .search-chip .search-chip-label{display:none}
   .settings-section{padding:12px}
   .seg-btn{min-width:54px;padding:8px 8px;font-size:11px}
   .seg-btn .seg-main{font-size:12px}
@@ -934,6 +993,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       </div>
     </div>
     <div class="header-right">
+      <button class="search-chip" id="searchChip" type="button" aria-label="Найти окно погоды" data-i18n-aria="search.aria">
+        <span class="search-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </span>
+        <span class="search-chip-label" data-i18n="search.chip">Найти окно</span>
+      </button>
       <button class="settings-chip" id="settingsChip" type="button" aria-label="Настройки" data-i18n-aria="settings.aria">
         <span class="gear-icon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1395,6 +1460,40 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   </div>
 </div>
 
+<div class="modal-backdrop" id="searchModal" role="dialog" aria-modal="true" aria-labelledby="searchModalTitle">
+  <div class="modal search-modal">
+    <button class="modal-close" id="searchModalClose" aria-label="Закрыть" data-i18n-aria="modal.closeAria">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-header">
+      <div class="modal-day-label" data-i18n="search.label">Inverse search</div>
+      <h2 class="modal-day-title" id="searchModalTitle" data-i18n="search.title">Когда будет нужная погода?</h2>
+      <div class="modal-day-date" data-i18n="search.sub">Опиши условие — найдём ближайшее окно в 10-дневном прогнозе</div>
+    </div>
+
+    <div class="search-input-row">
+      <div class="search-input-wrap">
+        <span class="search-input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+        </span>
+        <input type="text" id="searchInput" class="search-input"
+               data-i18n-placeholder="search.placeholder"
+               placeholder="например: без дождя 6 часов, тепло выше +20, ясное утро"
+               autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Очистить" style="display:none">×</button>
+      </div>
+      <button type="button" class="search-submit-btn" id="searchSubmitBtn" data-i18n="search.button">Найти</button>
+    </div>
+
+    <div class="search-presets" id="searchPresets">
+      <div class="search-presets-title" data-i18n="search.popularTitle">Популярные запросы</div>
+      <div class="search-presets-grid" id="searchPresetsGrid"></div>
+    </div>
+
+    <div class="search-results" id="searchResults" aria-live="polite"></div>
+  </div>
+</div>
+
 <div class="hdm-backdrop" id="hourlyDetailModal" role="dialog" aria-modal="true" aria-labelledby="hdmTitle" aria-hidden="true">
   <div class="hdm-sheet">
     <div class="hdm-top">
@@ -1493,6 +1592,35 @@ const I18N = {
     'precip.tomorrow': 'завтра',
     'precip.legend': 'мм/ч',
     'hdm.title': 'Почасовой',
+    'search.chip': 'Найти окно',
+    'search.aria': 'Найти окно погоды',
+    'search.label': 'Inverse search',
+    'search.title': 'Когда будет нужная погода?',
+    'search.sub': 'Опиши условие — найдём ближайшее окно в 10-дневном прогнозе',
+    'search.placeholder': 'например: без дождя 6 часов, тепло выше +20, ясное утро',
+    'search.button': 'Найти',
+    'search.popularTitle': 'Популярные запросы',
+    'search.empty.title': 'В ближайшие 10 дней такого не будет',
+    'search.empty.hint': 'Попробуй другое условие из подсказок',
+    'search.empty.closest': 'Самое близкое: {when}',
+    'search.error.parse': 'Не понял запрос. Попробуй пример из подсказок.',
+    'search.results.found': 'Найдено {n} {label}',
+    'search.results.label.one': 'окно',
+    'search.results.label.few': 'окна',
+    'search.results.label.many': 'окон',
+    'search.duration.hours': '{n}ч',
+    'search.tempRange': '{lo}…{hi}',
+    'search.wind': 'ветер {v} {unit}',
+    'search.day.today': 'Сегодня',
+    'search.day.tomorrow': 'Завтра',
+    'search.preset.norain': 'без дождя ≥6ч',
+    'search.preset.warm': 'тепло выше +20',
+    'search.preset.clear': 'ясно',
+    'search.preset.calm': 'тихо без ветра',
+    'search.preset.run': 'пробежка',
+    'search.preset.bbq': 'шашлык',
+    'search.preset.carwash': 'мойка авто',
+    'search.preset.storm': 'когда гроза',
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Осадки',
     'sources.title': 'Источник прогноза',
@@ -1767,6 +1895,35 @@ const I18N = {
     'precip.tomorrow': 'завтра',
     'precip.legend': 'мм/год',
     'hdm.title': 'Погодинний',
+    'search.chip': 'Знайти вікно',
+    'search.aria': 'Знайти вікно погоди',
+    'search.label': 'Inverse search',
+    'search.title': 'Коли буде потрібна погода?',
+    'search.sub': 'Опиши умову — знайдемо найближче вікно в 10-денному прогнозі',
+    'search.placeholder': 'наприклад: без дощу 6 годин, тепло вище +20, ясний ранок',
+    'search.button': 'Знайти',
+    'search.popularTitle': 'Популярні запити',
+    'search.empty.title': 'У найближчі 10 днів такого не буде',
+    'search.empty.hint': 'Спробуй іншу умову з підказок',
+    'search.empty.closest': 'Найближче: {when}',
+    'search.error.parse': 'Не зрозумів запит. Спробуй приклад з підказок.',
+    'search.results.found': 'Знайдено {n} {label}',
+    'search.results.label.one': 'вікно',
+    'search.results.label.few': 'вікна',
+    'search.results.label.many': 'вікон',
+    'search.duration.hours': '{n}год',
+    'search.tempRange': '{lo}…{hi}',
+    'search.wind': 'вітер {v} {unit}',
+    'search.day.today': 'Сьогодні',
+    'search.day.tomorrow': 'Завтра',
+    'search.preset.norain': 'без дощу ≥6год',
+    'search.preset.warm': 'тепло вище +20',
+    'search.preset.clear': 'ясно',
+    'search.preset.calm': 'тихо без вітру',
+    'search.preset.run': 'пробіжка',
+    'search.preset.bbq': 'шашлик',
+    'search.preset.carwash': 'мийка авто',
+    'search.preset.storm': 'коли гроза',
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Опади',
     'sources.title': 'Джерело прогнозу',
@@ -2041,6 +2198,35 @@ const I18N = {
     'precip.tomorrow': 'tomorrow',
     'precip.legend': 'mm/h',
     'hdm.title': 'Hourly',
+    'search.chip': 'Find window',
+    'search.aria': 'Find weather window',
+    'search.label': 'Inverse search',
+    'search.title': 'When will the right weather come?',
+    'search.sub': 'Describe the condition — we will find the nearest window in the 10-day forecast',
+    'search.placeholder': 'e.g. no rain for 6 hours, warm above +20, clear morning',
+    'search.button': 'Find',
+    'search.popularTitle': 'Popular queries',
+    'search.empty.title': 'No such window in the next 10 days',
+    'search.empty.hint': 'Try a different condition from the suggestions',
+    'search.empty.closest': 'Closest: {when}',
+    'search.error.parse': 'Could not parse the query. Try an example from the suggestions.',
+    'search.results.found': 'Found {n} {label}',
+    'search.results.label.one': 'window',
+    'search.results.label.few': 'windows',
+    'search.results.label.many': 'windows',
+    'search.duration.hours': '{n}h',
+    'search.tempRange': '{lo}…{hi}',
+    'search.wind': 'wind {v} {unit}',
+    'search.day.today': 'Today',
+    'search.day.tomorrow': 'Tomorrow',
+    'search.preset.norain': 'no rain ≥6h',
+    'search.preset.warm': 'warm above +20',
+    'search.preset.clear': 'clear sky',
+    'search.preset.calm': 'calm no wind',
+    'search.preset.run': 'good for a run',
+    'search.preset.bbq': 'bbq weather',
+    'search.preset.carwash': 'car wash',
+    'search.preset.storm': 'when thunderstorm',
     'chart.legendTemp': 'Temperature',
     'chart.legendPrecip': 'Precipitation',
     'sources.title': 'Forecast source',
@@ -3400,6 +3586,342 @@ function setupHourlyDetailModal() {
   backBtn.addEventListener('click', closeHourlyDetail);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeHourlyDetail();
+  });
+}
+
+/* ============================================
+   INVERSE SEARCH — «когда будет нужная погода?»
+   Парсер: 10 паттернов через regex (без дождя, тепло выше +N, ясно, ветер и т.д.)
+   Сканер: проходит почасовой массив всех дней, группирует подряд идущие совпадения в окна
+   Рендер: карточки окон с метаданными + клик открывает детальную модалку
+   ============================================ */
+
+let searchEscHandler = null;
+
+// Разбирает текст запроса в структурированный фильтр {type, threshold?, minDuration?, preset?}.
+// Возвращает null если не понял.
+function parseSearchQuery(text) {
+  if (!text || typeof text !== 'string') return null;
+  const q = text.toLowerCase().replace(/ё/g, 'е').replace(/\s+/g, ' ').trim();
+  if (!q) return null;
+
+  // Числа в запросе (для «без дождя 6ч», «выше +20» и т.п.)
+  const numbers = (q.match(/-?\d+/g) || []).map(Number);
+  const firstNum = numbers.length > 0 ? numbers[0] : null;
+
+  // Пресеты — переиспользуем concept из карточки "Окна возможностей" (фаза В3)
+  if (/(пробеж|пробiж|run|jog)/.test(q))                    return { type:'preset', preset:'run', raw:q };
+  if (/(шашлы|шашли|bbq|barbecue|grill)/.test(q))           return { type:'preset', preset:'bbq', raw:q };
+  if (/(мой(к|т)\s*ав|мийк|car\s*wash|carwash)/.test(q))    return { type:'preset', preset:'carwash', raw:q };
+  if (/(прогул|walk|выгул)/.test(q))                        return { type:'preset', preset:'walk', raw:q };
+  if (/(поли(в|ть)|water(ing)?\s*plant)/.test(q))           return { type:'preset', preset:'water', raw:q };
+  if (/(бель[еёє]|laundry|сушит.*дос)/.test(q))             return { type:'preset', preset:'laundry', raw:q };
+
+  // Гроза
+  if (/(гроз|молн|thunder|lightning)/.test(q))              return { type:'thunderstorm', raw:q };
+  // Снег
+  if (/(\bснег\b|снiг|snow|первый\s*снег)/.test(q))         return { type:'snow', raw:q };
+
+  // Без дождя N часов
+  if (/(без\s*до(ж|щ)|сух(о|их|ие)?|без\s*осад|no\s*rain|\bdry\b)/.test(q)) {
+    const dur = firstNum && firstNum > 0 && firstNum <= 24 ? firstNum : 4;
+    return { type:'no_rain', minDuration: dur, raw:q };
+  }
+
+  // Сильный ветер / шторм
+  if (/(сильн.*ветр|сильн.*вiтр|штормит|шторм\b|windy|strong\s*wind|gale)/.test(q)) {
+    return { type:'windy', threshold: firstNum != null ? firstNum : 10, raw:q };
+  }
+  // Без ветра / тихо / штиль
+  if (/(тихо|без\s*ветр|без\s*вiтр|штил|calm|no\s*wind)/.test(q)) {
+    return { type:'calm', threshold: firstNum != null ? firstNum : 3, raw:q };
+  }
+
+  // Холодно ниже / заморозок
+  if (/(холодн|cold|below|ниже|нижче|заморозок|freeze|frost)/.test(q)) {
+    return { type:'temp_below', threshold: firstNum != null ? firstNum : 0, raw:q };
+  }
+  // Тепло выше +N / жара
+  if (/(тепл|тепле|жар|hot|warm|above|выше|вище|больше\s*\+|more\s*than)/.test(q)) {
+    return { type:'temp_above', threshold: firstNum != null ? firstNum : 20, raw:q };
+  }
+
+  // Ясное / солнечно
+  if (/(ясн|солнечн|сонячн|clear|sunny|без\s*облак)/.test(q)) {
+    return { type:'clear', raw:q };
+  }
+
+  // Если есть число и слово «градус» — считаем что это temp_above
+  if (firstNum != null && /(градус|°|degree)/.test(q)) {
+    return { type: firstNum >= 0 ? 'temp_above' : 'temp_below', threshold: firstNum, raw:q };
+  }
+
+  return null;
+}
+
+// Возвращает функцию-предикат (час → boolean) для фильтра.
+function makeSearchMatcher(filter) {
+  if (!filter) return null;
+  // "Сухо": реальные осадки в мм/ч ниже порога.
+  // Не проверяем h.c (weather_code → condition) — он может быть 'rain' если 1-2 модели
+  // предсказывают морось, при этом среднее pmm всё равно ≈ 0.
+  // Достаточно факта осадков: pmm — это среднее количество мм/ч по 7 моделям.
+  const noRainCond = (h) => (typeof h.pmm === 'number' ? h.pmm : 0) < 0.1;
+  switch (filter.type) {
+    case 'no_rain':     return noRainCond;
+    case 'temp_above':  return (h) => h.t >= filter.threshold;
+    case 'temp_below':  return (h) => h.t < filter.threshold;
+    case 'calm':        return (h) => (typeof h.w === 'number' ? h.w : 0) <= filter.threshold && noRainCond(h);
+    case 'windy':       return (h) => (typeof h.w === 'number' ? h.w : 0) >= filter.threshold;
+    case 'clear':       return (h) => (h.cl == null || h.cl < 30) && noRainCond(h);
+    case 'thunderstorm':return (h) => h.c === 'thunderstorm' || (typeof h.wc === 'number' && h.wc >= 95 && h.wc <= 99);
+    case 'snow':        return (h) => h.c === 'snow' || (typeof h.wc === 'number' && h.wc >= 71 && h.wc <= 77);
+    case 'preset':
+      switch (filter.preset) {
+        case 'run':     return (h) => noRainCond(h) && h.t >= 5 && h.t <= 25 && (h.w || 0) < 7;
+        case 'bbq':     return (h) => noRainCond(h) && h.t >= 15 && (h.w || 0) < 5;
+        case 'carwash': return (h) => noRainCond(h) && h.t > 0;
+        case 'walk':    return (h) => noRainCond(h) && h.t >= 0 && (h.w || 0) < 7;
+        case 'water':   return (h) => h.t >= 8 && h.t <= 25 && (h.cl == null || h.cl < 70);
+        case 'laundry': return (h) => noRainCond(h) && (h.hum == null || h.hum < 70) && (h.w || 0) < 10;
+        default: return null;
+      }
+    default: return null;
+  }
+}
+
+// Сканер — собирает все часы из forecast, группирует подряд идущие совпадения в окна.
+// Возвращает массив окон, отсортированных по времени появления.
+function findSearchWindows(forecast, filter) {
+  if (!forecast || !filter) return [];
+  const matcher = makeSearchMatcher(filter);
+  if (!matcher) return [];
+
+  const minDuration = filter.minDuration || 1;
+
+  // Flatten все часы со ссылкой на день
+  const all = [];
+  for (let di = 0; di < forecast.length; di++) {
+    const day = forecast[di];
+    if (!day || !day.hourly) continue;
+    for (let hi = 0; hi < day.hourly.length; hi++) {
+      all.push({ h: day.hourly[hi], dayIdx: di, hourIdx: hi, day });
+    }
+  }
+  // Для "сегодня" отсекаем часы до текущего — искать в прошлом бессмысленно
+  const startCursor = (forecast[0] && forecast[0].id === 0) ? NOW_HOUR : 0;
+  const filtered = all.slice(startCursor);
+
+  const windows = [];
+  let run = null;
+  // Длинные окна, перекрывающие несколько дней, разбиваем на пер-дневные сегменты —
+  // иначе суббота, входящая в "Сегодня→Сб→Вс" 48-часовое окно, скрывается под лейблом "Сегодня".
+  const pushRun = (start, end) => {
+    const byDay = new Map();
+    for (let k = start; k <= end; k++) {
+      const di = filtered[k].dayIdx;
+      if (!byDay.has(di)) byDay.set(di, { startI: k, endI: k });
+      else byDay.get(di).endI = k;
+    }
+    for (const range of byDay.values()) {
+      windows.push(buildSearchWindow(filtered, range.startI, range.endI));
+    }
+  };
+  for (let i = 0; i < filtered.length; i++) {
+    if (matcher(filtered[i].h)) {
+      if (!run) run = { startI: i, endI: i };
+      else run.endI = i;
+    } else if (run) {
+      pushRun(run.startI, run.endI);
+      run = null;
+    }
+  }
+  if (run) pushRun(run.startI, run.endI);
+
+  // Фильтрация по minDuration, потом сортировка:
+  // ближайшие окна важнее, но среди равных по близости — длинные приоритетнее
+  // (комбинированный score: dayIdx * 10000 - duration; меньше = лучше)
+  return windows
+    .filter(w => w.duration >= minDuration)
+    .sort((a, b) => {
+      // Сначала по дню (раньше = выше)
+      if (a.dayIdx !== b.dayIdx) return a.dayIdx - b.dayIdx;
+      // Внутри одного дня — по длительности убыванию
+      return b.duration - a.duration;
+    })
+    .slice(0, 15);
+}
+
+function buildSearchWindow(items, startI, endI) {
+  const slice = items.slice(startI, endI + 1);
+  const first = slice[0];
+  const last = slice[slice.length - 1];
+  const temps = slice.map(s => s.h.t).filter(v => typeof v === 'number');
+  const winds = slice.map(s => s.h.w || 0);
+  const midItem = slice[Math.floor(slice.length / 2)];
+  return {
+    duration: slice.length,
+    dayIdx: first.dayIdx,
+    day: first.day,
+    hourStart: first.h.h,
+    hourEnd: last.h.h,
+    startHourIdx: first.hourIdx,
+    tMin: temps.length ? Math.min(...temps) : 0,
+    tMax: temps.length ? Math.max(...temps) : 0,
+    wAvg: Math.round(winds.reduce((a, b) => a + b, 0) / winds.length),
+    cond: midItem.h.c || 'cloudy'
+  };
+}
+
+function renderSearchResults(windows, filter) {
+  const container = document.getElementById('searchResults');
+  if (!container) return;
+
+  if (!windows.length) {
+    container.innerHTML = `
+      <div class="search-empty">
+        <div class="search-empty-icon">😔</div>
+        <div class="search-empty-title">${t('search.empty.title')}</div>
+        <div class="search-empty-hint">${t('search.empty.hint')}</div>
+      </div>`;
+    return;
+  }
+
+  const n = windows.length;
+  const label = n === 1 ? t('search.results.label.one')
+              : (n <= 4 ? t('search.results.label.few') : t('search.results.label.many'));
+  const header = `<div class="search-presets-title">${t('search.results.found', { n, label })}</div>`;
+
+  const cards = windows.map(w => {
+    const dayName = w.dayIdx === 0 ? t('search.day.today')
+                  : (w.dayIdx === 1 ? t('search.day.tomorrow')
+                  : `${localizeDayShort(w.day.name)}, ${(w.day.date || '').slice(0,5)}`);
+    const range = `${String(w.hourStart).padStart(2,'0')}:00 – ${String(w.hourEnd).padStart(2,'0')}:00`;
+    const durStr = t('search.duration.hours', { n: w.duration });
+    const tLo = fmtTempNum(w.tMin), tHi = fmtTempNum(w.tMax);
+    const tempStr = `${tLo}…${tHi}${unitTemp()}`;
+    const windStr = `💨 ${fmtWind(w.wAvg, { withUnit: false })} ${unitWind()}`;
+    return `
+      <div class="search-result-card" data-day-idx="${w.dayIdx}" data-hour="${w.startHourIdx}">
+        <div class="search-result-icon">${weatherIcon(w.cond, 46)}</div>
+        <div class="search-result-body">
+          <div class="search-result-head"><span class="sr-day">${dayName}</span> · <span class="sr-range">${range}</span> · ${durStr}</div>
+          <div class="search-result-meta"><span>🌡 ${tempStr}</span><span>${windStr}</span></div>
+        </div>
+        <div class="search-result-arrow">→</div>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = header + cards;
+  container.querySelectorAll('.search-result-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const dayIdx = parseInt(card.dataset.dayIdx, 10);
+      const hour = parseInt(card.dataset.hour, 10);
+      closeSearchModal();
+      // Если это сегодня — открываем hourly detail на этом часе; иначе обычную day-модалку
+      setTimeout(() => {
+        if (dayIdx === 0) openHourlyDetail(isNaN(hour) ? 0 : hour);
+        else openModal(dayIdx);
+      }, 320);  // ждём пока закроется search modal
+    });
+  });
+}
+
+function doSearch(query) {
+  const resultsEl = document.getElementById('searchResults');
+  if (!resultsEl) return;
+  const filter = parseSearchQuery(query);
+  if (!filter) {
+    resultsEl.innerHTML = `<div class="search-error">${t('search.error.parse')}</div>`;
+    return;
+  }
+  const forecast = getForecast(currentSourceId);
+  const windows = findSearchWindows(forecast, filter);
+  renderSearchResults(windows, filter);
+}
+
+function renderSearchPresets() {
+  const grid = document.getElementById('searchPresetsGrid');
+  if (!grid) return;
+  // Локализованный запрос (в actual query идёт нелокализованная подсказка — парсер всё равно matchнет)
+  const presets = [
+    { emoji:'🌤', key:'search.preset.norain',  query:'без дождя 6 часов' },
+    { emoji:'🌡', key:'search.preset.warm',    query:'когда выше +20' },
+    { emoji:'☀',  key:'search.preset.clear',   query:'когда ясно' },
+    { emoji:'💨', key:'search.preset.calm',    query:'без ветра' },
+    { emoji:'🏃', key:'search.preset.run',     query:'пробежка' },
+    { emoji:'🍖', key:'search.preset.bbq',     query:'шашлык' },
+    { emoji:'🚗', key:'search.preset.carwash', query:'мойка авто' },
+    { emoji:'⛈', key:'search.preset.storm',   query:'когда гроза' }
+  ];
+  grid.innerHTML = presets.map(p =>
+    `<button class="search-preset" type="button" data-query="${p.query}">
+      <span class="search-preset-emoji">${p.emoji}</span>
+      <span>${t(p.key)}</span>
+    </button>`).join('');
+  grid.querySelectorAll('.search-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.query;
+      const input = document.getElementById('searchInput');
+      if (input) input.value = q;
+      doSearch(q);
+    });
+  });
+}
+
+function openSearchModal() {
+  const modal = document.getElementById('searchModal');
+  if (!modal) return;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Перерисовать пресеты (текст обновится при смене языка)
+  renderSearchPresets();
+  // Фокус в инпут после анимации
+  setTimeout(() => {
+    const input = document.getElementById('searchInput');
+    if (input) input.focus();
+  }, 320);
+  searchEscHandler = (e) => { if (e.key === 'Escape') closeSearchModal(); };
+  document.addEventListener('keydown', searchEscHandler);
+}
+
+function closeSearchModal() {
+  const modal = document.getElementById('searchModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  if (searchEscHandler) {
+    document.removeEventListener('keydown', searchEscHandler);
+    searchEscHandler = null;
+  }
+}
+
+function setupSearchModal() {
+  const chip = document.getElementById('searchChip');
+  const modal = document.getElementById('searchModal');
+  const closeBtn = document.getElementById('searchModalClose');
+  const input = document.getElementById('searchInput');
+  const submitBtn = document.getElementById('searchSubmitBtn');
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (!chip || !modal || !input || !submitBtn) return;
+
+  chip.addEventListener('click', openSearchModal);
+  closeBtn.addEventListener('click', closeSearchModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeSearchModal(); });
+
+  submitBtn.addEventListener('click', () => doSearch(input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); doSearch(input.value); }
+  });
+  input.addEventListener('input', () => {
+    clearBtn.style.display = input.value ? '' : 'none';
+  });
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    clearBtn.style.display = 'none';
+    const results = document.getElementById('searchResults');
+    if (results) results.innerHTML = '';
+    input.focus();
   });
 }
 
@@ -6194,6 +6716,7 @@ setupSegmentedHandlers();
 setupHourlyTabs();
 setupScrollArrows();
 setupHourlyDetailModal();
+setupSearchModal();
 applyAll();
 
 // PWA: регистрируем service-worker для офлайн-кэша и установки приложения на главный экран.
