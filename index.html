@@ -3,11 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Content Security Policy: разрешаем только нужные источники (Chart.js CDN, Google Fonts, Open-Meteo API, Nominatim).
+     'unsafe-inline' оставлен потому что у нас inline-стили и inline-скрипт в одном файле. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://archive-api.open-meteo.com https://geocoding-api.open-meteo.com https://nominatim.openstreetmap.org; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
 <title>Метеоагрегатор · Харьков</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- Chart.js с SRI: хэш SHA-384 защищает от подмены кода на CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -1435,6 +1439,10 @@ const I18N = {
     'metric.rain': 'Осадки',
     'metric.pressure': 'Давление',
     'metric.humidity': 'Влажность',
+    'metric.dewpoint': 'Точка росы',
+    'metric.uv': 'УФ-индекс',
+    'metric.visibility': 'Видимость',
+    'metric.solar': 'Солнечная радиация',
     'metric.windSub': '{dir} · порывы {gust}',
     'metric.rainSub': '~{mm} мм · {desc}',
     'metric.rain.none': 'без осадков',
@@ -1705,6 +1713,10 @@ const I18N = {
     'metric.rain': 'Опади',
     'metric.pressure': 'Тиск',
     'metric.humidity': 'Вологість',
+    'metric.dewpoint': 'Точка роси',
+    'metric.uv': 'УФ-індекс',
+    'metric.visibility': 'Видимість',
+    'metric.solar': 'Сонячна радіація',
     'metric.windSub': '{dir} · пориви {gust}',
     'metric.rainSub': '~{mm} мм · {desc}',
     'metric.rain.none': 'без опадів',
@@ -1975,6 +1987,10 @@ const I18N = {
     'metric.rain': 'Precipitation',
     'metric.pressure': 'Pressure',
     'metric.humidity': 'Humidity',
+    'metric.dewpoint': 'Dew point',
+    'metric.uv': 'UV index',
+    'metric.visibility': 'Visibility',
+    'metric.solar': 'Solar radiation',
     'metric.windSub': '{dir} · gusts {gust}',
     'metric.rainSub': '~{mm} mm · {desc}',
     'metric.rain.none': 'no precipitation',
@@ -3198,13 +3214,22 @@ function hdmMetricsConfig() {
   const blueColor = '#00d4ff';
   const purpleColor = '#a78bfa';
   const grayColor = '#9ca3af';
+  const cyanColor = '#67e8f9';
+  const violetColor = '#c084fc';
+  const yellowColor = '#fde047';
+  const whiteColor = '#e5e7eb';
   return [
-    { id:'temp',     emoji:'🌡', nameKey:'metric.temp',     unit:unitTemp(),                color:tempColor,   get:h=>convertTemp(h.t, state.units.temp),                                fmt:v=>`${Math.round(v)}°` },
-    { id:'feels',    emoji:'🌡', nameKey:'metric.feels',    unit:unitTemp(),                color:tempColor,   get:h=>convertTemp(h.feels!=null?h.feels:h.t, state.units.temp),          fmt:v=>`${Math.round(v)}°` },
-    { id:'precip',   emoji:'💧', nameKey:'metric.rain',     unit:'%',                       color:blueColor,   get:h=>typeof h.p==='number'?h.p:0,                                       fmt:v=>`${Math.round(v)}` },
-    { id:'pmm',      emoji:'🌧', nameKey:'precip.title',    unit:'мм',                      color:blueColor,   get:h=>typeof h.pmm==='number'?h.pmm:0,                                   fmt:v=>`${Math.round(v*10)/10}` },
-    { id:'wind',     emoji:'💨', nameKey:'metric.wind',     unit:unitWind(),                color:grayColor,   get:h=>convertWind(h.w, state.units.wind),                                fmt:v=>`${Math.round(v)}` },
-    { id:'pressure', emoji:'⊙',  nameKey:'metric.pressure', unit:shortMetricUnit('pressure'), color:purpleColor, get:h=>h.pr!=null?convertPressure(h.pr, state.units.pressure):null,      fmt:v=>v!=null?`${Math.round(v)}`:'—' }
+    { id:'temp',       emoji:'🌡', nameKey:'metric.temp',       unit:unitTemp(),                  color:tempColor,   get:h=>convertTemp(h.t, state.units.temp),                            fmt:v=>`${Math.round(v)}°` },
+    { id:'feels',      emoji:'🌡', nameKey:'metric.feels',      unit:unitTemp(),                  color:tempColor,   get:h=>convertTemp(h.feels!=null?h.feels:h.t, state.units.temp),      fmt:v=>`${Math.round(v)}°` },
+    { id:'precip',     emoji:'💧', nameKey:'metric.rain',       unit:'%',                         color:blueColor,   get:h=>typeof h.p==='number'?h.p:0,                                   fmt:v=>`${Math.round(v)}` },
+    { id:'pmm',        emoji:'🌧', nameKey:'precip.title',      unit:'мм',                        color:blueColor,   get:h=>typeof h.pmm==='number'?h.pmm:0,                               fmt:v=>`${Math.round(v*10)/10}` },
+    { id:'wind',       emoji:'💨', nameKey:'metric.wind',       unit:unitWind(),                  color:grayColor,   get:h=>convertWind(h.w, state.units.wind),                            fmt:v=>`${Math.round(v)}` },
+    { id:'pressure',   emoji:'⊙',  nameKey:'metric.pressure',   unit:shortMetricUnit('pressure'), color:purpleColor, get:h=>h.pr!=null?convertPressure(h.pr, state.units.pressure):null,   fmt:v=>v!=null?`${Math.round(v)}`:'—' },
+    { id:'humidity',   emoji:'💦', nameKey:'metric.humidity',   unit:'%',                         color:cyanColor,   get:h=>typeof h.hum==='number'?h.hum:null,                            fmt:v=>v!=null?`${Math.round(v)}`:'—' },
+    { id:'dewpoint',   emoji:'🌫', nameKey:'metric.dewpoint',   unit:unitTemp(),                  color:violetColor, get:h=>h.dp!=null?convertTemp(h.dp, state.units.temp):null,           fmt:v=>v!=null?`${Math.round(v)}°`:'—' },
+    { id:'uv',         emoji:'☀',  nameKey:'metric.uv',         unit:'/11',                       color:yellowColor, get:h=>typeof h.uvi==='number'?h.uvi:null,                            fmt:v=>v!=null?`${Math.round(v)}`:'—' },
+    { id:'visibility', emoji:'👁', nameKey:'metric.visibility', unit:'км',                        color:whiteColor,  get:h=>typeof h.vis==='number'?h.vis:null,                            fmt:v=>v!=null?`${Math.round(v)}`:'—' },
+    { id:'solar',      emoji:'🔆', nameKey:'metric.solar',      unit:'W/m²',                      color:yellowColor, get:h=>typeof h.sr==='number'?h.sr:null,                              fmt:v=>v!=null?`${Math.round(v)}`:'—' }
   ];
 }
 
@@ -5372,8 +5397,8 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v8: в hourly добавлено поле pr (давление мм рт.ст. по часам) для табов почасовой карточки.
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v8`;
+  // v9: в hourly добавлены поля hum/dp/uvi/vis/sr (влажность, точка росы, УФ, видимость, солнечная радиация) для модалки "Почасовой".
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v9`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -5608,7 +5633,10 @@ async function fetchOpenMeteo(lat, lon, models = null) {
       'apparent_temperature',
       'cloud_cover',
       'cape',
-      'lifted_index'
+      'lifted_index',
+      'uv_index',
+      'visibility',
+      'shortwave_radiation'
     ].join(','),
     daily: [
       'temperature_2m_max',
@@ -5712,6 +5740,9 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   const hCl  = hPick('cloud_cover');
   const hCape = hPick('cape');           // CAPE J/kg — энергия конвекции (для В6)
   const hLi   = hPick('lifted_index');   // Lifted Index — индекс неустойчивости (для В6)
+  const hUv   = hPick('uv_index');       // УФ-индекс почасово (расширенный hourly для модалки)
+  const hVis  = hPick('visibility');     // Видимость в метрах (для модалки)
+  const hSr   = hPick('shortwave_radiation'); // Солнечная радиация W/m² (для модалки)
 
   // Если у модели вообще нет температуры — отбраковываем (модель не покрывает регион)
   if (!tMax || tMax.every(v => v == null)) return null;
@@ -5741,6 +5772,11 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null,
         cl: hCl && hCl[idx] != null ? Math.round(hCl[idx]) : null,
         pr: hPr && hPr[idx] != null ? hPaToMmHg(hPr[idx]) : null,  // давление в мм рт.ст. для почасовых табов
+        hum: hHum && hHum[idx] != null ? Math.round(hHum[idx]) : null,   // влажность % (для hourly detail modal)
+        dp:  hDp  && hDp[idx]  != null ? Math.round(hDp[idx]) : null,    // точка росы °C
+        uvi: hUv  && hUv[idx]  != null ? Math.round(hUv[idx] * 10) / 10 : null, // UV-индекс /11
+        vis: hVis && hVis[idx] != null ? Math.round(hVis[idx] / 100) / 10 : null, // видимость в км (метры → км с 1 знаком)
+        sr:  hSr  && hSr[idx]  != null ? Math.round(hSr[idx]) : null,    // солнечная радиация W/m²
         // В6 (гроза-индикатор): сырой weather_code (число), CAPE, lifted_index
         wc: hWc && hWc[idx] != null ? hWc[idx] : null,
         cape: hCape && hCape[idx] != null ? Math.round(hCape[idx]) : null,
@@ -5864,6 +5900,17 @@ function computeAverageForecast(forecasts) {
       const liVals   = hours.map(o => o.li).filter(v => typeof v === 'number');
       const wcVals   = hours.map(o => o.wc).filter(v => typeof v === 'number');
       const prVals   = hours.map(o => o.pr).filter(v => typeof v === 'number');
+      const humVals  = hours.map(o => o.hum).filter(v => typeof v === 'number');
+      const dpVals   = hours.map(o => o.dp).filter(v => typeof v === 'number');
+      const uviVals  = hours.map(o => o.uvi).filter(v => typeof v === 'number');
+      const visVals  = hours.map(o => o.vis).filter(v => typeof v === 'number');
+      const srVals   = hours.map(o => o.sr).filter(v => typeof v === 'number');
+      const meanRound = (arr, decimals = 0) => {
+        if (arr.length === 0) return null;
+        const m = arr.reduce((a,b) => a+b, 0) / arr.length;
+        const factor = Math.pow(10, decimals);
+        return Math.round(m * factor) / factor;
+      };
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
@@ -5874,7 +5921,12 @@ function computeAverageForecast(forecasts) {
         c: hours[0].c,
         feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
         cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null,
-        pr: prVals.length > 0 ? Math.round(prVals.reduce((a,b) => a+b, 0) / prVals.length) : null,
+        pr: meanRound(prVals, 0),
+        hum: meanRound(humVals, 0),
+        dp:  meanRound(dpVals, 0),
+        uvi: meanRound(uviVals, 1),
+        vis: meanRound(visVals, 1),
+        sr:  meanRound(srVals, 0),
         tMin: tVals.length > 0 ? Math.min(...tVals) : null,
         tMax: tVals.length > 0 ? Math.max(...tVals) : null,
         wc: wcVals.length > 0 ? Math.max(...wcVals) : null,
