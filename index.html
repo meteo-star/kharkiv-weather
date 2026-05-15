@@ -7,6 +7,14 @@
      'unsafe-inline' оставлен потому что у нас inline-стили и inline-скрипт в одном файле. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://archive-api.open-meteo.com https://geocoding-api.open-meteo.com https://nominatim.openstreetmap.org; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
 <title>Метеоагрегатор · Харьков</title>
+<!-- PWA manifest + apple-touch + theme-color -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#0a1128">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Meteo Star">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -6187,6 +6195,21 @@ setupHourlyTabs();
 setupScrollArrows();
 setupHourlyDetailModal();
 applyAll();
+
+// PWA: регистрируем service-worker для офлайн-кэша и установки приложения на главный экран.
+// Поддержка: Chrome/Edge/Firefox/Safari iOS 11.3+. Без push-уведомлений — только установка и cache-first/network-first стратегии.
+if ('serviceWorker' in navigator) {
+  // Откладываем до window.load чтобы не блокировать первую отрисовку
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then((reg) => {
+        console.info('[PWA] Service Worker зарегистрирован, scope:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('[PWA] Регистрация Service Worker не удалась:', err);
+      });
+  });
+}
 
 // Refresh-кнопка в footer — принудительно обновить прогноз (пропуская кэш)
 const btnRefresh = document.getElementById('btnRefresh');
