@@ -112,8 +112,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .legend .sw.p{background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 0 10px rgba(167,139,250,0.4)}
 .chart-wrap{position:relative;height:260px;width:100%}
 
-.days{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
-.day{padding:18px 12px;text-align:center;cursor:pointer;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;gap:8px;user-select:none}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 48px) / 5);gap:12px;margin-bottom:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);padding-bottom:8px}
+.days::-webkit-scrollbar{height:6px}
+.days::-webkit-scrollbar-track{background:rgba(255,255,255,0.04);border-radius:3px}
+.days::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.days::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.5)}
+.day{padding:18px 12px;text-align:center;cursor:pointer;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;gap:8px;user-select:none;scroll-snap-align:start;min-width:0}
 .day:hover{transform:translateY(-4px);border-color:rgba(0,212,255,0.4);box-shadow:0 8px 32px rgba(0,212,255,0.15),inset 0 1px 0 rgba(255,255,255,0.1)}
 .day:active{transform:translateY(-2px) scale(0.98)}
 .day.today{border-color:rgba(0,212,255,0.5);background:linear-gradient(135deg,rgba(0,212,255,0.1) 0%,rgba(167,139,250,0.05) 100%);box-shadow:0 8px 32px rgba(0,212,255,0.2),inset 0 1px 0 rgba(255,255,255,0.15)}
@@ -188,10 +192,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .btn-refresh:active{transform:scale(0.96)}
 
 /* MODAL */
-.modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(5,10,38,0.6);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s ease;overflow-y:auto}
-.modal-backdrop.open{opacity:1;pointer-events:auto}
-.modal{width:100%;max-width:760px;max-height:calc(100vh - 40px);overflow-y:auto;background:linear-gradient(135deg, rgba(20,30,70,0.85) 0%, rgba(10,15,45,0.85) 100%);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border:1px solid rgba(255,255,255,0.12);border-radius:28px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 30px 90px rgba(0,0,0,0.5),0 0 60px rgba(0,212,255,0.1);position:relative;padding:28px;transform:scale(0.95) translateY(20px);opacity:0;transition:transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.35s}
-.modal-backdrop.open .modal{transform:scale(1) translateY(0);opacity:1}
+.modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(5,10,38,0);backdrop-filter:blur(0px) saturate(100%);-webkit-backdrop-filter:blur(0px) saturate(100%);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.36s ease-out,background 0.36s ease-out,backdrop-filter 0.36s ease-out,-webkit-backdrop-filter 0.36s ease-out;overflow-y:auto}
+.modal-backdrop.open{opacity:1;pointer-events:auto;background:rgba(5,10,38,0.6);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
+.modal{width:100%;max-width:760px;max-height:calc(100vh - 40px);overflow-y:auto;background:linear-gradient(135deg, rgba(20,30,70,0.85) 0%, rgba(10,15,45,0.85) 100%);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border:1px solid rgba(255,255,255,0.12);border-radius:28px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 30px 90px rgba(0,0,0,0.5),0 0 60px rgba(0,212,255,0.1);position:relative;padding:28px;transform:scale(0.88) translateY(36px);opacity:0;filter:blur(6px);transition:transform 0.48s cubic-bezier(0.16,1,0.3,1) 0.06s,opacity 0.42s cubic-bezier(0.16,1,0.3,1) 0.06s,filter 0.42s cubic-bezier(0.16,1,0.3,1) 0.06s}
+.modal-backdrop.open .modal{transform:scale(1) translateY(0);opacity:1;filter:blur(0)}
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(0,212,255,0.6), rgba(167,139,250,0.4), transparent);border-radius:28px 28px 0 0}
 .modal-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border:none;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:#e8f0ff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;backdrop-filter:blur(10px)}
 .modal-close:hover{background:rgba(255,80,80,0.15);border-color:rgba(255,100,100,0.4);color:#ff8080;transform:rotate(90deg)}
@@ -244,8 +248,103 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hour-cell:hover{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.3)}
 .hour-cell .h{font-size:11px;color:rgba(232,240,255,0.6);font-weight:600;font-feature-settings:'tnum'}
 .hour-cell .ic{width:36px;height:36px}
-.hour-cell .t{font-size:14px;color:#fff;font-weight:600;font-feature-settings:'tnum'}
+.hour-cell .t{font-size:14px;color:#fff;font-weight:600;font-feature-settings:'tnum';display:inline-flex;align-items:baseline;gap:2px;white-space:nowrap}
+.hour-cell .t .hc-unit{font-size:0.7em;opacity:0.55;font-weight:400;font-family:'JetBrains Mono',monospace}
 .hour-cell .p{font-size:10px;color:#00d4ff;font-feature-settings:'tnum';font-weight:500}
+
+.hourly-card{padding:24px;margin-bottom:18px}
+.hourly-card .card-title .sub#chartSourceSub{color:var(--src-color,#00d4ff);font-weight:500;font-family:'JetBrains Mono',monospace}
+.scroll-wrap{position:relative;margin-bottom:18px}
+.hourly-card .scroll-wrap,.precip-card .scroll-wrap{margin-bottom:0}
+.scroll-arrow{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;background:rgba(10,17,40,0.85);border:1px solid rgba(0,212,255,0.4);color:#00d4ff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;z-index:3;transition:all 0.2s ease;backdrop-filter:blur(6px);box-shadow:0 4px 16px rgba(0,0,0,0.45);font-family:'Onest',sans-serif;font-weight:600;padding:0;user-select:none}
+.scroll-arrow:hover{background:rgba(0,212,255,0.22);border-color:rgba(0,212,255,0.7);color:#fff;box-shadow:0 6px 20px rgba(0,212,255,0.25)}
+.scroll-arrow:active{transform:translateY(-50%) scale(0.92)}
+.scroll-arrow.left{left:-12px}
+.scroll-arrow.right{right:-12px}
+.scroll-arrow.disabled{opacity:0;pointer-events:none}
+.scroll-wrap > .days,.scroll-wrap > .hours-scroll,.scroll-wrap > .precip-scroll{margin-bottom:0}
+
+/* ===== Hourly Detail Modal — полноэкранная карточка "Почасовой" ===== */
+.hdm-backdrop{position:fixed;inset:0;z-index:1100;background:rgba(5,10,38,0);backdrop-filter:blur(0px) saturate(100%);-webkit-backdrop-filter:blur(0px) saturate(100%);opacity:0;pointer-events:none;transition:opacity 0.4s ease-out,background 0.4s ease-out,backdrop-filter 0.4s ease-out,-webkit-backdrop-filter 0.4s ease-out;display:flex;align-items:stretch;justify-content:center}
+.hdm-backdrop.open{opacity:1;pointer-events:auto;background:rgba(3,7,28,0.78);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
+.hdm-sheet{position:relative;width:100%;max-width:980px;background:linear-gradient(160deg,rgba(20,30,70,0.88) 0%,rgba(8,13,42,0.92) 100%);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-left:1px solid rgba(255,255,255,0.06);border-right:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 1px 0 rgba(255,255,255,0.1),0 -20px 80px rgba(0,0,0,0.5);display:flex;flex-direction:column;transform:translateY(80px) scale(0.94);opacity:0;filter:blur(8px);transition:transform 0.55s cubic-bezier(0.16,1,0.3,1) 0.08s,opacity 0.45s cubic-bezier(0.16,1,0.3,1) 0.08s,filter 0.45s cubic-bezier(0.16,1,0.3,1) 0.08s}
+.hdm-backdrop.open .hdm-sheet{transform:translateY(0) scale(1);opacity:1;filter:blur(0)}
+.hdm-sheet::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.55),rgba(167,139,250,0.4),transparent);pointer-events:none;z-index:20}
+
+.hdm-top{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(8,13,38,0.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative;z-index:15}
+.hdm-back{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#e8f0ff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;font-family:'Onest',sans-serif;font-weight:600;padding:0;transition:all 0.2s ease}
+.hdm-back:hover{background:rgba(0,212,255,0.15);border-color:rgba(0,212,255,0.4);color:#fff;transform:translateX(-2px)}
+.hdm-title{font-size:17px;font-weight:600;color:#fff;flex:1;text-align:center;margin-right:38px}
+
+.hdm-scroll{flex:1 1 auto;overflow:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);position:relative}
+.hdm-scroll::-webkit-scrollbar{height:8px;width:8px}
+.hdm-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
+.hdm-scroll::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:4px}
+.hdm-scroll::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.5)}
+.hdm-inner{position:relative}
+
+.hdm-sticky-hours{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(8,13,38,0.95) 0%,rgba(8,13,38,0.85) 100%);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 0 8px;border-bottom:1px solid rgba(255,255,255,0.06)}
+.hdm-day-label{font-size:12px;color:rgba(232,240,255,0.7);font-weight:500;font-feature-settings:'tnum';padding:0 0 8px 14px;letter-spacing:0.04em}
+.hdm-hours-row{display:flex}
+.hdm-hour-cell{flex:0 0 auto;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
+.hdm-hour-cell .hic{width:30px;height:30px}
+.hdm-hour-cell .hh{font-size:11px;color:rgba(232,240,255,0.7);font-family:'JetBrains Mono',monospace;font-feature-settings:'tnum'}
+.hdm-hour-cell.now .hh{color:#00d4ff;font-weight:700}
+.hdm-hour-cell.now::before{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:2px;height:6px;background:#00d4ff;border-radius:2px;box-shadow:0 0 6px #00d4ff}
+
+.hdm-metrics{display:flex;flex-direction:column}
+.hdm-metric{padding:14px 0 10px;border-bottom:1px solid rgba(255,255,255,0.04);position:relative}
+.hdm-metric:last-child{border-bottom:none;padding-bottom:24px}
+.hdm-metric-head{display:flex;align-items:baseline;gap:8px;padding:0 14px 6px;position:sticky;left:0;width:max-content;background:transparent;pointer-events:none}
+.hdm-metric-emoji{font-size:16px;filter:drop-shadow(0 0 6px rgba(0,212,255,0.35))}
+.hdm-metric-name{font-size:14px;color:#fff;font-weight:500}
+.hdm-metric-unit{font-size:11px;color:rgba(232,240,255,0.45);font-family:'JetBrains Mono',monospace}
+.hdm-metric-chart{position:relative;height:90px}
+.hdm-metric-chart svg{display:block}
+.hdm-now-line{position:absolute;top:0;bottom:0;width:1.5px;background:linear-gradient(180deg,rgba(0,212,255,0.7) 0%,rgba(0,212,255,0.15) 100%);pointer-events:none;z-index:2}
+
+.scroll-arrow.hdm-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:18;width:42px;height:42px;font-size:24px;background:rgba(8,13,42,0.85);border-color:rgba(0,212,255,0.5);box-shadow:0 6px 24px rgba(0,0,0,0.45),0 0 16px rgba(0,212,255,0.18)}
+.scroll-arrow.hdm-arrow.left{left:14px;right:auto}
+.scroll-arrow.hdm-arrow.right{right:14px;left:auto}
+.scroll-arrow.hdm-arrow:hover{background:rgba(0,212,255,0.28);border-color:rgba(0,212,255,0.85);box-shadow:0 8px 28px rgba(0,212,255,0.35)}
+
+@media (max-width: 640px){
+  .hdm-top{padding:12px 14px}
+  .hdm-title{font-size:15px;margin-right:30px}
+  .hdm-back{width:32px;height:32px;font-size:18px}
+  .hdm-hour-cell .hic{width:26px;height:26px}
+  .hdm-metric-chart{height:80px}
+  .hdm-metric-name{font-size:13px}
+}
+@media (max-width: 640px){
+  .scroll-arrow{display:none}
+  .scroll-arrow.hdm-arrow{display:flex;width:36px;height:36px;font-size:20px}
+}
+.hourly-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 14px;margin-bottom:4px;scrollbar-width:none}
+.hourly-tabs::-webkit-scrollbar{display:none}
+.ht-tab{flex:0 0 auto;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(232,240,255,0.7);padding:8px 14px;border-radius:20px;cursor:pointer;font-family:'Onest',sans-serif;font-size:12px;font-weight:500;transition:all 0.2s;white-space:nowrap;user-select:none}
+.ht-tab:hover{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.25);color:#e8f0ff}
+.ht-tab.active{background:rgba(0,212,255,0.18);border-color:rgba(0,212,255,0.45);color:#fff;box-shadow:0 2px 12px rgba(0,212,255,0.18)}
+.hourly-row{padding-top:4px}
+.hour-cell.now{background:rgba(0,212,255,0.14);border-color:rgba(0,212,255,0.5);box-shadow:0 4px 16px rgba(0,212,255,0.18)}
+.hour-cell.now .h{color:#00d4ff}
+
+.precip-card{padding:24px;margin-bottom:18px}
+.precip-card .pc-emoji{margin-right:8px;font-size:18px}
+.precip-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);padding-bottom:8px;-webkit-overflow-scrolling:touch}
+.precip-scroll::-webkit-scrollbar{height:6px}
+.precip-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.04);border-radius:3px}
+.precip-scroll::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.precip-scroll::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.5)}
+.precip-inner{display:flex;flex-direction:column}
+.precip-chart-wrap{position:relative;height:200px}
+.precip-types{display:flex;height:20px;margin-top:2px;align-items:center}
+.precip-type{flex:0 0 auto;text-align:center;font-size:12px;line-height:20px;letter-spacing:0}
+.precip-type.rain{color:#00d4ff;filter:drop-shadow(0 0 4px rgba(0,212,255,0.55))}
+.precip-type.snow{color:#dbeefd;filter:drop-shadow(0 0 4px rgba(219,238,253,0.55))}
+.precip-type.storm{color:#c4b5fd;filter:drop-shadow(0 0 4px rgba(196,181,253,0.6))}
+.precip-days{display:flex;margin-top:4px}
+.precip-day{flex:0 0 auto;text-align:center;border-top:1px solid rgba(0,212,255,0.3);padding-top:6px;font-size:11px;color:rgba(232,240,255,0.75);font-weight:500;font-feature-settings:'tnum';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 @media (max-width: 900px){
   .astro-row{grid-template-columns:1fr 1fr}
@@ -256,7 +355,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .weather-icon-3d{width:130px;height:130px;justify-self:flex-end;margin-top:-30px}
   .hero-temp-num{font-size:80px}
   .metrics{grid-template-columns:repeat(2,1fr)}
-  .days{grid-template-columns:repeat(5,1fr);gap:8px}
+  .days{grid-auto-columns:calc((100% - 32px) / 5);gap:8px}
   .day{padding:12px 6px;gap:6px}
   .day-icon{width:44px;height:44px}
   .day-hi{font-size:17px}
@@ -277,7 +376,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .sun-moon{grid-column:span 1;grid-template-columns:1fr;padding:18px}
   .moon-section{border-left:none;border-top:1px solid rgba(255,255,255,0.08);padding-left:0;padding-top:14px;flex-direction:row;justify-content:flex-start;gap:14px}
   .moon-svg{width:60px;height:60px}
-  .days{grid-template-columns:repeat(5,1fr);gap:6px}
+  .days{grid-auto-columns:calc((100% - 24px) / 5);gap:6px}
   .day{padding:10px 4px}
   .day-icon{width:38px;height:38px}
   .day-hi{font-size:15px}
@@ -288,6 +387,15 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .day-wind{display:none}
   .chart-card{padding:18px}
   .chart-wrap{height:220px}
+  .hourly-card{padding:18px}
+  .ht-tab{padding:6px 11px;font-size:11px}
+  .precip-card{padding:18px}
+  .precip-chart-wrap{height:170px}
+  .precip-day{font-size:10px}
+  .hour-cell{width:60px;padding:10px 5px;gap:5px}
+  .hour-cell .ic{width:32px;height:32px}
+  .hour-cell .h{font-size:10px}
+  .hour-cell .t{font-size:13px}
   .main-source-btn{padding:16px 18px;border-radius:16px}
   .msb-icon{width:44px;height:44px}
   .msb-title{font-size:15px}
@@ -306,9 +414,11 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .modal-chart-wrap{height:180px}
 }
 @media (max-width: 380px){
-  .days{grid-template-columns:repeat(3,1fr)}
-  .day:nth-child(4),.day:nth-child(5){grid-column:span 1}
+  .days{grid-auto-columns:calc((100% - 18px) / 4);gap:6px}
   .sources-grid{grid-template-columns:1fr}
+  .hour-cell{width:54px;padding:8px 4px}
+  .hour-cell .ic{width:30px;height:30px}
+  .ht-tab{padding:5px 9px;font-size:10px}
 }
 
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
@@ -925,32 +1035,51 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     </div>
   </div>
 
-  <div class="glass chart-card">
+  <div class="glass hourly-card">
     <div class="card-title">
       <div>
         <h2 data-i18n="chart.title">Сегодня · почасовой прогноз</h2>
-        <div class="sub" id="chartSourceSub">Усреднено по 10 моделям</div>
-      </div>
-      <div class="legend">
-        <span><span class="sw t"></span><span data-i18n="chart.legendTemp">Температура</span></span>
-        <span><span class="sw p"></span><span data-i18n="chart.legendPrecip">Осадки</span></span>
+        <div class="sub" id="chartSourceSub">Усреднено по 7 моделям</div>
       </div>
     </div>
-    <div class="chart-wrap"><canvas id="hourlyChart"></canvas></div>
+    <div class="hourly-tabs" id="hourlyTabs" role="tablist">
+      <button class="ht-tab active" data-metric="temp" role="tab"><span data-i18n="metric.temp">Температура</span></button>
+      <button class="ht-tab" data-metric="feels" role="tab"><span data-i18n="metric.feels">По ощущениям</span></button>
+      <button class="ht-tab" data-metric="precip" role="tab"><span data-i18n="metric.rain">Осадки</span></button>
+      <button class="ht-tab" data-metric="wind" role="tab"><span data-i18n="metric.wind">Ветер</span></button>
+      <button class="ht-tab" data-metric="pressure" role="tab"><span data-i18n="metric.pressure">Давление</span></button>
+    </div>
+    <div class="scroll-wrap">
+      <button class="scroll-arrow left" data-scroll-target="hourlyRow" aria-label="Прокрутить влево">‹</button>
+      <div class="hours-scroll hourly-row" id="hourlyRow"></div>
+      <button class="scroll-arrow right" data-scroll-target="hourlyRow" aria-label="Прокрутить вправо">›</button>
+    </div>
   </div>
 
-  <div class="days" id="daysGrid"></div>
-
-  <div class="glass activity-windows" id="activityWindowsCard">
-    <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
-    <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 5 дней</div>
-    <div class="aw-grid" id="activityWindowsGrid"></div>
+  <div class="scroll-wrap" id="daysWrap">
+    <button class="scroll-arrow left" data-scroll-target="daysGrid" aria-label="Прокрутить влево">‹</button>
+    <div class="days" id="daysGrid"></div>
+    <button class="scroll-arrow right" data-scroll-target="daysGrid" aria-label="Прокрутить вправо">›</button>
   </div>
 
-  <div class="glass pollen-card" id="pollenCard">
-    <h2><span class="pl-emoji">🌼</span><span data-i18n="pollen.title">Пыльца сегодня</span></h2>
-    <div class="sub" data-i18n="pollen.sub">Концентрация аллергенов в воздухе</div>
-    <div class="pollen-grid" id="pollenGrid"></div>
+  <div class="glass precip-card" id="precipCard">
+    <div class="card-title">
+      <div>
+        <h2><span class="pc-emoji">🌧</span><span data-i18n="precip.title">Осадки</span></h2>
+        <div class="sub" data-i18n="precip.sub">Прогноз мм/ч на ближайшие 48 часов</div>
+      </div>
+    </div>
+    <div class="scroll-wrap">
+      <button class="scroll-arrow left" data-scroll-target="precipScroll" aria-label="Прокрутить влево">‹</button>
+      <div class="precip-scroll" id="precipScroll">
+        <div class="precip-inner" id="precipInner">
+          <div class="precip-chart-wrap"><canvas id="precipChart"></canvas></div>
+          <div class="precip-types" id="precipTypes"></div>
+          <div class="precip-days" id="precipDays"></div>
+        </div>
+      </div>
+      <button class="scroll-arrow right" data-scroll-target="precipScroll" aria-label="Прокрутить вправо">›</button>
+    </div>
   </div>
 
   <div class="glass storm-card" id="stormCard">
@@ -970,6 +1099,18 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       <span>+48ч</span>
     </div>
     <div class="storm-legend" id="stormLegend"></div>
+  </div>
+
+  <div class="glass activity-windows" id="activityWindowsCard">
+    <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
+    <div class="sub" data-i18n="windows.sub">Лучшее время для бытовых задач в ближайшие 5 дней</div>
+    <div class="aw-grid" id="activityWindowsGrid"></div>
+  </div>
+
+  <div class="glass pollen-card" id="pollenCard">
+    <h2><span class="pl-emoji">🌼</span><span data-i18n="pollen.title">Пыльца сегодня</span></h2>
+    <div class="sub" data-i18n="pollen.sub">Концентрация аллергенов в воздухе</div>
+    <div class="pollen-grid" id="pollenGrid"></div>
   </div>
 
   <div class="glass climate-card" id="climateCard">
@@ -1080,7 +1221,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <div class="card-title">
       <div>
         <h2 data-i18n="sources.title">Источник прогноза</h2>
-        <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 10 моделям</div>
+        <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 7 моделям</div>
       </div>
       <div class="confidence-chip" id="confidenceChip" style="display:none" title="">
         <span class="cc-dot"></span>
@@ -1101,7 +1242,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         </div>
         <div class="msb-text">
           <div class="msb-title" data-i18n="sources.avgTitle">Среднее по всем сервисам</div>
-          <div class="msb-sub" data-i18n="sources.avgSub">Агрегация 10 моделей · ансамблевый прогноз</div>
+          <div class="msb-sub" data-i18n="sources.avgSub">Агрегация 7 моделей · ансамблевый прогноз</div>
         </div>
       </div>
       <span class="msb-arrow">→</span>
@@ -1242,6 +1383,26 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   </div>
 </div>
 
+<div class="hdm-backdrop" id="hourlyDetailModal" role="dialog" aria-modal="true" aria-labelledby="hdmTitle" aria-hidden="true">
+  <div class="hdm-sheet">
+    <div class="hdm-top">
+      <button class="hdm-back" id="hdmBack" aria-label="Назад">←</button>
+      <div class="hdm-title" id="hdmTitle" data-i18n="hdm.title">Почасовой</div>
+    </div>
+    <button class="scroll-arrow hdm-arrow left" data-scroll-target="hdmScroll" aria-label="Прокрутить влево">‹</button>
+    <button class="scroll-arrow hdm-arrow right" data-scroll-target="hdmScroll" aria-label="Прокрутить вправо">›</button>
+    <div class="hdm-scroll" id="hdmScroll">
+      <div class="hdm-inner" id="hdmInner">
+        <div class="hdm-sticky-hours" id="hdmStickyHours">
+          <div class="hdm-day-label" id="hdmDayLabel">Сегодня</div>
+          <div class="hdm-hours-row" id="hdmHoursRow"></div>
+        </div>
+        <div class="hdm-metrics" id="hdmMetrics"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ============================================
    UID + UTILITIES
@@ -1268,6 +1429,8 @@ const I18N = {
     'hero.feelsAfterSunset':   'Ощущается как {feels} · Закат был в {sunset}',
     'hero.sourceNote': 'По данным {name}',
     'hero.sourceAvg': 'усреднения 7 моделей',
+    'metric.temp': 'Температура',
+    'metric.feels': 'По ощущениям',
     'metric.wind': 'Ветер',
     'metric.rain': 'Осадки',
     'metric.pressure': 'Давление',
@@ -1307,14 +1470,19 @@ const I18N = {
     'astro.stars.veryPoor': 'Очень плохо',
     'astro.stars.hint': 'облачность {cl}% · луна {moon}%',
     'chart.title': 'Сегодня · почасовой прогноз',
-    'chart.sub.avg': 'Усреднено по 10 моделям',
+    'chart.sub.avg': 'Усреднено по 7 моделям',
     'chart.sub.named': 'Прогноз {name}',
+    'precip.title': 'Осадки',
+    'precip.sub': 'Прогноз мм/ч на ближайшие 48 часов',
+    'precip.tomorrow': 'завтра',
+    'precip.legend': 'мм/ч',
+    'hdm.title': 'Почасовой',
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Осадки',
     'sources.title': 'Источник прогноза',
-    'sources.sub': 'Выбери источник или используй среднее по всем 10 моделям',
+    'sources.sub': 'Выбери источник или используй среднее по всем 7 моделям',
     'sources.avgTitle': 'Среднее по всем сервисам',
-    'sources.avgSub': 'Агрегация 10 моделей · ансамблевый прогноз',
+    'sources.avgSub': 'Агрегация 7 моделей · ансамблевый прогноз',
     'sources.avgShort': 'Среднее по 7 моделям',
     'sources.dividerOr': 'или конкретный источник',
     'confidence.label': 'Согласие моделей',
@@ -1531,6 +1699,8 @@ const I18N = {
     'hero.feelsAfterSunset':   'Відчувається як {feels} · Захід був о {sunset}',
     'hero.sourceNote': 'За даними {name}',
     'hero.sourceAvg': 'усереднення 7 моделей',
+    'metric.temp': 'Температура',
+    'metric.feels': 'Відчувається',
     'metric.wind': 'Вітер',
     'metric.rain': 'Опади',
     'metric.pressure': 'Тиск',
@@ -1570,14 +1740,19 @@ const I18N = {
     'astro.stars.veryPoor': 'Дуже погано',
     'astro.stars.hint': 'хмарність {cl}% · місяць {moon}%',
     'chart.title': 'Сьогодні · погодинний прогноз',
-    'chart.sub.avg': 'Усереднено по 10 моделях',
+    'chart.sub.avg': 'Усереднено по 7 моделях',
     'chart.sub.named': 'Прогноз {name}',
+    'precip.title': 'Опади',
+    'precip.sub': 'Прогноз мм/год на найближчі 48 годин',
+    'precip.tomorrow': 'завтра',
+    'precip.legend': 'мм/год',
+    'hdm.title': 'Погодинний',
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Опади',
     'sources.title': 'Джерело прогнозу',
-    'sources.sub': 'Обери джерело або використовуй середнє по 10 моделях',
+    'sources.sub': 'Обери джерело або використовуй середнє по 7 моделях',
     'sources.avgTitle': 'Середнє по всіх сервісах',
-    'sources.avgSub': 'Агрегація 10 моделей · ансамблевий прогноз',
+    'sources.avgSub': 'Агрегація 7 моделей · ансамблевий прогноз',
     'sources.avgShort': 'Середнє по 7 моделях',
     'sources.dividerOr': 'або конкретне джерело',
     'confidence.label': 'Згода моделей',
@@ -1794,6 +1969,8 @@ const I18N = {
     'hero.feelsAfterSunset':   'Feels like {feels} · Sunset was at {sunset}',
     'hero.sourceNote': 'Source: {name}',
     'hero.sourceAvg': 'average of 7 models',
+    'metric.temp': 'Temperature',
+    'metric.feels': 'Feels like',
     'metric.wind': 'Wind',
     'metric.rain': 'Precipitation',
     'metric.pressure': 'Pressure',
@@ -1833,14 +2010,19 @@ const I18N = {
     'astro.stars.veryPoor': 'Very poor',
     'astro.stars.hint': 'clouds {cl}% · moon {moon}%',
     'chart.title': 'Today · hourly forecast',
-    'chart.sub.avg': 'Averaged across 10 models',
+    'chart.sub.avg': 'Averaged across 7 models',
     'chart.sub.named': 'Forecast by {name}',
+    'precip.title': 'Precipitation',
+    'precip.sub': 'Forecast mm/h for next 48 hours',
+    'precip.tomorrow': 'tomorrow',
+    'precip.legend': 'mm/h',
+    'hdm.title': 'Hourly',
     'chart.legendTemp': 'Temperature',
     'chart.legendPrecip': 'Precipitation',
     'sources.title': 'Forecast source',
-    'sources.sub': 'Pick a source or use the average of all 10 models',
+    'sources.sub': 'Pick a source or use the average of all 7 models',
     'sources.avgTitle': 'Average of all services',
-    'sources.avgSub': 'Aggregation of 10 models · ensemble forecast',
+    'sources.avgSub': 'Aggregation of 7 models · ensemble forecast',
     'sources.avgShort': 'Average of 7 models',
     'sources.dividerOr': 'or a specific source',
     'confidence.label': 'Model agreement',
@@ -2777,8 +2959,12 @@ function colorForUV(v) {
    ============================================ */
 
 let currentSourceId = 'avg';
-let mainChartInstance = null;
 let modalChartInstance = null;
+let precipChartInstance = null;
+// Активная метрика почасовой карточки: 'temp' | 'feels' | 'precip' | 'wind' | 'pressure'
+let currentHourlyMetric = 'temp';
+// Отдельная метрика для модалки дня (сбрасывается на 'temp' при каждом открытии).
+let currentModalMetric = 'temp';
 
 function getCurrentSource() { return getSrc(currentSourceId); }
 
@@ -2913,67 +3099,486 @@ function renderConfidenceChip() {
   chip.title = t('confidence.tooltip', { n: day.modelCount || 7, range: day.tempRange != null ? day.tempRange : '?' });
 }
 
-function renderMainChart(forecast) {
+// Короткая единица измерения для метрики (для подписей в табах).
+// Давление сокращаем до 'мм' / 'гПа' / 'inHg' — полная форма «мм рт.ст.» слишком длинная для таба.
+function shortMetricUnit(metric) {
+  switch (metric) {
+    case 'temp':
+    case 'feels': return unitTemp();
+    case 'precip': return '%';
+    case 'wind': return unitWind();
+    case 'pressure': {
+      const u = state.units.pressure;
+      if (u === 'mmhg') return 'мм';
+      if (u === 'hpa') return 'гПа';
+      if (u === 'inhg') return 'inHg';
+      return u;
+    }
+    default: return '';
+  }
+}
+
+// Возвращает HTML-строку значения метрики для часа h.
+// Единица измерения завёрнута в <span class="hc-unit"> — приглушённая, мелким шрифтом, в стиле таба.
+function hourMetricValue(h, metric) {
+  switch (metric) {
+    case 'temp':
+      return `${fmtTempNum(h.t)}<span class="hc-unit">${unitTemp()}</span>`;
+    case 'feels': {
+      const f = h.feels != null ? h.feels : h.t;
+      return `${fmtTempNum(f)}<span class="hc-unit">${unitTemp()}</span>`;
+    }
+    case 'precip':
+      return `${h.p}<span class="hc-unit">%</span>`;
+    case 'wind':
+      return `${fmtWind(h.w, { withUnit: false })}<span class="hc-unit">${unitWind()}</span>`;
+    case 'pressure':
+      return h.pr != null
+        ? `${fmtPressure(h.pr, { withUnit: false })}<span class="hc-unit">${shortMetricUnit('pressure')}</span>`
+        : '—';
+    default:
+      return '';
+  }
+}
+
+function renderHourlyRow(forecast) {
+  const row = document.getElementById('hourlyRow');
+  if (!row) return;
   const today = forecast[0];
-  const hours = today.hourly.map(h => String(h.h).padStart(2, '0'));
-  const tempsC = today.hourly.map(h => h.t);
-  const temps = tempsC.map(c => convertTemp(c, state.units.temp));
-  const precs = today.hourly.map(h => h.p);
+  const metric = currentHourlyMetric;
 
-  // Полоса разброса между моделями (только для AVG: tMin/tMax есть только в среднем)
-  const showSpread = currentSourceId === 'avg' && today.hourly.every(h => typeof h.tMin === 'number' && typeof h.tMax === 'number');
-  const spreadMin = showSpread ? today.hourly.map(h => convertTemp(h.tMin, state.units.temp)) : null;
-  const spreadMax = showSpread ? today.hourly.map(h => convertTemp(h.tMax, state.units.temp)) : null;
+  document.querySelectorAll('#hourlyTabs .ht-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.metric === metric);
+  });
 
-  const tUnit = unitTemp();
-  const labelTemp = t('chart.legendTemp');
-  const labelPrecip = t('chart.legendPrecip');
-  const labelSpread = t('chart.spreadLabel');
+  // Сохраняем позицию scroll'а перед перерисовкой (например при переключении метрики)
+  const savedScroll = row.scrollLeft;
 
-  const allTemps = showSpread ? [...temps, ...spreadMin, ...spreadMax] : temps;
-  const minT = Math.min(...allTemps), maxT = Math.max(...allTemps);
+  row.innerHTML = today.hourly.map((h, i) => {
+    const isNow = (i === NOW_HOUR);
+    return `
+      <div class="hour-cell${isNow ? ' now' : ''}" data-hour-index="${i}">
+        <div class="h">${String(h.h).padStart(2,'0')}:00</div>
+        <div class="ic">${weatherIcon(h.c, 36)}</div>
+        <div class="t">${hourMetricValue(h, metric)}</div>
+      </div>
+    `;
+  }).join('');
 
-  const ctx = document.getElementById('hourlyChart').getContext('2d');
-  if (mainChartInstance) mainChartInstance.destroy();
-
-  const grad = ctx.createLinearGradient(0, 0, 0, 260);
-  grad.addColorStop(0, 'rgba(0,212,255,0.45)');
-  grad.addColorStop(0.5, 'rgba(77,171,247,0.15)');
-  grad.addColorStop(1, 'rgba(0,212,255,0.0)');
-
-  const datasets = [];
-  // Полоса разброса: два line-dataset'а min/max, между ними полупрозрачная заливка.
-  // Рисуем первыми чтобы основная температурная линия была сверху.
-  if (showSpread) {
-    datasets.push({
-      type: 'line', label: labelSpread + ' max', data: spreadMax,
-      borderColor: 'rgba(0,212,255,0.18)', borderWidth: 0,
-      pointRadius: 0, pointHoverRadius: 0,
-      fill: '+1', backgroundColor: 'rgba(0,212,255,0.08)',
-      tension: 0.45, yAxisID: 'yT', order: 0
+  // Клик на любую плитку часа → открывает модалку "Почасовой" на этом часе
+  row.querySelectorAll('.hour-cell').forEach(cell => {
+    cell.style.cursor = 'pointer';
+    cell.addEventListener('click', () => {
+      const i = parseInt(cell.dataset.hourIndex, 10);
+      if (!Number.isNaN(i)) openHourlyDetail(i);
     });
-    datasets.push({
-      type: 'line', label: labelSpread + ' min', data: spreadMin,
-      borderColor: 'rgba(0,212,255,0.18)', borderWidth: 0,
-      pointRadius: 0, pointHoverRadius: 0,
-      fill: false, tension: 0.45, yAxisID: 'yT', order: 0
+  });
+
+  // Если пользователь раньше не скроллил (savedScroll === 0) — позиционируем на текущий час.
+  // Иначе восстанавливаем его позицию, чтобы переключение таба не сбрасывало вид.
+  if (savedScroll > 0) {
+    row.scrollLeft = savedScroll;
+  } else {
+    const nowCell = row.querySelector('.hour-cell.now');
+    if (nowCell) row.scrollLeft = nowCell.offsetLeft;
+  }
+}
+
+/* ============================================
+   HOURLY DETAIL MODAL — полноэкранная карточка "Почасовой"
+   Sticky-часы сверху, под ними mini-charts по 6 метрикам, всё скроллится горизонтально.
+   ============================================ */
+const HDM_HOUR_WIDTH = 60;
+const HDM_CHART_HEIGHT = 90;
+let hdmEscHandler = null;
+
+// Конфигурация метрик: emoji + ключ названия + единица + цвет + getter из часа + форматтер числа
+function hdmMetricsConfig() {
+  const tempColor = '#fbbf24';
+  const blueColor = '#00d4ff';
+  const purpleColor = '#a78bfa';
+  const grayColor = '#9ca3af';
+  return [
+    { id:'temp',     emoji:'🌡', nameKey:'metric.temp',     unit:unitTemp(),                color:tempColor,   get:h=>convertTemp(h.t, state.units.temp),                                fmt:v=>`${Math.round(v)}°` },
+    { id:'feels',    emoji:'🌡', nameKey:'metric.feels',    unit:unitTemp(),                color:tempColor,   get:h=>convertTemp(h.feels!=null?h.feels:h.t, state.units.temp),          fmt:v=>`${Math.round(v)}°` },
+    { id:'precip',   emoji:'💧', nameKey:'metric.rain',     unit:'%',                       color:blueColor,   get:h=>typeof h.p==='number'?h.p:0,                                       fmt:v=>`${Math.round(v)}` },
+    { id:'pmm',      emoji:'🌧', nameKey:'precip.title',    unit:'мм',                      color:blueColor,   get:h=>typeof h.pmm==='number'?h.pmm:0,                                   fmt:v=>`${Math.round(v*10)/10}` },
+    { id:'wind',     emoji:'💨', nameKey:'metric.wind',     unit:unitWind(),                color:grayColor,   get:h=>convertWind(h.w, state.units.wind),                                fmt:v=>`${Math.round(v)}` },
+    { id:'pressure', emoji:'⊙',  nameKey:'metric.pressure', unit:shortMetricUnit('pressure'), color:purpleColor, get:h=>h.pr!=null?convertPressure(h.pr, state.units.pressure):null,      fmt:v=>v!=null?`${Math.round(v)}`:'—' }
+  ];
+}
+
+// SVG mini-chart: area-fill + smooth line + цифровые подписи над каждой точкой
+function renderHdmMetricChart(values, color, formatValue) {
+  const w = values.length * HDM_HOUR_WIDTH;
+  const h = HDM_CHART_HEIGHT;
+  const padTop = 22;   // место для цифр над линией
+  const padBot = 8;
+
+  const nonNull = values.filter(v => typeof v === 'number' && !Number.isNaN(v));
+  if (nonNull.length === 0) return `<svg width="${w}" height="${h}"></svg>`;
+
+  let minV = Math.min(...nonNull);
+  let maxV = Math.max(...nonNull);
+  if (maxV - minV < 0.5) { minV -= 0.5; maxV += 0.5; }   // плоская линия — расширяем диапазон
+  const range = maxV - minV;
+  const yScale = v => h - padBot - ((v - minV) / range) * (h - padTop - padBot);
+  const xScale = i => i * HDM_HOUR_WIDTH + HDM_HOUR_WIDTH / 2;
+
+  const gradId = `hdmgrad-${uid()}`;
+
+  // Сглаживание через cubic-bezier (monotone-подобное): control points = (prev+cur)/2
+  const pts = values.map((v, i) => (typeof v === 'number' && !Number.isNaN(v)) ? { x: xScale(i), y: yScale(v) } : null);
+  let pathD = '';
+  let areaD = '';
+  let firstX = null, lastX = null;
+  for (let i = 0; i < pts.length; i++) {
+    if (!pts[i]) continue;
+    const p = pts[i];
+    if (firstX === null) {
+      pathD = `M ${p.x} ${p.y}`;
+      areaD = `M ${p.x} ${h - padBot} L ${p.x} ${p.y}`;
+      firstX = p.x;
+    } else {
+      const prev = pts.slice(0, i).reverse().find(Boolean);
+      const cx = (prev.x + p.x) / 2;
+      pathD += ` Q ${cx} ${prev.y}, ${cx} ${(prev.y + p.y) / 2} T ${p.x} ${p.y}`;
+      areaD += ` L ${p.x} ${p.y}`;
+    }
+    lastX = p.x;
+  }
+  if (lastX !== null) areaD += ` L ${lastX} ${h - padBot} Z`;
+
+  const labels = values.map((v, i) => {
+    if (typeof v !== 'number' || Number.isNaN(v)) return '';
+    return `<text x="${xScale(i)}" y="${yScale(v) - 8}" text-anchor="middle" fill="#e8f0ff" font-size="11" font-family="Onest,sans-serif" font-weight="500" style="font-feature-settings:'tnum'">${formatValue(v)}</text>`;
+  }).join('');
+
+  return `
+    <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.38"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
+      <path d="${pathD}" stroke="${color}" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+      ${labels}
+    </svg>
+  `;
+}
+
+function renderHdmContent(forecast) {
+  const day = forecast[0];
+  if (!day || !day.hourly) return;
+  const hours = day.hourly;
+  const totalWidth = hours.length * HDM_HOUR_WIDTH;
+
+  const inner = document.getElementById('hdmInner');
+  const stickyHours = document.getElementById('hdmHoursRow');
+  const dayLabel = document.getElementById('hdmDayLabel');
+  const metricsContainer = document.getElementById('hdmMetrics');
+  if (!inner || !stickyHours || !metricsContainer) return;
+
+  inner.style.width = totalWidth + 'px';
+
+  stickyHours.innerHTML = hours.map((h, i) => {
+    const isNow = (i === NOW_HOUR && day.id === 0);
+    return `<div class="hdm-hour-cell${isNow ? ' now' : ''}" style="width:${HDM_HOUR_WIDTH}px">
+      <div class="hic">${weatherIcon(h.c, 30)}</div>
+      <div class="hh">${h.h}</div>
+    </div>`;
+  }).join('');
+
+  const dateShort = day.date ? day.date.slice(0,5) : '';
+  const labelText = (day.id === 0)
+    ? `${t('day.today')} · ${dateShort}`
+    : `${localizeDayShort(day.name)} · ${dateShort}`;
+  dayLabel.textContent = labelText;
+
+  const cfg = hdmMetricsConfig();
+  metricsContainer.innerHTML = cfg.map(m => {
+    const values = hours.map(m.get);
+    const chartSvg = renderHdmMetricChart(values, m.color, m.fmt);
+    return `
+      <div class="hdm-metric" data-metric="${m.id}">
+        <div class="hdm-metric-head">
+          <span class="hdm-metric-emoji">${m.emoji}</span>
+          <span class="hdm-metric-name">${t(m.nameKey)}</span>
+          <span class="hdm-metric-unit">${m.unit}</span>
+        </div>
+        <div class="hdm-metric-chart">${chartSvg}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Вертикальная линия "сейчас" — поверх всех графиков (только для сегодняшнего дня)
+  if (day.id === 0) {
+    const nowX = NOW_HOUR * HDM_HOUR_WIDTH + HDM_HOUR_WIDTH / 2;
+    metricsContainer.querySelectorAll('.hdm-metric-chart').forEach(chartEl => {
+      const line = document.createElement('div');
+      line.className = 'hdm-now-line';
+      line.style.left = (nowX - 0.75) + 'px';
+      chartEl.appendChild(line);
     });
   }
-  datasets.push({
-    type: 'line', label: labelTemp, data: temps, borderColor: '#00d4ff', backgroundColor: grad, borderWidth: 2.5,
-    pointRadius: hours.map((_,i) => i === NOW_HOUR ? 6 : 0),
-    pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2,
-    pointHoverRadius: 6, fill: true, tension: 0.45, yAxisID: 'yT', order: 1
-  });
-  datasets.push({
-    type: 'bar', label: labelPrecip, data: precs,
-    backgroundColor: hours.map((_,i) => i === NOW_HOUR ? 'rgba(167,139,250,0.85)' : 'rgba(167,139,250,0.4)'),
-    borderRadius: 4, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.65, categoryPercentage: 0.85
+}
+
+function openHourlyDetail(startHour) {
+  const modal = document.getElementById('hourlyDetailModal');
+  if (!modal) return;
+  const forecast = getForecast(currentSourceId);
+  renderHdmContent(forecast);
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+
+  requestAnimationFrame(() => {
+    const scrollEl = document.getElementById('hdmScroll');
+    if (!scrollEl) return;
+    // Центрируем выбранный час в видимой области
+    const targetX = Math.max(0, startHour * HDM_HOUR_WIDTH - scrollEl.clientWidth / 2 + HDM_HOUR_WIDTH / 2);
+    scrollEl.scrollLeft = targetX;
+    // Пересчитываем состояние disabled у стрелок прокрутки модалки (ширина контента уже известна)
+    if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
   });
 
-  mainChartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: { labels: hours, datasets: datasets },
+  hdmEscHandler = (e) => { if (e.key === 'Escape') closeHourlyDetail(); };
+  document.addEventListener('keydown', hdmEscHandler);
+}
+
+function closeHourlyDetail() {
+  const modal = document.getElementById('hourlyDetailModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  if (hdmEscHandler) {
+    document.removeEventListener('keydown', hdmEscHandler);
+    hdmEscHandler = null;
+  }
+}
+
+function setupHourlyDetailModal() {
+  const modal = document.getElementById('hourlyDetailModal');
+  const backBtn = document.getElementById('hdmBack');
+  if (!modal || !backBtn) return;
+  backBtn.addEventListener('click', closeHourlyDetail);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeHourlyDetail();
+  });
+}
+
+// Привязка кликов на табы метрик. Вызывается один раз при init.
+function setupHourlyTabs() {
+  document.querySelectorAll('#hourlyTabs .ht-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentHourlyMetric = btn.dataset.metric;
+      renderHourlyRow(getForecast(currentSourceId));
+    });
+  });
+}
+
+// Кнопки прокрутки «‹ ›» для горизонтальных скролл-карточек.
+// Один раз вешает обработчики на все .scroll-arrow и слушает scroll для disabled-состояния.
+function setupScrollArrows() {
+  document.querySelectorAll('.scroll-arrow').forEach(btn => {
+    const targetId = btn.dataset.scrollTarget;
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    const isRight = btn.classList.contains('right');
+    btn.addEventListener('click', () => {
+      // Прокручиваем на ~80% видимой ширины — мягко, чтобы не «перепрыгнуть»
+      const delta = target.clientWidth * 0.8 * (isRight ? 1 : -1);
+      target.scrollBy({ left: delta, behavior: 'smooth' });
+    });
+  });
+  // Слушаем scroll на каждом таргете, чтобы прятать неактивную стрелку
+  const targets = new Set();
+  document.querySelectorAll('.scroll-arrow').forEach(b => {
+    const t = document.getElementById(b.dataset.scrollTarget);
+    if (t) targets.add(t);
+  });
+  targets.forEach(t => {
+    const update = () => updateScrollArrows(t);
+    t.addEventListener('scroll', update, { passive: true });
+    update();
+  });
+  // Также пересчитать при ресайзе окна (например при повороте устройства)
+  window.addEventListener('resize', () => {
+    targets.forEach(t => updateScrollArrows(t));
+  });
+}
+
+function updateScrollArrows(target) {
+  const max = target.scrollWidth - target.clientWidth;
+  const cur = target.scrollLeft;
+  const atStart = cur <= 1;
+  const atEnd = cur >= max - 1;
+  const noScroll = max <= 1;
+  document.querySelectorAll(`.scroll-arrow[data-scroll-target="${target.id}"]`).forEach(btn => {
+    const isRight = btn.classList.contains('right');
+    const disabled = noScroll || (isRight ? atEnd : atStart);
+    btn.classList.toggle('disabled', disabled);
+  });
+}
+
+// График осадков (мм/ч) на ближайшие 48 часов от текущего часа.
+// Использует несколько последовательных дней forecast (обычно 3: сегодня-хвост + завтра + послезавтра-головной кусок).
+// Фиксированная ширина по часам, контейнер скроллится горизонтально.
+// Под графиком — ряд эмодзи (тип осадков: дождь/снег/гроза) и полоска с сегментами дней.
+// На границах суток в графике — пунктирная вертикальная линия.
+const PRECIP_PX_PER_HOUR = 32;
+const PRECIP_TARGET_HOURS = 48;
+
+// Определяет тип осадков для часа на основе condition/weather_code и фактического pmm.
+// Порог 0.05 мм/ч — отсекает «технические» следы прогноза без видимых осадков.
+function precipKind(h) {
+  if (!h || typeof h.pmm !== 'number' || h.pmm < 0.05) return null;
+  const c = h.c;
+  if (c === 'snow') return 'snow';
+  if (c === 'thunderstorm') return 'storm';
+  if (c === 'rain' || c === 'heavy-rain') return 'rain';
+  // Прочие условия с заметным pmm (морось, fog с осадками) — считаем дождём.
+  return 'rain';
+}
+
+const PRECIP_KIND_COLORS = {
+  rain:  '#00d4ff',
+  snow:  '#dbeefd',
+  storm: '#c4b5fd'
+};
+const PRECIP_KIND_EMOJI = {
+  rain:  '💧',
+  snow:  '❄',
+  storm: '⛈'
+};
+
+function renderPrecipChart(forecast) {
+  const canvas = document.getElementById('precipChart');
+  const inner = document.getElementById('precipInner');
+  const daysBar = document.getElementById('precipDays');
+  const typesBar = document.getElementById('precipTypes');
+  if (!canvas || !inner || !daysBar || !typesBar) return;
+  if (!forecast || !forecast[0] || !forecast[0].hourly) return;
+
+  // Собираем последовательность из дней forecast, начиная с сегодня от NOW_HOUR.
+  // Каждый сегмент: { day, hours } — где hours это кусок из day.hourly.
+  // Останавливаемся когда набрали 48 часов или forecast кончился.
+  const segments = [];
+  let collected = 0;
+  for (let di = 0; di < forecast.length && collected < PRECIP_TARGET_HOURS; di++) {
+    const day = forecast[di];
+    if (!day || !day.hourly) continue;
+    const startHour = (di === 0) ? NOW_HOUR : 0;
+    const need = PRECIP_TARGET_HOURS - collected;
+    const hours = day.hourly.slice(startHour, startHour + need);
+    if (hours.length === 0) continue;
+    segments.push({ day, hours });
+    collected += hours.length;
+  }
+
+  // Плоский массив всех часов для графика
+  const merged = segments.flatMap(s => s.hours);
+  if (merged.length === 0) return;
+
+  // Фикс. ширина: PRECIP_PX_PER_HOUR на каждый час. Получаем горизонтальный scroll, если viewport уже.
+  const totalWidth = merged.length * PRECIP_PX_PER_HOUR;
+  inner.style.width = totalWidth + 'px';
+
+  // Полоска дней под графиком: по одному сегменту на каждый день.
+  daysBar.innerHTML = segments.map((s, i) => {
+    const d = s.day;
+    const dateShort = d.date ? d.date.slice(0,5) : '';
+    const label = (i === 0 && d.id === 0)
+      ? `${t('day.today')} · ${dateShort}`
+      : `${localizeDayShort(d.name)} · ${dateShort}`;
+    return `<div class="precip-day" style="width:${s.hours.length * PRECIP_PX_PER_HOUR}px">${label}</div>`;
+  }).join('');
+
+  const labels = merged.map(h => String(h.h).padStart(2, '0'));
+  const values = merged.map(h => (typeof h.pmm === 'number' ? h.pmm : 0));
+  const kinds = merged.map(h => precipKind(h));
+
+  // Ряд эмодзи под графиком: один блок на каждый час, эмодзи только там где есть осадки.
+  typesBar.innerHTML = kinds.map((k) => {
+    const emoji = k ? PRECIP_KIND_EMOJI[k] : '';
+    const cls = k ? `precip-type ${k}` : 'precip-type';
+    return `<div class="${cls}" style="width:${PRECIP_PX_PER_HOUR}px">${emoji}</div>`;
+  }).join('');
+
+  // Индексы где начинается новый день (для пунктирных разделителей в графике)
+  const dayBreakIndices = [];
+  let acc = 0;
+  for (let i = 0; i < segments.length - 1; i++) {
+    acc += segments[i].hours.length;
+    dayBreakIndices.push(acc);
+  }
+
+  const ctx = canvas.getContext('2d');
+  if (precipChartInstance) precipChartInstance.destroy();
+
+  const maxVal = Math.max(...values, 1);
+
+  // Градиент заливки под линией: насыщенный бирюзовый внизу → прозрачный наверху
+  const fillGrad = ctx.createLinearGradient(0, 0, 0, 200);
+  fillGrad.addColorStop(0, 'rgba(0,212,255,0.45)');
+  fillGrad.addColorStop(0.5, 'rgba(77,171,247,0.18)');
+  fillGrad.addColorStop(1, 'rgba(0,212,255,0.02)');
+
+  // Плагин для отрисовки пунктирных вертикальных линий на границах суток
+  const dayDividersPlugin = {
+    id: 'precipDayDividers',
+    afterDatasetsDraw(chart) {
+      const c = chart.ctx;
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      dayBreakIndices.forEach(idx => {
+        const pxA = xScale.getPixelForValue(idx - 1);
+        const pxB = xScale.getPixelForValue(idx);
+        const x = (pxA + pxB) / 2;
+        c.save();
+        c.beginPath();
+        c.strokeStyle = 'rgba(0,212,255,0.5)';
+        c.lineWidth = 1.5;
+        c.setLineDash([4, 3]);
+        c.moveTo(x, yScale.top);
+        c.lineTo(x, yScale.bottom);
+        c.stroke();
+        c.restore();
+      });
+    }
+  };
+
+  precipChartInstance = new Chart(ctx, {
+    type: 'line',
+    plugins: [dayDividersPlugin],
+    data: {
+      labels,
+      datasets: [{
+        label: t('precip.legend'),
+        data: values,
+        borderColor: '#00d4ff',
+        backgroundColor: fillGrad,
+        borderWidth: 2.5,
+        pointRadius: values.map((v, i) => (i === 0 || (kinds[i] && v > 0.05)) ? 4 : 0),
+        pointHoverRadius: 6,
+        pointBackgroundColor: kinds.map(k => k ? PRECIP_KIND_COLORS[k] : '#00d4ff'),
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1.5,
+        fill: true,
+        tension: 0.4,
+        cubicInterpolationMode: 'monotone',
+        spanGaps: true,
+        segment: {
+          borderColor: (ctx) => {
+            const k = kinds[ctx.p1DataIndex] || kinds[ctx.p0DataIndex];
+            return k ? PRECIP_KIND_COLORS[k] : '#00d4ff';
+          }
+        }
+      }]
+    },
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
@@ -2984,31 +3589,42 @@ function renderMainChart(forecast) {
           borderColor: 'rgba(0,212,255,0.3)', borderWidth: 1, padding: 12, cornerRadius: 12,
           titleFont: { family: 'Onest', size: 13, weight: '600' },
           bodyFont: { family: 'Onest', size: 12 },
-          filter: (item) => item.dataset.label === labelTemp || item.dataset.label === labelPrecip,
           callbacks: {
             title: (items) => {
-              const hourIdx = items[0].dataIndex;
-              const head = items[0].label + ':00';
-              if (showSpread && spreadMin && spreadMax) {
-                const lo = Math.round(spreadMin[hourIdx]);
-                const hi = Math.round(spreadMax[hourIdx]);
-                return `${head}  ·  ${lo}–${hi}${tUnit}`;
+              const i = items[0].dataIndex;
+              const h = merged[i];
+              // Определить день: считаем сколько часов прошло
+              let dayIdx = 0, sum = 0;
+              for (let s = 0; s < segments.length; s++) {
+                sum += segments[s].hours.length;
+                if (i < sum) { dayIdx = s; break; }
               }
-              return head;
+              const day = segments[dayIdx].day;
+              const dateShort = day.date ? day.date.slice(0,5) : '';
+              const dayLabel = (dayIdx === 0 && day.id === 0)
+                ? t('day.today')
+                : localizeDayShort(day.name);
+              return `${String(h.h).padStart(2,'0')}:00 · ${dayLabel} · ${dateShort}`;
             },
-            label: (ctx) => {
-              const v = Math.round(ctx.parsed.y);
-              if (ctx.dataset.label === labelTemp)   return ` ${labelTemp}: ${v}${tUnit}`;
-              if (ctx.dataset.label === labelPrecip) return ` ${labelPrecip}: ${v}%`;
-              return null;
-            }
+            label: (c) => ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
           }
         }
       },
       scales: {
-        x: { ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, autoSkip: false, callback: (v, i) => (i % 3 === 0) ? hours[i] : '' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
-        yT: { type: 'linear', position: 'left', min: Math.floor(minT) - 3, max: Math.ceil(maxT) + 3, ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 4, callback: v => v + '°' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
-        yP: { type: 'linear', position: 'right', min: 0, max: 100, ticks: { color: 'rgba(232,240,255,0.4)', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 25, callback: v => v + '%' }, grid: { display: false }, border: { display: false } }
+        x: {
+          ticks: {
+            color: (c) => (merged[c.index] && merged[c.index].h === 0) ? '#00d4ff' : 'rgba(232,240,255,0.5)',
+            font: (c) => ({
+              family: 'JetBrains Mono',
+              size: 10,
+              weight: (merged[c.index] && merged[c.index].h === 0) ? '700' : '400'
+            }),
+            maxRotation: 0, minRotation: 0, autoSkip: false, padding: 4
+          },
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { display: false }
+        },
+        y: { min: 0, max: Math.ceil(maxVal * 1.2), ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, callback: v => v + ' ' + t('precip.legend') }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
       }
     }
   });
@@ -3020,8 +3636,16 @@ function renderAll() {
   renderSourceIndicator();
   renderHeroAndMetrics(forecast);
   renderDays(forecast);
-  renderMainChart(forecast);
+  renderHourlyRow(forecast);
+  renderPrecipChart(forecast);
   renderConfidenceChip();
+  // После любого ре-рендера пересчитать состояние стрелок прокрутки (ширина контента могла измениться)
+  requestAnimationFrame(() => {
+    ['hourlyRow', 'daysGrid', 'precipScroll'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) updateScrollArrows(el);
+    });
+  });
 }
 
 /* ============================================
@@ -3163,66 +3787,54 @@ function openModal(dayId) {
       </div>
     </div>
 
-    <div class="modal-hourly">
-      <h3>${t('modal.day.hourlyTitle')}</h3>
-      <div class="modal-chart-wrap"><canvas id="modalChart"></canvas></div>
-    </div>
-
     <div class="modal-hours-list">
       <h3>${t('modal.day.hoursTitle')}</h3>
-      <div class="hours-scroll">
-        ${d.hourly.map(h => `
-          <div class="hour-cell">
-            <div class="h">${String(h.h).padStart(2,'0')}:00</div>
-            <div class="ic">${weatherIcon(h.c, 36)}</div>
-            <div class="t">${fmtTempNum(h.t)}°</div>
-            <div class="p">${h.p}%</div>
-          </div>
-        `).join('')}
+      <div class="hourly-tabs" id="modalHourlyTabs" role="tablist">
+        <button class="ht-tab" data-metric="temp" role="tab"><span data-i18n="metric.temp">Температура</span></button>
+        <button class="ht-tab" data-metric="feels" role="tab"><span data-i18n="metric.feels">По ощущениям</span></button>
+        <button class="ht-tab" data-metric="precip" role="tab"><span data-i18n="metric.rain">Осадки</span></button>
+        <button class="ht-tab" data-metric="wind" role="tab"><span data-i18n="metric.wind">Ветер</span></button>
+        <button class="ht-tab" data-metric="pressure" role="tab"><span data-i18n="metric.pressure">Давление</span></button>
       </div>
+      <div class="hours-scroll" id="modalHourlyRow"></div>
     </div>
   `;
 
   modal.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  setTimeout(() => {
-    const mctx = document.getElementById('modalChart').getContext('2d');
-    const mTempsC = d.hourly.map(h => h.t);
-    const mTemps = mTempsC.map(c => convertTemp(c, state.units.temp));
-    const mPrecs = d.hourly.map(h => h.p);
-    const mHours = d.hourly.map(h => String(h.h).padStart(2, '0'));
-    const mGrad = mctx.createLinearGradient(0, 0, 0, 220);
-    mGrad.addColorStop(0, 'rgba(0,212,255,0.45)');
-    mGrad.addColorStop(0.5, 'rgba(77,171,247,0.15)');
-    mGrad.addColorStop(1, 'rgba(0,212,255,0.0)');
-    const minT = Math.min(...mTemps), maxT = Math.max(...mTemps);
-    const mTUnit = unitTemp();
-    const mLabelT = t('chart.legendTemp');
-    const mLabelP = t('chart.legendPrecip');
+  // Сбрасываем модальную метрику на температуру при каждом открытии — так UX предсказуемее.
+  currentModalMetric = 'temp';
+  renderModalHourlyRow(d);
+  setupModalHourlyTabs(d);
+}
 
-    if (modalChartInstance) modalChartInstance.destroy();
-    modalChartInstance = new Chart(mctx, {
-      type: 'bar',
-      data: {
-        labels: mHours,
-        datasets: [
-          { type: 'line', label: mLabelT, data: mTemps, borderColor: '#00d4ff', backgroundColor: mGrad, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointBackgroundColor: '#00d4ff', pointBorderColor: '#fff', pointBorderWidth: 2, fill: true, tension: 0.45, yAxisID: 'yT', order: 1 },
-          { type: 'bar', label: mLabelP, data: mPrecs, backgroundColor: 'rgba(167,139,250,0.5)', borderRadius: 3, borderWidth: 0, yAxisID: 'yP', order: 2, barPercentage: 0.7, categoryPercentage: 0.85 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,17,40,0.95)', titleColor: '#00d4ff', bodyColor: '#e8f0ff', borderColor: 'rgba(0,212,255,0.3)', borderWidth: 1, padding: 12, cornerRadius: 12, titleFont: { family: 'Onest', size: 13, weight: '600' }, bodyFont: { family: 'Onest', size: 12 }, callbacks: { title: (items) => items[0].label + ':00', label: (ctx) => { const v = Math.round(ctx.parsed.y); return ctx.datasetIndex === 0 ? ` ${mLabelT}: ${v}${mTUnit}` : ` ${mLabelP}: ${v}%`; } } } },
-        scales: {
-          x: { ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0, autoSkip: false, callback: (v, i) => (i % 3 === 0) ? mHours[i] : '' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
-          yT: { type: 'linear', position: 'left', min: minT - 3, max: maxT + 3, ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, callback: v => Math.round(v) + '°' }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
-          yP: { type: 'linear', position: 'right', min: 0, max: 100, ticks: { color: 'rgba(232,240,255,0.4)', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 25, callback: v => v + '%' }, grid: { display: false }, border: { display: false } }
-        }
-      }
+function renderModalHourlyRow(d) {
+  const row = document.getElementById('modalHourlyRow');
+  if (!row) return;
+  document.querySelectorAll('#modalHourlyTabs .ht-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.metric === currentModalMetric);
+  });
+  const isToday = (d.id === 0);
+  row.innerHTML = d.hourly.map((h, i) => {
+    const isNow = isToday && (i === NOW_HOUR);
+    return `
+    <div class="hour-cell${isNow ? ' now' : ''}">
+      <div class="h">${String(h.h).padStart(2,'0')}:00</div>
+      <div class="ic">${weatherIcon(h.c, 36)}</div>
+      <div class="t">${hourMetricValue(h, currentModalMetric)}</div>
+    </div>
+  `;
+  }).join('');
+}
+
+function setupModalHourlyTabs(d) {
+  document.querySelectorAll('#modalHourlyTabs .ht-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentModalMetric = btn.dataset.metric;
+      renderModalHourlyRow(d);
     });
-  }, 100);
+  });
 }
 
 function closeModal() {
@@ -4760,8 +5372,8 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v5: hotfix activity-windows — в hourly добавились pmm/pmmMax (осадки в мм/ч для надёжных проверок).
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v5`;
+  // v8: в hourly добавлено поле pr (давление мм рт.ст. по часам) для табов почасовой карточки.
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v8`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -4915,7 +5527,7 @@ async function fetchAirQuality(lat, lon, signal = null) {
     hourly: 'european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen',
     current: 'european_aqi,pm2_5,pm10,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen',
     timezone: 'auto',
-    forecast_days: '5'
+    forecast_days: '7'
   });
   const url = `https://air-quality-api.open-meteo.com/v1/air-quality?${params.toString()}`;
   try {
@@ -5012,7 +5624,7 @@ async function fetchOpenMeteo(lat, lon, models = null) {
     ].join(','),
     timezone: 'auto',
     wind_speed_unit: 'ms',
-    forecast_days: '5'
+    forecast_days: '10'
   });
   if (Array.isArray(models) && models.length > 0) {
     params.set('models', models.join(','));
@@ -5047,7 +5659,7 @@ async function fetchOpenMeteo(lat, lon, models = null) {
   }
 }
 
-// Превращаем JSON Open-Meteo в массив 5 дней в нашем внутреннем формате (как BASELINE).
+// Превращаем JSON Open-Meteo в массив до 10 дней в нашем внутреннем формате (как BASELINE).
 // Bы будем хранить русские строки в полях condLabel/uvLabel/aqiLabel/moonName/windDir чтобы
 // существующие локализаторы (localizeCondLabel, localizeUvLabel и т.д.) работали без изменений.
 // Параметр suffix — пустая строка для best_match, или '_<model_name>' для конкретной модели.
@@ -5105,7 +5717,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   if (!tMax || tMax.every(v => v == null)) return null;
 
   const days = [];
-  for (let i = 0; i < Math.min(5, dailyTime.length); i++) {
+  for (let i = 0; i < Math.min(10, dailyTime.length); i++) {
     const date = new Date(dailyTime[i] + 'T12:00:00');
     const sunriseIso = sunR ? sunR[i] : null;
     const sunsetIso  = sunS ? sunS[i] : null;
@@ -5128,6 +5740,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         c: hWc && hWc[idx] != null ? codeToCondition(hWc[idx]) : 'cloudy',
         feels: hAp && hAp[idx] != null ? Math.round(hAp[idx]) : null,
         cl: hCl && hCl[idx] != null ? Math.round(hCl[idx]) : null,
+        pr: hPr && hPr[idx] != null ? hPaToMmHg(hPr[idx]) : null,  // давление в мм рт.ст. для почасовых табов
         // В6 (гроза-индикатор): сырой weather_code (число), CAPE, lifted_index
         wc: hWc && hWc[idx] != null ? hWc[idx] : null,
         cape: hCape && hCape[idx] != null ? Math.round(hCape[idx]) : null,
@@ -5250,6 +5863,7 @@ function computeAverageForecast(forecasts) {
       const capeVals = hours.map(o => o.cape).filter(v => typeof v === 'number');
       const liVals   = hours.map(o => o.li).filter(v => typeof v === 'number');
       const wcVals   = hours.map(o => o.wc).filter(v => typeof v === 'number');
+      const prVals   = hours.map(o => o.pr).filter(v => typeof v === 'number');
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
@@ -5260,6 +5874,7 @@ function computeAverageForecast(forecasts) {
         c: hours[0].c,
         feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
         cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null,
+        pr: prVals.length > 0 ? Math.round(prVals.reduce((a,b) => a+b, 0) / prVals.length) : null,
         tMin: tVals.length > 0 ? Math.min(...tVals) : null,
         tMax: tVals.length > 0 ? Math.max(...tVals) : null,
         wc: wcVals.length > 0 ? Math.max(...wcVals) : null,
@@ -5516,6 +6131,9 @@ function loadInitialLocation() {
 loadSavedSettings();
 loadInitialLocation();
 setupSegmentedHandlers();
+setupHourlyTabs();
+setupScrollArrows();
+setupHourlyDetailModal();
 applyAll();
 
 // Refresh-кнопка в footer — принудительно обновить прогноз (пропуская кэш)
