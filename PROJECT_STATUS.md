@@ -4,9 +4,10 @@
 > Содержит актуальное состояние проекта, что уже сделано, что осталось.
 >
 > **Дата обновления:** 15 мая 2026
-> **Текущая версия:** v1.7-ui-redesign
+> **Текущая версия:** v1.9-pwa
 > **Статус фазы В:** ✅ закрыта полностью (В1–В7)
 > **Статус фазы Г (UI-редизайн):** ✅ закрыта полностью
+> **Статус фазы Д (PWA + безопасность):** ✅ закрыта (v1.8, v1.9)
 > **Live URL:** https://meteo-star.github.io/kharkiv-weather/
 > **GitHub:** https://github.com/meteo-star/kharkiv-weather
 
@@ -179,10 +180,20 @@
 
 ---
 
+### Фаза Д: PWA + безопасность
+
+| Шаг | Tag | Что |
+|---|---|---|
+| Д1 | `v1.8-modal-security` | **Расширение «Почасовой» модалки до 11 метрик + SRI + CSP.** В Open-Meteo hourly запрос добавлены `uv_index`, `visibility`, `shortwave_radiation`. Парсер кладёт в hourly[] новые поля: `hum`, `dp`, `uvi`, `vis`, `sr`. `computeAverageForecast` усредняет их по 7 моделям. `hdmMetricsConfig` расширен с 6 до 11 метрик (+ Влажность, Точка росы, УФ-индекс, Видимость, Солнечная радиация). Cache-key `:v8 → :v9`. SRI integrity-хэш SHA-384 для Chart.js (защита от подмены кода на CDN). CSP через `<meta http-equiv="Content-Security-Policy">` с whitelist'ом доменов (только cdn.jsdelivr.net, fonts.googleapis.com, fonts.gstatic.com, Open-Meteo APIs, Nominatim), `frame-ancestors 'none'` для защиты от clickjacking. |
+| Д2 | `v1.9-pwa` | **PWA-Lite: установка приложения + офлайн-кэш (без push).** Добавлены: `manifest.json` (имя, иконки, theme_color, display:standalone), `service-worker.js` (3 стратегии кэша: cache-first для shell/шрифтов/Chart.js, network-first для API с fallback на кэш, stale-while-revalidate для same-origin), 6 иконок PNG (192/512 normal + 192/512 maskable + 180 apple-touch + 32 favicon) сгенерированы через `scripts/gen-icons.py` (PIL). В `<head>`: link rel=manifest + apple-touch-icon + theme-color + apple-mobile-web-app-capable. Service-worker регистрируется на `window.load`. Работает на Android Chrome (auto-баннер «Установить»), iOS Safari ≥11.3 (Share → На главный экран), всех desktop-браузерах. Push-уведомлений нет — добавятся отдельно при необходимости (нужен внешний backend типа Cloudflare Workers). |
+
+---
+
 ## 6. ОСТАЛОСЬ СДЕЛАТЬ
 
 ✅ **Фаза В закрыта полностью (В1–В7).** Все 7 уникальных фишек реализованы.
 ✅ **Фаза Г закрыта полностью (Г1–Г5).** Редизайн UI завершён.
+✅ **Фаза Д закрыта (Д1–Д2).** PWA-Lite + SRI/CSP реализованы. Push-уведомления вынесены в бэклог.
 
 Следующая активность – из бэклога (см. часть 7) либо новые идеи по запросу.
 
@@ -258,6 +269,10 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 | Файл | Назначение |
 |---|---|
 | `index.html` | Весь код – HTML, CSS, JS в одном файле |
+| `manifest.json` | PWA-манифест (имя, иконки, theme_color, start_url, display:standalone) |
+| `service-worker.js` | PWA service worker — офлайн-кэш + cache strategies (cache-first / network-first / stale-while-revalidate) |
+| `icons/` | PNG-иконки PWA: 192, 512, maskable 192/512, apple-touch 180, favicon 32 |
+| `scripts/gen-icons.py` | Генератор иконок через PIL/Pillow (запускается вручную при изменении дизайна иконки) |
 | `README.md` | Краткое описание проекта (видно на GitHub) |
 | `SECURITY.md` | Контракт безопасности и приватности – все внешние сервисы, что они видят |
 | `HANDOFF.md` | **Исходный** документ из чата claude.ai (v0.4) – исторический контекст, как начинали |
@@ -276,8 +291,8 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 
 ---
 
-*Документ обновлён: 15 мая 2026 после релиза v1.7-ui-redesign (фаза Г — редизайн UI: горизонтальные scroll-карточки, табы метрик, новая полноэкранная модалка «Почасовой» с sticky-часами и 6 mini-charts, графики осадков с типами).*
-*Следующий шаг: что-то из бэклога (Inverse search / ICS-export / PWA + Push / RainViewer-радар) либо новые идеи.*
+*Документ обновлён: 15 мая 2026 после релиза v1.9-pwa (фаза Д — PWA-Lite: установка приложения + офлайн-кэш + SRI/CSP). Push-уведомления отложены до решения с backend (Cloudflare Worker / Telegram Bot).*
+*Следующий шаг: Inverse search / Аудио-резюме / Multi-city favorites / Push-уведомления / Радар осадков — выбор за пользователем.*
 
 ### Заметка по В6
 По итогам обсуждения от прямого WebSocket к Blitzortung отказались (закрытое API, нестабильный handshake, требует прокси). Вместо этого реализован **прогнозный** индикатор грозы на 48ч из Open-Meteo с использованием `weather_code` (95/96/99), `cape` и `lifted_index`. Real-time трекер молний может вернуться отдельной фичей В6.5 через Cloudflare Worker-прокси, если возникнет потребность.
