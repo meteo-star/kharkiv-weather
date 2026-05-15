@@ -578,6 +578,37 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .search-chip .search-icon{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:#00d4ff;transition:transform 0.3s ease}
 .search-chip:hover .search-icon{transform:scale(1.15)}
 
+/* ===== Favorites row — чипы любимых городов под header'ом ===== */
+.favorites-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) transparent;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.favorites-row::-webkit-scrollbar{height:4px}
+.favorites-row::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.favorites-row:empty{display:none}
+.fav-chip{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:7px 12px 7px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:100px;font-family:'Onest',sans-serif;font-size:12px;color:rgba(232,240,255,0.85);font-weight:500;cursor:pointer;transition:all 0.2s ease;user-select:none;white-space:nowrap;backdrop-filter:blur(8px);position:relative}
+.fav-chip:hover{background:rgba(0,212,255,0.1);border-color:rgba(0,212,255,0.4);color:#fff;transform:translateY(-1px)}
+.fav-chip.active{background:rgba(0,212,255,0.18);border-color:rgba(0,212,255,0.55);color:#fff;box-shadow:0 0 18px rgba(0,212,255,0.22)}
+.fav-chip-pin{font-size:10px;opacity:0.7;line-height:1}
+.fav-chip-name{font-weight:500}
+.fav-chip-remove{margin-left:2px;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;color:rgba(232,240,255,0.6);font-size:14px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0;font-family:'Onest',sans-serif;transition:all 0.15s ease}
+.fav-chip:hover .fav-chip-remove{display:inline-flex}
+.fav-chip-remove:hover{background:rgba(255,80,80,0.25);color:#ff8080}
+.fav-chip.add{padding:7px 14px;border-style:dashed;color:rgba(232,240,255,0.55);background:transparent}
+.fav-chip.add:hover{color:#00d4ff;border-color:rgba(0,212,255,0.5);border-style:dashed}
+@media (max-width: 640px){
+  .favorites-row{margin-bottom:10px}
+  .fav-chip{padding:6px 10px;font-size:11px;gap:4px}
+  .fav-chip.add{padding:6px 11px}
+}
+
+/* Звезда в city-modal для добавления в избранное */
+.city-item-fav-btn{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(232,240,255,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;font-size:14px;line-height:1;transition:all 0.18s ease;margin-left:auto}
+.city-item-fav-btn:hover{background:rgba(252,211,77,0.15);border-color:rgba(252,211,77,0.4);color:#fbbf24;transform:scale(1.1)}
+.city-item-fav-btn.active{background:rgba(252,211,77,0.18);border-color:rgba(252,211,77,0.45);color:#fbbf24}
+.city-item-fav-btn.active:hover{background:rgba(255,100,100,0.15);border-color:rgba(255,100,100,0.35);color:#ff8080}
+
+/* Заголовок секции в списке городов city-modal */
+.city-section-header{padding:14px 4px 6px;font-size:10px;color:rgba(232,240,255,0.45);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;font-family:'JetBrains Mono',monospace}
+.city-section-header:first-child{padding-top:6px}
+
 .settings-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(167,139,250,0.3);border-radius:100px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#e8f0ff;font-weight:500;cursor:pointer;transition:all 0.25s ease;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(167,139,250,0.1)}
 .settings-chip:hover{border-color:rgba(167,139,250,0.55);background:rgba(255,255,255,0.06);box-shadow:0 0 24px rgba(167,139,250,0.2);transform:translateY(-1px)}
 .settings-chip:active{transform:translateY(0) scale(0.98)}
@@ -1018,6 +1049,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
       </div>
     </div>
   </div>
+
+  <div class="favorites-row" id="favoritesRow"></div>
 
   <div class="api-error-banner" id="apiErrorBanner" style="display:none">
     <span class="err-icon">
@@ -1621,6 +1654,13 @@ const I18N = {
     'search.preset.bbq': 'шашлык',
     'search.preset.carwash': 'мойка авто',
     'search.preset.storm': 'когда гроза',
+    'fav.add': '+ Добавить',
+    'fav.addToFav': 'В избранное',
+    'fav.removeFromFav': 'Убрать из избранного',
+    'city.section.favorites': 'Избранные',
+    'city.section.ua': 'Города Украины',
+    'city.section.world': 'Города мира',
+    'city.section.searchResults': 'Результаты поиска',
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Осадки',
     'sources.title': 'Источник прогноза',
@@ -1924,6 +1964,13 @@ const I18N = {
     'search.preset.bbq': 'шашлик',
     'search.preset.carwash': 'мийка авто',
     'search.preset.storm': 'коли гроза',
+    'fav.add': '+ Додати',
+    'fav.addToFav': 'В обране',
+    'fav.removeFromFav': 'Прибрати з обраного',
+    'city.section.favorites': 'Обрані',
+    'city.section.ua': 'Міста України',
+    'city.section.world': 'Міста світу',
+    'city.section.searchResults': 'Результати пошуку',
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Опади',
     'sources.title': 'Джерело прогнозу',
@@ -2227,6 +2274,13 @@ const I18N = {
     'search.preset.bbq': 'bbq weather',
     'search.preset.carwash': 'car wash',
     'search.preset.storm': 'when thunderstorm',
+    'fav.add': '+ Add city',
+    'fav.addToFav': 'Add to favorites',
+    'fav.removeFromFav': 'Remove from favorites',
+    'city.section.favorites': 'Favorites',
+    'city.section.ua': 'Ukrainian cities',
+    'city.section.world': 'World cities',
+    'city.section.searchResults': 'Search results',
     'chart.legendTemp': 'Temperature',
     'chart.legendPrecip': 'Precipitation',
     'sources.title': 'Forecast source',
@@ -5368,6 +5422,8 @@ setInterval(updateDateLine, 60_000);
    ============================================ */
 
 const LOCATION_STORAGE_KEY = 'kw:location:v1';
+const FAVORITES_STORAGE_KEY = 'kw:favorites:v1';
+const FAVORITES_MAX = 8;
 
 // Дефолт – Харьков (центр)
 const DEFAULT_LOCATION = {
@@ -5411,8 +5467,86 @@ const POPULAR_UA_CITIES = [
   { name: 'Каменец-Подольский',region: 'Хмельницкая обл.',       lat: 48.6845, lon: 26.5868 }
 ];
 
+// Города мира — крупные столицы и мегаполисы для quick-add в city-modal.
+// Open-Meteo даёт данные глобально (ECMWF/GFS/ICON покрывают всю планету), так что любые координаты работают.
+// Имена в EN — стандартные, локализация в city-modal не критична (поиск Geocoding API работает по имени).
+const POPULAR_WORLD_CITIES = [
+  { name: 'New York',     region: 'USA',                 lat: 40.7128, lon: -74.0060 },
+  { name: 'London',       region: 'United Kingdom',      lat: 51.5074, lon: -0.1278  },
+  { name: 'Paris',        region: 'France',              lat: 48.8566, lon:  2.3522  },
+  { name: 'Berlin',       region: 'Germany',             lat: 52.5200, lon: 13.4050  },
+  { name: 'Madrid',       region: 'Spain',               lat: 40.4168, lon: -3.7038  },
+  { name: 'Rome',         region: 'Italy',               lat: 41.9028, lon: 12.4964  },
+  { name: 'Amsterdam',    region: 'Netherlands',         lat: 52.3676, lon:  4.9041  },
+  { name: 'Vienna',       region: 'Austria',             lat: 48.2082, lon: 16.3738  },
+  { name: 'Warsaw',       region: 'Poland',              lat: 52.2297, lon: 21.0122  },
+  { name: 'Prague',       region: 'Czech Republic',      lat: 50.0755, lon: 14.4378  },
+  { name: 'Stockholm',    region: 'Sweden',              lat: 59.3293, lon: 18.0686  },
+  { name: 'Istanbul',     region: 'Turkey',              lat: 41.0082, lon: 28.9784  },
+  { name: 'Dubai',        region: 'UAE',                 lat: 25.2048, lon: 55.2708  },
+  { name: 'Tel Aviv',     region: 'Israel',              lat: 32.0853, lon: 34.7818  },
+  { name: 'Tokyo',        region: 'Japan',               lat: 35.6762, lon: 139.6503 },
+  { name: 'Beijing',      region: 'China',               lat: 39.9042, lon: 116.4074 },
+  { name: 'Singapore',    region: 'Singapore',           lat:  1.3521, lon: 103.8198 },
+  { name: 'Bangkok',      region: 'Thailand',            lat: 13.7563, lon: 100.5018 },
+  { name: 'Sydney',       region: 'Australia',           lat: -33.8688, lon: 151.2093 },
+  { name: 'Toronto',      region: 'Canada',              lat: 43.6532, lon: -79.3832 },
+  { name: 'Los Angeles',  region: 'USA',                 lat: 34.0522, lon: -118.2437 },
+  { name: 'Sao Paulo',    region: 'Brazil',              lat: -23.5505, lon: -46.6333 },
+  { name: 'Cairo',        region: 'Egypt',               lat: 30.0444, lon: 31.2357  }
+];
+
 // Текущая локация — заполнится в loadInitialLocation()
 let currentLocation = { ...DEFAULT_LOCATION };
+
+// === Избранные города (localStorage) ===
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    // Валидация: каждый item должен иметь name+lat+lon
+    return arr.filter(it => it && typeof it.name === 'string' && typeof it.lat === 'number' && typeof it.lon === 'number').slice(0, FAVORITES_MAX);
+  } catch (e) {
+    return [];
+  }
+}
+function saveFavorites(list) {
+  try {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(list.slice(0, FAVORITES_MAX)));
+  } catch (e) {
+    console.warn('Не удалось сохранить favorites:', e);
+  }
+}
+// Координаты совпадают (с точностью до 2 знаков ≈ 1км) — считаем что это один и тот же город
+function sameCoords(a, b) {
+  if (!a || !b) return false;
+  return Math.abs(a.lat - b.lat) < 0.01 && Math.abs(a.lon - b.lon) < 0.01;
+}
+function isFavorite(loc) {
+  return loadFavorites().some(f => sameCoords(f, loc));
+}
+function toggleFavorite(loc) {
+  const list = loadFavorites();
+  const idx = list.findIndex(f => sameCoords(f, loc));
+  if (idx >= 0) {
+    list.splice(idx, 1);
+  } else {
+    if (list.length >= FAVORITES_MAX) {
+      list.pop();  // вытесняем самый старый
+    }
+    list.unshift({
+      name: loc.name,
+      region: loc.region || '',
+      country: loc.country || '',
+      lat: loc.lat,
+      lon: loc.lon
+    });
+  }
+  saveFavorites(list);
+  return list;
+}
 
 // === localStorage ===
 function loadSavedLocation() {
@@ -5442,6 +5576,7 @@ function setCurrentLocation(loc) {
   currentLocation = { ...loc };
   saveLocation(currentLocation);
   renderLocationHeader();
+  renderFavoritesRow();
   // Перезапросить прогноз для новых координат
   refreshForecast();
 }
@@ -5508,24 +5643,42 @@ async function reverseGeocode(lat, lon) {
 }
 
 // === Поиск через Open-Meteo Geocoding ===
+// Глобальный поиск через Open-Meteo Geocoding API.
+// Раньше был жёстко ограничен countryCode=UA → ломал поиск Tokyo/Berlin/etc.
+// Сейчас: глобальный поиск, но результаты пост-сортируются так чтобы
+// при русско-/украиноязычном интерфейсе украинские населённые пункты шли сверху.
 async function searchCities(query) {
   const q = query.trim();
   if (q.length < 2) return [];
   const apiLang = state.lang === 'uk' ? 'uk' : state.lang === 'en' ? 'en' : 'ru';
   const params = new URLSearchParams({
     name: q,
-    count: '15',
-    language: apiLang,
-    countryCode: 'UA'
+    count: '25',  // было 15 — увеличили чтобы захватить больше сёл
+    language: apiLang
   });
   const url = `https://geocoding-api.open-meteo.com/v1/search?${params}`;
   const resp = await fetch(url);
   if (!resp.ok) throw new Error('Geocoding HTTP ' + resp.status);
   const data = await resp.json();
   if (!data.results) return [];
-  return data.results.map(r => ({
+
+  // Сортируем по релевантности с учётом локали: для RU/UK украинские населённые пункты сверху.
+  // Open-Meteo возвращает уже отсортированный список по релевантности, но для UA-локали хочется приоритета.
+  const preferUA = (apiLang === 'ru' || apiLang === 'uk');
+  const sorted = [...data.results].sort((a, b) => {
+    if (preferUA) {
+      const aUa = a.country_code === 'UA' ? 1 : 0;
+      const bUa = b.country_code === 'UA' ? 1 : 0;
+      if (aUa !== bUa) return bUa - aUa;
+    }
+    // Внутри страны сохраняем порядок от API (он по убыванию релевантности)
+    return 0;
+  });
+
+  return sorted.map(r => ({
     name: r.name,
     region: [r.admin1, r.admin2].filter(Boolean).join(' · ') || r.country || '',
+    country: r.country || '',
     lat: r.latitude,
     lon: r.longitude
   }));
@@ -5547,7 +5700,7 @@ function openCityModal() {
   citySearchInput.value = '';
   citySearchClear.classList.remove('visible');
   cityListHeader.textContent = t('city.list.popular');
-  renderCityList(POPULAR_UA_CITIES);
+  renderCityList(null, { sections: getDefaultCitySections() });
   cityModal.classList.add('open');
   document.body.style.overflow = 'hidden';
   setTimeout(() => citySearchInput.focus(), 350);
@@ -5557,9 +5710,70 @@ function closeCityModal() {
   document.body.style.overflow = '';
 }
 
+// Один item списка городов: pin + текст + check + звёздочка-избранное.
+// Звёздочка — отдельная кнопка с stopPropagation, не должна переключать локацию.
+function buildCityItem(c) {
+  const isActive = sameCoords(c, currentLocation);
+  const fav = isFavorite(c);
+  const item = document.createElement('button');
+  item.type = 'button';
+  item.className = 'city-item' + (isActive ? ' active' : '');
+  const { name: dispName, region: dispRegion } = localizeCity(c);
+  item.innerHTML = `
+    <span class="city-pin">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.5 8 12 8 12s8-6.5 8-12c0-4.42-3.58-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
+    </span>
+    <span class="city-text">
+      <span class="city-name">${escapeHtml(dispName)}</span>
+      <span class="city-region">${escapeHtml(dispRegion)}</span>
+    </span>
+    <span class="city-active-check">✓</span>
+    <button type="button" class="city-item-fav-btn${fav ? ' active' : ''}" aria-label="${escapeHtml(fav ? t('fav.removeFromFav') : t('fav.addToFav'))}" title="${escapeHtml(fav ? t('fav.removeFromFav') : t('fav.addToFav'))}">${fav ? '★' : '☆'}</button>
+  `;
+  item.addEventListener('click', () => selectCityFromList(c));
+  const favBtn = item.querySelector('.city-item-fav-btn');
+  favBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    toggleFavorite(c);
+    renderFavoritesRow();
+    // Перерисовать всю модалку чтобы обновить состояние всех звёзд (один город может появляться в нескольких секциях)
+    if (typeof window._lastCityRender === 'function') window._lastCityRender();
+  });
+  return item;
+}
+
+// cities — либо массив городов (плоский, для поиска), либо null + opts.sections с секциями.
 function renderCityList(cities, opts = {}) {
   cityList.innerHTML = '';
-  if (!cities.length) {
+
+  // Сохраняем последнюю функцию рендера чтобы можно было перерисовать после toggleFavorite
+  window._lastCityRender = () => renderCityList(cities, opts);
+
+  // Режим секций
+  if (opts.sections && Array.isArray(opts.sections)) {
+    let totalCount = 0;
+    opts.sections.forEach(section => {
+      if (!section.cities || !section.cities.length) return;
+      totalCount += section.cities.length;
+      const header = document.createElement('div');
+      header.className = 'city-section-header';
+      header.textContent = section.title;
+      cityList.appendChild(header);
+      section.cities.forEach(c => cityList.appendChild(buildCityItem(c)));
+    });
+    if (totalCount === 0) {
+      cityList.innerHTML = `
+        <div class="city-empty">
+          <div class="empty-icon">🔍</div>
+          <div>${opts.emptyText || t('city.list.empty')}</div>
+        </div>`;
+    }
+    return;
+  }
+
+  // Плоский режим (обычный массив, для результатов поиска)
+  if (!cities || !cities.length) {
     cityList.innerHTML = `
       <div class="city-empty">
         <div class="empty-icon">🔍</div>
@@ -5567,24 +5781,55 @@ function renderCityList(cities, opts = {}) {
       </div>`;
     return;
   }
-  cities.forEach(c => {
-    const isActive = Math.abs(c.lat - currentLocation.lat) < 0.01 && Math.abs(c.lon - currentLocation.lon) < 0.01;
-    const item = document.createElement('button');
-    item.type = 'button';
-    item.className = 'city-item' + (isActive ? ' active' : '');
-    const { name: dispName, region: dispRegion } = localizeCity(c);
-    item.innerHTML = `
-      <span class="city-pin">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2C7.58 2 4 5.58 4 10c0 5.5 8 12 8 12s8-6.5 8-12c0-4.42-3.58-8-8-8z"/><circle cx="12" cy="10" r="3"/></svg>
-      </span>
-      <span class="city-text">
-        <span class="city-name">${escapeHtml(dispName)}</span>
-        <span class="city-region">${escapeHtml(dispRegion)}</span>
-      </span>
-      <span class="city-active-check">✓</span>`;
-    item.addEventListener('click', () => selectCityFromList(c));
-    cityList.appendChild(item);
+  cities.forEach(c => cityList.appendChild(buildCityItem(c)));
+}
+
+// Дефолтный набор секций при открытии city-modal без ввода: Избранные → Украина → Мир
+function getDefaultCitySections() {
+  const sections = [];
+  const favs = loadFavorites();
+  if (favs.length > 0) {
+    sections.push({ title: t('city.section.favorites'), cities: favs });
+  }
+  sections.push({ title: t('city.section.ua'), cities: POPULAR_UA_CITIES });
+  sections.push({ title: t('city.section.world'), cities: POPULAR_WORLD_CITIES });
+  return sections;
+}
+
+// Рисуем чипы избранного в шапке. Если favorites пуст — рисуем только кнопку «+ Добавить».
+function renderFavoritesRow() {
+  const row = document.getElementById('favoritesRow');
+  if (!row) return;
+  row.innerHTML = '';
+  const favs = loadFavorites();
+  favs.forEach(f => {
+    const isActive = sameCoords(f, currentLocation);
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'fav-chip' + (isActive ? ' active' : '');
+    const { name: dispName } = localizeCity(f);
+    chip.innerHTML = `
+      <span class="fav-chip-pin">📍</span>
+      <span class="fav-chip-name">${escapeHtml(dispName)}</span>
+      <button type="button" class="fav-chip-remove" aria-label="${escapeHtml(t('fav.removeFromFav'))}" title="${escapeHtml(t('fav.removeFromFav'))}">×</button>
+    `;
+    chip.addEventListener('click', () => {
+      setCurrentLocation({ ...f, source: 'favorite' });
+    });
+    chip.querySelector('.fav-chip-remove').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(f);
+      renderFavoritesRow();
+    });
+    row.appendChild(chip);
   });
+  // Кнопка "+ Добавить" — открывает city-modal
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'fav-chip add';
+  addBtn.textContent = t('fav.add');
+  addBtn.addEventListener('click', () => openCityModal());
+  row.appendChild(addBtn);
 }
 
 function escapeHtml(s) {
@@ -5640,7 +5885,7 @@ citySearchInput.addEventListener('input', () => {
 
   if (q.trim().length === 0) {
     cityListHeader.textContent = t('city.list.popular');
-    renderCityList(POPULAR_UA_CITIES);
+    renderCityList(null, { sections: getDefaultCitySections() });
     return;
   }
   if (q.trim().length < 2) {
@@ -5649,13 +5894,25 @@ citySearchInput.addEventListener('input', () => {
     return;
   }
 
-  // Локальная фильтрация POPULAR_UA_CITIES — учитываем все языковые имена
+  // Локальная фильтрация: ищем по UA-городам + мировым + сохранённым избранным.
+  // Учитываем все языковые имена (через UA_CITY_TRANSLATIONS), region и country.
   const ql = q.toLowerCase().trim();
-  const local = POPULAR_UA_CITIES.filter(c => {
+  const allKnown = [...POPULAR_UA_CITIES, ...POPULAR_WORLD_CITIES, ...loadFavorites()];
+  // Дедуп по координатам — favorites могут совпадать с popular
+  const seenKeys = new Set();
+  const dedupKnown = allKnown.filter(c => {
+    const k = `${c.lat.toFixed(2)}_${c.lon.toFixed(2)}`;
+    if (seenKeys.has(k)) return false;
+    seenKeys.add(k);
+    return true;
+  });
+  const local = dedupKnown.filter(c => {
     const tr = UA_CITY_TRANSLATIONS[c.name] || {};
     return c.name.toLowerCase().includes(ql)
         || (tr.uk && tr.uk.toLowerCase().includes(ql))
-        || (tr.en && tr.en.toLowerCase().includes(ql));
+        || (tr.en && tr.en.toLowerCase().includes(ql))
+        || (c.region && c.region.toLowerCase().includes(ql))
+        || (c.country && c.country.toLowerCase().includes(ql));
   });
   if (local.length > 0) {
     cityListHeader.textContent = t('city.list.foundLocal');
@@ -5665,15 +5922,22 @@ citySearchInput.addEventListener('input', () => {
     renderCityList([]);
   }
 
-  // Параллельно — API-поиск (с задержкой 300 мс)
+  // Параллельно — API-поиск (с задержкой 300 мс). Дедуп с локальными результатами по координатам.
   searchTimer = setTimeout(async () => {
     try {
       const found = await searchCities(q);
-      cityListHeader.textContent = found.length ? t('city.list.found', { n: found.length }) : t('city.list.notFound');
-      renderCityList(found, { emptyText: t('city.list.emptyForQuery', { q: escapeHtml(q) }) });
+      // Объединяем: локальные сверху (они уже видны), потом уникальные API-результаты
+      const localKeys = new Set(local.map(c => `${c.lat.toFixed(2)}_${c.lon.toFixed(2)}`));
+      const uniqueApi = found.filter(c => !localKeys.has(`${c.lat.toFixed(2)}_${c.lon.toFixed(2)}`));
+      const combined = [...local, ...uniqueApi];
+      cityListHeader.textContent = combined.length ? t('city.list.found', { n: combined.length }) : t('city.list.notFound');
+      renderCityList(combined, { emptyText: t('city.list.emptyForQuery', { q: escapeHtml(q) }) });
     } catch (err) {
-      cityListHeader.textContent = t('city.list.notFound');
-      renderCityList([], { emptyText: t('city.list.searchError') });
+      // Если локальные результаты есть — оставляем их видимыми, ошибку показываем только если ничего не нашли вообще
+      if (local.length === 0) {
+        cityListHeader.textContent = t('city.list.notFound');
+        renderCityList([], { emptyText: t('city.list.searchError') });
+      }
     }
   }, 300);
 });
@@ -5682,7 +5946,7 @@ citySearchClear.addEventListener('click', () => {
   citySearchInput.value = '';
   citySearchClear.classList.remove('visible');
   cityListHeader.textContent = t('city.list.popular');
-  renderCityList(POPULAR_UA_CITIES);
+  renderCityList(null, { sections: getDefaultCitySections() });
   citySearchInput.focus();
 });
 
@@ -5750,6 +6014,7 @@ function applyAll() {
   updateChip();
   refreshSegmentedActive();
   renderLocationHeader();
+  renderFavoritesRow();
   renderStaticAstro();
   renderAstroPhoto();
   renderActivityWindows();
@@ -5766,7 +6031,7 @@ function applyAll() {
     const q = citySearchInput.value;
     if (!q.trim()) {
       cityListHeader.textContent = t('city.list.popular');
-      renderCityList(POPULAR_UA_CITIES);
+      renderCityList(null, { sections: getDefaultCitySections() });
     } else {
       citySearchInput.dispatchEvent(new Event('input'));
     }
