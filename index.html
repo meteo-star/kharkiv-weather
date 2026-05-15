@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- Content Security Policy: разрешаем только нужные источники (Chart.js CDN, Google Fonts, Open-Meteo API, Nominatim).
      'unsafe-inline' оставлен потому что у нас inline-стили и inline-скрипт в одном файле. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://archive-api.open-meteo.com https://geocoding-api.open-meteo.com https://nominatim.openstreetmap.org; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://tilecache.rainviewer.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://archive-api.open-meteo.com https://geocoding-api.open-meteo.com https://nominatim.openstreetmap.org https://api.rainviewer.com; frame-src https://embed.windy.com https://www.windy.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
 <title>Метеоагрегатор · Харьков</title>
 <!-- PWA manifest + apple-touch + theme-color -->
 <link rel="manifest" href="manifest.json">
@@ -20,6 +20,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- Chart.js с SRI: хэш SHA-384 защищает от подмены кода на CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- Leaflet 1.9.4 (для радара осадков RainViewer) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" referrerpolicy="no-referrer">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -75,9 +78,15 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-.metric{padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform 0.3s, border-color 0.3s}
+.metric{padding:18px;display:flex;flex-direction:column;gap:10px;transition:transform 0.3s, border-color 0.3s, box-shadow 0.3s}
 .metric:hover{transform:translateY(-3px);border-color:rgba(0,212,255,0.3)}
-.metric-head{display:flex;align-items:center;justify-content:space-between}
+.metric-head{display:flex;align-items:center;gap:10px}
+.metric-clickable{cursor:pointer;position:relative;user-select:none}
+.metric-clickable:hover{border-color:rgba(0,212,255,0.45);box-shadow:0 8px 28px rgba(0,212,255,0.18)}
+.metric-clickable:active{transform:translateY(-1px) scale(0.98)}
+.metric-clickable:focus-visible{outline:2px solid rgba(0,212,255,0.55);outline-offset:2px}
+.metric-arrow{margin-left:auto;color:rgba(232,240,255,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s ease, color 0.2s ease}
+.metric-clickable:hover .metric-arrow{color:#00d4ff;transform:translateX(3px)}
 .metric-icon{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:10px}
 .metric-icon.wind{background:rgba(96,165,250,0.15);box-shadow:inset 0 0 12px rgba(96,165,250,0.2)}
 .metric-icon.rain{background:rgba(0,212,255,0.15);box-shadow:inset 0 0 12px rgba(0,212,255,0.2)}
@@ -88,30 +97,30 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .metric-value span{font-size:14px;color:rgba(232,240,255,0.5);font-weight:400;margin-left:4px}
 .metric-sub{font-size:12px;color:rgba(232,240,255,0.55)}
 
-.astro-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:18px}
-.sun-moon{padding:22px;display:grid;grid-template-columns:1fr 120px;gap:20px;align-items:center}
+.astro-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.sun-moon{padding:16px 18px;display:grid;grid-template-columns:1fr 96px;gap:16px;align-items:center}
 .sun-section{position:relative}
-.sun-title{font-size:11px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-bottom:12px}
-.sun-arc-wrap{position:relative;height:110px;width:100%}
-.sun-times{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:rgba(232,240,255,0.7);font-feature-settings:'tnum'}
-.sun-times span{display:flex;flex-direction:column;gap:2px}
-.sun-times .lbl{font-size:10px;color:rgba(232,240,255,0.45);text-transform:uppercase;letter-spacing:0.06em}
-.daylen{position:absolute;top:0;right:0;font-size:11px;color:rgba(232,240,255,0.5);font-feature-settings:'tnum'}
+.sun-title{font-size:11px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-bottom:8px}
+.sun-arc-wrap{position:relative;height:88px;width:100%}
+.sun-times{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(232,240,255,0.65);font-feature-settings:'tnum'}
+.sun-times span{display:flex;flex-direction:column;gap:1px}
+.sun-times .lbl{font-size:9px;color:rgba(232,240,255,0.4);text-transform:uppercase;letter-spacing:0.06em}
+.daylen{position:absolute;top:0;right:0;font-size:10px;color:rgba(232,240,255,0.45);font-feature-settings:'tnum'}
 
-.moon-section{display:flex;flex-direction:column;align-items:center;gap:10px;border-left:1px solid rgba(255,255,255,0.08);padding-left:20px}
-.moon-svg{width:80px;height:80px;filter:drop-shadow(0 0 12px rgba(220,230,255,0.2))}
-.moon-name{font-size:11px;color:rgba(232,240,255,0.8);text-align:center;font-weight:500;line-height:1.3}
-.moon-illum{font-size:13px;color:#fff;font-weight:600;font-feature-settings:'tnum'}
+.moon-section{display:flex;flex-direction:column;align-items:center;gap:6px;border-left:1px solid rgba(255,255,255,0.08);padding-left:16px}
+.moon-svg{width:60px;height:60px;filter:drop-shadow(0 0 10px rgba(220,230,255,0.2))}
+.moon-name{font-size:10px;color:rgba(232,240,255,0.75);text-align:center;font-weight:500;line-height:1.25}
+.moon-illum{font-size:12px;color:#fff;font-weight:600;font-feature-settings:'tnum'}
 
-.uv-card,.aqi-card{padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px}
-.uv-card .lbl,.aqi-card .lbl{font-size:11px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;align-self:flex-start}
-.uv-gauge{position:relative;width:130px;height:75px;margin-top:6px}
-.uv-val{font-size:32px;font-weight:600;color:#fff;line-height:1;font-feature-settings:'tnum';margin-top:-8px}
-.uv-status,.aqi-status{font-size:13px;font-weight:500;padding:4px 12px;border-radius:100px;letter-spacing:0.02em}
-.aqi-bar{position:relative;width:100%;height:8px;border-radius:4px;background:linear-gradient(90deg,#4ade80 0%,#facc15 25%,#fb923c 50%,#ef4444 75%,#a855f7 100%);margin:18px 0 4px;overflow:visible}
-.aqi-marker{position:absolute;top:-6px;width:4px;height:20px;background:#fff;border-radius:2px;box-shadow:0 0 8px rgba(255,255,255,0.6);transform:translateX(-2px)}
-.aqi-scale{display:flex;justify-content:space-between;font-size:9px;color:rgba(232,240,255,0.4);font-feature-settings:'tnum';width:100%}
-.aqi-val{font-size:32px;font-weight:600;color:#fff;line-height:1;font-feature-settings:'tnum'}
+.uv-card,.aqi-card{padding:14px 14px 16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.uv-card .lbl,.aqi-card .lbl{font-size:10px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;align-self:flex-start}
+.uv-gauge{position:relative;width:108px;height:62px;margin-top:2px}
+.uv-val{font-size:26px;font-weight:600;color:#fff;line-height:1;font-feature-settings:'tnum';margin-top:-6px}
+.uv-status,.aqi-status{font-size:11px;font-weight:500;padding:3px 10px;border-radius:100px;letter-spacing:0.02em}
+.aqi-bar{position:relative;width:100%;height:6px;border-radius:3px;background:linear-gradient(90deg,#4ade80 0%,#facc15 25%,#fb923c 50%,#ef4444 75%,#a855f7 100%);margin:14px 0 3px;overflow:visible}
+.aqi-marker{position:absolute;top:-5px;width:3px;height:16px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,0.6);transform:translateX(-1.5px)}
+.aqi-scale{display:flex;justify-content:space-between;font-size:8px;color:rgba(232,240,255,0.4);font-feature-settings:'tnum';width:100%}
+.aqi-val{font-size:26px;font-weight:600;color:#fff;line-height:1;font-feature-settings:'tnum'}
 
 .chart-card{padding:24px;margin-bottom:18px}
 .card-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
@@ -202,6 +211,34 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .btn-refresh{padding:8px 16px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);border-radius:12px;color:#00d4ff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:'Onest',sans-serif;transition:all 0.2s;backdrop-filter:blur(10px)}
 .btn-refresh:hover{background:rgba(0,212,255,0.2);box-shadow:0 0 20px rgba(0,212,255,0.3)}
 .btn-refresh:active{transform:scale(0.96)}
+.speak-chip{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid rgba(167,139,250,0.32);border-radius:100px;font-family:'Onest',sans-serif;font-size:12px;color:#e8f0ff;font-weight:500;cursor:pointer;transition:all 0.25s ease;backdrop-filter:blur(10px);box-shadow:0 0 16px rgba(167,139,250,0.1);margin-right:8px;white-space:nowrap}
+.speak-chip:hover{border-color:rgba(167,139,250,0.6);background:rgba(167,139,250,0.08);box-shadow:0 0 24px rgba(167,139,250,0.22);transform:translateY(-1px)}
+.speak-chip:active{transform:translateY(0) scale(0.98)}
+.speak-chip .speak-chip-icon{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:#c4b5fd;transition:transform 0.3s ease}
+.speak-chip:hover .speak-chip-icon{transform:scale(1.15)}
+.speak-chip.speaking{background:rgba(167,139,250,0.28);border-color:rgba(167,139,250,0.65);box-shadow:0 0 24px rgba(167,139,250,0.45);color:#fff;animation:speakPulse 1.6s ease-in-out infinite}
+.speak-chip.speaking .speak-chip-icon{color:#fff}
+@keyframes speakPulse{0%,100%{box-shadow:0 0 18px rgba(167,139,250,0.35)}50%{box-shadow:0 0 28px rgba(167,139,250,0.6)}}
+
+.voice-list{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(167,139,250,0.3) transparent;padding-right:4px}
+.voice-list::-webkit-scrollbar{width:6px}
+.voice-list::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.3);border-radius:3px}
+.voice-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;transition:all 0.18s ease;user-select:none}
+.voice-item:hover{background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.3)}
+.voice-item.active{background:rgba(167,139,250,0.15);border-color:rgba(167,139,250,0.5);box-shadow:0 0 14px rgba(167,139,250,0.18)}
+.voice-radio{width:14px;height:14px;border-radius:50%;border:2px solid rgba(232,240,255,0.3);flex-shrink:0;position:relative;transition:all 0.18s}
+.voice-item.active .voice-radio{border-color:#c4b5fd}
+.voice-item.active .voice-radio::after{content:'';position:absolute;inset:2px;background:#c4b5fd;border-radius:50%;box-shadow:0 0 6px #c4b5fd}
+.voice-name{flex:1;font-size:13px;color:#fff;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.voice-gender{font-size:10px;padding:2px 7px;border-radius:8px;font-family:'JetBrains Mono',monospace;text-transform:lowercase;flex-shrink:0}
+.voice-gender.female{background:rgba(244,114,182,0.15);color:#f9a8d4;border:1px solid rgba(244,114,182,0.3)}
+.voice-gender.male{background:rgba(96,165,250,0.15);color:#93c5fd;border:1px solid rgba(96,165,250,0.3)}
+.voice-gender.unknown{background:rgba(232,240,255,0.06);color:rgba(232,240,255,0.5);border:1px solid rgba(232,240,255,0.12)}
+.voice-lang{font-size:10px;color:rgba(232,240,255,0.4);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.voice-preview-btn{width:30px;height:30px;border-radius:50%;background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#c4b5fd;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.18s;flex-shrink:0}
+.voice-preview-btn:hover{background:rgba(167,139,250,0.25);transform:scale(1.08)}
+.voice-preview-btn:active{transform:scale(0.94)}
+.voice-list-empty{padding:14px;text-align:center;color:rgba(232,240,255,0.5);font-size:12px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:10px}
 
 /* MODAL */
 .modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(5,10,38,0);backdrop-filter:blur(0px) saturate(100%);-webkit-backdrop-filter:blur(0px) saturate(100%);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.36s ease-out,background 0.36s ease-out,backdrop-filter 0.36s ease-out,-webkit-backdrop-filter 0.36s ease-out;overflow-y:auto}
@@ -320,6 +357,72 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .scroll-arrow.hdm-arrow.right{right:14px;left:auto}
 .scroll-arrow.hdm-arrow:hover{background:rgba(0,212,255,0.28);border-color:rgba(0,212,255,0.85);box-shadow:0 8px 28px rgba(0,212,255,0.35)}
 
+/* ===== Precip Detail Modal — вертикальный скролл внутри hdm-sheet с обычными карточками ===== */
+.pdm-scroll{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding:18px 18px 28px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);-webkit-overflow-scrolling:touch}
+.pdm-scroll::-webkit-scrollbar{width:8px}
+.pdm-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
+.pdm-scroll::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:4px}
+.pdm-scroll::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.5)}
+.pdm-scroll > .glass{margin-bottom:14px}
+.pdm-scroll > .glass:last-child{margin-bottom:0}
+
+/* ===== Radar card ===== */
+.radar-card{padding:22px;margin-bottom:18px}
+.radar-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.radar-card h2 .rd-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(0,212,255,0.55))}
+.radar-card .sub{font-size:11px;color:rgba(232,240,255,0.5);margin-top:2px;margin-bottom:14px}
+.radar-map-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(8,13,38,0.9);box-shadow:inset 0 0 24px rgba(0,212,255,0.06)}
+.rain-radar-map{width:100%;height:340px;background:#0a0e22}
+.rain-radar-map .leaflet-control-attribution{background:rgba(0,0,0,0.6);color:rgba(232,240,255,0.6);font-size:9px;backdrop-filter:blur(4px)}
+.rain-radar-map .leaflet-control-attribution a{color:rgba(0,212,255,0.7)}
+.rain-radar-map .leaflet-bar{background:rgba(8,13,38,0.85);border:1px solid rgba(0,212,255,0.3);box-shadow:0 4px 16px rgba(0,0,0,0.4);backdrop-filter:blur(8px)}
+.rain-radar-map .leaflet-bar a{background:transparent;color:#e8f0ff;border-bottom-color:rgba(255,255,255,0.08)}
+.rain-radar-map .leaflet-bar a:hover{background:rgba(0,212,255,0.18);color:#fff}
+.rain-radar-map .leaflet-tile-pane{filter:saturate(1.2)}
+.rain-radar-map .rv-city-pin{filter:drop-shadow(0 0 8px rgba(0,212,255,0.9))}
+
+.radar-controls{display:flex;align-items:center;gap:12px;margin-top:14px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px}
+.radar-play-btn{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:rgba(0,212,255,0.18);border:1px solid rgba(0,212,255,0.45);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all 0.2s}
+.radar-play-btn:hover{background:rgba(0,212,255,0.32);transform:scale(1.06);box-shadow:0 0 18px rgba(0,212,255,0.4)}
+.radar-play-btn:active{transform:scale(0.94)}
+.radar-slider{flex:1 1 auto;-webkit-appearance:none;appearance:none;height:6px;background:linear-gradient(90deg,rgba(0,212,255,0.18) 0%,rgba(0,212,255,0.4) 70%,rgba(167,139,250,0.4) 100%);border-radius:3px;outline:none;cursor:pointer}
+.radar-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00d4ff;border:2px solid #fff;box-shadow:0 0 12px rgba(0,212,255,0.7);cursor:pointer;transition:transform 0.15s}
+.radar-slider::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.radar-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#00d4ff;border:2px solid #fff;box-shadow:0 0 12px rgba(0,212,255,0.7);cursor:pointer}
+.radar-time{flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:13px;color:#fff;font-weight:600;min-width:60px;text-align:right;font-feature-settings:'tnum'}
+
+.radar-status{font-size:12px;color:rgba(232,240,255,0.55);margin-top:14px;text-align:center;padding:8px;font-style:italic}
+.radar-status.error{color:#ff8080}
+
+/* Табы переключения «Радар / Прогноз» */
+.radar-tabs{display:flex;gap:6px;margin-bottom:14px;padding:4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px}
+.radar-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;background:transparent;border:none;color:rgba(232,240,255,0.65);cursor:pointer;font-family:'Onest',sans-serif;font-size:12px;font-weight:500;border-radius:10px;transition:all 0.2s ease;white-space:nowrap;user-select:none}
+.radar-tab .rt-emoji{font-size:14px}
+.radar-tab:hover{background:rgba(0,212,255,0.06);color:#e8f0ff}
+.radar-tab.active{background:rgba(0,212,255,0.18);color:#fff;box-shadow:0 2px 12px rgba(0,212,255,0.2),inset 0 0 0 1px rgba(0,212,255,0.45)}
+
+/* Windy iframe */
+.windy-iframe-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);background:rgba(8,13,38,0.9);min-height:340px}
+.windy-iframe{width:100%;height:480px;border:0;display:block;background:#0a0e22}
+
+@media (max-width: 640px){
+  .windy-iframe{height:380px}
+  .windy-iframe-wrap{min-height:280px}
+  .radar-tab{padding:7px 10px;font-size:11px}
+  .radar-tab .rt-emoji{font-size:12px}
+}
+
+@media (max-width: 640px){
+  .radar-card{padding:16px}
+  .rain-radar-map{height:280px}
+  .radar-controls{padding:8px 10px;gap:10px}
+  .radar-play-btn{width:32px;height:32px}
+  .radar-time{font-size:11px;min-width:48px}
+}
+@media (max-width: 640px){
+  .pdm-scroll{padding:14px 14px 24px}
+}
+
 /* ===== Search Modal (Inverse search — «когда будет ...») ===== */
 .search-modal{max-width:680px}
 .search-modal .modal-day-label{color:#00d4ff}
@@ -410,8 +513,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .precip-day{flex:0 0 auto;text-align:center;border-top:1px solid rgba(0,212,255,0.3);padding-top:6px;font-size:11px;color:rgba(232,240,255,0.75);font-weight:500;font-feature-settings:'tnum';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 @media (max-width: 900px){
-  .astro-row{grid-template-columns:1fr 1fr}
-  .sun-moon{grid-column:span 2}
+  .astro-row{grid-template-columns:1fr 1fr;gap:10px}
+  .sun-moon{grid-column:span 2;padding:14px 16px}
+  .sun-arc-wrap{height:80px}
+  .uv-card,.aqi-card{padding:12px 12px 14px}
+  .uv-val,.aqi-val{font-size:24px}
+  .uv-gauge{width:96px;height:56px}
 }
 @media (max-width: 820px){
   .hero{grid-template-columns:1fr;text-align:left}
@@ -435,10 +542,21 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .hero-condition{font-size:15px}
   .metric{padding:14px}
   .metric-value{font-size:22px}
-  .astro-row{grid-template-columns:1fr;gap:10px}
-  .sun-moon{grid-column:span 1;grid-template-columns:1fr;padding:18px}
-  .moon-section{border-left:none;border-top:1px solid rgba(255,255,255,0.08);padding-left:0;padding-top:14px;flex-direction:row;justify-content:flex-start;gap:14px}
-  .moon-svg{width:60px;height:60px}
+  .astro-row{grid-template-columns:1fr 1fr;gap:8px}
+  .sun-moon{grid-column:span 2;grid-template-columns:1fr 80px;padding:12px 14px;gap:12px}
+  .sun-arc-wrap{height:72px}
+  .sun-title{font-size:10px;margin-bottom:4px}
+  .moon-section{padding-left:12px;gap:4px}
+  .moon-svg{width:50px;height:50px}
+  .moon-name{font-size:9px}
+  .moon-illum{font-size:11px}
+  .uv-card,.aqi-card{padding:10px 10px 12px;gap:6px}
+  .uv-val,.aqi-val{font-size:22px}
+  .uv-status,.aqi-status{font-size:10px;padding:2px 8px}
+  .uv-gauge{width:88px;height:50px;margin-top:0}
+  .aqi-bar{margin:10px 0 2px;height:5px}
+  .aqi-scale{font-size:7px}
+  .daylen{font-size:9px}
   .days{grid-auto-columns:calc((100% - 24px) / 5);gap:6px}
   .day{padding:10px 4px}
   .day-icon{width:38px;height:38px}
@@ -637,6 +755,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .settings-chip .val:nth-of-type(n+3),.settings-chip .sep:nth-of-type(n+2){display:none}
   .search-chip{padding:6px 10px;gap:5px;font-size:11px;margin-right:6px}
   .search-chip .search-chip-label{display:none}
+  .speak-chip{padding:6px 10px;gap:5px;font-size:11px;margin-right:6px}
+  .speak-chip .speak-chip-label{display:none}
   .settings-section{padding:12px}
   .seg-btn{min-width:54px;padding:8px 8px;font-size:11px}
   .seg-btn .seg-main{font-size:12px}
@@ -1030,6 +1150,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         </span>
         <span class="search-chip-label" data-i18n="search.chip">Найти окно</span>
       </button>
+      <button class="speak-chip" id="btnSpeak" type="button" aria-label="Озвучить прогноз" data-i18n-aria="footer.speakAria" style="display:none">
+        <span class="speak-chip-icon" id="btnSpeakIcon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M15 9a3 3 0 0 1 0 6"/><path d="M18 6a7 7 0 0 1 0 12"/></svg>
+        </span>
+        <span class="speak-chip-label" data-i18n="footer.speak">Озвучить</span>
+      </button>
       <button class="settings-chip" id="settingsChip" type="button" aria-label="Настройки" data-i18n-aria="settings.aria">
         <span class="gear-icon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1077,34 +1203,46 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   </div>
 
   <div class="metrics">
-    <div class="glass metric">
+    <div class="glass metric metric-clickable" id="metricWindCard" role="button" tabindex="0" aria-label="Подробности о ветре" data-i18n-aria="metric.wind.tapHint" data-open-metric="wind">
       <div class="metric-head">
         <div class="metric-icon wind"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/><path d="M17.6 7.6A2.5 2.5 0 1 1 19 12H2"/></svg></div>
         <div class="metric-label" data-i18n="metric.wind">Ветер</div>
+        <div class="metric-arrow" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       </div>
       <div class="metric-value" id="metricWind">3<span>м/с</span></div>
       <div class="metric-sub" id="metricWindSub">Северо-западный · порывы 6</div>
     </div>
-    <div class="glass metric">
+    <div class="glass metric metric-clickable" id="metricRainCard" role="button" tabindex="0" aria-label="Подробности об осадках" data-i18n-aria="metric.rain.tapHint">
       <div class="metric-head">
         <div class="metric-icon rain"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linecap="round"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M8 19v3M12 17v5M16 19v3"/></svg></div>
         <div class="metric-label" data-i18n="metric.rain">Осадки</div>
+        <div class="metric-arrow" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       </div>
       <div class="metric-value" id="metricRain">30<span>%</span></div>
       <div class="metric-sub" id="metricRainSub">~2 мм · слабый дождь</div>
     </div>
-    <div class="glass metric">
+    <div class="glass metric metric-clickable" id="metricPressureCard" role="button" tabindex="0" aria-label="Подробности о давлении" data-i18n-aria="metric.pressure.tapHint" data-open-metric="pressure">
       <div class="metric-head">
         <div class="metric-icon pressure"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
         <div class="metric-label" data-i18n="metric.pressure">Давление</div>
+        <div class="metric-arrow" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       </div>
       <div class="metric-value" id="metricPressure">756<span>мм рт.ст.</span></div>
       <div class="metric-sub" id="metricPressureSub">Понижается ↓</div>
     </div>
-    <div class="glass metric">
+    <div class="glass metric metric-clickable" id="metricHumidityCard" role="button" tabindex="0" aria-label="Подробности о влажности" data-i18n-aria="metric.humidity.tapHint" data-open-metric="humidity">
       <div class="metric-head">
         <div class="metric-icon humidity"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5eead4" stroke-width="2" stroke-linecap="round"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg></div>
         <div class="metric-label" data-i18n="metric.humidity">Влажность</div>
+        <div class="metric-arrow" aria-hidden="true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </div>
       </div>
       <div class="metric-value" id="metricHumidity">72<span>%</span></div>
       <div class="metric-sub" id="metricHumiditySub">Точка росы 11°C</div>
@@ -1170,45 +1308,6 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     <button class="scroll-arrow left" data-scroll-target="daysGrid" aria-label="Прокрутить влево">‹</button>
     <div class="days" id="daysGrid"></div>
     <button class="scroll-arrow right" data-scroll-target="daysGrid" aria-label="Прокрутить вправо">›</button>
-  </div>
-
-  <div class="glass precip-card" id="precipCard">
-    <div class="card-title">
-      <div>
-        <h2><span class="pc-emoji">🌧</span><span data-i18n="precip.title">Осадки</span></h2>
-        <div class="sub" data-i18n="precip.sub">Прогноз мм/ч на ближайшие 48 часов</div>
-      </div>
-    </div>
-    <div class="scroll-wrap">
-      <button class="scroll-arrow left" data-scroll-target="precipScroll" aria-label="Прокрутить влево">‹</button>
-      <div class="precip-scroll" id="precipScroll">
-        <div class="precip-inner" id="precipInner">
-          <div class="precip-chart-wrap"><canvas id="precipChart"></canvas></div>
-          <div class="precip-types" id="precipTypes"></div>
-          <div class="precip-days" id="precipDays"></div>
-        </div>
-      </div>
-      <button class="scroll-arrow right" data-scroll-target="precipScroll" aria-label="Прокрутить вправо">›</button>
-    </div>
-  </div>
-
-  <div class="glass storm-card" id="stormCard">
-    <h2><span class="sm-emoji">⚡</span><span data-i18n="storm.title">Гроза-индикатор</span></h2>
-    <div class="sub" data-i18n="storm.sub">Риск грозы по часам на ближайшие 48 часов</div>
-    <div class="storm-banner" id="stormBanner"><span class="sb-icon">⚠</span><span id="stormBannerText"></span></div>
-    <div class="storm-status st-r0" id="stormStatus">
-      <span class="storm-status-text" id="stormStatusText">—</span>
-      <span class="storm-status-pill" id="stormStatusPill" style="display:none">—</span>
-    </div>
-    <div class="storm-heatmap" id="stormHeatmap"></div>
-    <div class="storm-axis">
-      <span data-i18n="storm.axisNow">сейчас</span>
-      <span>+12ч</span>
-      <span>+24ч</span>
-      <span>+36ч</span>
-      <span>+48ч</span>
-    </div>
-    <div class="storm-legend" id="stormLegend"></div>
   </div>
 
   <div class="glass activity-windows" id="activityWindowsCard">
@@ -1490,6 +1589,23 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         <button class="seg-btn" type="button" data-val="inhg"><span class="seg-main">inHg</span><span class="seg-sub" data-i18n="settings.pressure.inhg.full">дюймы рт.ст.</span></button>
       </div>
     </div>
+    <div class="settings-section" id="voiceSection">
+      <div class="settings-section-title">
+        <span class="sec-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M15 9a3 3 0 0 1 0 6"/><path d="M18 6a7 7 0 0 1 0 12"/></svg>
+        </span>
+        <span data-i18n="settings.voice.label">Голос озвучки</span>
+      </div>
+      <div class="voice-list" id="voiceList"></div>
+      <div class="settings-section-title" style="margin-top:14px">
+        <span data-i18n="settings.voice.rate.label">Скорость</span>
+      </div>
+      <div class="segmented" id="segVoiceRate">
+        <button class="seg-btn" type="button" data-val="0.85"><span class="seg-main" data-i18n="settings.voice.rate.slow">медленно</span></button>
+        <button class="seg-btn" type="button" data-val="1"><span class="seg-main" data-i18n="settings.voice.rate.normal">норма</span></button>
+        <button class="seg-btn" type="button" data-val="1.2"><span class="seg-main" data-i18n="settings.voice.rate.fast">быстро</span></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1524,6 +1640,90 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     </div>
 
     <div class="search-results" id="searchResults" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="hdm-backdrop" id="precipDetailModal" role="dialog" aria-modal="true" aria-labelledby="pdmTitle" aria-hidden="true">
+  <div class="hdm-sheet">
+    <div class="hdm-top">
+      <button class="hdm-back" id="pdmBack" aria-label="Назад">←</button>
+      <div class="hdm-title" id="pdmTitle" data-i18n="precipDetail.title">Детали осадков</div>
+    </div>
+    <div class="pdm-scroll">
+      <div class="glass precip-card" id="precipCard">
+        <div class="card-title">
+          <div>
+            <h2><span class="pc-emoji">🌧</span><span data-i18n="precip.title">Осадки</span></h2>
+            <div class="sub" data-i18n="precip.sub">Прогноз мм/ч на ближайшие 48 часов</div>
+          </div>
+        </div>
+        <div class="scroll-wrap">
+          <button class="scroll-arrow left" data-scroll-target="precipScroll" aria-label="Прокрутить влево">‹</button>
+          <div class="precip-scroll" id="precipScroll">
+            <div class="precip-inner" id="precipInner">
+              <div class="precip-chart-wrap"><canvas id="precipChart"></canvas></div>
+              <div class="precip-types" id="precipTypes"></div>
+              <div class="precip-days" id="precipDays"></div>
+            </div>
+          </div>
+          <button class="scroll-arrow right" data-scroll-target="precipScroll" aria-label="Прокрутить вправо">›</button>
+        </div>
+      </div>
+
+      <div class="glass storm-card" id="stormCard">
+        <h2><span class="sm-emoji">⚡</span><span data-i18n="storm.title">Гроза-индикатор</span></h2>
+        <div class="sub" data-i18n="storm.sub">Риск грозы по часам на ближайшие 48 часов</div>
+        <div class="storm-banner" id="stormBanner"><span class="sb-icon">⚠</span><span id="stormBannerText"></span></div>
+        <div class="storm-status st-r0" id="stormStatus">
+          <span class="storm-status-text" id="stormStatusText">—</span>
+          <span class="storm-status-pill" id="stormStatusPill" style="display:none">—</span>
+        </div>
+        <div class="storm-heatmap" id="stormHeatmap"></div>
+        <div class="storm-axis">
+          <span data-i18n="storm.axisNow">сейчас</span>
+          <span>+12ч</span>
+          <span>+24ч</span>
+          <span>+36ч</span>
+          <span>+48ч</span>
+        </div>
+        <div class="storm-legend" id="stormLegend"></div>
+      </div>
+
+      <div class="glass radar-card" id="radarCard">
+        <h2><span class="rd-emoji">📡</span><span data-i18n="radar.title">Радар осадков</span></h2>
+        <div class="sub" data-i18n="radar.sub">Реальные осадки за последние 2 часа + прогноз ECMWF на 72 часа</div>
+
+        <div class="radar-tabs" role="tablist">
+          <button type="button" class="radar-tab active" data-radar-tab="live" role="tab">
+            <span class="rt-emoji">📡</span><span data-i18n="radar.tabLive">Радар · 2ч</span>
+          </button>
+          <button type="button" class="radar-tab" data-radar-tab="forecast" role="tab">
+            <span class="rt-emoji">🔮</span><span data-i18n="radar.tabForecast">Прогноз · 72ч</span>
+          </button>
+        </div>
+
+        <!-- Вкладка 1: real-time радар (RainViewer + Leaflet, тёмная basemap) -->
+        <div class="radar-tab-pane" id="radarLiveWrap">
+          <div class="radar-map-wrap"><div id="rainRadarMap" class="rain-radar-map"></div></div>
+          <div class="radar-controls" id="radarControls" style="display:none">
+            <button type="button" class="radar-play-btn" id="radarPlayBtn" aria-label="Play / Pause">
+              <svg class="rp-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="rp-pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+            </button>
+            <input type="range" class="radar-slider" id="radarSlider" min="0" max="0" step="1" value="0" aria-label="Время кадра">
+            <div class="radar-time" id="radarTime">—</div>
+          </div>
+          <div class="radar-status" id="radarStatus" data-i18n="radar.loading">Загружаем тайлы радара…</div>
+        </div>
+
+        <!-- Вкладка 2: прогноз ECMWF на 72ч (Windy iframe, lazy-load) -->
+        <div class="radar-tab-pane" id="radarForecastWrap" style="display:none">
+          <div class="windy-iframe-wrap" id="windyIframeWrap">
+            <div class="radar-status" data-i18n="radar.windyHint">Используется виджет Windy.com с моделью ECMWF</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1625,6 +1825,21 @@ const I18N = {
     'precip.tomorrow': 'завтра',
     'precip.legend': 'мм/ч',
     'hdm.title': 'Почасовой',
+    'precipDetail.title': 'Детали осадков',
+    'metric.rain.tapHint': 'Нажми чтобы посмотреть график, грозу и радар',
+    'metric.wind.tapHint': 'Нажми чтобы посмотреть почасовой график ветра',
+    'metric.pressure.tapHint': 'Нажми чтобы посмотреть почасовой график давления',
+    'metric.humidity.tapHint': 'Нажми чтобы посмотреть почасовой график влажности',
+    'radar.title': 'Радар осадков',
+    'radar.sub': 'Реальные осадки за последние 2 часа + прогноз ECMWF на 72 часа',
+    'radar.loading': 'Загружаем тайлы радара…',
+    'radar.error': 'Не удалось получить данные радара',
+    'radar.empty': 'Нет данных радара для этой зоны',
+    'radar.now': 'сейчас',
+    'radar.forecast': 'прогноз',
+    'radar.tabLive': 'Радар · 2ч',
+    'radar.tabForecast': 'Прогноз · 72ч',
+    'radar.windyHint': 'Используется виджет Windy.com с моделью ECMWF',
     'search.chip': 'Найти окно',
     'search.aria': 'Найти окно погоды',
     'search.label': 'Inverse search',
@@ -1748,6 +1963,19 @@ const I18N = {
     'accuracy.legendQ4': 'слабо',
     'accuracy.bestBadge': 'Самая точная модель по последним замерам',
     'footer.refresh': 'Обновить',
+    'footer.speak': 'Озвучить',
+    'footer.speakStop': 'Стоп',
+    'footer.speakAria': 'Озвучить прогноз погоды',
+    'settings.voice.label': 'Голос озвучки',
+    'settings.voice.female': 'жен.',
+    'settings.voice.male': 'муж.',
+    'settings.voice.none': 'Голос недоступен на этом устройстве',
+    'settings.voice.preview': 'Послушать пример',
+    'settings.voice.previewText': 'Привет! Я озвучу прогноз погоды.',
+    'settings.voice.rate.label': 'Скорость',
+    'settings.voice.rate.slow': 'медленно',
+    'settings.voice.rate.normal': 'норма',
+    'settings.voice.rate.fast': 'быстро',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
     'modal.day.forecast': 'Прогноз',
@@ -1935,6 +2163,21 @@ const I18N = {
     'precip.tomorrow': 'завтра',
     'precip.legend': 'мм/год',
     'hdm.title': 'Погодинний',
+    'precipDetail.title': 'Деталі опадів',
+    'metric.rain.tapHint': 'Натисни щоб подивитися графік, грозу і радар',
+    'metric.wind.tapHint': 'Натисни щоб подивитися погодинний графік вітру',
+    'metric.pressure.tapHint': 'Натисни щоб подивитися погодинний графік тиску',
+    'metric.humidity.tapHint': 'Натисни щоб подивитися погодинний графік вологості',
+    'radar.title': 'Радар опадів',
+    'radar.sub': 'Реальні опади за останні 2 години + прогноз ECMWF на 72 години',
+    'radar.loading': 'Завантажуємо тайли радара…',
+    'radar.error': 'Не вдалося отримати дані радара',
+    'radar.empty': 'Немає даних радара для цієї зони',
+    'radar.now': 'зараз',
+    'radar.forecast': 'прогноз',
+    'radar.tabLive': 'Радар · 2год',
+    'radar.tabForecast': 'Прогноз · 72год',
+    'radar.windyHint': 'Використовується віджет Windy.com з моделлю ECMWF',
     'search.chip': 'Знайти вікно',
     'search.aria': 'Знайти вікно погоди',
     'search.label': 'Inverse search',
@@ -2058,6 +2301,19 @@ const I18N = {
     'accuracy.legendQ4': 'слабко',
     'accuracy.bestBadge': 'Найточніша модель за останніми замірами',
     'footer.refresh': 'Оновити',
+    'footer.speak': 'Озвучити',
+    'footer.speakStop': 'Стоп',
+    'footer.speakAria': 'Озвучити прогноз погоди',
+    'settings.voice.label': 'Голос озвучення',
+    'settings.voice.female': 'жін.',
+    'settings.voice.male': 'чол.',
+    'settings.voice.none': 'Голос недоступний на цьому пристрої',
+    'settings.voice.preview': 'Послухати приклад',
+    'settings.voice.previewText': 'Привіт! Я озвучу прогноз погоди.',
+    'settings.voice.rate.label': 'Швидкість',
+    'settings.voice.rate.slow': 'повільно',
+    'settings.voice.rate.normal': 'норма',
+    'settings.voice.rate.fast': 'швидко',
     'footer.updated': 'оновлено о {time}',
     'modal.closeAria': 'Закрити',
     'modal.day.forecast': 'Прогноз',
@@ -2245,6 +2501,21 @@ const I18N = {
     'precip.tomorrow': 'tomorrow',
     'precip.legend': 'mm/h',
     'hdm.title': 'Hourly',
+    'precipDetail.title': 'Precipitation details',
+    'metric.rain.tapHint': 'Tap to see chart, thunderstorm risk and radar',
+    'metric.wind.tapHint': 'Tap to see hourly wind chart',
+    'metric.pressure.tapHint': 'Tap to see hourly pressure chart',
+    'metric.humidity.tapHint': 'Tap to see hourly humidity chart',
+    'radar.title': 'Precipitation radar',
+    'radar.sub': 'Live precipitation last 2 hours + ECMWF forecast for next 72 hours',
+    'radar.loading': 'Loading radar tiles…',
+    'radar.error': 'Failed to load radar data',
+    'radar.empty': 'No radar data for this area',
+    'radar.now': 'now',
+    'radar.forecast': 'forecast',
+    'radar.tabLive': 'Radar · 2h',
+    'radar.tabForecast': 'Forecast · 72h',
+    'radar.windyHint': 'Powered by Windy.com widget with ECMWF model',
     'search.chip': 'Find window',
     'search.aria': 'Find weather window',
     'search.label': 'Inverse search',
@@ -2368,6 +2639,19 @@ const I18N = {
     'accuracy.legendQ4': 'poor',
     'accuracy.bestBadge': 'Most accurate model by recent samples',
     'footer.refresh': 'Refresh',
+    'footer.speak': 'Speak',
+    'footer.speakStop': 'Stop',
+    'footer.speakAria': 'Speak weather forecast aloud',
+    'settings.voice.label': 'Voice',
+    'settings.voice.female': 'female',
+    'settings.voice.male': 'male',
+    'settings.voice.none': 'Voice not available on this device',
+    'settings.voice.preview': 'Preview',
+    'settings.voice.previewText': 'Hello! I will read the weather forecast.',
+    'settings.voice.rate.label': 'Speed',
+    'settings.voice.rate.slow': 'slow',
+    'settings.voice.rate.normal': 'normal',
+    'settings.voice.rate.fast': 'fast',
     'footer.updated': 'updated at {time}',
     'modal.closeAria': 'Close',
     'modal.day.forecast': 'Forecast',
@@ -2495,7 +2779,10 @@ const I18N = {
 // App-level state (overwritten from localStorage in init below)
 const state = {
   lang: 'ru',
-  units: { temp: 'C', wind: 'ms', pressure: 'mmhg' }
+  units: { temp: 'C', wind: 'ms', pressure: 'mmhg' },
+  // Голос озвучки: voiceURI = идентификатор системного голоса (null = автоматический),
+  // rate = 0.85 / 1.0 / 1.2 (медленно / норма / быстро)
+  voice: { voiceURI: null, rate: 1.0 }
 };
 
 function t(key, params) {
@@ -2830,6 +3117,10 @@ function loadSavedSettings() {
         if (['ms','kmh','mph','kn'].includes(s.units.wind)) state.units.wind = s.units.wind;
         if (['mmhg','hpa','inhg'].includes(s.units.pressure)) state.units.pressure = s.units.pressure;
       }
+      if (s.voice && typeof s.voice === 'object') {
+        if (typeof s.voice.voiceURI === 'string') state.voice.voiceURI = s.voice.voiceURI;
+        if (typeof s.voice.rate === 'number' && s.voice.rate >= 0.5 && s.voice.rate <= 2) state.voice.rate = s.voice.rate;
+      }
     }
   } catch (e) {
     console.warn('Не удалось прочитать настройки:', e);
@@ -2837,7 +3128,11 @@ function loadSavedSettings() {
 }
 function saveSettings() {
   try {
-    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({ lang: state.lang, units: { ...state.units } }));
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
+      lang: state.lang,
+      units: { ...state.units },
+      voice: { ...state.voice }
+    }));
   } catch (e) {
     console.warn('Не удалось сохранить настройки:', e);
   }
@@ -3019,30 +3314,101 @@ function moonPhaseIcon(illumPercent, waxing) {
   </svg>`;
 }
 
+// Красивая визуализация хода солнца от восхода к закату.
+// Дуга: квадратичная Безье от восхода через зенит к закату.
+// Сейчас: яркое солнце с двойным glow на своей позиции (или прозрачное «прошло/ещё не взошло»).
+// Под горизонтом — лёгкая «земля» с заливкой.
+// Тики через каждые ~2 часа на дуге для масштаба.
 function sunArc(sunrise, sunset, nowHHMM) {
   const u = uid();
-  const toMin = (t) => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+  const toMin = (t) => { if (!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; };
   const rise = toMin(sunrise), set = toMin(sunset), now = toMin(nowHHMM);
-  let pos = (now - rise) / (set - rise);
-  pos = Math.max(0, Math.min(1, pos));
+  const daylen = Math.max(60, set - rise);
+  let pos = (now - rise) / daylen;
   const isDay = (now >= rise && now <= set);
-  const cx = 50 + (pos - 0.5) * 84;
-  const cy = 50 - Math.sin(pos * Math.PI) * 38;
-  const sunDot = isDay
-    ? `<circle cx="${cx}" cy="${cy}" r="5" fill="url(#sd-${u})" filter="url(#sdg-${u})"/><circle cx="${cx}" cy="${cy}" r="2" fill="#fff"/>`
-    : `<circle cx="${now < rise ? 8 : 92}" cy="50" r="4" fill="rgba(232,240,255,0.25)" stroke="rgba(232,240,255,0.4)" stroke-width="1"/>`;
-  return `<svg viewBox="0 0 100 60" width="100%" height="100%" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  pos = Math.max(0, Math.min(1, pos));
+
+  // Параметры дуги: SVG viewBox 200×100
+  // Горизонт на y=78. Восход x=18, закат x=182. Пик дуги в y=8.
+  const ARC_X1 = 18, ARC_X2 = 182, ARC_Y = 78, ARC_PEAK_Y = 8;
+  // Квадратичная кривая: B(t) = (1-t)²P0 + 2(1-t)t*P1 + t²P2, P1 = (100, 2*ARC_PEAK_Y - ARC_Y)
+  const cpY = 2 * ARC_PEAK_Y - ARC_Y;  // control point Y чтобы вершина была в ARC_PEAK_Y
+  const sunX = (1-pos)*(1-pos)*ARC_X1 + 2*(1-pos)*pos*100 + pos*pos*ARC_X2;
+  const sunY = (1-pos)*(1-pos)*ARC_Y + 2*(1-pos)*pos*cpY + pos*pos*ARC_Y;
+
+  // Тики на дуге: 5 промежуточных точек
+  const tickPositions = [0.2, 0.4, 0.6, 0.8];
+  const ticks = tickPositions.map(t => {
+    const tx = (1-t)*(1-t)*ARC_X1 + 2*(1-t)*t*100 + t*t*ARC_X2;
+    const ty = (1-t)*(1-t)*ARC_Y + 2*(1-t)*t*cpY + t*t*ARC_Y;
+    return `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="1.4" fill="rgba(255,210,120,0.35)"/>`;
+  }).join('');
+
+  // Подписи времени (без отдельного блока ниже — они интегрированы)
+  const sunriseLabel = `<text x="${ARC_X1}" y="93" text-anchor="middle" fill="rgba(255,200,120,0.85)" font-size="9" font-family="JetBrains Mono, monospace" font-weight="500">${sunrise || ''}</text>`;
+  const sunsetLabel  = `<text x="${ARC_X2}" y="93" text-anchor="middle" fill="rgba(255,160,80,0.85)"  font-size="9" font-family="JetBrains Mono, monospace" font-weight="500">${sunset  || ''}</text>`;
+
+  // Солнце — двойной glow + ядро + блик. Только когда день.
+  const sunRender = isDay ? `
+    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="18" fill="url(#sg-outer-${u})" opacity="0.55"/>
+    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="11" fill="url(#sg-mid-${u})" opacity="0.85"/>
+    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="6.5" fill="url(#sg-core-${u})"/>
+    <ellipse cx="${(sunX-1.5).toFixed(1)}" cy="${(sunY-1.5).toFixed(1)}" rx="2" ry="1.5" fill="rgba(255,255,255,0.7)"/>
+  ` : `
+    <circle cx="${now < rise ? ARC_X1 : ARC_X2}" cy="${ARC_Y}" r="4" fill="rgba(180,200,230,0.3)" stroke="rgba(180,200,230,0.5)" stroke-width="0.6"/>
+  `;
+
+  // Состояние "сейчас" под дугой — фоновая «земля» с лёгкой заливкой
+  return `<svg viewBox="0 0 200 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
     <defs>
-      <linearGradient id="ag-${u}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="rgba(255,140,80,0.6)"/><stop offset="50%" stop-color="rgba(255,200,80,0.8)"/><stop offset="100%" stop-color="rgba(255,140,80,0.6)"/></linearGradient>
-      <radialGradient id="sd-${u}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff5d4"/><stop offset="100%" stop-color="#ff8c00"/></radialGradient>
-      <filter id="sdg-${u}"><feGaussianBlur stdDeviation="2"/><feFlood flood-color="#ffd84d" flood-opacity="0.9"/><feComposite operator="in"/><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <linearGradient id="skyG-${u}" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#7c4dff" stop-opacity="0.18"/>
+        <stop offset="30%" stop-color="#ff9966" stop-opacity="0.25"/>
+        <stop offset="50%" stop-color="#ffd54f" stop-opacity="0.32"/>
+        <stop offset="70%" stop-color="#ff9966" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#7c4dff" stop-opacity="0.18"/>
+      </linearGradient>
+      <linearGradient id="arcG-${u}" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a78bfa"/>
+        <stop offset="25%" stop-color="#fb923c"/>
+        <stop offset="50%" stop-color="#facc15"/>
+        <stop offset="75%" stop-color="#fb923c"/>
+        <stop offset="100%" stop-color="#a78bfa"/>
+      </linearGradient>
+      <linearGradient id="groundG-${u}" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="rgba(60,80,120,0.18)"/>
+        <stop offset="100%" stop-color="rgba(20,30,60,0)"/>
+      </linearGradient>
+      <radialGradient id="sg-core-${u}" cx="35%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#fffbe6"/>
+        <stop offset="50%" stop-color="#ffd54f"/>
+        <stop offset="100%" stop-color="#ff8a00"/>
+      </radialGradient>
+      <radialGradient id="sg-mid-${u}" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(255,215,100,0.9)"/>
+        <stop offset="100%" stop-color="rgba(255,150,40,0)"/>
+      </radialGradient>
+      <radialGradient id="sg-outer-${u}" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="rgba(255,200,90,0.7)"/>
+        <stop offset="100%" stop-color="rgba(255,150,40,0)"/>
+      </radialGradient>
     </defs>
-    <line x1="0" y1="50" x2="100" y2="50" stroke="rgba(255,255,255,0.15)" stroke-width="0.5" stroke-dasharray="2,2"/>
-    <path d="M 8 50 Q 50 -10 92 50" stroke="url(#ag-${u})" stroke-width="1.5" fill="none" stroke-dasharray="2,2" opacity="0.7"/>
-    <path d="M 8 50 Q 50 -10 92 50 L 92 50 L 8 50 Z" fill="url(#ag-${u})" opacity="0.08"/>
-    ${sunDot}
-    <circle cx="8" cy="50" r="2.5" fill="rgba(255,180,80,0.6)"/>
-    <circle cx="92" cy="50" r="2.5" fill="rgba(255,140,80,0.6)"/>
+    <!-- небо как заливка под дугой -->
+    <path d="M ${ARC_X1} ${ARC_Y} Q 100 ${cpY} ${ARC_X2} ${ARC_Y} L ${ARC_X2} ${ARC_Y} L ${ARC_X1} ${ARC_Y} Z" fill="url(#skyG-${u})"/>
+    <!-- земля под горизонтом -->
+    <rect x="0" y="${ARC_Y}" width="200" height="${100 - ARC_Y}" fill="url(#groundG-${u})"/>
+    <!-- линия горизонта -->
+    <line x1="4" y1="${ARC_Y}" x2="196" y2="${ARC_Y}" stroke="rgba(255,255,255,0.18)" stroke-width="0.6"/>
+    <!-- сама дуга -->
+    <path d="M ${ARC_X1} ${ARC_Y} Q 100 ${cpY} ${ARC_X2} ${ARC_Y}" stroke="url(#arcG-${u})" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.75" stroke-dasharray="3,2.5"/>
+    <!-- тики на дуге -->
+    ${ticks}
+    <!-- маркеры восхода/заката (точки на горизонте) -->
+    <circle cx="${ARC_X1}" cy="${ARC_Y}" r="2.2" fill="#a78bfa" opacity="0.85"/>
+    <circle cx="${ARC_X2}" cy="${ARC_Y}" r="2.2" fill="#fb923c" opacity="0.85"/>
+    ${sunriseLabel}
+    ${sunsetLabel}
+    ${sunRender}
   </svg>`;
 }
 
@@ -3542,7 +3908,7 @@ function renderHdmMetricChart(values, color, formatValue) {
   `;
 }
 
-function renderHdmContent(forecast) {
+function renderHdmContent(forecast, opts = {}) {
   const day = forecast[0];
   if (!day || !day.hourly) return;
   const hours = day.hourly;
@@ -3570,7 +3936,17 @@ function renderHdmContent(forecast) {
     : `${localizeDayShort(day.name)} · ${dateShort}`;
   dayLabel.textContent = labelText;
 
-  const cfg = hdmMetricsConfig();
+  const allCfg = hdmMetricsConfig();
+  // Опции:
+  //   opts.singleMetric — id одной метрики (legacy, для одного графика)
+  //   opts.metrics — массив id-шников для нескольких графиков подряд
+  // Если ничего не задано — показываем все 11.
+  let cfg = allCfg;
+  if (Array.isArray(opts.metrics) && opts.metrics.length) {
+    cfg = opts.metrics.map(id => allCfg.find(m => m.id === id)).filter(Boolean);
+  } else if (opts.singleMetric) {
+    cfg = allCfg.filter(m => m.id === opts.singleMetric);
+  }
   metricsContainer.innerHTML = cfg.map(m => {
     const values = hours.map(m.get);
     const chartSvg = renderHdmMetricChart(values, m.color, m.fmt);
@@ -3598,11 +3974,25 @@ function renderHdmContent(forecast) {
   }
 }
 
-function openHourlyDetail(startHour) {
+function openHourlyDetail(startHour, opts = {}) {
   const modal = document.getElementById('hourlyDetailModal');
   if (!modal) return;
   const forecast = getForecast(currentSourceId);
-  renderHdmContent(forecast);
+  renderHdmContent(forecast, { singleMetric: opts.singleMetric, metrics: opts.metrics });
+  // Управление заголовком: для одной метрики — её имя; для массива — имя первой;
+  // если ничего не задано — общий «Почасовой».
+  const titleEl = document.getElementById('hdmTitle');
+  if (titleEl) {
+    const firstId = (Array.isArray(opts.metrics) && opts.metrics[0]) || opts.singleMetric;
+    if (firstId) {
+      const m = hdmMetricsConfig().find(x => x.id === firstId);
+      titleEl.textContent = m ? t(m.nameKey) : t('hdm.title');
+      titleEl.removeAttribute('data-i18n');  // запрещаем applyTranslations переписать
+    } else {
+      titleEl.textContent = t('hdm.title');
+      titleEl.setAttribute('data-i18n', 'hdm.title');
+    }
+  }
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
@@ -3641,6 +4031,350 @@ function setupHourlyDetailModal() {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeHourlyDetail();
   });
+}
+
+/* ============================================
+   PRECIP DETAIL MODAL — клик по плитке "Осадки" открывает детальный вид:
+   график мм/ч (precip-card) + гроза-индикатор (storm-card).
+   Карточки физически живут внутри этой модалки, рендер renderPrecipChart/renderStorm
+   работает без изменений потому что id элементов сохранены.
+   ============================================ */
+
+let precipDetailEscHandler = null;
+
+function openPrecipDetail() {
+  const modal = document.getElementById('precipDetailModal');
+  if (!modal) return;
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+  // Принудительно перерисовываем precip-chart — Chart.js мог сложиться когда модалка была hidden
+  requestAnimationFrame(() => {
+    const forecast = getForecast(currentSourceId);
+    renderPrecipChart(forecast);
+    // Скроллим горизонтальный график на 0 (показываем «сейчас» слева)
+    const ps = document.getElementById('precipScroll');
+    if (ps) ps.scrollLeft = 0;
+    // Lazy-init радара (загружает Leaflet + RainViewer) — только при первом открытии
+    initRainRadar().catch(err => console.warn('Radar init failed:', err));
+    // Если открыта вкладка «Прогноз 72ч» — обновим iframe (вдруг город сменился)
+    if (currentRadarTab === 'forecast') ensureWindyIframe();
+  });
+  precipDetailEscHandler = (e) => { if (e.key === 'Escape') closePrecipDetail(); };
+  document.addEventListener('keydown', precipDetailEscHandler);
+}
+
+function closePrecipDetail() {
+  const modal = document.getElementById('precipDetailModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+  // Останавливаем анимацию радара чтобы не крутилась впустую в фоне
+  rainRadarPause();
+  if (precipDetailEscHandler) {
+    document.removeEventListener('keydown', precipDetailEscHandler);
+    precipDetailEscHandler = null;
+  }
+}
+
+function setupPrecipDetailModal() {
+  const modal = document.getElementById('precipDetailModal');
+  const backBtn = document.getElementById('pdmBack');
+  const card = document.getElementById('metricRainCard');
+  if (!modal || !backBtn || !card) return;
+
+  backBtn.addEventListener('click', closePrecipDetail);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closePrecipDetail();
+  });
+  card.addEventListener('click', openPrecipDetail);
+  card.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openPrecipDetail(); }
+  });
+}
+
+// Клик/Enter на плитках Ветер / Давление / Влажность открывает hourlyDetailModal,
+// но с отфильтрованным набором метрик и кастомным заголовком.
+// Это даёт по сути отдельные модалки «Ветер» / «Давление» / «Влажность» бесплатно,
+// без копирования инфраструктуры sticky-часов и horizontal scroll.
+// Маппинг: id плитки → массив id-шников графиков в hdmMetricsConfig.
+const METRIC_CARD_TO_HDM = {
+  wind:     ['wind'],
+  pressure: ['pressure'],
+  // Влажность включает дополнительно точку росы — связанные метрики удобнее видеть вместе
+  humidity: ['humidity', 'dewpoint']
+};
+function setupMetricCards() {
+  document.querySelectorAll('.metric-clickable[data-open-metric]').forEach(card => {
+    const metricId = card.dataset.openMetric;
+    // Плитка осадков (rain) обрабатывается своей собственной модалкой (с радаром/грозой)
+    if (!metricId || metricId === 'rain') return;
+    const targetMetrics = METRIC_CARD_TO_HDM[metricId];
+    if (!targetMetrics) return;
+    const trigger = () => openHourlyDetail(NOW_HOUR, { metrics: targetMetrics });
+    card.addEventListener('click', trigger);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger(); }
+    });
+  });
+}
+
+/* ============================================
+   RAIN RADAR — RainViewer tiles на Leaflet карте (тёмная basemap CartoDB).
+   Lazy-init при первом открытии precipDetailModal.
+   API: https://api.rainviewer.com/public/weather-maps.json
+   Тайлы: https://tilecache.rainviewer.com{path}/{size}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png
+   ============================================ */
+
+const RV_API_URL = 'https://api.rainviewer.com/public/weather-maps.json';
+const RV_TILE_SIZE = 256;
+const RV_COLOR_SCHEME = 4;    // 4 = классическая шкала, читаемая на тёмной basemap
+const RV_SMOOTH = 1;
+const RV_SNOW = 1;
+const RV_INITIAL_ZOOM = 7;
+const RV_ANIMATION_INTERVAL_MS = 600;
+
+const rainRadar = {
+  map: null,
+  cityMarker: null,
+  frames: [],          // [{ time, path, kind: 'past'|'nowcast' }]
+  layers: [],          // соответствующие L.tileLayer для каждого frame
+  currentIdx: 0,
+  playing: false,
+  playTimer: null,
+  manifestHost: null,
+  inited: false,
+  initPromise: null
+};
+
+// Инициализируем карту и подгружаем RainViewer тайлы. Идемпотентна — повторные вызовы
+// просто перецентрируют карту на текущий город (полезно при смене локации).
+async function initRainRadar() {
+  const mapEl = document.getElementById('rainRadarMap');
+  const statusEl = document.getElementById('radarStatus');
+  const controlsEl = document.getElementById('radarControls');
+  if (!mapEl || !statusEl) return;
+
+  // Leaflet может ещё не подгрузиться (defer-script)
+  if (typeof L === 'undefined') {
+    statusEl.textContent = t('radar.loading');
+    await new Promise(r => setTimeout(r, 250));
+    if (typeof L === 'undefined') {
+      statusEl.textContent = t('radar.error');
+      statusEl.classList.add('error');
+      return;
+    }
+  }
+
+  const { lat, lon } = currentLocation;
+
+  if (!rainRadar.map) {
+    rainRadar.map = L.map(mapEl, {
+      center: [lat, lon],
+      zoom: RV_INITIAL_ZOOM,
+      zoomControl: true,
+      attributionControl: true,
+      preferCanvas: false
+    });
+    // Тёмная basemap CartoDB Dark Matter (бесплатная, без ключа)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 11,
+      minZoom: 3,
+      attribution: '&copy; OpenStreetMap &copy; CARTO &copy; RainViewer'
+    }).addTo(rainRadar.map);
+    // Маркер города поверх basemap, под тайлами радара
+    rainRadar.cityMarker = L.circleMarker([lat, lon], {
+      radius: 6, color: '#00d4ff', weight: 2, fillColor: '#00d4ff', fillOpacity: 0.85, className: 'rv-city-pin'
+    }).addTo(rainRadar.map);
+  } else {
+    // Карта уже создана — просто перецентрируем
+    rainRadar.map.setView([lat, lon], RV_INITIAL_ZOOM, { animate: true });
+    if (rainRadar.cityMarker) rainRadar.cityMarker.setLatLng([lat, lon]);
+  }
+
+  // Загружаем manifest RainViewer (если ещё не загружали ИЛИ если он старше 5 минут)
+  if (!rainRadar.frames.length || (Date.now() - (rainRadar._manifestTs || 0) > 5 * 60 * 1000)) {
+    statusEl.textContent = t('radar.loading');
+    statusEl.classList.remove('error');
+    try {
+      const resp = await fetch(RV_API_URL);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      rainRadar.manifestHost = data.host;
+      rainRadar._manifestTs = Date.now();
+      const past = (data.radar && data.radar.past) ? data.radar.past.map(f => ({ ...f, kind: 'past' })) : [];
+      const nowcast = (data.radar && data.radar.nowcast) ? data.radar.nowcast.map(f => ({ ...f, kind: 'nowcast' })) : [];
+      rainRadar.frames = [...past, ...nowcast];
+      if (!rainRadar.frames.length) {
+        statusEl.textContent = t('radar.empty');
+        return;
+      }
+      // Очищаем старые слои если были
+      rainRadar.layers.forEach(l => rainRadar.map.removeLayer(l));
+      rainRadar.layers = rainRadar.frames.map(f => {
+        const url = `${rainRadar.manifestHost}${f.path}/${RV_TILE_SIZE}/{z}/{x}/{y}/${RV_COLOR_SCHEME}/${RV_SMOOTH}_${RV_SNOW}.png`;
+        return L.tileLayer(url, {
+          opacity: 0,
+          zIndex: 5,
+          maxZoom: 11,
+          tileSize: 256
+        }).addTo(rainRadar.map);
+      });
+      // Стартуем на последнем «past» кадре (это «сейчас»)
+      const pastCount = past.length;
+      rainRadar.currentIdx = Math.max(0, pastCount - 1);
+    } catch (err) {
+      console.warn('RainViewer manifest error:', err);
+      statusEl.textContent = t('radar.error');
+      statusEl.classList.add('error');
+      return;
+    }
+  }
+
+  // Показываем slider и play
+  statusEl.style.display = 'none';
+  if (controlsEl) controlsEl.style.display = '';
+  const slider = document.getElementById('radarSlider');
+  if (slider) {
+    slider.max = String(rainRadar.frames.length - 1);
+    slider.value = String(rainRadar.currentIdx);
+  }
+  showRadarFrame(rainRadar.currentIdx);
+  rainRadar.inited = true;
+
+  // Invalidate size — Leaflet нужно когда контейнер становится видим (открыта модалка)
+  setTimeout(() => { if (rainRadar.map) rainRadar.map.invalidateSize(); }, 100);
+}
+
+function showRadarFrame(idx) {
+  if (!rainRadar.layers.length) return;
+  idx = Math.max(0, Math.min(rainRadar.layers.length - 1, idx));
+  rainRadar.currentIdx = idx;
+  rainRadar.layers.forEach((l, i) => l.setOpacity(i === idx ? 0.75 : 0));
+  // Обновить подпись времени
+  const timeEl = document.getElementById('radarTime');
+  if (timeEl && rainRadar.frames[idx]) {
+    const d = new Date(rainRadar.frames[idx].time * 1000);
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const tag = rainRadar.frames[idx].kind === 'nowcast' ? ` · ${t('radar.forecast')}` : '';
+    timeEl.textContent = `${hh}:${mm}${tag}`;
+  }
+  const slider = document.getElementById('radarSlider');
+  if (slider && slider.value !== String(idx)) slider.value = String(idx);
+}
+
+function rainRadarPlay() {
+  if (rainRadar.playing) return;
+  rainRadar.playing = true;
+  setRadarPlayIcon(true);
+  rainRadar.playTimer = setInterval(() => {
+    const next = (rainRadar.currentIdx + 1) % rainRadar.layers.length;
+    showRadarFrame(next);
+    // Дойдя до последнего кадра — пауза
+    if (next === rainRadar.layers.length - 1) rainRadarPause();
+  }, RV_ANIMATION_INTERVAL_MS);
+}
+function rainRadarPause() {
+  rainRadar.playing = false;
+  setRadarPlayIcon(false);
+  if (rainRadar.playTimer) { clearInterval(rainRadar.playTimer); rainRadar.playTimer = null; }
+}
+function setRadarPlayIcon(playing) {
+  const btn = document.getElementById('radarPlayBtn');
+  if (!btn) return;
+  const play = btn.querySelector('.rp-play');
+  const pause = btn.querySelector('.rp-pause');
+  if (play && pause) {
+    play.style.display = playing ? 'none' : '';
+    pause.style.display = playing ? '' : 'none';
+  }
+}
+
+function setupRainRadarControls() {
+  const playBtn = document.getElementById('radarPlayBtn');
+  const slider = document.getElementById('radarSlider');
+  if (playBtn) {
+    playBtn.addEventListener('click', () => {
+      if (rainRadar.playing) rainRadarPause(); else rainRadarPlay();
+    });
+  }
+  if (slider) {
+    slider.addEventListener('input', (e) => {
+      rainRadarPause();
+      showRadarFrame(parseInt(e.target.value, 10) || 0);
+    });
+  }
+  // Табы переключения «Радар (live) / Прогноз (Windy)»
+  document.querySelectorAll('.radar-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.radarTab;
+      switchRadarTab(tab);
+    });
+  });
+}
+
+// Текущая активная вкладка ('live' или 'forecast')
+let currentRadarTab = 'live';
+
+function switchRadarTab(tab) {
+  if (tab !== 'live' && tab !== 'forecast') return;
+  currentRadarTab = tab;
+  document.querySelectorAll('.radar-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.radarTab === tab);
+  });
+  const liveWrap = document.getElementById('radarLiveWrap');
+  const forecastWrap = document.getElementById('radarForecastWrap');
+  if (!liveWrap || !forecastWrap) return;
+  if (tab === 'live') {
+    liveWrap.style.display = '';
+    forecastWrap.style.display = 'none';
+    // Leaflet нужно invalidateSize когда контейнер стал виден
+    setTimeout(() => { if (rainRadar.map) rainRadar.map.invalidateSize(); }, 50);
+  } else {
+    liveWrap.style.display = 'none';
+    forecastWrap.style.display = '';
+    rainRadarPause();   // на всякий случай — анимация в скрытом табе бесполезна
+    ensureWindyIframe();
+  }
+}
+
+// Lazy-инициализация Windy iframe — создаём только при первом переключении на вкладку.
+// При смене города пересоздаём src чтобы карта показывала актуальную точку.
+function ensureWindyIframe() {
+  const wrap = document.getElementById('windyIframeWrap');
+  if (!wrap) return;
+  const { lat, lon } = currentLocation;
+  const latStr = lat.toFixed(3);
+  const lonStr = lon.toFixed(3);
+  // Windy embed2 params:
+  //   overlay=rain     слой осадков (прогноз ECMWF на 10 дней — нам нужны первые 72ч)
+  //   product=ecmwf    модель ECMWF (бесплатная, точная)
+  //   level=surface    приземный уровень
+  //   marker=true      маркер с координатами города
+  //   metric*          метрические единицы
+  const url = `https://embed.windy.com/embed2.html?lat=${latStr}&lon=${lonStr}&detailLat=${latStr}&detailLon=${lonStr}&zoom=7&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1`;
+  let iframe = wrap.querySelector('iframe.windy-iframe');
+  if (!iframe) {
+    // Очищаем placeholder-текст
+    wrap.innerHTML = '';
+    iframe = document.createElement('iframe');
+    iframe.className = 'windy-iframe';
+    iframe.setAttribute('title', 'Windy precipitation forecast');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('loading', 'lazy');
+    iframe.setAttribute('referrerpolicy', 'no-referrer');
+    iframe.setAttribute('allow', 'fullscreen');
+    iframe.src = url;
+    wrap.appendChild(iframe);
+  } else if (iframe.dataset.lat !== latStr || iframe.dataset.lon !== lonStr) {
+    // Координаты изменились — обновим src
+    iframe.src = url;
+  }
+  iframe.dataset.lat = latStr;
+  iframe.dataset.lon = lonStr;
 }
 
 /* ============================================
@@ -3977,6 +4711,304 @@ function setupSearchModal() {
     if (results) results.innerHTML = '';
     input.focus();
   });
+}
+
+/* ============================================
+   TTS — Аудио-резюме погоды (Web Speech API)
+   Генератор текста + контроллер speak/stop + работа со списком голосов.
+   ============================================ */
+
+const TTS_SUPPORTED = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
+let _ttsVoicesCache = null;          // массив SpeechSynthesisVoice
+let _ttsCurrentUtterance = null;     // активный говорящий utterance (для остановки)
+
+// Имена голосов которые мы считаем "женскими" (по платформам).
+// Не идеально (нет cross-browser gender API), но покрывает 90% случаев.
+const FEMALE_VOICE_NAMES = [
+  // Russian
+  'Milena','Yelena','Irina','Tatyana','Katyusha','Maria','Anna','Elena',
+  // Ukrainian
+  'Lesya','Solomiya',
+  // English (часто полезно как fallback)
+  'Samantha','Karen','Tessa','Moira','Victoria','Susan','Allison','Ava','Zira','Eva','Fiona',
+  // generic markers
+  'Female','female'
+];
+const MALE_VOICE_NAMES = ['Yuri','Pavel','Daniel','Alex','Tom','David','Mark','Pavlo'];
+
+function ttsLangCode() {
+  // Маппим наш state.lang в BCP-47 для Web Speech
+  if (state.lang === 'uk') return 'uk-UA';
+  if (state.lang === 'en') return 'en-US';
+  return 'ru-RU';
+}
+
+// Считается, что имя голоса принадлежит женщине, если содержит одно из FEMALE_VOICE_NAMES.
+function voiceGender(voice) {
+  const n = (voice.name || '').toLowerCase();
+  for (const fn of FEMALE_VOICE_NAMES) if (n.includes(fn.toLowerCase())) return 'female';
+  for (const mn of MALE_VOICE_NAMES) if (n.includes(mn.toLowerCase())) return 'male';
+  return 'unknown';
+}
+
+// Список голосов, релевантных для текущего языка + общедоступных как fallback (en).
+// При недостатке возвращаем все голоса.
+function getAvailableVoices() {
+  if (!TTS_SUPPORTED) return [];
+  const all = speechSynthesis.getVoices() || [];
+  if (!all.length) return [];
+  const lang = ttsLangCode();
+  const langPrefix = lang.split('-')[0];
+  // Сначала точное совпадение языка, потом тот же языковой prefix, потом fallback en
+  const sameLang = all.filter(v => v.lang === lang);
+  const samePrefix = all.filter(v => v.lang.startsWith(langPrefix + '-') && v.lang !== lang);
+  const enFallback = all.filter(v => v.lang.startsWith('en-'));
+  // Возвращаем primary (нашего языка) + английские как запасной (для редких uk-UA случаев)
+  const primary = [...sameLang, ...samePrefix];
+  if (primary.length > 0) return primary;
+  return enFallback.length > 0 ? enFallback : all;
+}
+
+// Выбираем активный голос: 1) сохранённый по voiceURI, 2) первый женский, 3) первый из списка.
+function pickActiveVoice() {
+  const voices = getAvailableVoices();
+  if (!voices.length) return null;
+  if (state.voice.voiceURI) {
+    const found = voices.find(v => v.voiceURI === state.voice.voiceURI);
+    if (found) return found;
+  }
+  const female = voices.find(v => voiceGender(v) === 'female');
+  return female || voices[0];
+}
+
+// Voices грузятся асинхронно в Chrome/Firefox. Дожидаемся первого заполнения.
+function ensureVoicesLoaded() {
+  return new Promise((resolve) => {
+    if (!TTS_SUPPORTED) { resolve([]); return; }
+    let voices = speechSynthesis.getVoices();
+    if (voices && voices.length) { _ttsVoicesCache = voices; resolve(voices); return; }
+    const handler = () => {
+      voices = speechSynthesis.getVoices() || [];
+      _ttsVoicesCache = voices;
+      speechSynthesis.removeEventListener('voiceschanged', handler);
+      resolve(voices);
+    };
+    speechSynthesis.addEventListener('voiceschanged', handler);
+    // Защитный таймаут на случай если событие не сработает
+    setTimeout(() => {
+      voices = speechSynthesis.getVoices() || [];
+      _ttsVoicesCache = voices;
+      resolve(voices);
+    }, 1500);
+  });
+}
+
+// --- Локализация числа: «плюс 13 / минус 5» вместо «13 / −5» ---
+function spokenTemp(c) {
+  const n = Math.round(c);
+  if (state.lang === 'ru') {
+    if (n > 0) return `плюс ${n}`;
+    if (n < 0) return `минус ${Math.abs(n)}`;
+    return 'ноль';
+  }
+  if (state.lang === 'uk') {
+    if (n > 0) return `плюс ${n}`;
+    if (n < 0) return `мінус ${Math.abs(n)}`;
+    return 'нуль';
+  }
+  // en
+  if (n > 0) return `plus ${n}`;
+  if (n < 0) return `minus ${Math.abs(n)}`;
+  return 'zero';
+}
+
+// Сборка текста резюме на текущем языке для одного дня прогноза.
+function generateWeatherSummary(forecast, dayIdx = 0) {
+  const day = forecast && forecast[dayIdx];
+  if (!day) return '';
+  const lang = state.lang;
+  const cond = localizeCondLabel(day.condLabel) || '';
+  const tMax = spokenTemp(convertTemp(day.max, state.units.temp));
+  const tMin = spokenTemp(convertTemp(day.min, state.units.temp));
+  const windV = Math.round(convertWind(day.wind, state.units.wind));
+  const precipPct = day.precip;
+  const cityName = (localizeCity(currentLocation).name || currentLocation.name || '').trim();
+
+  const parts = [];
+  if (lang === 'uk') {
+    parts.push(dayIdx === 0 ? `Сьогодні в ${cityName}.` : `${localizeDayShort(day.name)}, ${(day.date||'').slice(0,5)}.`);
+    if (cond) parts.push(`${cond}.`);
+    parts.push(`Температура від ${tMin} до ${tMax} градусів.`);
+    parts.push(`Швидкість вітру ${windV} метрів за секунду.`);
+    if (precipPct >= 60) parts.push(`Ймовірність опадів ${precipPct} відсотків.`);
+    else if (precipPct >= 30) parts.push(`Можливі опади.`);
+  } else if (lang === 'en') {
+    parts.push(dayIdx === 0 ? `Today in ${cityName}.` : `${day.name}, ${(day.date||'').slice(0,5)}.`);
+    if (cond) parts.push(`${cond}.`);
+    parts.push(`Temperature from ${tMin} to ${tMax} degrees.`);
+    parts.push(`Wind speed ${windV} meters per second.`);
+    if (precipPct >= 60) parts.push(`Precipitation probability ${precipPct} percent.`);
+    else if (precipPct >= 30) parts.push(`Some precipitation possible.`);
+  } else {
+    // ru
+    parts.push(dayIdx === 0 ? `Сегодня в ${cityName}.` : `${localizeDayShort(day.name)}, ${(day.date||'').slice(0,5)}.`);
+    if (cond) parts.push(`${cond}.`);
+    parts.push(`Температура от ${tMin} до ${tMax} градусов.`);
+    parts.push(`Скорость ветра ${windV} метров в секунду.`);
+    if (precipPct >= 60) parts.push(`Вероятность осадков ${precipPct} процентов.`);
+    else if (precipPct >= 30) parts.push(`Возможны небольшие осадки.`);
+  }
+  return parts.join(' ');
+}
+
+// Запускаем озвучку. onEnd вызывается когда речь закончилась или прервана.
+function speakText(text, onEnd) {
+  if (!TTS_SUPPORTED || !text) { if (onEnd) onEnd(); return; }
+  stopSpeaking();  // прерываем предыдущую если играет
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = ttsLangCode();
+  utter.rate = state.voice.rate || 1.0;
+  utter.pitch = 1.0;
+  utter.volume = 1.0;
+  const voice = pickActiveVoice();
+  if (voice) utter.voice = voice;
+  utter.onend = () => { _ttsCurrentUtterance = null; if (onEnd) onEnd(); };
+  utter.onerror = () => { _ttsCurrentUtterance = null; if (onEnd) onEnd(); };
+  _ttsCurrentUtterance = utter;
+  speechSynthesis.speak(utter);
+}
+
+function stopSpeaking() {
+  if (!TTS_SUPPORTED) return;
+  if (speechSynthesis.speaking || speechSynthesis.pending) {
+    speechSynthesis.cancel();
+  }
+  _ttsCurrentUtterance = null;
+}
+
+function isSpeaking() {
+  return TTS_SUPPORTED && (speechSynthesis.speaking || speechSynthesis.pending);
+}
+
+// === UI ===
+
+// Рисуем список доступных голосов в settings-modal.
+async function renderVoiceList() {
+  const container = document.getElementById('voiceList');
+  if (!container) return;
+  if (!TTS_SUPPORTED) {
+    container.innerHTML = `<div class="voice-list-empty">${t('settings.voice.none')}</div>`;
+    return;
+  }
+  await ensureVoicesLoaded();
+  const voices = getAvailableVoices();
+  if (!voices.length) {
+    container.innerHTML = `<div class="voice-list-empty">${t('settings.voice.none')}</div>`;
+    return;
+  }
+  // Если ничего ещё не сохранено в state — выбираем первый женский (или первый из списка) и сохраняем
+  if (!state.voice.voiceURI) {
+    const active = pickActiveVoice();
+    if (active) {
+      state.voice.voiceURI = active.voiceURI;
+      saveSettings();
+    }
+  }
+  container.innerHTML = voices.map(v => {
+    const gender = voiceGender(v);
+    const genderLabel = gender === 'female' ? t('settings.voice.female')
+                      : gender === 'male' ? t('settings.voice.male') : '';
+    const isActive = v.voiceURI === state.voice.voiceURI;
+    return `
+      <div class="voice-item${isActive ? ' active' : ''}" data-voice-uri="${escapeHtml(v.voiceURI)}">
+        <span class="voice-radio"></span>
+        <span class="voice-name">${escapeHtml(v.name)}</span>
+        ${genderLabel ? `<span class="voice-gender ${gender}">${escapeHtml(genderLabel)}</span>` : ''}
+        <span class="voice-lang">${escapeHtml(v.lang)}</span>
+        <button type="button" class="voice-preview-btn" aria-label="${escapeHtml(t('settings.voice.preview'))}" title="${escapeHtml(t('settings.voice.preview'))}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.voice-item').forEach(item => {
+    const uri = item.dataset.voiceUri;
+    item.addEventListener('click', () => {
+      state.voice.voiceURI = uri;
+      saveSettings();
+      // Обновляем active-стиль
+      container.querySelectorAll('.voice-item').forEach(el => el.classList.toggle('active', el.dataset.voiceUri === uri));
+    });
+    // Превью голоса — не должно переключать (stopPropagation)
+    const previewBtn = item.querySelector('.voice-preview-btn');
+    previewBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Временно делаем этот голос активным для preview, потом возвращаем сохранённый
+      const savedUri = state.voice.voiceURI;
+      state.voice.voiceURI = uri;
+      speakText(t('settings.voice.previewText'), () => {
+        // Восстанавливаем выбор пользователя если он не менял голос
+        state.voice.voiceURI = savedUri;
+      });
+    });
+  });
+}
+
+// Обновить состояние footer-кнопки "Озвучить" (показывать / прятать / play / stop)
+function refreshSpeakButton() {
+  const btn = document.getElementById('btnSpeak');
+  if (!btn) return;
+  // Если TTS не поддерживается — прячем кнопку
+  if (!TTS_SUPPORTED) {
+    btn.style.display = 'none';
+    return;
+  }
+  // Если голосов нет — тоже прячем (пока async проверка делается, она будет повторно вызвана)
+  const voices = getAvailableVoices();
+  btn.style.display = voices.length > 0 ? '' : 'none';
+  // Состояние "сейчас играет"
+  const speaking = isSpeaking();
+  btn.classList.toggle('speaking', speaking);
+  const labelSpan = btn.querySelector('.speak-chip-label');
+  if (labelSpan) {
+    labelSpan.setAttribute('data-i18n', speaking ? 'footer.speakStop' : 'footer.speak');
+    labelSpan.textContent = t(speaking ? 'footer.speakStop' : 'footer.speak');
+  }
+}
+
+function onSpeakBtnClick() {
+  if (!TTS_SUPPORTED) return;
+  if (isSpeaking()) {
+    stopSpeaking();
+    refreshSpeakButton();
+    return;
+  }
+  const forecast = getForecast(currentSourceId);
+  const text = generateWeatherSummary(forecast, 0);
+  if (!text) return;
+  speakText(text, () => refreshSpeakButton());
+  refreshSpeakButton();
+}
+
+function setupSpeakButton() {
+  const btn = document.getElementById('btnSpeak');
+  if (!btn) return;
+  btn.addEventListener('click', onSpeakBtnClick);
+  // Подписываемся на voiceschanged чтобы прятать/показывать кнопку и перерисовывать список
+  if (TTS_SUPPORTED) {
+    ensureVoicesLoaded().then(() => {
+      refreshSpeakButton();
+      // Если на момент load уже открыта settings — обновим список (защита от race)
+      const settingsModalEl = document.getElementById('settingsModal');
+      if (settingsModalEl && settingsModalEl.classList.contains('open')) renderVoiceList();
+    });
+    speechSynthesis.addEventListener('voiceschanged', () => {
+      _ttsVoicesCache = speechSynthesis.getVoices();
+      refreshSpeakButton();
+      const settingsModalEl = document.getElementById('settingsModal');
+      if (settingsModalEl && settingsModalEl.classList.contains('open')) renderVoiceList();
+    });
+  }
 }
 
 // Привязка кликов на табы метрик. Вызывается один раз при init.
@@ -5958,7 +6990,7 @@ const settingsChip       = document.getElementById('settingsChip');
 const settingsModal      = document.getElementById('settingsModal');
 const settingsModalClose = document.getElementById('settingsModalClose');
 
-function openSettingsModal()  { refreshSegmentedActive(); settingsModal.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function openSettingsModal()  { refreshSegmentedActive(); renderVoiceList(); settingsModal.classList.add('open'); document.body.style.overflow = 'hidden'; }
 function closeSettingsModal() { settingsModal.classList.remove('open'); document.body.style.overflow = ''; }
 
 settingsChip.addEventListener('click', openSettingsModal);
@@ -5978,6 +7010,7 @@ function refreshSegmentedActive() {
   setActiveInGroup('segTemp',     state.units.temp);
   setActiveInGroup('segWind',     state.units.wind);
   setActiveInGroup('segPressure', state.units.pressure);
+  setActiveInGroup('segVoiceRate', String(state.voice.rate));
 }
 
 function setupSegmentedHandlers() {
@@ -5985,7 +7018,9 @@ function setupSegmentedHandlers() {
     { id: 'segLang',     allowed: ['ru','uk','en'],            apply: v => { state.lang = v; } },
     { id: 'segTemp',     allowed: ['C','F'],                   apply: v => { state.units.temp = v; } },
     { id: 'segWind',     allowed: ['ms','kmh','mph','kn'],     apply: v => { state.units.wind = v; } },
-    { id: 'segPressure', allowed: ['mmhg','hpa','inhg'],       apply: v => { state.units.pressure = v; } }
+    { id: 'segPressure', allowed: ['mmhg','hpa','inhg'],       apply: v => { state.units.pressure = v; } },
+    { id: 'segVoiceRate', allowed: ['0.85','1','1.2'],         apply: v => { state.voice.rate = parseFloat(v); },
+      skipApplyAll: true /* скорость голоса не требует ре-рендера всего */ }
   ];
   groups.forEach(g => {
     const el = document.getElementById(g.id);
@@ -5997,7 +7032,11 @@ function setupSegmentedHandlers() {
       if (!g.allowed.includes(v)) return;
       g.apply(v);
       saveSettings();
-      applyAll();
+      if (g.skipApplyAll) {
+        refreshSegmentedActive();
+      } else {
+        applyAll();
+      }
     });
   });
 }
@@ -6981,7 +8020,11 @@ setupSegmentedHandlers();
 setupHourlyTabs();
 setupScrollArrows();
 setupHourlyDetailModal();
+setupPrecipDetailModal();
+setupMetricCards();
+setupRainRadarControls();
 setupSearchModal();
+setupSpeakButton();
 applyAll();
 
 // PWA: регистрируем service-worker для офлайн-кэша и установки приложения на главный экран.
