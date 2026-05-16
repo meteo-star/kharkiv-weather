@@ -4273,105 +4273,71 @@ function openHourlyDetail(startHour, opts = {}) {
       titleEl.setAttribute('data-i18n', 'hdm.title');
     }
   }
+
+  // КЛЮЧЕВОЕ: ставим scrollLeft ПЕРЕД открытием модалки, пока layout стабилен и
+  // нет анимаций. Раньше делали ПОСЛЕ classList.add('open') и боролись с
+  // -webkit-overflow-scrolling + transition + sticky-headers с 11 чартами.
+  // Теперь — пока модалка ещё в opacity:0 (но display:flex и в layout),
+  // scrollLeft ставится надёжно. Затем открываем модалку с уже правильным скроллом.
+  const scrollElPre = document.getElementById('hdmScroll');
+  if (scrollElPre) {
+    // Принудительный layout-read чтобы offsetLeft был корректным
+    void scrollElPre.offsetWidth;
+    const preCells = scrollElPre.querySelectorAll('.hdm-hour-cell');
+    const preTarget = preCells[startHour];
+    if (preTarget && scrollElPre.clientWidth >= 50) {
+      const preVw = scrollElPre.clientWidth;
+      const preMax = Math.max(0, scrollElPre.scrollWidth - preVw);
+      const preX = Math.max(0, Math.min(preTarget.offsetLeft + preTarget.offsetWidth / 2 - preVw / 2, preMax));
+      // Сбрасываем -webkit-overflow-scrolling временно (известный iOS-блокер programmatic scroll)
+      const prevWebkit = scrollElPre.style.webkitOverflowScrolling;
+      scrollElPre.style.webkitOverflowScrolling = 'auto';
+      scrollElPre.scrollTop = 0;        // вертикаль в начало (важно для модалки с 11 чартами)
+      scrollElPre.scrollLeft = preX;    // горизонталь — целевая
+      // НЕ восстанавливаем сразу — оставляем 'auto' пока модалка открывается,
+      // вернём после стабилизации
+      scrollElPre.dataset.prevWebkit = prevWebkit || '';
+    }
+  }
+
   modal.classList.add('open');
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
-  // Центрирование выбранного часа на iPhone PWA — нетривиальная задача:
-  //   1) -webkit-overflow-scrolling: touch БЛОКИРУЕТ программное scrollLeft.
-  //   2) Анимация открытия модалки (transform scale+translateY 0.55s) сбивает scroll.
-  //   3) iOS Safari может сбрасывать scrollLeft в 0 когда элемент только что стал visible.
-  //   4) HDM_HOUR_WIDTH (60) может не совпадать с реальной шириной ячейки если CSS перекрыл.
-  //
-  // Решение — гибрид: измеряем РЕАЛЬНУЮ ширину ячейки + scrollIntoView (нативный API,
-  // игнорирует все iOS-квирки) + повторяем 5 раз через увеличивающиеся интервалы.
-  const positionToHour = (label) => {
+  // Подстраховка: пере-центрируем после открытия, на случай если iOS сбросит scrollLeft
+  // при transition. Также восстанавливаем -webkit-overflow-scrolling.
+  const repositionAndRestore = () => {
     const scrollEl = document.getElementById('hdmScroll');
-    if (!scrollEl) return false;
+    if (!scrollEl) return;
     const cells = scrollEl.querySelectorAll('.hdm-hour-cell');
     const targetCell = cells[startHour];
     const vw = scrollEl.clientWidth || scrollEl.offsetWidth || 0;
-    if (!targetCell || vw < 50) return false; // ещё не layouted
-
-    // ПЕРВЫЙ способ — нативный scrollIntoView с inline:center.
-    // На iOS это самый надёжный путь: браузер сам определяет нужный scrollLeft и
-    // игнорирует -webkit-overflow-scrolling.
-    try {
-      targetCell.scrollIntoView({ inline: 'center', block: 'nearest' });
-      // Проверим, что реально докрутилось куда нужно. Если нет — fallback ниже.
-      const rect = targetCell.getBoundingClientRect();
-      const scrollRect = scrollEl.getBoundingClientRect();
-      const visualCenter = rect.left + rect.width / 2;
-      const expectedCenter = scrollRect.left + scrollRect.width / 2;
-      if (Math.abs(visualCenter - expectedCenter) < vw * 0.15) {
-        // Достаточно близко — успех
-        if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
-        return true;
-      }
-    } catch (e) { /* fallback ниже */ }
-
-    // ВТОРОЙ способ — ручной расчёт через offsetLeft реальной ячейки (а не HDM_HOUR_WIDTH).
-    // offsetLeft возвращает позицию ячейки относительно offsetParent, что точнее чем
-    // умножение на константу — если CSS вдруг изменил ширину, мы всё равно посчитаем верно.
-    const cellOffsetLeft = targetCell.offsetLeft;
-    const cellWidth = targetCell.offsetWidth || HDM_HOUR_WIDTH;
+    if (!targetCell || vw < 50) return;
     const maxScroll = Math.max(0, scrollEl.scrollWidth - vw);
-    const targetX = Math.max(0, Math.min(cellOffsetLeft + cellWidth / 2 - vw / 2, maxScroll));
-
-    // iOS bugfix: -webkit-overflow-scrolling=touch блокирует programmatic scroll.
-    const prevWebkit = scrollEl.style.webkitOverflowScrolling;
-    scrollEl.style.webkitOverflowScrolling = 'auto';
-    // Используем scrollTo с явным behavior:auto (instant) — обходит momentum scroll
-    if (typeof scrollEl.scrollTo === 'function') {
-      try { scrollEl.scrollTo({ left: targetX, top: 0, behavior: 'auto' }); }
-      catch (e) { scrollEl.scrollLeft = targetX; }
-    } else {
+    const targetX = Math.max(0, Math.min(targetCell.offsetLeft + targetCell.offsetWidth / 2 - vw / 2, maxScroll));
+    // Только если реально сбило — переустанавливаем (иначе игнорируем чтобы не дёргать)
+    if (Math.abs(scrollEl.scrollLeft - targetX) > 5) {
       scrollEl.scrollLeft = targetX;
     }
-    requestAnimationFrame(() => { scrollEl.style.webkitOverflowScrolling = prevWebkit || ''; });
     if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
-    return true;
   };
 
-  // Стратегия: вызываем positionToHour в максимально возможных моментах:
-  //  – Сразу через двойной rAF (для метрических модалок где 1-2 чарта — этого хватает)
-  //  – На каждый шаг анимации модалки (через transitionend на .hdm-sheet)
-  //  – На любой resize самого scrollEl (ResizeObserver — ловит момент когда layout
-  //    стабилизировался после рендера 11 SVG-чартов)
-  //  – Финальная серия фиксированных таймеров на случай если события не сработали
-  requestAnimationFrame(() => requestAnimationFrame(positionToHour));
-
-  const sheet = modal.querySelector('.hdm-sheet');
-  if (sheet) {
-    const onTransition = () => positionToHour('transitionend');
-    sheet.addEventListener('transitionend', onTransition, { once: true });
-    // На случай если transitionend не выстрелит (бывает на iOS если transition прерван)
-    setTimeout(() => sheet.removeEventListener('transitionend', onTransition), 1500);
-  }
-
-  // ResizeObserver: после того как все 11 чартов отрисовались, scrollEl может слегка
-  // измениться в размерах (scrollbar, content reflow). Каждый такой ресайз — повод
-  // повторно центрировать час. Особенно важно для модалки с 11 метриками.
-  const scrollElForRO = document.getElementById('hdmScroll');
-  if (scrollElForRO && typeof ResizeObserver !== 'undefined') {
-    let roCount = 0;
-    const ro = new ResizeObserver(() => {
-      roCount++;
-      positionToHour('resize-' + roCount);
-      // Прекращаем наблюдение через 1.5s — дальше layout всё равно стабилен
-      if (roCount > 8) ro.disconnect();
-    });
-    ro.observe(scrollElForRO);
-    setTimeout(() => ro.disconnect(), 1800);
-  }
-
-  // Финальная серия таймеров — гарантированное покрытие если события не отработают.
-  // Тайминги подобраны под анимацию открытия (0.55s) + iOS-задержки на медленных устр.
-  setTimeout(positionToHour, 100);
-  setTimeout(positionToHour, 300);
-  setTimeout(positionToHour, 600);
-  setTimeout(positionToHour, 1000);
-  setTimeout(positionToHour, 1500);  // на случай очень медленной отрисовки 11 SVG чартов
+  // 3 проверки на разных таймингах:
+  //  100мс — середина transition
+  //  600мс — после завершения transition (0.55s)
+  //  1200мс — после полной стабилизации layout у 11 SVG-чартов
+  setTimeout(repositionAndRestore, 100);
+  setTimeout(repositionAndRestore, 600);
+  setTimeout(() => {
+    repositionAndRestore();
+    // Восстанавливаем -webkit-overflow-scrolling = touch для нормальной inertia scrolling
+    const scrollEl = document.getElementById('hdmScroll');
+    if (scrollEl) {
+      const prev = scrollEl.dataset.prevWebkit;
+      scrollEl.style.webkitOverflowScrolling = (prev !== undefined && prev !== '') ? prev : 'touch';
+      delete scrollEl.dataset.prevWebkit;
+    }
+  }, 1200);
 
   hdmEscHandler = (e) => { if (e.key === 'Escape') closeHourlyDetail(); };
   document.addEventListener('keydown', hdmEscHandler);
