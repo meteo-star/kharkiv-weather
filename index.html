@@ -4277,7 +4277,15 @@ function openHourlyDetail(startHour, opts = {}) {
   // Debug-логгер: показывает на экране что происходит со скроллом (только если
   // включен debug-режим через localStorage: localStorage.setItem('kw:hdm-debug','1')).
   // Помогает увидеть на iPhone PWA где именно теряется scrollLeft.
-  const debugMode = (function(){ try { return localStorage.getItem('kw:hdm-debug') === '1'; } catch(e){ return false; } })();
+  const debugMode = (function(){
+    try {
+      if (location.search.indexOf('hdmdebug') !== -1) {
+        localStorage.setItem('kw:hdm-debug','1');
+        return true;
+      }
+      return localStorage.getItem('kw:hdm-debug') === '1';
+    } catch(e){ return false; }
+  })();
   const debugLog = [];
   const dlog = (msg, data) => {
     if (!debugMode) return;
