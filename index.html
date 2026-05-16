@@ -4333,12 +4333,45 @@ function openHourlyDetail(startHour, opts = {}) {
     return true;
   };
 
-  // 5 попыток с растущими интервалами. iOS PWA капризный: один из вызовов точно зацепится.
+  // Стратегия: вызываем positionToHour в максимально возможных моментах:
+  //  – Сразу через двойной rAF (для метрических модалок где 1-2 чарта — этого хватает)
+  //  – На каждый шаг анимации модалки (через transitionend на .hdm-sheet)
+  //  – На любой resize самого scrollEl (ResizeObserver — ловит момент когда layout
+  //    стабилизировался после рендера 11 SVG-чартов)
+  //  – Финальная серия фиксированных таймеров на случай если события не сработали
   requestAnimationFrame(() => requestAnimationFrame(positionToHour));
+
+  const sheet = modal.querySelector('.hdm-sheet');
+  if (sheet) {
+    const onTransition = () => positionToHour('transitionend');
+    sheet.addEventListener('transitionend', onTransition, { once: true });
+    // На случай если transitionend не выстрелит (бывает на iOS если transition прерван)
+    setTimeout(() => sheet.removeEventListener('transitionend', onTransition), 1500);
+  }
+
+  // ResizeObserver: после того как все 11 чартов отрисовались, scrollEl может слегка
+  // измениться в размерах (scrollbar, content reflow). Каждый такой ресайз — повод
+  // повторно центрировать час. Особенно важно для модалки с 11 метриками.
+  const scrollElForRO = document.getElementById('hdmScroll');
+  if (scrollElForRO && typeof ResizeObserver !== 'undefined') {
+    let roCount = 0;
+    const ro = new ResizeObserver(() => {
+      roCount++;
+      positionToHour('resize-' + roCount);
+      // Прекращаем наблюдение через 1.5s — дальше layout всё равно стабилен
+      if (roCount > 8) ro.disconnect();
+    });
+    ro.observe(scrollElForRO);
+    setTimeout(() => ro.disconnect(), 1800);
+  }
+
+  // Финальная серия таймеров — гарантированное покрытие если события не отработают.
+  // Тайминги подобраны под анимацию открытия (0.55s) + iOS-задержки на медленных устр.
   setTimeout(positionToHour, 100);
   setTimeout(positionToHour, 300);
-  setTimeout(positionToHour, 600);   // после завершения transition (0.55s)
-  setTimeout(positionToHour, 1000);  // финальная подстраховка
+  setTimeout(positionToHour, 600);
+  setTimeout(positionToHour, 1000);
+  setTimeout(positionToHour, 1500);  // на случай очень медленной отрисовки 11 SVG чартов
 
   hdmEscHandler = (e) => { if (e.key === 'Escape') closeHourlyDetail(); };
   document.addEventListener('keydown', hdmEscHandler);
