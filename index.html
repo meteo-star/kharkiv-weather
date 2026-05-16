@@ -45,7 +45,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @keyframes float-diag-left{0%{transform:translate(12vw,-10vh);opacity:0}10%,90%{opacity:1}50%{transform:translate(-4vw,55vh)}100%{transform:translate(-22vw,110vh);opacity:0}}
 @keyframes float-zigzag{0%{transform:translate(0,110vh);opacity:0}10%,90%{opacity:1}25%{transform:translate(45px,80vh)}50%{transform:translate(-45px,50vh)}75%{transform:translate(55px,20vh)}100%{transform:translate(-30px,-10vh);opacity:0}}
 
-.container{max-width:1180px;margin:0 auto;padding:24px 20px 40px;position:relative;z-index:1}
+.container{max-width:1180px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top, 0px)) max(20px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px));position:relative;z-index:1}
+@media (max-width: 640px){
+  .container{padding-top:calc(18px + env(safe-area-inset-top, 0px))}
+}
 
 .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:28px}
 .location-block{display:flex;align-items:center;gap:14px}
