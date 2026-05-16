@@ -52,6 +52,16 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @media (max-width: 640px){
   .container{padding-top:max(70px, calc(env(safe-area-inset-top, 0px) + 24px))}
 }
+/* iOS PWA standalone mode (галочка "Открыть как Web App" включена) — iOS
+   некорректно применяет env(safe-area-inset-top), контент уходит под Dynamic
+   Island/notch. Принудительно даём 95px минимум для верха экрана. В Safari
+   (обычной вкладке) это правило не действует — display-mode: browser. */
+@media (display-mode: standalone), (display-mode: fullscreen){
+  .container{padding-top:max(95px, calc(env(safe-area-inset-top, 0px) + 50px)) !important}
+}
+@media (display-mode: standalone) and (max-width: 640px){
+  .container{padding-top:max(95px, calc(env(safe-area-inset-top, 0px) + 50px)) !important}
+}
 
 .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:28px}
 .location-block{display:flex;align-items:center;gap:14px}
