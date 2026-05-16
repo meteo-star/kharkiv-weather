@@ -4277,48 +4277,68 @@ function openHourlyDetail(startHour, opts = {}) {
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
-  // Центрируем выбранный час в видимой области.
-  // На iPhone PWA это нетривиально из-за двух факторов:
-  //   1) -webkit-overflow-scrolling: touch БЛОКИРУЕТ программный scrollLeft, пока
-  //      пользователь не коснётся элемента. Решение — временно убрать это свойство.
-  //   2) Анимация открытия модалки (transform: scale + translateY, 0.55s) сбивает
-  //      scrollLeft на время transition. Решение — повторяем позиционирование
-  //      несколько раз: до transition, во время и после.
+  // Центрирование выбранного часа на iPhone PWA — нетривиальная задача:
+  //   1) -webkit-overflow-scrolling: touch БЛОКИРУЕТ программное scrollLeft.
+  //   2) Анимация открытия модалки (transform scale+translateY 0.55s) сбивает scroll.
+  //   3) iOS Safari может сбрасывать scrollLeft в 0 когда элемент только что стал visible.
+  //   4) HDM_HOUR_WIDTH (60) может не совпадать с реальной шириной ячейки если CSS перекрыл.
+  //
+  // Решение — гибрид: измеряем РЕАЛЬНУЮ ширину ячейки + scrollIntoView (нативный API,
+  // игнорирует все iOS-квирки) + повторяем 5 раз через увеличивающиеся интервалы.
   const positionToHour = (label) => {
     const scrollEl = document.getElementById('hdmScroll');
     if (!scrollEl) return false;
-    const vw = scrollEl.clientWidth || scrollEl.offsetWidth || window.innerWidth;
-    if (vw < 50) return false; // layout ещё не готов
-    const totalContentWidth = (forecast[0]?.hourly?.length || 24) * HDM_HOUR_WIDTH;
-    const hourCenterX = startHour * HDM_HOUR_WIDTH + HDM_HOUR_WIDTH / 2;
-    const maxScroll = Math.max(0, totalContentWidth - vw);
-    const targetX = Math.max(0, Math.min(hourCenterX - vw / 2, maxScroll));
+    const cells = scrollEl.querySelectorAll('.hdm-hour-cell');
+    const targetCell = cells[startHour];
+    const vw = scrollEl.clientWidth || scrollEl.offsetWidth || 0;
+    if (!targetCell || vw < 50) return false; // ещё не layouted
+
+    // ПЕРВЫЙ способ — нативный scrollIntoView с inline:center.
+    // На iOS это самый надёжный путь: браузер сам определяет нужный scrollLeft и
+    // игнорирует -webkit-overflow-scrolling.
+    try {
+      targetCell.scrollIntoView({ inline: 'center', block: 'nearest' });
+      // Проверим, что реально докрутилось куда нужно. Если нет — fallback ниже.
+      const rect = targetCell.getBoundingClientRect();
+      const scrollRect = scrollEl.getBoundingClientRect();
+      const visualCenter = rect.left + rect.width / 2;
+      const expectedCenter = scrollRect.left + scrollRect.width / 2;
+      if (Math.abs(visualCenter - expectedCenter) < vw * 0.15) {
+        // Достаточно близко — успех
+        if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
+        return true;
+      }
+    } catch (e) { /* fallback ниже */ }
+
+    // ВТОРОЙ способ — ручной расчёт через offsetLeft реальной ячейки (а не HDM_HOUR_WIDTH).
+    // offsetLeft возвращает позицию ячейки относительно offsetParent, что точнее чем
+    // умножение на константу — если CSS вдруг изменил ширину, мы всё равно посчитаем верно.
+    const cellOffsetLeft = targetCell.offsetLeft;
+    const cellWidth = targetCell.offsetWidth || HDM_HOUR_WIDTH;
+    const maxScroll = Math.max(0, scrollEl.scrollWidth - vw);
+    const targetX = Math.max(0, Math.min(cellOffsetLeft + cellWidth / 2 - vw / 2, maxScroll));
+
     // iOS bugfix: -webkit-overflow-scrolling=touch блокирует programmatic scroll.
-    // Временно сбрасываем, ставим scrollLeft, на следующем rAF восстанавливаем.
     const prevWebkit = scrollEl.style.webkitOverflowScrolling;
     scrollEl.style.webkitOverflowScrolling = 'auto';
-    scrollEl.scrollLeft = targetX;
+    // Используем scrollTo с явным behavior:auto (instant) — обходит momentum scroll
+    if (typeof scrollEl.scrollTo === 'function') {
+      try { scrollEl.scrollTo({ left: targetX, top: 0, behavior: 'auto' }); }
+      catch (e) { scrollEl.scrollLeft = targetX; }
+    } else {
+      scrollEl.scrollLeft = targetX;
+    }
     requestAnimationFrame(() => { scrollEl.style.webkitOverflowScrolling = prevWebkit || ''; });
     if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
     return true;
   };
-  // 4 попытки с разными моментами: первый rAF (для синхронного layout),
-  // второй rAF (после первой отрисовки sticky-часов), 150мс (середина transition),
-  // 600мс (после transition завершён). Какая-то да зацепится.
-  requestAnimationFrame(() => requestAnimationFrame(() => positionToHour('rAF')));
-  setTimeout(() => positionToHour('150ms'), 150);
-  setTimeout(() => positionToHour('600ms'), 600);
-  // Финальный fallback: используем scrollIntoView на now-cell — нативный браузерный
-  // способ, который игнорирует -webkit-overflow-scrolling.
-  setTimeout(() => {
-    const scrollEl = document.getElementById('hdmScroll');
-    if (!scrollEl) return;
-    const cells = scrollEl.querySelectorAll('.hdm-hour-cell');
-    const target = cells[startHour];
-    if (target && typeof target.scrollIntoView === 'function') {
-      try { target.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {}
-    }
-  }, 650);
+
+  // 5 попыток с растущими интервалами. iOS PWA капризный: один из вызовов точно зацепится.
+  requestAnimationFrame(() => requestAnimationFrame(positionToHour));
+  setTimeout(positionToHour, 100);
+  setTimeout(positionToHour, 300);
+  setTimeout(positionToHour, 600);   // после завершения transition (0.55s)
+  setTimeout(positionToHour, 1000);  // финальная подстраховка
 
   hdmEscHandler = (e) => { if (e.key === 'Escape') closeHourlyDetail(); };
   document.addEventListener('keydown', hdmEscHandler);
