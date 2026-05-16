@@ -11,9 +11,9 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
-<meta name="theme-color" content="#0a1128">
+<meta name="theme-color" content="#02061a">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Meteo Star">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,8 +25,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;overflow-x:hidden;
+html{scroll-behavior:smooth;background-color:#02061a}
+body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;overflow-x:hidden;background-color:#02061a;
   background:
     radial-gradient(ellipse at 20% 0%, #1a1f5c 0%, transparent 50%),
     radial-gradient(ellipse at 80% 100%, #003a8c 0%, transparent 50%),
@@ -4278,33 +4278,47 @@ function openHourlyDetail(startHour, opts = {}) {
   document.body.style.overflow = 'hidden';
 
   // Центрируем выбранный час в видимой области.
-  // Двойной rAF: первый ждёт reflow после classList.add('open'), второй — после первой
-  // отрисовки sticky-часов и metrics (innerHTML только что был установлен). На iPhone это
-  // критично, потому что без двойного rAF clientWidth может быть 0 или модалка ещё в transition.
-  const positionToHour = () => {
+  // На iPhone PWA это нетривиально из-за двух факторов:
+  //   1) -webkit-overflow-scrolling: touch БЛОКИРУЕТ программный scrollLeft, пока
+  //      пользователь не коснётся элемента. Решение — временно убрать это свойство.
+  //   2) Анимация открытия модалки (transform: scale + translateY, 0.55s) сбивает
+  //      scrollLeft на время transition. Решение — повторяем позиционирование
+  //      несколько раз: до transition, во время и после.
+  const positionToHour = (label) => {
+    const scrollEl = document.getElementById('hdmScroll');
+    if (!scrollEl) return false;
+    const vw = scrollEl.clientWidth || scrollEl.offsetWidth || window.innerWidth;
+    if (vw < 50) return false; // layout ещё не готов
+    const totalContentWidth = (forecast[0]?.hourly?.length || 24) * HDM_HOUR_WIDTH;
+    const hourCenterX = startHour * HDM_HOUR_WIDTH + HDM_HOUR_WIDTH / 2;
+    const maxScroll = Math.max(0, totalContentWidth - vw);
+    const targetX = Math.max(0, Math.min(hourCenterX - vw / 2, maxScroll));
+    // iOS bugfix: -webkit-overflow-scrolling=touch блокирует programmatic scroll.
+    // Временно сбрасываем, ставим scrollLeft, на следующем rAF восстанавливаем.
+    const prevWebkit = scrollEl.style.webkitOverflowScrolling;
+    scrollEl.style.webkitOverflowScrolling = 'auto';
+    scrollEl.scrollLeft = targetX;
+    requestAnimationFrame(() => { scrollEl.style.webkitOverflowScrolling = prevWebkit || ''; });
+    if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
+    return true;
+  };
+  // 4 попытки с разными моментами: первый rAF (для синхронного layout),
+  // второй rAF (после первой отрисовки sticky-часов), 150мс (середина transition),
+  // 600мс (после transition завершён). Какая-то да зацепится.
+  requestAnimationFrame(() => requestAnimationFrame(() => positionToHour('rAF')));
+  setTimeout(() => positionToHour('150ms'), 150);
+  setTimeout(() => positionToHour('600ms'), 600);
+  // Финальный fallback: используем scrollIntoView на now-cell — нативный браузерный
+  // способ, который игнорирует -webkit-overflow-scrolling.
+  setTimeout(() => {
     const scrollEl = document.getElementById('hdmScroll');
     if (!scrollEl) return;
-    const totalContentWidth = (forecast[0]?.hourly?.length || 24) * HDM_HOUR_WIDTH;
-    const viewportWidth = scrollEl.clientWidth || scrollEl.offsetWidth || window.innerWidth;
-    // X-координата центра целевой плитки в логических пикселях
-    const hourCenterX = startHour * HDM_HOUR_WIDTH + HDM_HOUR_WIDTH / 2;
-    // Желаемый scrollLeft — чтобы целевая плитка была в центре видимой области
-    let targetX = hourCenterX - viewportWidth / 2;
-    // Клампим к границам: не уходим в минус (раннее утро) и не за правый край (поздний вечер).
-    // Если контент уже короче viewport — оставляем 0.
-    const maxScroll = Math.max(0, totalContentWidth - viewportWidth);
-    targetX = Math.max(0, Math.min(targetX, maxScroll));
-    scrollEl.scrollLeft = targetX;
-    if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
-  };
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      positionToHour();
-      // Подстраховка: на iOS layout может стабилизироваться только после завершения transition
-      // самого листа (~0.55s). Повторяем позиционирование, чтобы наверняка попасть в центр.
-      setTimeout(positionToHour, 80);
-    });
-  });
+    const cells = scrollEl.querySelectorAll('.hdm-hour-cell');
+    const target = cells[startHour];
+    if (target && typeof target.scrollIntoView === 'function') {
+      try { target.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) {}
+    }
+  }, 650);
 
   hdmEscHandler = (e) => { if (e.key === 'Escape') closeHourlyDetail(); };
   document.addEventListener('keydown', hdmEscHandler);
