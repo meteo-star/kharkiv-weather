@@ -7,7 +7,7 @@
     При обновлении версии CACHE_VERSION старый кэш стирается на activate.
 */
 
-const CACHE_VERSION = 'meteo-star-v1';
+const CACHE_VERSION = 'meteo-star-v1.15.3';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
@@ -75,9 +75,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // === Same-origin (наш HTML, JSON, иконки) — cache-first с обновлением в фоне ===
+  // === Same-origin ===
   if (url.origin === self.location.origin) {
-    event.respondWith(staleWhileRevalidate(req, STATIC_CACHE));
+    // Navigation (HTML, manifest.json) — network-first: при наличии сети обновление видно
+    // сразу. Без этого iOS PWA требовал 2 запуска, чтобы подхватить новый shell.
+    // Иконки/картинки/прочие статические ассеты — stale-while-revalidate (мгновенно из кэша).
+    const isFreshNeeded = req.mode === 'navigate' ||
+                          url.pathname.endsWith('/') ||
+                          url.pathname.endsWith('.html') ||
+                          url.pathname.endsWith('manifest.json');
+    if (isFreshNeeded) {
+      event.respondWith(networkFirst(req, STATIC_CACHE));
+    } else {
+      event.respondWith(staleWhileRevalidate(req, STATIC_CACHE));
+    }
     return;
   }
 
