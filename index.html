@@ -4274,28 +4274,61 @@ function openHourlyDetail(startHour, opts = {}) {
     }
   }
 
-  // КЛЮЧЕВОЕ: ставим scrollLeft ПЕРЕД открытием модалки, пока layout стабилен и
-  // нет анимаций. Раньше делали ПОСЛЕ classList.add('open') и боролись с
-  // -webkit-overflow-scrolling + transition + sticky-headers с 11 чартами.
-  // Теперь — пока модалка ещё в opacity:0 (но display:flex и в layout),
-  // scrollLeft ставится надёжно. Затем открываем модалку с уже правильным скроллом.
+  // Debug-логгер: показывает на экране что происходит со скроллом (только если
+  // включен debug-режим через localStorage: localStorage.setItem('kw:hdm-debug','1')).
+  // Помогает увидеть на iPhone PWA где именно теряется scrollLeft.
+  const debugMode = (function(){ try { return localStorage.getItem('kw:hdm-debug') === '1'; } catch(e){ return false; } })();
+  const debugLog = [];
+  const dlog = (msg, data) => {
+    if (!debugMode) return;
+    const ts = new Date().toISOString().slice(11,23);
+    const line = `[${ts}] ${msg} ${data ? JSON.stringify(data) : ''}`;
+    debugLog.push(line);
+    console.log('[HDM]', line);
+    renderDebugPanel();
+  };
+  const renderDebugPanel = () => {
+    if (!debugMode) return;
+    let panel = document.getElementById('hdmDebugPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'hdmDebugPanel';
+      panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow:auto;background:rgba(0,0,0,0.92);color:#0f0;font:10px/1.3 monospace;padding:8px;z-index:99999;border-top:2px solid #0f0;white-space:pre-wrap;word-break:break-all';
+      document.body.appendChild(panel);
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '×';
+      closeBtn.style.cssText = 'position:absolute;top:2px;right:8px;background:transparent;border:none;color:#f00;font-size:18px;cursor:pointer';
+      closeBtn.onclick = () => panel.remove();
+      panel.appendChild(closeBtn);
+    }
+    panel.textContent = debugLog.slice(-20).join('\n');
+  };
+
+  // КЛЮЧЕВОЕ: ставим scrollLeft ПЕРЕД открытием модалки, пока layout стабилен.
   const scrollElPre = document.getElementById('hdmScroll');
   if (scrollElPre) {
-    // Принудительный layout-read чтобы offsetLeft был корректным
-    void scrollElPre.offsetWidth;
+    void scrollElPre.offsetWidth; // force layout
     const preCells = scrollElPre.querySelectorAll('.hdm-hour-cell');
     const preTarget = preCells[startHour];
+    dlog('PRE', {
+      startHour,
+      cells: preCells.length,
+      hasTarget: !!preTarget,
+      vw: scrollElPre.clientWidth,
+      sw: scrollElPre.scrollWidth,
+      scrollLeft: scrollElPre.scrollLeft,
+      offsetLeft: preTarget?.offsetLeft,
+      offsetWidth: preTarget?.offsetWidth
+    });
     if (preTarget && scrollElPre.clientWidth >= 50) {
       const preVw = scrollElPre.clientWidth;
       const preMax = Math.max(0, scrollElPre.scrollWidth - preVw);
       const preX = Math.max(0, Math.min(preTarget.offsetLeft + preTarget.offsetWidth / 2 - preVw / 2, preMax));
-      // Сбрасываем -webkit-overflow-scrolling временно (известный iOS-блокер programmatic scroll)
       const prevWebkit = scrollElPre.style.webkitOverflowScrolling;
       scrollElPre.style.webkitOverflowScrolling = 'auto';
-      scrollElPre.scrollTop = 0;        // вертикаль в начало (важно для модалки с 11 чартами)
-      scrollElPre.scrollLeft = preX;    // горизонталь — целевая
-      // НЕ восстанавливаем сразу — оставляем 'auto' пока модалка открывается,
-      // вернём после стабилизации
+      scrollElPre.scrollTop = 0;
+      scrollElPre.scrollLeft = preX;
+      dlog('SET preX', { preX, actualLeft: scrollElPre.scrollLeft, diff: Math.abs(preX - scrollElPre.scrollLeft) });
       scrollElPre.dataset.prevWebkit = prevWebkit || '';
     }
   }
@@ -4305,32 +4338,36 @@ function openHourlyDetail(startHour, opts = {}) {
   document.body.style.overflow = 'hidden';
 
   // Подстраховка: пере-центрируем после открытия, на случай если iOS сбросит scrollLeft
-  // при transition. Также восстанавливаем -webkit-overflow-scrolling.
-  const repositionAndRestore = () => {
+  const repositionAndRestore = (tag) => {
     const scrollEl = document.getElementById('hdmScroll');
     if (!scrollEl) return;
     const cells = scrollEl.querySelectorAll('.hdm-hour-cell');
     const targetCell = cells[startHour];
     const vw = scrollEl.clientWidth || scrollEl.offsetWidth || 0;
-    if (!targetCell || vw < 50) return;
+    if (!targetCell || vw < 50) { dlog(`SKIP ${tag}`, { vw, hasTarget: !!targetCell }); return; }
     const maxScroll = Math.max(0, scrollEl.scrollWidth - vw);
     const targetX = Math.max(0, Math.min(targetCell.offsetLeft + targetCell.offsetWidth / 2 - vw / 2, maxScroll));
-    // Только если реально сбило — переустанавливаем (иначе игнорируем чтобы не дёргать)
+    const before = scrollEl.scrollLeft;
     if (Math.abs(scrollEl.scrollLeft - targetX) > 5) {
       scrollEl.scrollLeft = targetX;
     }
+    const after = scrollEl.scrollLeft;
+    dlog(tag, {
+      targetX,
+      before,
+      after,
+      stuck: Math.abs(after - targetX) < 5,
+      vw,
+      sw: scrollEl.scrollWidth,
+      offsetLeft: targetCell.offsetLeft
+    });
     if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
   };
 
-  // 3 проверки на разных таймингах:
-  //  100мс — середина transition
-  //  600мс — после завершения transition (0.55s)
-  //  1200мс — после полной стабилизации layout у 11 SVG-чартов
-  setTimeout(repositionAndRestore, 100);
-  setTimeout(repositionAndRestore, 600);
+  setTimeout(() => repositionAndRestore('100ms'), 100);
+  setTimeout(() => repositionAndRestore('600ms'), 600);
   setTimeout(() => {
-    repositionAndRestore();
-    // Восстанавливаем -webkit-overflow-scrolling = touch для нормальной inertia scrolling
+    repositionAndRestore('1200ms');
     const scrollEl = document.getElementById('hdmScroll');
     if (scrollEl) {
       const prev = scrollEl.dataset.prevWebkit;
