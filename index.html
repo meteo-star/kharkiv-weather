@@ -4075,12 +4075,19 @@ function renderHourlyRow(forecast) {
     `;
   }).join('');
 
-  // Клик на любую плитку часа → открывает модалку "Почасовой" на этом часе
+  // Клик на любую плитку часа → открывает модалку "Почасовой".
+  // ВСЕГДА центрируем на NOW_HOUR (текущий час), а не на кликнутом — по запросу
+  // пользователя: «чтоб текущий час был посреди экрана сразу чтобы пользователь его
+  // не искал». Кликнутый час всё равно виден в модалке через скролл.
+  // Исключение — если кликнут конкретный час близкий к NOW (±3), центрируем на нём:
+  // явный жест внимания, пользователь хочет именно этот час.
   row.querySelectorAll('.hour-cell').forEach(cell => {
     cell.style.cursor = 'pointer';
     cell.addEventListener('click', () => {
       const i = parseInt(cell.dataset.hourIndex, 10);
-      if (!Number.isNaN(i)) openHourlyDetail(i);
+      if (Number.isNaN(i)) return;
+      const distFromNow = Math.abs(i - NOW_HOUR);
+      openHourlyDetail(distFromNow <= 3 ? i : NOW_HOUR);
     });
   });
 
@@ -4274,60 +4281,14 @@ function openHourlyDetail(startHour, opts = {}) {
     }
   }
 
-  // Debug-логгер: показывает на экране что происходит со скроллом (только если
-  // включен debug-режим через localStorage: localStorage.setItem('kw:hdm-debug','1')).
-  // Помогает увидеть на iPhone PWA где именно теряется scrollLeft.
-  const debugMode = (function(){
-    try {
-      if (location.search.indexOf('hdmdebug') !== -1) {
-        localStorage.setItem('kw:hdm-debug','1');
-        return true;
-      }
-      return localStorage.getItem('kw:hdm-debug') === '1';
-    } catch(e){ return false; }
-  })();
-  const debugLog = [];
-  const dlog = (msg, data) => {
-    if (!debugMode) return;
-    const ts = new Date().toISOString().slice(11,23);
-    const line = `[${ts}] ${msg} ${data ? JSON.stringify(data) : ''}`;
-    debugLog.push(line);
-    console.log('[HDM]', line);
-    renderDebugPanel();
-  };
-  const renderDebugPanel = () => {
-    if (!debugMode) return;
-    let panel = document.getElementById('hdmDebugPanel');
-    if (!panel) {
-      panel = document.createElement('div');
-      panel.id = 'hdmDebugPanel';
-      panel.style.cssText = 'position:fixed;bottom:0;left:0;right:0;max-height:40vh;overflow:auto;background:rgba(0,0,0,0.92);color:#0f0;font:10px/1.3 monospace;padding:8px;z-index:99999;border-top:2px solid #0f0;white-space:pre-wrap;word-break:break-all';
-      document.body.appendChild(panel);
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '×';
-      closeBtn.style.cssText = 'position:absolute;top:2px;right:8px;background:transparent;border:none;color:#f00;font-size:18px;cursor:pointer';
-      closeBtn.onclick = () => panel.remove();
-      panel.appendChild(closeBtn);
-    }
-    panel.textContent = debugLog.slice(-20).join('\n');
-  };
-
-  // КЛЮЧЕВОЕ: ставим scrollLeft ПЕРЕД открытием модалки, пока layout стабилен.
+  // КЛЮЧЕВОЕ: ставим scrollLeft ПЕРЕД открытием модалки, пока layout стабилен и
+  // нет анимаций. Иначе iOS Safari конфликтует со sticky-headers .hdm-metric-head
+  // (11 штук в полной модалке) во время transition и сбрасывает scrollLeft.
   const scrollElPre = document.getElementById('hdmScroll');
   if (scrollElPre) {
     void scrollElPre.offsetWidth; // force layout
     const preCells = scrollElPre.querySelectorAll('.hdm-hour-cell');
     const preTarget = preCells[startHour];
-    dlog('PRE', {
-      startHour,
-      cells: preCells.length,
-      hasTarget: !!preTarget,
-      vw: scrollElPre.clientWidth,
-      sw: scrollElPre.scrollWidth,
-      scrollLeft: scrollElPre.scrollLeft,
-      offsetLeft: preTarget?.offsetLeft,
-      offsetWidth: preTarget?.offsetWidth
-    });
     if (preTarget && scrollElPre.clientWidth >= 50) {
       const preVw = scrollElPre.clientWidth;
       const preMax = Math.max(0, scrollElPre.scrollWidth - preVw);
@@ -4336,7 +4297,6 @@ function openHourlyDetail(startHour, opts = {}) {
       scrollElPre.style.webkitOverflowScrolling = 'auto';
       scrollElPre.scrollTop = 0;
       scrollElPre.scrollLeft = preX;
-      dlog('SET preX', { preX, actualLeft: scrollElPre.scrollLeft, diff: Math.abs(preX - scrollElPre.scrollLeft) });
       scrollElPre.dataset.prevWebkit = prevWebkit || '';
     }
   }
@@ -4345,37 +4305,26 @@ function openHourlyDetail(startHour, opts = {}) {
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
-  // Подстраховка: пере-центрируем после открытия, на случай если iOS сбросит scrollLeft
-  const repositionAndRestore = (tag) => {
+  // Подстраховка: пере-центрируем 3 раза после открытия на случай если iOS сбросит.
+  const repositionAndRestore = () => {
     const scrollEl = document.getElementById('hdmScroll');
     if (!scrollEl) return;
     const cells = scrollEl.querySelectorAll('.hdm-hour-cell');
     const targetCell = cells[startHour];
     const vw = scrollEl.clientWidth || scrollEl.offsetWidth || 0;
-    if (!targetCell || vw < 50) { dlog(`SKIP ${tag}`, { vw, hasTarget: !!targetCell }); return; }
+    if (!targetCell || vw < 50) return;
     const maxScroll = Math.max(0, scrollEl.scrollWidth - vw);
     const targetX = Math.max(0, Math.min(targetCell.offsetLeft + targetCell.offsetWidth / 2 - vw / 2, maxScroll));
-    const before = scrollEl.scrollLeft;
     if (Math.abs(scrollEl.scrollLeft - targetX) > 5) {
       scrollEl.scrollLeft = targetX;
     }
-    const after = scrollEl.scrollLeft;
-    dlog(tag, {
-      targetX,
-      before,
-      after,
-      stuck: Math.abs(after - targetX) < 5,
-      vw,
-      sw: scrollEl.scrollWidth,
-      offsetLeft: targetCell.offsetLeft
-    });
     if (typeof updateScrollArrows === 'function') updateScrollArrows(scrollEl);
   };
 
-  setTimeout(() => repositionAndRestore('100ms'), 100);
-  setTimeout(() => repositionAndRestore('600ms'), 600);
+  setTimeout(repositionAndRestore, 100);
+  setTimeout(repositionAndRestore, 600);
   setTimeout(() => {
-    repositionAndRestore('1200ms');
+    repositionAndRestore();
     const scrollEl = document.getElementById('hdmScroll');
     if (scrollEl) {
       const prev = scrollEl.dataset.prevWebkit;
