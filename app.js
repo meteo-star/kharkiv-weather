@@ -6098,33 +6098,13 @@ function renderCompareView() {
   // Chart — почасовая температура (lazy Chart.js)
   renderCompareChart(dayA, forecastB && forecastB[0] ? forecastB[0] : null);
 
-  // 10-дневная лента
+  // 10-дневная лента. Скролл синхронизирован нативно: оба ряда живут
+  // внутри одного скролл-контейнера .cd-table, а лейблы городов залипают
+  // position:sticky на левый край. Никакого JS-синхрона не нужно.
   setText('cdRowLabelA', cityA);
   setText('cdRowLabelB', cityB);
   renderCompareDays('cdCellsA', forecastA);
   renderCompareDays('cdCellsB', forecastB);
-  syncCompareDaysScroll();
-}
-
-// Синхронизация горизонтального скролла между двумя строками 10-дневного
-// прогноза в Compare Mode. Без этого пользователь скроллит одну строку
-// и теряет соответствие дней между городами.
-let _compareScrollWired = false;
-function syncCompareDaysScroll() {
-  if (_compareScrollWired) return;
-  const a = document.getElementById('cdCellsA');
-  const b = document.getElementById('cdCellsB');
-  if (!a || !b) return;
-  let busy = false;
-  const link = (src, dst) => src.addEventListener('scroll', () => {
-    if (busy) return;
-    busy = true;
-    dst.scrollLeft = src.scrollLeft;
-    requestAnimationFrame(() => { busy = false; });
-  }, { passive: true });
-  link(a, b);
-  link(b, a);
-  _compareScrollWired = true;
 }
 
 function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }

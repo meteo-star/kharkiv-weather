@@ -98,9 +98,13 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @media (max-width: 640px){
   .header{flex-direction:column;align-items:stretch;gap:12px;margin-bottom:18px}
   .header-right{justify-content:flex-start;flex-wrap:wrap;gap:8px;width:100%}
-  .source-indicator{padding:6px 12px;gap:7px;font-size:11px}
-  .source-indicator .si-label{display:none}
-  .source-indicator .si-name{font-size:12px;font-weight:600}
+  /* Source-indicator на мобиле — только цветная точка в кружке.
+     Текст "Среднее по 7 моделям" не помещался → выкидывал индикатор
+     на отдельную строку. Тап по точке всё равно открывает модалку
+     источника со всей инфой. */
+  .source-indicator{padding:0;width:34px;height:34px;justify-content:center;border-radius:50%;gap:0}
+  .source-indicator > div{display:none}
+  .source-indicator .si-dot{width:11px;height:11px}
   .location-text h1{font-size:18px}
   .location-text p{font-size:12px}
 }
@@ -1074,20 +1078,22 @@ body.compare-mode .astro-photo { display:none !important }
 .ccc-dot.b{background:#a78bfa;box-shadow:0 0 6px #a78bfa}
 .compare-chart-wrap{position:relative;height:180px}
 
-/* Dual 10-day forecast (горизонтальный скролл) */
+/* Dual 10-day forecast — ОДИН общий горизонтальный скролл, два ряда внутри.
+   Лейблы городов sticky-залипают на левый край, обе ленты двигаются вместе
+   нативной inertia-прокруткой. Никакого JS-синхрона между двумя скролл-
+   контейнерами не нужно — это родная фишка sticky. */
 .compare-days{padding:18px}
 .compare-days h2{font-size:14px;font-weight:600;color:#fff;margin-bottom:14px}
-.cd-rows{display:flex;flex-direction:column;gap:12px}
-.cd-row{display:flex;flex-direction:column;gap:8px;min-width:0}
-.cd-row-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding-left:2px}
+.cd-table{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);position:relative}
+.cd-table::-webkit-scrollbar{height:6px}
+.cd-table::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.cd-row{display:flex;align-items:stretch;gap:8px;margin-bottom:10px}
+.cd-row:last-child{margin-bottom:0}
+.cd-row-label{position:sticky;left:0;z-index:2;flex-shrink:0;width:96px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;background:linear-gradient(90deg,rgba(14,22,52,0.98) 0%,rgba(14,22,52,0.96) 85%,rgba(14,22,52,0) 100%);padding-right:14px;text-align:center;line-height:1.1}
 .cd-row[data-side="a"] .cd-row-label{color:#00d4ff}
 .cd-row[data-side="b"] .cd-row-label{color:#a78bfa}
-.cd-cells{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(78px,1fr);grid-template-columns:repeat(5,1fr);gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04)}
-.cd-cells::-webkit-scrollbar{height:5px}
-.cd-cells::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
-.cd-row[data-side="b"] .cd-cells{scrollbar-color:rgba(167,139,250,0.3) rgba(255,255,255,0.04)}
-.cd-row[data-side="b"] .cd-cells::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.3)}
-.cd-cell{padding:12px 6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;text-align:center;font-size:11px;line-height:1.25;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;min-height:140px}
+.cd-cells{display:flex;gap:8px;flex-shrink:0}
+.cd-cell{flex:0 0 88px;padding:12px 6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;text-align:center;font-size:11px;line-height:1.25;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;min-height:140px}
 .cd-row[data-side="a"] .cd-cell{border-color:rgba(0,212,255,0.18);background:rgba(0,212,255,0.04)}
 .cd-row[data-side="b"] .cd-cell{border-color:rgba(167,139,250,0.18);background:rgba(167,139,250,0.04)}
 .cd-cell .day{font-size:11px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.04em}
@@ -1110,9 +1116,9 @@ body.compare-mode .astro-photo { display:none !important }
   .cm-row{grid-template-columns:1fr auto 1fr;column-gap:8px}
   .cm-vs{display:none}
   .cm-a,.cm-b{min-width:0}
-  .cd-cells{grid-template-columns:repeat(4,minmax(72px,1fr));gap:6px}
-  .cd-cell{padding:10px 4px;min-height:130px}
-  .cd-cell .icon{height:36px}
+  .cd-row-label{width:72px;font-size:11px;padding-right:10px}
+  .cd-cell{flex:0 0 76px;padding:10px 4px;min-height:128px}
+  .cd-cell .icon{height:34px}
   .cd-cell .t{font-size:12px}
   .compare-chart-wrap{height:160px}
 }
