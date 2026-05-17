@@ -93,6 +93,17 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 }
 
 .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:28px}
+/* Мобильная шапка: location-block во всю ширину, чипы и source-indicator —
+   на отдельной строке, выровнены слева, компактный source-indicator. */
+@media (max-width: 640px){
+  .header{flex-direction:column;align-items:stretch;gap:12px;margin-bottom:18px}
+  .header-right{justify-content:flex-start;flex-wrap:wrap;gap:8px;width:100%}
+  .source-indicator{padding:6px 12px;gap:7px;font-size:11px}
+  .source-indicator .si-label{display:none}
+  .source-indicator .si-name{font-size:12px;font-weight:600}
+  .location-text h1{font-size:18px}
+  .location-text p{font-size:12px}
+}
 .location-block{display:flex;align-items:center;gap:14px}
 .location-icon{width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(0,212,255,0.12);backdrop-filter:blur(12px);border:1px solid rgba(0,212,255,0.25);border-radius:14px;box-shadow:0 0 20px rgba(0,212,255,0.15)}
 .location-text h1{font-size:20px;font-weight:600;letter-spacing:-0.02em;color:#f0f6ff}
