@@ -39,6 +39,11 @@ export default {
       return handleWebhook(request, env, ctx);
     }
 
+    // API endpoints для сайта (фаза Б3)
+    if (url.pathname.startsWith('/api/')) {
+      return handleApi(url, request, env, ctx);
+    }
+
     // Простая корневая страница — помогает понять, что Worker жив,
     // когда заходишь в браузере по URL `.workers.dev`.
     return new Response('Meteo Star Bot is running. POST /webhook for Telegram updates.', {
@@ -107,6 +112,8 @@ async function processUpdate(update, env) {
       case '/status':      return handleStatus(env, chatId);
       case '/stop':        return handleStop(env, chatId);
       case '/location':    return handleLocation(env, chatId, args);
+      case '/pair':        return handlePair(env, chatId, userId, msg.from, args);
+      case '/unpair':      return handleUnpair(env, chatId);
     }
 
     // Админ-команды
@@ -203,6 +210,8 @@ async function handleHelp(env, chatId, isAdmin) {
     `<code>/start</code> — подписаться\n` +
     `<code>/status</code> — твоя подписка и активные правила\n` +
     `<code>/location &lt;город&gt;</code> — сменить локацию\n` +
+    `<code>/pair &lt;код&gt;</code> — связать с сайтом (код берётся в Settings)\n` +
+    `<code>/unpair</code> — разорвать связь с сайтом\n` +
     `<code>/stop</code> — отписаться от всех уведомлений\n` +
     `<code>/help</code> — эта подсказка`;
 
@@ -315,6 +324,78 @@ function formatRule(r) {
     case 'morning_summary':  return `🌅 Сводка утром в ${r.hour}:${String(r.minute || 0).padStart(2,'0')}`;
     default:                 return `? ${r.type}`;
   }
+}
+
+// /pair <code>  — связать чат с сайтом по коду из сайта
+async function handlePair(env, chatId, userId, fromObj, args) {
+  const code = (args || '').trim();
+  if (!/^\d{6}$/.test(code)) {
+    return sendMessage(env, chatId,
+      `🔗 Использование: <code>/pair 123456</code>\n\nКод из 6 цифр нужно сначала получить на сайте: Настройки → 🔔 Уведомления → «Связать с Telegram».`,
+      { parse_mode: 'HTML' }
+    );
+  }
+  const raw = await env.PAIRING.get(`pair:${code}`);
+  if (!raw) {
+    return sendMessage(env, chatId,
+      `❌ Код <code>${esc(code)}</code> не найден или истёк (срок 10 минут).\nЗапроси новый на сайте.`,
+      { parse_mode: 'HTML' }
+    );
+  }
+  const data = JSON.parse(raw);
+  if (data.chatId) {
+    return sendMessage(env, chatId, `⚠ Этот код уже использован другим чатом.`);
+  }
+
+  // Создаём подписку если её нет
+  let sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  if (!sub) {
+    sub = {
+      chatId,
+      userId,
+      username: fromObj?.username || null,
+      firstName: fromObj?.first_name || null,
+      lat: 49.9, lon: 36.21, name: 'Высокий',
+      lang: fromObj?.language_code === 'uk' ? 'uk' : (fromObj?.language_code === 'en' ? 'en' : 'ru'),
+      rules: [],
+      createdAt: new Date().toISOString(),
+      banned: false,
+      lastFired: {}
+    };
+    await incrementStat(env, 'subscribed');
+  }
+
+  // Генерим pairToken (32 hex символа)
+  const pairToken = generatePairToken();
+  sub.pairToken = pairToken;
+  await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
+
+  // Обновляем pair-запись — теперь сайт сможет получить chatId+pairToken через poll
+  data.chatId = chatId;
+  data.pairToken = pairToken;
+  await env.PAIRING.put(`pair:${code}`, JSON.stringify(data), { expirationTtl: 600 });
+
+  return sendMessage(env, chatId,
+    `✅ <b>Связано с сайтом!</b>\n\nВозвращайся в браузер — теперь можешь настроить уведомления.\n\nЛокация: <b>${esc(sub.name)}</b>\nЕсли хочешь сменить — <code>/location &lt;город&gt;</code>`,
+    { parse_mode: 'HTML' }
+  );
+}
+
+async function handleUnpair(env, chatId) {
+  const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  if (!sub) return sendMessage(env, chatId, `Ты не подписан.`);
+  if (!sub.pairToken) return sendMessage(env, chatId, `Сайт не связан с этим чатом.`);
+  sub.pairToken = null;
+  await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
+  return sendMessage(env, chatId,
+    `🔓 Связь с сайтом разорвана.\nПодписка осталась, правила тоже. Чтобы менять правила — снова свяжи через сайт.`
+  );
+}
+
+function generatePairToken() {
+  const a = new Uint8Array(16);
+  crypto.getRandomValues(a);
+  return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
 }
 
 // ============================================================
@@ -469,6 +550,168 @@ async function handleAdminClearRules(env, chatId) {
   sub.lastFired = {};
   await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
   return sendMessage(env, chatId, `🗑 Все правила удалены.`);
+}
+
+// ============================================================
+// HTTP API для сайта (фаза Б3)
+// ============================================================
+
+// Whitelist origin'ов с которых разрешены CORS-запросы
+const ALLOWED_ORIGINS = [
+  'https://meteo-star.github.io',
+  'http://localhost:8000',
+  'http://localhost:8765',
+  'http://127.0.0.1:8000',
+  'http://127.0.0.1:8765'
+];
+
+function corsHeaders(origin) {
+  const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'content-type',
+    'Access-Control-Max-Age': '86400'
+  };
+}
+
+function withCors(response, origin) {
+  const headers = new Headers(response.headers);
+  for (const [k, v] of Object.entries(corsHeaders(origin))) headers.set(k, v);
+  return new Response(response.body, { status: response.status, headers });
+}
+
+function jsonResp(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { 'content-type': 'application/json' }
+  });
+}
+
+async function handleApi(url, request, env, ctx) {
+  const origin = request.headers.get('Origin');
+
+  // CORS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  }
+
+  const path = url.pathname;
+
+  // POST /api/pair-create  { code }  →  { ok: true } | { error }
+  // Регистрирует код для будущей связки. Сайт показывает код пользователю,
+  // тот пишет /pair <code> в боте. TTL 10 минут.
+  if (path === '/api/pair-create' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const code = String(body.code || '').trim();
+    if (!/^\d{6}$/.test(code)) {
+      return withCors(jsonResp({ error: 'invalid_code' }, 400), origin);
+    }
+    const existing = await env.PAIRING.get(`pair:${code}`);
+    if (existing) {
+      return withCors(jsonResp({ error: 'code_taken' }, 409), origin);
+    }
+    await env.PAIRING.put(`pair:${code}`,
+      JSON.stringify({ chatId: null, pairToken: null, createdAt: new Date().toISOString() }),
+      { expirationTtl: 600 }  // 10 минут
+    );
+    return withCors(jsonResp({ ok: true }), origin);
+  }
+
+  // GET /api/pair-poll?code=123456  →  { ok, chatId?, pairToken?, name? }
+  // Сайт спрашивает раз в 3 секунды до получения данных.
+  if (path === '/api/pair-poll' && request.method === 'GET') {
+    const code = url.searchParams.get('code') || '';
+    if (!/^\d{6}$/.test(code)) {
+      return withCors(jsonResp({ error: 'invalid_code' }, 400), origin);
+    }
+    const raw = await env.PAIRING.get(`pair:${code}`);
+    if (!raw) {
+      return withCors(jsonResp({ error: 'expired_or_not_found' }, 404), origin);
+    }
+    const data = JSON.parse(raw);
+    if (!data.chatId) {
+      return withCors(jsonResp({ ok: true, status: 'pending' }), origin);
+    }
+    // Получаем имя/локацию подписки, чтобы вернуть для UI
+    const sub = await env.SUBSCRIPTIONS.get(`sub:${data.chatId}`, { type: 'json' });
+    // Удаляем pair: запись — она больше не нужна
+    await env.PAIRING.delete(`pair:${code}`);
+    return withCors(jsonResp({
+      ok: true,
+      status: 'linked',
+      chatId: data.chatId,
+      pairToken: data.pairToken,
+      name: sub?.name || null,
+      username: sub?.username || null,
+      firstName: sub?.firstName || null
+    }), origin);
+  }
+
+  // POST /api/rules-get  { chatId, pairToken }  →  { rules: [], name }
+  if (path === '/api/rules-get' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const sub = await authSub(env, body);
+    if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
+    return withCors(jsonResp({ rules: sub.rules || [], name: sub.name, lang: sub.lang }), origin);
+  }
+
+  // POST /api/rules-set  { chatId, pairToken, rules: [] }  →  { ok: true }
+  if (path === '/api/rules-set' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const sub = await authSub(env, body);
+    if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
+
+    const rules = Array.isArray(body.rules) ? body.rules.filter(validateRule).slice(0, 20) : [];
+    sub.rules = rules;
+    // При смене правил сбрасываем cooldown'ы — иначе старые ключи висят
+    sub.lastFired = {};
+    await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
+    return withCors(jsonResp({ ok: true, count: rules.length }), origin);
+  }
+
+  // POST /api/unpair  { chatId, pairToken }  →  { ok: true }
+  // Сбрасывает pairToken (сайт теряет доступ, бот остаётся подписан).
+  if (path === '/api/unpair' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const sub = await authSub(env, body);
+    if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
+    sub.pairToken = null;
+    await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
+    return withCors(jsonResp({ ok: true }), origin);
+  }
+
+  return withCors(jsonResp({ error: 'not_found' }, 404), origin);
+}
+
+async function authSub(env, body) {
+  const chatId = body.chatId;
+  const pairToken = body.pairToken;
+  if (!chatId || !pairToken) return null;
+  const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  if (!sub) return null;
+  if (sub.banned) return null;
+  if (!sub.pairToken || sub.pairToken !== pairToken) return null;
+  return sub;
+}
+
+function validateRule(r) {
+  if (!r || typeof r !== 'object') return false;
+  switch (r.type) {
+    case 'temp_below':
+    case 'temp_above':
+      return Number.isFinite(Number(r.threshold));
+    case 'rain_soon':
+      return Number.isFinite(Number(r.windowHours)) && r.windowHours > 0 && r.windowHours <= 48;
+    case 'storm_alert':
+      return true;
+    case 'dry_streak':
+      return Number.isFinite(Number(r.days)) && r.days > 0 && r.days <= 14;
+    case 'morning_summary':
+      return Number.isFinite(Number(r.hour)) && r.hour >= 0 && r.hour <= 23
+        && Number.isFinite(Number(r.minute)) && r.minute >= 0 && r.minute <= 59;
+    default: return false;
+  }
 }
 
 // ============================================================
