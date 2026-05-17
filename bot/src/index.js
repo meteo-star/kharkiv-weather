@@ -150,6 +150,7 @@ async function processUpdate(update, env) {
       case '/pair':        return handlePair(env, chatId, userId, msg.from, args, chatType, msg.chat);
       case '/unpair':      return handleUnpair(env, chatId);
       case '/setup':       return handleSetup(env, chatId, userId, chatType, msg);
+      case '/login':       return handleLogin(env, chatId, userId, chatType);
     }
 
     // Админ-команды
@@ -256,6 +257,7 @@ async function handleHelp(env, chatId, isAdmin) {
     `<code>/status</code> — твоя подписка и активные правила\n` +
     `<code>/location &lt;город&gt;</code> — сменить локацию\n` +
     `<code>/pair &lt;код&gt;</code> — связать с сайтом (код берётся в Settings)\n` +
+    `<code>/login</code> — ссылка для входа на сайт с любого устройства\n` +
     `<code>/unpair</code> — разорвать связь с сайтом\n` +
     `<code>/stop</code> — отписаться от всех уведомлений\n` +
     `<code>/help</code> — эта подсказка`;
@@ -522,6 +524,49 @@ function generatePairToken() {
   const a = new Uint8Array(16);
   crypto.getRandomValues(a);
   return Array.from(a, b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// /login — выдаёт магическую ссылку для входа на сайт с любого устройства.
+// Используется когда: на новом устройстве (iPhone) сайт не знает что юзер уже
+// связан с ботом → юзер пишет /login → получает URL → открывает → сайт сам
+// логинится с правильным chatId+pairToken.
+//
+// В группе: /login генерит ссылку именно для ГРУППЫ (chatId группы).
+// Доступ к группе с любого устройства = просто открыть свежую ссылку.
+async function handleLogin(env, chatId, userId, chatType) {
+  // В группе только admin/creator может генерить login-ссылку
+  if (chatType !== 'private') {
+    const isGroupAdmin = await checkGroupAdmin(env, chatId, userId);
+    if (!isGroupAdmin) {
+      return sendMessage(env, chatId, `🚫 Только админ группы может получить ссылку для входа на сайт.`);
+    }
+  }
+  let sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  if (!sub) {
+    return sendMessage(env, chatId, `Сначала /start (или /pair если уже создал код на сайте).`);
+  }
+  // Если pairToken'а нет — генерим заодно (это случай когда пользователь
+  // никогда не связывался с сайтом, но хочет получить доступ через login).
+  if (!sub.pairToken) {
+    sub.pairToken = generatePairToken();
+    await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
+  }
+
+  // Короткий одноразовый auth-токен, истекает через 10 мин
+  const authToken = generatePairToken();
+  await env.PAIRING.put(`auth:${authToken}`,
+    JSON.stringify({ chatId, pairToken: sub.pairToken, createdAt: new Date().toISOString() }),
+    { expirationTtl: 600 }
+  );
+
+  const url = `https://meteo-star.github.io/kharkiv-weather/?auth=${authToken}`;
+  return sendMessage(env, chatId,
+    `🔗 <b>Ссылка для входа на сайт:</b>\n\n` +
+    `${url}\n\n` +
+    `<i>Открой её на любом устройстве (iPhone, ПК, ноут) — сайт сам войдёт с твоим аккаунтом.\n` +
+    `Действительна 10 минут, используется один раз.</i>`,
+    { parse_mode: 'HTML' }
+  );
 }
 
 // ============================================================
@@ -846,6 +891,39 @@ async function handleApi(url, request, env, ctx) {
     return withCors(jsonResp({ ok: true, count: rules.length }), origin);
   }
 
+  // POST /api/auth-claim  { token }  →  { chatId, pairToken, name, chatTitle, chatType }
+  // Магическая ссылка из /login команды бота — обмен короткого auth-токена
+  // на постоянный pairToken. Используется для входа с нового устройства.
+  if (path === '/api/auth-claim' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const token = String(body.token || '').trim();
+    if (!/^[0-9a-f]{32}$/.test(token)) {
+      return withCors(jsonResp({ error: 'invalid_token' }, 400), origin);
+    }
+    const raw = await env.PAIRING.get(`auth:${token}`);
+    if (!raw) {
+      return withCors(jsonResp({ error: 'expired_or_used' }, 404), origin);
+    }
+    const data = JSON.parse(raw);
+    // Удаляем — токен одноразовый
+    await env.PAIRING.delete(`auth:${token}`);
+    // Получаем имя/локацию подписки для UI
+    const sub = await env.SUBSCRIPTIONS.get(`sub:${data.chatId}`, { type: 'json' });
+    if (!sub || sub.banned) {
+      return withCors(jsonResp({ error: 'subscription_not_found' }, 404), origin);
+    }
+    return withCors(jsonResp({
+      ok: true,
+      chatId: data.chatId,
+      pairToken: data.pairToken,
+      name: sub.name,
+      username: sub.username,
+      firstName: sub.firstName,
+      chatType: sub.chatType || 'private',
+      chatTitle: sub.chatTitle || null
+    }), origin);
+  }
+
   // POST /api/unpair  { chatId, pairToken }  →  { ok: true }
   // Сбрасывает pairToken (сайт теряет доступ, бот остаётся подписан).
   if (path === '/api/unpair' && request.method === 'POST') {
@@ -866,10 +944,39 @@ async function handleApi(url, request, env, ctx) {
 }
 
 async function handleAdminApi(path, request, env, origin) {
-  // Авторизация: X-Admin-Token header должен совпадать с ADMIN_TOKEN secret
+  // Авторизация: X-Admin-Token header должен совпадать с ADMIN_TOKEN secret.
+  // Защита от брутфорса: считаем неудачные попытки login по IP, при 5+
+  // блокируем на 10 минут. Без этого короткий пароль легко перебрать.
+  const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const failKey = `admin_fails:${ip}`;
+  const failData = await env.STATS.get(failKey, { type: 'json' });
+
+  // Проверяем не заблокирован ли IP
+  if (failData?.blockUntil && Date.now() < failData.blockUntil) {
+    const remainMin = Math.ceil((failData.blockUntil - Date.now()) / 60000);
+    return withCors(jsonResp({ error: 'rate_limited', remain: remainMin }, 429), origin);
+  }
+
   const token = request.headers.get('X-Admin-Token');
   if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    // Только для /login инкрементируем счётчик попыток. Остальные endpoints
+    // тоже требуют токен, но обычно их вызывает уже-залогиненный фронтенд,
+    // подсчёт там бессмыслен.
+    if (path === '/api/admin/login') {
+      const count = (failData?.count || 0) + 1;
+      const newData = { count };
+      if (count >= 5) {
+        // Блок на 10 минут
+        newData.blockUntil = Date.now() + 10 * 60 * 1000;
+      }
+      await env.STATS.put(failKey, JSON.stringify(newData), { expirationTtl: 3600 });
+    }
     return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
+  }
+
+  // Успешный логин — сбрасываем счётчик
+  if (path === '/api/admin/login' && failData) {
+    await env.STATS.delete(failKey);
   }
 
   // GET /api/admin/login — просто проверка валидности токена (для UI)

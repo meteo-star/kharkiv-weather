@@ -7951,7 +7951,59 @@ function setupNotifSection() {
   cancelBtn.addEventListener('click', cancelPairing);
   unlinkBtn.addEventListener('click', unlinkTelegram);
   saveBtn.addEventListener('click', saveNotifRules);
-  refreshNotifPane();
+
+  // Проверяем магическую ссылку из /login команды бота. Если в URL есть
+  // ?auth=TOKEN — обмениваем у Worker'а на chatId+pairToken и логинимся
+  // на этом устройстве. После — чистим URL чтобы при перезагрузке не
+  // пытаться обменять уже использованный токен.
+  const params = new URLSearchParams(window.location.search);
+  const authToken = params.get('auth');
+  if (authToken && /^[0-9a-f]{32}$/.test(authToken)) {
+    claimAuthToken(authToken).finally(() => {
+      // Удаляем ?auth= из URL не перезагружая страницу
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, '', newUrl);
+    });
+  } else {
+    refreshNotifPane();
+  }
+}
+
+async function claimAuthToken(token) {
+  try {
+    const r = await fetch(`${BOT_API_BASE}/api/auth-claim`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token })
+    });
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({}));
+      console.warn('auth-claim failed:', err.error || r.status);
+      refreshNotifPane();
+      return;
+    }
+    const data = await r.json();
+    if (data.ok) {
+      saveTelegramState({
+        chatId: data.chatId,
+        pairToken: data.pairToken,
+        name: data.name,
+        username: data.username,
+        firstName: data.firstName,
+        chatType: data.chatType || 'private',
+        chatTitle: data.chatTitle || null
+      });
+      // Открываем Settings модалку чтобы пользователь увидел что залогинен
+      try {
+        const settingsModal = document.getElementById('settingsModal');
+        if (settingsModal) settingsModal.classList.add('open');
+      } catch (e) {}
+    }
+    refreshNotifPane();
+  } catch (e) {
+    console.error('claimAuthToken err:', e);
+    refreshNotifPane();
+  }
 }
 
 function refreshNotifPane() {

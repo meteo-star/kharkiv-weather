@@ -31,7 +31,11 @@ async function tryLogin(token) {
   } catch (e) {
     adminToken = '';
     sessionStorage.removeItem(TOKEN_KEY);
-    $('loginErr').textContent = '❌ Неверный токен';
+    if (e.message === 'rate_limited') {
+      $('loginErr').textContent = '🚫 Слишком много попыток. Попробуй позже.';
+    } else {
+      $('loginErr').textContent = '❌ Неверный пароль';
+    }
   }
 }
 
