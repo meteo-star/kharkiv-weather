@@ -102,8 +102,13 @@ function renderSubs(subs) {
 
   for (const s of subs) {
     const tr = document.createElement('tr');
-    const handle = s.username ? `@${s.username}` : (s.firstName || '—');
     const isGroup = s.chatType && s.chatType !== 'private';
+    let handle;
+    if (isGroup) {
+      handle = s.chatTitle ? `👥 ${s.chatTitle}` : `👥 Группа ${s.chatId}`;
+    } else {
+      handle = s.username ? `@${s.username}` : (s.firstName || '—');
+    }
     const stateBadges = [];
     if (s.banned) stateBadges.push('<span class="badge-banned">BAN</span>');
     if (s.paired) stateBadges.push('<span class="badge-paired">сайт</span>');

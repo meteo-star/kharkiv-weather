@@ -817,6 +817,8 @@ async function handleAdminApi(path, request, env, origin) {
         chatId: sub.chatId,
         username: sub.username,
         firstName: sub.firstName,
+        chatTitle: sub.chatTitle || null,
+        initiator: sub.initiator || null,
         name: sub.name,
         lat: sub.lat,
         lon: sub.lon,
