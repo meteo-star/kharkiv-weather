@@ -1,45 +1,152 @@
-# Метеоагрегатор · Харьков / Высокий
+# Meteo Star · Метеоагрегатор
 
-Веб-приложение для агрегации прогноза погоды по 10 источникам в стиле Liquid Glass.
+Веб-приложение для агрегации прогноза погоды по **7 моделям одновременно**. Liquid Glass UI, тёмная тема, оптимизировано под мобильные. Устанавливается как PWA на главный экран iOS / Android.
 
-## Что внутри
+🌐 **Live:** https://meteo-star.github.io/kharkiv-weather/
 
-- Усреднение прогнозов: ECMWF, GFS, ICON, MET Norway, OpenWeatherMap, WeatherAPI, Visual Crossing, Ventusky, AccuWeather, Укргідрометцентр
-- Тёмный Liquid Glass UI с неоновыми акцентами
-- 3D-иконки погоды, восход/закат, фаза луны, УФ-индекс, AQI
-- Интерактивные модалки с почасовым прогнозом на каждый день
-- Адаптив под любой экран
+---
 
-## Запуск
+## Что умеет
 
-Открыть `index.html` в браузере или развернуть на GitHub Pages.
+### Базовое
+- **Прогноз на 10 дней** – суточный max/min, осадки, ветер, влажность, давление
+- **Почасовая детализация** – 11 метрик в полноэкранной модалке: температура, ощущается, осадки %, осадки мм, ветер, давление, влажность, точка росы, УФ-индекс, видимость, солнечная радиация
+- **Геолокация + глобальный поиск города** через Open-Meteo Geocoding
+- **Избранные города** – до 8 локаций пилюлями в шапке
+- **3 языка** – RU / UK / EN с моментальным переключением
+- **Гибкие единицы** – °C/°F, м/с / км/ч / mph / уз, мм рт.ст. / гПа / inHg
+- **PWA** – устанавливается как нативное приложение, работает офлайн через service worker
 
-## Демо
+### Уникальные фишки
 
-https://meteo-star.github.io/kharkiv-weather/
+**Ансамблевый прогноз**
+- Среднее по 7 моделям: ECMWF, GFS, ICON, GEM, JMA, MeteoFrance, UKMO
+- **Индекс согласия моделей** – цветовая полоска на каждой карточке дня: 🟢 надёжный / 🟡 средний / 🟠 шаткий / 🔴 большой разброс
+- **Самооценка точности** – копится история «предсказание vs факт» по 30 датам, выдаётся MAE-рейтинг лучшей модели именно для вашей локации (🏆-бейдж)
 
-## Технологии
+**Inverse search «когда будет нужная погода»**
+- Свободный ввод («без дождя 6 часов», «теплее +20», «когда ясно», «без ветра») с regex-парсером
+- 8 пресетов активностей: 🏃 пробежка / 🍖 шашлык / 🚗 мойка / 🚶 прогулка / 🌱 полив / 🧺 бельё / 🌤 ясно / ⛈ гроза
+- Учёт **социальных часов суток** (шашлык не предлагается в 3 ночи)
+- **Строгая защита от ложных «сухо»-окон**: три критерия одновременно – количество осадков, вероятность дождя, weather_code
+- Окна разбиваются по дням, сортируются по близости и длительности
 
-- Чистая статика: HTML + CSS + ванильный JavaScript
-- Chart.js через CDN (с проверкой Subresource Integrity)
-- Шрифты Onest + JetBrains Mono через Google Fonts
-- Без сборщиков, без npm
-- Деплой: GitHub Pages
+**Сравнение двух городов**
+- Чип `⚖ Сравнить` в шапке открывает выбор второго города (favorites + worldwide search)
+- Параллельные карточки A↔B: dual hero (cyan/фиолет), 4 метрики side-by-side, авто-summary «🏆 где лучше»
+- Двухлинейный график почасовой температуры
+- Параллельные ленты прогноза на 10 дней с горизонтальным скроллом
+- Кнопки `↻` swap на каждой карточке – смена A или B без выхода из режима
+- Состояние персистится в localStorage – переоткрытие восстанавливает режим
+
+**Алерты экстремальной температуры**
+- При прогнозе ≥+32°C на 48ч – баннер `🥵 Сильная жара` с рекомендациями по воде/тени
+- При ≤-15°C – `🥶 Сильный мороз` с предупреждением об обморожении
+- 4 уровня: severe / extreme для каждой стороны
+
+**Климатический контекст**
+- Сравнение текущей погоды с 5-летней нормой через Open-Meteo Archive API
+- SVG-спарклайн «в этот день в прошлые годы» (5 точек по годам)
+- Кэш климата на 30 дней (норма меняется медленно)
+
+**Прогноз пыльцы** – 6 аллергенов с цветовыми уровнями: ольха, берёза, злаки, полынь, олива, амброзия
+
+**Окна возможностей** – авто-поиск лучших часов в ближайших 5 днях для 6 пресетов активностей
+
+**Astro/Photographer mode** – золотой/синий час, качество заката, видимость звёзд
+
+**Радар осадков** – RainViewer (прошлое-настоящее, 2ч) + Windy iframe (прогноз 72ч, ECMWF)
+
+**Гроза-индикатор** – heatmap риска на 48ч из weather_code + CAPE + lifted_index, тревожный баннер при риске ≥2 в ближайшие 6ч
+
+**TTS-озвучка** – Web Speech API проговаривает резюме погоды на 3 языках, выбор голоса в настройках
+
+**Реалистичная hero-сцена** – 8 фото-фонов неба в зависимости от времени суток × облачности, анимированные погодные частицы (дождь, снег, туман, молнии, ветровые стрики) реагирующие на интенсивность из API
+
+### Производительность
+
+- **Lazy-load Chart.js** – 200КБ библиотеки грузится только при первом открытии модалок с графиками
+- **Yielding-based parsing** – парсер 7 моделей разбит через `await setTimeout(0)`, main thread не фризит во время обработки JSON
+- **Page Visibility API** – все таймеры (clock, sun arc, date) останавливаются на скрытой вкладке, экономия батареи в PWA
+- **localStorage cleanup** – старые версии кэша (forecast-cache:vN, climate-cache:vN) удаляются при старте
+- **Service Worker network-first** для HTML/CSS/JS – мгновенные обновления без двух перезапусков PWA
+- **Skeleton-screen** при холодном старте – пульсирующие плейсхолдеры вместо мерцания BASELINE-данных
+
+### Безопасность
+
+- **Content Security Policy** через meta-тег: whitelist только нужных доменов (Open-Meteo, Google Fonts, Chart.js, Leaflet, RainViewer, Windy)
+- **Subresource Integrity (SRI)** для всех CDN-скриптов (Chart.js, Leaflet) – защита от подмены кода
+- **frame-ancestors 'none'** – защита от clickjacking
+- Никакой аналитики, никаких трекеров, никаких персональных данных на сервере. Всё – только в браузере
+
+---
+
+## Локальный запуск
+
+```powershell
+python -m http.server 8000 --bind 127.0.0.1
+```
+
+Открыть http://localhost:8000/
+
+---
+
+## Архитектура
+
+```
+.
+├── index.html              # HTML-разметка (~870 строк)
+├── style.css               # Glass UI + responsive (~1400 строк)
+├── app.js                  # Логика, ванильный JS (~7400 строк)
+├── manifest.json           # PWA-манифест
+├── service-worker.js       # Cache strategies (network-first / cache-first / stale-while-revalidate)
+├── icons/                  # PNG-иконки PWA (favicon, apple-touch, maskable)
+├── assets/scenes/          # 8 WebP фото-фонов hero (~217 КБ)
+├── README.md               # Этот файл
+├── SECURITY.md             # Контракт безопасности и приватности
+├── HANDOFF.md              # Исторический контекст (v0.4 из чата claude.ai)
+└── PROJECT_STATUS.md       # Лог фаз разработки
+```
+
+**Без сборщиков, без npm, без бэкенда.** Чистая статика, открывается прямо в браузере или с GitHub Pages.
+
+---
 
 ## Источники данных
 
-- [Open-Meteo](https://open-meteo.com/) – основной форкаст (7 моделей: ECMWF, GFS, ICON, GEM, JMA, MeteoFrance, UKMO)
-- [Open-Meteo Air Quality](https://open-meteo.com/en/docs/air-quality-api) – AQI, PM2.5, PM10
-- [Open-Meteo Archive](https://open-meteo.com/en/docs/historical-weather-api) – исторические данные (для климатического контекста)
-- [Open-Meteo Pollen](https://open-meteo.com/en/docs/air-quality-api) – уровень пыльцы (берёза, ольха, амброзия, злаки)
-- [Blitzortung](https://www.blitzortung.org/) – молнии в реальном времени
+| API | Что даёт |
+|---|---|
+| [Open-Meteo Forecast](https://open-meteo.com/) | 7 моделей: ECMWF, GFS, ICON, GEM, JMA, MeteoFrance, UKMO |
+| [Open-Meteo Air Quality](https://open-meteo.com/en/docs/air-quality-api) | AQI, PM2.5, PM10 + 6 видов пыльцы |
+| [Open-Meteo Archive](https://open-meteo.com/en/docs/historical-weather-api) | 5-летняя норма для климатического контекста |
+| [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) | Поиск города по названию |
+| [Nominatim](https://nominatim.openstreetmap.org/) | Reverse-геокодинг для `navigator.geolocation` |
+| [RainViewer](https://www.rainviewer.com/api.html) | Тайлы радара осадков |
+| [Windy](https://www.windy.com/) | iframe прогноза 72ч (ECMWF surface rain) |
 
-Все источники бесплатные, без API-ключей.
+**Все бесплатные, без API-ключей.**
 
-## Приватность
+---
 
-См. [SECURITY.md](SECURITY.md). Коротко: никакой аналитики, никаких трекеров, никаких персональных данных на сервере. Всё – только в твоём браузере.
+## История разработки
+
+- **Фазы А-Б** – деплой прототипа, реальные API, multi-models
+- **Фаза В** – уникальные фишки (astro mode, confidence index, activity windows, климат, пыльца, гроза, accuracy ranking)
+- **Фаза Г** – UI-редизайн (mobile-first, scroll-based forecast, 11 метрик в hourly modal)
+- **Фаза Д** – PWA + SRI + CSP
+- **Фаза Е** – Inverse search
+- **Фаза Ж** – Multi-city favorites + worldwide search
+- **Фаза З** – TTS-озвучка
+- **Фаза И** – Интерактивные плитки + радар осадков
+- **Фаза К** – Реалистичная hero-сцена с фото-фонами
+- **Фаза Л** – iPhone PWA fixes (safe-area, swipe-down, status bar)
+- **Фаза М** – модуляризация (вынос CSS/JS в отдельные файлы, sun arc real-time, source data modal)
+- **Фаза Н** – performance (lazy Chart.js, yielding parse, visibility timers, skeleton, cleanup), алерты экстремальной температуры, Compare Mode (полный), фиксы inverse search
+
+Подробнее в [PROJECT_STATUS.md](PROJECT_STATUS.md).
+
+---
 
 ## Лицензия
 
-MIT (исходник прототипа), 2026.
+MIT, 2026.
