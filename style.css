@@ -132,36 +132,24 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
 .hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:sticky;top:max(env(safe-area-inset-top,0px),0px);z-index:50;isolation:isolate;min-height:220px;will-change:padding,min-height;transition:padding 0.42s cubic-bezier(0.4,0,0.2,1),min-height 0.42s cubic-bezier(0.4,0,0.2,1),box-shadow 0.42s cubic-bezier(0.4,0,0.2,1),border-radius 0.42s cubic-bezier(0.4,0,0.2,1)}
 /* COMPACT — когда залип сверху при скролле. Карточка сохраняет ширину
-   и скруглённые края, но появляется solid-фон позади (hero-stuck-bg),
-   который маскирует пиксели за скруглёнными уголками — чтобы там не
-   просвечивал «грязный» body-фон с частицами или скроллящийся контент. */
+   и скруглённые края, никакой подложки/overlay сзади. Она просто
+   «висит в воздухе» как настоящий floating glass — скроллящийся
+   контент идёт под её основное тело (с blur через .glass backdrop-filter)
+   и виден через скруглённые уголки как нормальная часть страницы. */
 .hero.stuck{
   padding:14px 22px;
   min-height:0;
-  box-shadow:0 10px 30px rgba(0,0,0,0.45),0 1px 0 rgba(0,212,255,0.18)
+  /* Усиленный glass — backdrop-filter с большим blur делает «стеклянный»
+     эффект сильнее, скроллящийся контент под карточкой становится мягче.
+     Базовый .glass blur:24px → 36px только в stuck. */
+  backdrop-filter:blur(36px) saturate(190%);
+  -webkit-backdrop-filter:blur(36px) saturate(190%);
+  box-shadow:0 14px 38px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.07)
 }
-/* Подсветка-линия сверху от .glass — в stuck может выглядеть как шов */
+/* Подсветка-линия сверху от .glass — в stuck выглядит как шов */
 .glass.hero.stuck::before{opacity:0}
-
-/* Сплошной фон-«подложка» за залипшим hero. Появляется ТОЛЬКО когда
-   body.hero-stuck — иначе невидим (height:0). Цвет идентичен body bg,
-   так что выглядит как естественное продолжение страницы; скроллящийся
-   контент уходит ПОД него (z-index:49 ниже hero=50, но выше всего
-   остального), а за скруглёнными уголками hero видна именно эта
-   подложка — никаких «фиолетовых пятен от частиц» больше нет. */
-.hero-stuck-bg{
-  position:fixed;
-  top:0;left:0;right:0;
-  height:0;
-  background:#02061a;
-  z-index:49;
-  pointer-events:none;
-  transition:height 0.42s cubic-bezier(0.4,0,0.2,1)
-}
-body.hero-stuck .hero-stuck-bg{
-  /* safe-area (notch на iOS PWA) + высота сжатого hero (~96px) */
-  height:calc(env(safe-area-inset-top, 0px) + 100px)
-}
+/* Фото-фон чуть прозрачнее в stuck — даём glass-эффекту проявиться сильнее */
+.hero.stuck .hero-scene{opacity:0.38}
 .hero.stuck .hero-scene{opacity:0.45}
 .hero.stuck .hero-overlay{background:linear-gradient(90deg,rgba(5,10,38,0.88) 0%,rgba(5,10,38,0.7) 60%,rgba(5,10,38,0.4) 100%)}
 .hero.stuck .hero-label,
@@ -739,7 +727,6 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   .hero{padding:22px;grid-template-columns:1fr auto}
   /* В stuck — компактный padding, ширина и скруглённые углы остаются как у обычной карточки */
   .hero.stuck{padding:12px 18px}
-  body.hero-stuck .hero-stuck-bg{height:calc(env(safe-area-inset-top, 0px) + 92px)}
   .weather-icon-3d{width:90px;height:90px;margin-top:0}
   .hero-temp-num{font-size:64px}
   .hero-temp-unit{font-size:22px}
