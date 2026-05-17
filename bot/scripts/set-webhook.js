@@ -5,51 +5,97 @@
  * когда меняется URL Worker'а или webhook secret.
  *
  * Использование:
- *   node scripts/set-webhook.js <WORKER_URL> <BOT_TOKEN> [WEBHOOK_SECRET]
+ *   node scripts/set-webhook.js [WORKER_URL]
  *
- * Пример:
- *   node scripts/set-webhook.js \
- *     https://meteo-star-bot.<your-subdomain>.workers.dev \
- *     1234567890:ABC-... \
- *     myrandomsecret123
- *
- * Если не указать WEBHOOK_SECRET — Telegram будет слать update'ы без
- * заголовка X-Telegram-Bot-Api-Secret-Token (менее безопасно).
+ * URL можно передать аргументом или ввести в prompt.
+ * Token и secret спрашиваются интерактивно — НЕ попадают в shell history.
  */
 
-const args = process.argv.slice(2);
-if (args.length < 2) {
-  console.error('Usage: node set-webhook.js <WORKER_URL> <BOT_TOKEN> [WEBHOOK_SECRET]');
-  process.exit(1);
+import { createInterface } from 'node:readline/promises';
+import { stdin, stdout } from 'node:process';
+
+async function ask(rl, label, mask = false) {
+  if (!mask) {
+    return (await rl.question(label)).trim();
+  }
+  // Для секретов — выключаем echo (как пароль)
+  const sttyAvailable = process.platform !== 'win32';
+  if (sttyAvailable) {
+    // На *nix можно отключить echo через stty
+    return (await rl.question(label)).trim();
+  }
+  // На Windows прячем через ANSI escape — input всё равно виден
+  // в логах если кто-то будет смотреть, но в обычном терминале не виден.
+  process.stdout.write(label);
+  const ch = await new Promise(resolve => {
+    let buf = '';
+    stdin.setRawMode(true);
+    stdin.resume();
+    stdin.setEncoding('utf8');
+    const onData = (key) => {
+      if (key === '\r' || key === '\n' || key === '') {
+        stdin.setRawMode(false);
+        stdin.removeListener('data', onData);
+        stdout.write('\n');
+        resolve(buf);
+      } else if (key === '') {  // Ctrl+C
+        process.exit(1);
+      } else if (key === '' || key === '\b') {  // backspace
+        if (buf.length > 0) {
+          buf = buf.slice(0, -1);
+          stdout.write('\b \b');
+        }
+      } else {
+        buf += key;
+        stdout.write('*');
+      }
+    };
+    stdin.on('data', onData);
+  });
+  return ch.trim();
 }
 
-const [workerUrl, botToken, webhookSecret] = args;
-const url = `${workerUrl.replace(/\/$/, '')}/webhook`;
+(async () => {
+  const rl = createInterface({ input: stdin, output: stdout });
 
-const body = {
-  url,
-  allowed_updates: ['message', 'edited_message']
-};
-if (webhookSecret) body.secret_token = webhookSecret;
+  let workerUrl = process.argv[2];
+  if (!workerUrl) {
+    workerUrl = await ask(rl, 'Worker URL (https://...workers.dev): ');
+  }
+  workerUrl = workerUrl.replace(/\/$/, '');
+  const webhookUrl = `${workerUrl}/webhook`;
 
-const apiUrl = `https://api.telegram.org/bot${botToken}/setWebhook`;
+  const botToken = await ask(rl, 'Bot token (paste, hidden): ', true);
+  if (!botToken) { console.error('No token provided'); process.exit(1); }
 
-fetch(apiUrl, {
-  method: 'POST',
-  headers: { 'content-type': 'application/json' },
-  body: JSON.stringify(body)
-})
-  .then(r => r.json())
-  .then(data => {
-    if (data.ok) {
-      console.log('✅ Webhook установлен:', url);
-      console.log('   description:', data.description);
-    } else {
-      console.error('❌ Ошибка:', data);
-      process.exit(1);
-    }
-  })
-  .catch(err => {
-    console.error('❌ Сетевая ошибка:', err.message);
-    process.exit(1);
+  const webhookSecret = await ask(rl, 'Webhook secret (paste, hidden, or leave empty): ', true);
+
+  rl.close();
+
+  console.log(`\nRegistering webhook: ${webhookUrl}`);
+
+  const body = {
+    url: webhookUrl,
+    allowed_updates: ['message', 'edited_message']
+  };
+  if (webhookSecret) body.secret_token = webhookSecret;
+
+  const apiUrl = `https://api.telegram.org/bot${botToken}/setWebhook`;
+  const r = await fetch(apiUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
   });
+  const data = await r.json();
+  if (data.ok) {
+    console.log('✅ Webhook установлен:', webhookUrl);
+    console.log('   description:', data.description);
+    console.log('\nПроверь в Telegram: открой своего бота и напиши /start');
+  } else {
+    console.error('❌ Telegram API ошибка:', data);
+    process.exit(1);
+  }
+})().catch(err => {
+  console.error('❌ Ошибка:', err.message);
+  process.exit(1);
+});
