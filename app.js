@@ -8012,9 +8012,22 @@ async function startPairing() {
       tEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
     }, 1000);
 
-    // Polling каждые 3 секунды
+    // Polling: первые 30 сек агрессивно каждые 1 сек (пользователь скорее всего
+    // вводит /pair прямо сейчас), потом снижаем до 3 сек до конца таймера.
     if (_notifPollTimer) clearInterval(_notifPollTimer);
-    _notifPollTimer = setInterval(() => pollPairing(code), 3000);
+    let pollCount = 0;
+    const pollFn = () => {
+      pollCount++;
+      pollPairing(code);
+      // После 30 быстрых тиков переходим на медленный режим
+      if (pollCount === 30) {
+        clearInterval(_notifPollTimer);
+        _notifPollTimer = setInterval(() => pollPairing(code), 3000);
+      }
+    };
+    // Первый запрос сразу — НЕ ждём первую секунду
+    pollFn();
+    _notifPollTimer = setInterval(pollFn, 1000);
   } catch (e) {
     console.error('pair start err:', e);
     alert('Не удалось связаться с ботом. Попробуй позже.');
