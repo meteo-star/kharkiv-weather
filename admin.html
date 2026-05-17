@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Meteo Star · Админка</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#02061a;color:#e8f0ff;font-family:'Onest',system-ui,sans-serif}
+  body{
+    background:
+      radial-gradient(ellipse at 20% 0%, #1a1f5c 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, #003a8c 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, #050a26 0%, #02061a 100%);
+    background-attachment:fixed;
+  }
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 18px 60px}
+  h1{font-size:22px;font-weight:700;margin-bottom:6px}
+  .sub{color:rgba(232,240,255,0.55);font-size:12px;margin-bottom:24px;font-family:'JetBrains Mono',monospace}
+
+  /* Login screen */
+  .login-card{
+    max-width:380px;margin:80px auto;padding:28px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.1);border-radius:18px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 12px 40px rgba(0,0,0,0.4);
+  }
+  .login-card h2{font-size:18px;font-weight:700;margin-bottom:6px}
+  .login-card p{font-size:12px;color:rgba(232,240,255,0.55);margin-bottom:18px}
+  .login-input{
+    width:100%;padding:12px 14px;font-family:'JetBrains Mono',monospace;font-size:13px;
+    background:rgba(0,0,0,0.3);border:1.5px solid rgba(0,212,255,0.32);
+    border-radius:12px;color:#fff;outline:none;margin-bottom:12px;
+    -webkit-text-security:disc;
+  }
+  .login-input:focus{border-color:#00d4ff;box-shadow:0 0 0 3px rgba(0,212,255,0.18)}
+  .login-btn{
+    width:100%;padding:12px;background:linear-gradient(135deg, #00d4ff, #0099cc);
+    border:none;border-radius:12px;color:#02061a;font-weight:700;font-size:14px;
+    cursor:pointer;transition:all 0.2s;
+  }
+  .login-btn:hover{box-shadow:0 6px 22px rgba(0,212,255,0.35)}
+  .login-err{font-size:11px;color:#fca5a5;margin-top:8px;text-align:center;min-height:14px}
+
+  /* Dashboard */
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+  .topbar h1{margin-bottom:0}
+  .topbar button{
+    padding:7px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);
+    border-radius:8px;color:rgba(232,240,255,0.85);font-family:inherit;font-size:12px;cursor:pointer;transition:all 0.18s;
+  }
+  .topbar button:hover{background:rgba(255,255,255,0.1);color:#fff}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-bottom:24px}
+  .stat-card{
+    padding:16px;background:linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:1px solid rgba(255,255,255,0.08);border-radius:14px;
+  }
+  .stat-card .lbl{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:rgba(232,240,255,0.5);margin-bottom:6px}
+  .stat-card .val{font-size:28px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#00d4ff}
+  .stat-card.warn .val{color:#facc15}
+  .stat-card.error .val{color:#f87171}
+
+  section{
+    margin-bottom:20px;padding:20px;
+    background:linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+    border:1px solid rgba(255,255,255,0.08);border-radius:16px;
+  }
+  section h2{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  section h2 .badge{font-size:10px;background:rgba(0,212,255,0.18);color:#00d4ff;padding:2px 8px;border-radius:8px;font-weight:600}
+
+  /* Subscriptions table */
+  .subs-table{width:100%;border-collapse:collapse;font-size:12px}
+  .subs-table th,.subs-table td{padding:8px 6px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.06);vertical-align:top}
+  .subs-table th{color:rgba(232,240,255,0.55);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.06em}
+  .subs-table td{color:rgba(232,240,255,0.85)}
+  .subs-table td.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+  .row-actions{display:flex;gap:4px;flex-wrap:wrap}
+  .row-actions button{
+    padding:4px 8px;font-size:10px;background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);border-radius:6px;
+    color:rgba(232,240,255,0.7);font-family:inherit;cursor:pointer;transition:all 0.15s;
+  }
+  .row-actions button:hover{background:rgba(0,212,255,0.15);color:#00d4ff;border-color:#00d4ff}
+  .row-actions button.danger:hover{background:rgba(239,68,68,0.18);color:#fca5a5;border-color:#ef4444}
+  .badge-banned{background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid rgba(239,68,68,0.35);padding:1px 6px;border-radius:6px;font-size:10px;font-family:'JetBrains Mono',monospace}
+  .badge-paired{background:rgba(74,222,128,0.12);color:#86efac;border:1px solid rgba(74,222,128,0.3);padding:1px 6px;border-radius:6px;font-size:10px}
+  .badge-group{background:rgba(167,139,250,0.12);color:#c4b5fd;border:1px solid rgba(167,139,250,0.3);padding:1px 6px;border-radius:6px;font-size:10px}
+
+  /* Broadcast */
+  .broadcast-form{display:flex;flex-direction:column;gap:10px}
+  .broadcast-form textarea{
+    width:100%;min-height:80px;padding:12px;font-family:inherit;font-size:13px;
+    background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;color:#fff;outline:none;resize:vertical;
+  }
+  .broadcast-form button{
+    align-self:flex-end;padding:9px 16px;
+    background:linear-gradient(135deg, #00d4ff, #0099cc);
+    border:none;border-radius:10px;color:#02061a;font-weight:700;font-size:13px;cursor:pointer;
+  }
+  .broadcast-status{font-size:11px;color:rgba(74,222,128,0.85);margin-top:6px;min-height:14px}
+  .broadcast-status.error{color:#fca5a5}
+
+  /* Stats sparkline */
+  .day-rows{display:flex;flex-direction:column;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px}
+  .day-row{display:grid;grid-template-columns:90px 80px 80px 80px 80px 80px 80px;gap:6px;padding:6px 8px;background:rgba(255,255,255,0.03);border-radius:6px;align-items:center}
+  .day-row.header{background:transparent;color:rgba(232,240,255,0.5);text-transform:uppercase;font-size:9px;letter-spacing:0.06em;padding:4px 8px}
+  .day-row .v{text-align:right}
+  .day-row .v.pos{color:#86efac}
+  .day-row .v.bad{color:#fca5a5}
+
+  @media (max-width: 640px){
+    .subs-table th:nth-child(3),.subs-table td:nth-child(3),
+    .subs-table th:nth-child(5),.subs-table td:nth-child(5){display:none}
+    .day-row{grid-template-columns:80px 1fr 1fr 1fr;font-size:10px}
+    .day-row .col4,.day-row .col5,.day-row .col6,.day-row .col7{display:none}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <!-- Login -->
+    <div id="loginView" class="login-card">
+      <h2>🔐 Meteo Star · Админка</h2>
+      <p>Введи admin token (значение секрета ADMIN_TOKEN из Cloudflare).</p>
+      <input id="tokenInput" class="login-input" type="text" autocomplete="off" autocapitalize="off" placeholder="admin token">
+      <button id="loginBtn" class="login-btn">Войти</button>
+      <div id="loginErr" class="login-err"></div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashView" style="display:none">
+      <div class="topbar">
+        <div>
+          <h1>👑 Meteo Star · Админка</h1>
+          <div class="sub" id="lastRefresh"></div>
+        </div>
+        <div>
+          <button id="refreshBtn">↻ Обновить</button>
+          <button id="cronBtn">⏰ Cron сейчас</button>
+          <button id="logoutBtn">Выйти</button>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="stat-card"><div class="lbl">Всего подписок</div><div class="val" id="statTotal">—</div></div>
+        <div class="stat-card"><div class="lbl">Отправлено сегодня</div><div class="val" id="statSent">—</div></div>
+        <div class="stat-card warn"><div class="lbl">Cron-запусков сегодня</div><div class="val" id="statCron">—</div></div>
+        <div class="stat-card error"><div class="lbl">Ошибок сегодня</div><div class="val" id="statErr">—</div></div>
+      </div>
+
+      <section>
+        <h2>📊 Статистика за 7 дней</h2>
+        <div class="day-rows">
+          <div class="day-row header">
+            <div>Дата</div><div class="v">Новые</div><div class="v">Отписки</div><div class="v col4">Отправки</div><div class="v col5">Ошибки</div><div class="v col6">Cron</div><div class="v col7">—</div>
+          </div>
+          <div id="dayRows"></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>👥 Подписки <span class="badge" id="subsCount">0</span></h2>
+        <div style="overflow-x:auto">
+          <table class="subs-table">
+            <thead>
+              <tr>
+                <th>Chat ID</th>
+                <th>Имя</th>
+                <th>Город</th>
+                <th>Правил</th>
+                <th>Состояние</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="subsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2>📢 Рассылка всем подписчикам</h2>
+        <div class="broadcast-form">
+          <textarea id="broadcastText" placeholder="Сообщение для всех подписчиков (поддерживается HTML: &lt;b&gt;, &lt;i&gt;, &lt;code&gt;, &lt;a href&gt;)"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;justify-content:flex-end">
+            <span id="broadcastStatus" class="broadcast-status"></span>
+            <button id="broadcastBtn">📤 Отправить</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

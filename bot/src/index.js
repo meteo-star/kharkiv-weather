@@ -92,6 +92,20 @@ async function processUpdate(update, env) {
 
     const chatId = msg.chat?.id;
     const userId = msg.from?.id;
+    const chatType = msg.chat?.type || 'private';
+    // Бота добавили в группу — приветствуем
+    if (msg.new_chat_members && msg.new_chat_members.length > 0) {
+      const me = await getBotInfo(env);
+      const botAdded = me && msg.new_chat_members.some(m => m.id === me.id);
+      if (botAdded) {
+        await sendMessage(env, chatId,
+          `👋 Привет! Я бот <b>Meteo Star</b>.\n\nЧтобы начать получать уведомления о погоде в этом чате:\n\n1. Админ группы пишет <code>/setup</code>\n2. Я выдам код для связки с сайтом\n3. На сайте Settings → 🔔 Уведомления → «Связать с Telegram»\n4. На сайте вводишь код, я подтверждаю связку\n\nДальше настраиваешь правила через сайт — и алерты приходят в этот чат.`,
+          { parse_mode: 'HTML' }
+        );
+      }
+      return;
+    }
+
     const text = (msg.text || '').trim();
     if (!chatId || !text) return;
 
@@ -107,13 +121,14 @@ async function processUpdate(update, env) {
 
     // Базовые команды для всех
     switch (cmd) {
-      case '/start':       return handleStart(env, chatId, userId, msg.from);
+      case '/start':       return handleStart(env, chatId, userId, msg.from, chatType);
       case '/help':        return handleHelp(env, chatId, isAdmin);
       case '/status':      return handleStatus(env, chatId);
       case '/stop':        return handleStop(env, chatId);
       case '/location':    return handleLocation(env, chatId, args);
-      case '/pair':        return handlePair(env, chatId, userId, msg.from, args);
+      case '/pair':        return handlePair(env, chatId, userId, msg.from, args, chatType);
       case '/unpair':      return handleUnpair(env, chatId);
+      case '/setup':       return handleSetup(env, chatId, userId, chatType, msg);
     }
 
     // Админ-команды
@@ -157,7 +172,14 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-async function handleStart(env, chatId, userId, fromObj) {
+async function handleStart(env, chatId, userId, fromObj, chatType = 'private') {
+  // В групповом чате /start не создаёт подписку — нужен /setup от админа
+  if (chatType !== 'private') {
+    return sendMessage(env, chatId,
+      `👋 Привет! В групповом чате используй <code>/setup</code> (от админа группы) чтобы привязать бота.`,
+      { parse_mode: 'HTML' }
+    );
+  }
   // Создаём или обновляем подписку с дефолтами
   const key = `sub:${chatId}`;
   const existing = await env.SUBSCRIPTIONS.get(key, { type: 'json' });
@@ -176,6 +198,7 @@ async function handleStart(env, chatId, userId, fromObj) {
   const sub = {
     chatId,
     userId,
+    chatType,
     username: fromObj?.username || null,
     firstName: fromObj?.first_name || null,
     lat: 49.9,         // Высокий по умолчанию
@@ -327,13 +350,20 @@ function formatRule(r) {
 }
 
 // /pair <code>  — связать чат с сайтом по коду из сайта
-async function handlePair(env, chatId, userId, fromObj, args) {
+async function handlePair(env, chatId, userId, fromObj, args, chatType = 'private') {
   const code = (args || '').trim();
   if (!/^\d{6}$/.test(code)) {
     return sendMessage(env, chatId,
       `🔗 Использование: <code>/pair 123456</code>\n\nКод из 6 цифр нужно сначала получить на сайте: Настройки → 🔔 Уведомления → «Связать с Telegram».`,
       { parse_mode: 'HTML' }
     );
+  }
+  // В группе /pair доступен только админу группы
+  if (chatType !== 'private') {
+    const isGroupAdmin = await checkGroupAdmin(env, chatId, userId);
+    if (!isGroupAdmin) {
+      return sendMessage(env, chatId, `🚫 В группе связку с сайтом может сделать только админ группы.`);
+    }
   }
   const raw = await env.PAIRING.get(`pair:${code}`);
   if (!raw) {
@@ -353,6 +383,7 @@ async function handlePair(env, chatId, userId, fromObj, args) {
     sub = {
       chatId,
       userId,
+      chatType,
       username: fromObj?.username || null,
       firstName: fromObj?.first_name || null,
       lat: 49.9, lon: 36.21, name: 'Высокий',
@@ -379,6 +410,57 @@ async function handlePair(env, chatId, userId, fromObj, args) {
     `✅ <b>Связано с сайтом!</b>\n\nВозвращайся в браузер — теперь можешь настроить уведомления.\n\nЛокация: <b>${esc(sub.name)}</b>\nЕсли хочешь сменить — <code>/location &lt;город&gt;</code>`,
     { parse_mode: 'HTML' }
   );
+}
+
+// /setup — для группы: запросить связку с сайтом. Доступно только админу группы.
+async function handleSetup(env, chatId, userId, chatType, msg) {
+  if (chatType === 'private') {
+    return sendMessage(env, chatId,
+      `💡 Команда <code>/setup</code> для группового чата.\nВ личном чате используй <code>/start</code>.`,
+      { parse_mode: 'HTML' }
+    );
+  }
+  const isGroupAdmin = await checkGroupAdmin(env, chatId, userId);
+  if (!isGroupAdmin) {
+    return sendMessage(env, chatId, `🚫 Только админ группы может запустить /setup.`);
+  }
+  const groupTitle = msg.chat?.title || `Группа ${chatId}`;
+  return sendMessage(env, chatId,
+    `📡 <b>Настройка группы:</b> ${esc(groupTitle)}\n\n` +
+    `1. Открой сайт <a href="https://meteo-star.github.io/kharkiv-weather/">Meteo Star</a>\n` +
+    `2. Настройки → 🔔 Уведомления → «Связать с Telegram»\n` +
+    `3. Получи 6-значный код\n` +
+    `4. Возвращайся сюда и напиши: <code>/pair &lt;код&gt;</code>\n\n` +
+    `После связки настраивай правила через сайт — уведомления приходят в этот чат.`,
+    { parse_mode: 'HTML' }
+  );
+}
+
+// Кэш для getMe — токен бота не меняется, можно кэшировать в памяти Worker'а
+let _botInfoCache = null;
+async function getBotInfo(env) {
+  if (_botInfoCache) return _botInfoCache;
+  try {
+    const r = await fetch(`${TG_API}/bot${env.TELEGRAM_BOT_TOKEN}/getMe`);
+    const data = await r.json();
+    if (data.ok) _botInfoCache = data.result;
+    return _botInfoCache;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Проверка прав пользователя в группе (admin/creator)
+async function checkGroupAdmin(env, chatId, userId) {
+  try {
+    const r = await fetch(`${TG_API}/bot${env.TELEGRAM_BOT_TOKEN}/getChatMember?chat_id=${chatId}&user_id=${userId}`);
+    const data = await r.json();
+    if (!data.ok) return false;
+    const status = data.result?.status;
+    return status === 'creator' || status === 'administrator';
+  } catch (e) {
+    return false;
+  }
 }
 
 async function handleUnpair(env, chatId) {
@@ -570,7 +652,7 @@ function corsHeaders(origin) {
   return {
     'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'content-type',
+    'Access-Control-Allow-Headers': 'content-type, x-admin-token',
     'Access-Control-Max-Age': '86400'
   };
 }
@@ -678,6 +760,147 @@ async function handleApi(url, request, env, ctx) {
     if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
     sub.pairToken = null;
     await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
+    return withCors(jsonResp({ ok: true }), origin);
+  }
+
+  // ===== ADMIN endpoints (фаза Б4, защищены ADMIN_TOKEN) =====
+  if (path.startsWith('/api/admin/')) {
+    return handleAdminApi(path, request, env, origin);
+  }
+
+  return withCors(jsonResp({ error: 'not_found' }, 404), origin);
+}
+
+async function handleAdminApi(path, request, env, origin) {
+  // Авторизация: X-Admin-Token header должен совпадать с ADMIN_TOKEN secret
+  const token = request.headers.get('X-Admin-Token');
+  if (!env.ADMIN_TOKEN || token !== env.ADMIN_TOKEN) {
+    return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
+  }
+
+  // GET /api/admin/login — просто проверка валидности токена (для UI)
+  if (path === '/api/admin/login' && request.method === 'GET') {
+    return withCors(jsonResp({ ok: true }), origin);
+  }
+
+  // GET /api/admin/list — все подписки с детальной инфой
+  if (path === '/api/admin/list' && request.method === 'GET') {
+    const list = await env.SUBSCRIPTIONS.list({ prefix: 'sub:' });
+    const subs = [];
+    for (const key of list.keys) {
+      const sub = await env.SUBSCRIPTIONS.get(key.name, { type: 'json' });
+      if (!sub) continue;
+      subs.push({
+        chatId: sub.chatId,
+        username: sub.username,
+        firstName: sub.firstName,
+        name: sub.name,
+        lat: sub.lat,
+        lon: sub.lon,
+        lang: sub.lang,
+        rulesCount: (sub.rules || []).length,
+        rules: sub.rules || [],
+        createdAt: sub.createdAt,
+        banned: !!sub.banned,
+        paired: !!sub.pairToken,
+        chatType: sub.chatType || 'private',
+        lastFiredCount: Object.keys(sub.lastFired || {}).length
+      });
+    }
+    return withCors(jsonResp({ subs }), origin);
+  }
+
+  // GET /api/admin/stats?days=7 — статистика за N дней
+  if (path === '/api/admin/stats' && request.method === 'GET') {
+    const url = new URL(request.url);
+    const days = Math.min(parseInt(url.searchParams.get('days') || '7', 10), 90);
+    const today = new Date();
+    const dayStats = [];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(today.getTime() - i * 86400000);
+      const key = `stats:${d.toISOString().slice(0,10)}`;
+      const stats = (await env.STATS.get(key, { type: 'json' })) || {};
+      dayStats.push({
+        date: d.toISOString().slice(0,10),
+        ...stats
+      });
+    }
+    const totalSubs = (await env.SUBSCRIPTIONS.list({ prefix: 'sub:' })).keys.length;
+    return withCors(jsonResp({ totalSubs, dayStats }), origin);
+  }
+
+  // POST /api/admin/broadcast { text } — рассылка всем
+  if (path === '/api/admin/broadcast' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const text = (body.text || '').toString().trim();
+    if (!text) return withCors(jsonResp({ error: 'empty_text' }, 400), origin);
+
+    const list = await env.SUBSCRIPTIONS.list({ prefix: 'sub:' });
+    let sent = 0, failed = 0;
+    for (const key of list.keys) {
+      const sub = await env.SUBSCRIPTIONS.get(key.name, { type: 'json' });
+      if (!sub || sub.banned) continue;
+      try {
+        await sendMessage(env, sub.chatId, text);
+        sent++;
+        await sleep(40);
+      } catch (e) { failed++; }
+    }
+    return withCors(jsonResp({ ok: true, sent, failed }), origin);
+  }
+
+  // POST /api/admin/ban { chatId }
+  if (path === '/api/admin/ban' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const chatId = body.chatId;
+    if (!chatId) return withCors(jsonResp({ error: 'no_chat_id' }, 400), origin);
+    const key = `sub:${chatId}`;
+    const sub = await env.SUBSCRIPTIONS.get(key, { type: 'json' });
+    if (!sub) return withCors(jsonResp({ error: 'not_found' }, 404), origin);
+    sub.banned = true;
+    await env.SUBSCRIPTIONS.put(key, JSON.stringify(sub));
+    return withCors(jsonResp({ ok: true }), origin);
+  }
+
+  // POST /api/admin/unban { chatId }
+  if (path === '/api/admin/unban' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const chatId = body.chatId;
+    if (!chatId) return withCors(jsonResp({ error: 'no_chat_id' }, 400), origin);
+    const key = `sub:${chatId}`;
+    const sub = await env.SUBSCRIPTIONS.get(key, { type: 'json' });
+    if (!sub) return withCors(jsonResp({ error: 'not_found' }, 404), origin);
+    sub.banned = false;
+    await env.SUBSCRIPTIONS.put(key, JSON.stringify(sub));
+    return withCors(jsonResp({ ok: true }), origin);
+  }
+
+  // POST /api/admin/test { chatId, text? }
+  if (path === '/api/admin/test' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const chatId = body.chatId;
+    const text = body.text || '🧪 Тестовое сообщение от админа.';
+    if (!chatId) return withCors(jsonResp({ error: 'no_chat_id' }, 400), origin);
+    try {
+      await sendMessage(env, chatId, text);
+      return withCors(jsonResp({ ok: true }), origin);
+    } catch (e) {
+      return withCors(jsonResp({ error: e.message }, 500), origin);
+    }
+  }
+
+  // POST /api/admin/cron — принудительный запуск cron-проверки
+  if (path === '/api/admin/cron' && request.method === 'POST') {
+    const res = await runCronCheck(env);
+    return withCors(jsonResp({ ok: true, ...res }), origin);
+  }
+
+  // POST /api/admin/delete-sub { chatId } — полное удаление подписки
+  if (path === '/api/admin/delete-sub' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({}));
+    const chatId = body.chatId;
+    if (!chatId) return withCors(jsonResp({ error: 'no_chat_id' }, 400), origin);
+    await env.SUBSCRIPTIONS.delete(`sub:${chatId}`);
     return withCors(jsonResp({ ok: true }), origin);
   }
 
