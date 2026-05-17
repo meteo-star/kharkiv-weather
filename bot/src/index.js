@@ -109,6 +109,27 @@ async function processUpdate(update, env) {
     const text = (msg.text || '').trim();
     if (!chatId || !text) return;
 
+    // Ленивая миграция: для групповых подписок, привязанных ДО фикса
+    // chatTitle, обновляем имя группы при любом сообщении (раз в N часов
+    // достаточно, но KV-write дешёвая операция).
+    if (chatType !== 'private' && msg.chat?.title) {
+      const subForMigration = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+      if (subForMigration && subForMigration.chatTitle !== msg.chat.title) {
+        subForMigration.chatTitle = msg.chat.title;
+        subForMigration.chatType = chatType;
+        // Очищаем ошибочно сохранённые поля юзера-инициатора
+        if (subForMigration.username && !subForMigration.initiator) {
+          subForMigration.initiator = {
+            username: subForMigration.username,
+            firstName: subForMigration.firstName
+          };
+          subForMigration.username = null;
+          subForMigration.firstName = null;
+        }
+        await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(subForMigration));
+      }
+    }
+
     // Парсинг команды: "/cmd@BotName arg1 arg2" → { cmd, args }
     const parsed = parseCommand(text);
     if (!parsed) {
