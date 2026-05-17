@@ -1,0 +1,48 @@
+name = "meteo-star-bot"
+main = "src/index.js"
+compatibility_date = "2026-05-01"
+
+# Account ID Cloudflare-аккаунта (виден в URL дашборда)
+account_id = "d9f70cbb1ffaec068c5c15d96a450132"
+
+# === Открытые переменные (можно коммитить) ===
+[vars]
+# Stas — главный админ. user_id выдан @userinfobot. Бот будет признавать
+# команды /admin_* только от этого числа.
+ADMIN_USER_ID = "151252296"
+
+# Webhook secret для верификации, что запрос реально пришёл от Telegram
+# (заполняется через `wrangler secret put TELEGRAM_WEBHOOK_SECRET`).
+# Здесь только подсказка, фактическое значение в Secret Store.
+
+# === KV Namespaces ===
+# SUBSCRIPTIONS — подписки пользователей (chat_id, lat, lon, rules, lastFired)
+# PAIRING — короткие коды для привязки веб-фронта к Telegram (TTL 10 минут)
+# STATS — счётчики отправленных уведомлений по дате
+# Все три namespace'а создадим командой:
+#   wrangler kv namespace create "SUBSCRIPTIONS"
+#   wrangler kv namespace create "PAIRING"
+#   wrangler kv namespace create "STATS"
+# После создания Cloudflare выдаст id'ы — вставим их сюда.
+
+[[kv_namespaces]]
+binding = "SUBSCRIPTIONS"
+id = "REPLACE_ME_AFTER_kv_namespace_create"
+
+[[kv_namespaces]]
+binding = "PAIRING"
+id = "REPLACE_ME_AFTER_kv_namespace_create"
+
+[[kv_namespaces]]
+binding = "STATS"
+id = "REPLACE_ME_AFTER_kv_namespace_create"
+
+# === Cron Trigger ===
+# Каждые 30 минут проверяем прогноз для каждой подписки и отправляем
+# уведомления по сработавшим правилам.
+[triggers]
+crons = ["*/30 * * * *"]
+
+# === Observability ===
+[observability]
+enabled = true
