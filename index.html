@@ -18,14 +18,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Chart.js с SRI: хэш SHA-384 защищает от подмены кода на CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- Chart.js загружается лениво при первом открытии модалки с графиком
+     (см. ensureChartJs() в app.js). Экономит ~200КБ на холодной загрузке
+     для пользователей, которые не открывают «Детали осадков». SRI hash
+     указан в коде ensureChartJs(). -->
 <!-- Leaflet 1.9.4 (для радара осадков RainViewer) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous" referrerpolicy="no-referrer">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous" referrerpolicy="no-referrer" defer></script>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="app-bootstrap">
 
 <h2 class="sr-only">Прогноз погоды для Харькова с переключателем источников</h2>
 
@@ -70,6 +72,10 @@
         </span>
         <span class="search-chip-label" data-i18n="search.chip">Найти окно</span>
       </button>
+      <button class="compare-chip" id="compareChip" type="button" aria-label="Сравнить с другим городом" data-i18n-aria="compare.chipAria">
+        <span class="compare-icon">⚖</span>
+        <span class="compare-chip-label" data-i18n="compare.chip">Сравнить</span>
+      </button>
       <button class="speak-chip" id="btnSpeak" type="button" aria-label="Озвучить прогноз" data-i18n-aria="footer.speakAria" style="display:none">
         <span class="speak-chip-icon" id="btnSpeakIcon">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h4l5-4v14l-5-4H3z"/><path d="M15 9a3 3 0 0 1 0 6"/><path d="M18 6a7 7 0 0 1 0 12"/></svg>
@@ -97,6 +103,114 @@
   </div>
 
   <div class="favorites-row" id="favoritesRow"></div>
+
+  <!-- Compare Mode: банер активного режима -->
+  <div class="compare-banner" id="compareBanner" style="display:none">
+    <span class="cb-icon">⚖</span>
+    <span class="cb-text">
+      <span data-i18n="compare.bannerLabel">Сравнение</span>:
+      <strong id="compareLabelA">—</strong>
+      <span class="cb-vs">↔</span>
+      <strong id="compareLabelB">—</strong>
+    </span>
+    <button class="cb-close" id="compareCloseBtn" type="button" aria-label="Выйти из сравнения" data-i18n-aria="compare.exitAria">✕</button>
+  </div>
+
+  <!-- Compare Mode: сама вьюшка (скрыта когда compare неактивен) -->
+  <div class="compare-view" id="compareView" style="display:none">
+    <!-- Dual hero -->
+    <div class="compare-heros">
+      <div class="compare-hero" data-side="a">
+        <button class="ch-swap" id="chSwapA" type="button" aria-label="Сменить первый город" data-i18n-aria="compare.swapA" title="Сменить">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        </button>
+        <div class="ch-city" id="chCityA">—</div>
+        <div class="ch-icon" id="chIconA"></div>
+        <div class="ch-temp"><span id="chTempA">—</span><span class="ch-temp-unit" id="chTempUnitA">°C</span></div>
+        <div class="ch-cond" id="chCondA">—</div>
+        <div class="ch-feels" id="chFeelsA"></div>
+      </div>
+      <div class="compare-divider-vs" aria-hidden="true">↔</div>
+      <div class="compare-hero" data-side="b">
+        <button class="ch-swap" id="chSwapB" type="button" aria-label="Сменить второй город" data-i18n-aria="compare.swapB" title="Сменить">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        </button>
+        <div class="ch-city" id="chCityB">—</div>
+        <div class="ch-icon" id="chIconB"></div>
+        <div class="ch-temp"><span id="chTempB">—</span><span class="ch-temp-unit" id="chTempUnitB">°C</span></div>
+        <div class="ch-cond" id="chCondB">—</div>
+        <div class="ch-feels" id="chFeelsB"></div>
+      </div>
+    </div>
+
+    <!-- "Где лучше" summary -->
+    <div class="compare-summary glass" id="compareSummary">
+      <span class="cs-icon">🏆</span><span id="compareSummaryText">—</span>
+    </div>
+
+    <!-- Key metrics: 4 строки сравнения -->
+    <div class="compare-metrics glass" id="compareMetrics">
+      <div class="cm-row" data-metric="wind">
+        <span class="cm-label" data-i18n="metric.wind">Ветер</span>
+        <span class="cm-a" id="cmWindA">—</span>
+        <span class="cm-vs">↔</span>
+        <span class="cm-b" id="cmWindB">—</span>
+      </div>
+      <div class="cm-row" data-metric="rain">
+        <span class="cm-label" data-i18n="metric.rain">Осадки</span>
+        <span class="cm-a" id="cmRainA">—</span>
+        <span class="cm-vs">↔</span>
+        <span class="cm-b" id="cmRainB">—</span>
+      </div>
+      <div class="cm-row" data-metric="pressure">
+        <span class="cm-label" data-i18n="metric.pressure">Давление</span>
+        <span class="cm-a" id="cmPressureA">—</span>
+        <span class="cm-vs">↔</span>
+        <span class="cm-b" id="cmPressureB">—</span>
+      </div>
+      <div class="cm-row" data-metric="humidity">
+        <span class="cm-label" data-i18n="metric.humidity">Влажность</span>
+        <span class="cm-a" id="cmHumidityA">—</span>
+        <span class="cm-vs">↔</span>
+        <span class="cm-b" id="cmHumidityB">—</span>
+      </div>
+    </div>
+
+    <!-- Combined hourly chart (lazy: Chart.js) -->
+    <div class="compare-chart-card glass">
+      <div class="ccc-header">
+        <h2 data-i18n="compare.hourlyTitle">Почасовая температура · сегодня</h2>
+        <div class="ccc-legend">
+          <span><span class="ccc-dot a"></span><span id="cccLegendA">A</span></span>
+          <span><span class="ccc-dot b"></span><span id="cccLegendB">B</span></span>
+        </div>
+      </div>
+      <div class="compare-chart-wrap"><canvas id="compareChart"></canvas></div>
+    </div>
+
+    <!-- Dual 7-day forecast: 2 параллельные ленты -->
+    <div class="compare-days glass">
+      <h2 data-i18n="compare.daysTitle">7 дней</h2>
+      <div class="cd-rows">
+        <div class="cd-row" data-side="a">
+          <div class="cd-row-label" id="cdRowLabelA">—</div>
+          <div class="cd-cells" id="cdCellsA"></div>
+        </div>
+        <div class="cd-row" data-side="b">
+          <div class="cd-row-label" id="cdRowLabelB">—</div>
+          <div class="cd-cells" id="cdCellsB"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="weather-alert-banner" id="weatherAlertBanner" style="display:none" role="alert">
+    <span class="wa-icon" id="weatherAlertIcon">🥵</span>
+    <div class="wa-content">
+      <div class="wa-title" id="weatherAlertTitle">Сильная жара</div>
+      <div class="wa-msg" id="weatherAlertMsg">Пейте больше воды, избегайте полудня на солнце</div>
+    </div>
+  </div>
 
   <div class="api-error-banner" id="apiErrorBanner" style="display:none">
     <span class="err-icon">
@@ -386,6 +500,31 @@
   </div>
 </div>
 
+<!-- Compare picker modal: выбор второго города для сравнения -->
+<div class="modal-backdrop" id="comparePickerModal" role="dialog" aria-modal="true" aria-labelledby="comparePickerTitle">
+  <div class="modal compare-picker-modal">
+    <div class="swipe-handle" aria-hidden="true"></div>
+    <button class="modal-close" id="comparePickerClose" aria-label="Закрыть" data-i18n-aria="modal.closeAria">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-header">
+      <div class="modal-day-label" data-i18n="compare.pickLabel">Сравнить с</div>
+      <h2 class="modal-day-title" id="comparePickerTitle" data-i18n="compare.pickTitle">Выберите второй город</h2>
+    </div>
+    <div class="city-search-wrap">
+      <span class="city-search-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <input type="search" class="city-search-input" id="comparePickerInput" placeholder="Поиск города..." data-i18n-placeholder="city.search.placeholder" autocomplete="off" spellcheck="false">
+      <button class="city-search-clear" id="comparePickerClear" aria-label="Очистить" type="button">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="city-list-header" data-i18n="compare.pickHint">Избранные или поиск по миру</div>
+    <div class="city-list" id="comparePickerList" role="listbox"></div>
+  </div>
+</div>
+
 <!-- Source data modal: содержит карточки "Источник прогноза" и "Точность источников" -->
 <div class="modal-backdrop" id="sourceDataModal" role="dialog" aria-modal="true" aria-labelledby="sourceDataModalTitle">
   <div class="modal source-data-modal">
@@ -429,6 +568,16 @@
         <span class="msb-arrow">→</span>
         <span class="msb-check">✓</span>
       </button>
+
+      <div class="conf-hint">
+        <div class="conf-hint-text" data-i18n="sources.confHint">Цветная полоска под карточкой дня — согласие 7 моделей:</div>
+        <div class="conf-hint-legend">
+          <span class="chl-item"><span class="chl-bar high"></span><span data-i18n="sources.confLegend.high">надёжный</span></span>
+          <span class="chl-item"><span class="chl-bar mid"></span><span data-i18n="sources.confLegend.mid">средний</span></span>
+          <span class="chl-item"><span class="chl-bar low"></span><span data-i18n="sources.confLegend.low">шаткий</span></span>
+          <span class="chl-item"><span class="chl-bar veryLow"></span><span data-i18n="sources.confLegend.veryLow">большой разброс</span></span>
+        </div>
+      </div>
 
       <div class="sources-divider" data-i18n="sources.dividerOr">или конкретный источник</div>
       <div class="sources-grid" id="sourcesGrid"></div>
@@ -600,16 +749,19 @@
             <div class="sub" data-i18n="precip.sub">Прогноз мм/ч на ближайшие 48 часов</div>
           </div>
         </div>
-        <div class="scroll-wrap">
-          <button class="scroll-arrow left" data-scroll-target="precipScroll" aria-label="Прокрутить влево">‹</button>
-          <div class="precip-scroll" id="precipScroll">
-            <div class="precip-inner" id="precipInner">
-              <div class="precip-chart-wrap"><canvas id="precipChart"></canvas></div>
-              <div class="precip-types" id="precipTypes"></div>
-              <div class="precip-days" id="precipDays"></div>
+        <div class="scroll-wrap precip-scroll-wrap">
+          <div class="precip-y-axis" id="precipYAxis" aria-hidden="true"></div>
+          <div class="precip-scroll-area">
+            <button class="scroll-arrow left" data-scroll-target="precipScroll" aria-label="Прокрутить влево">‹</button>
+            <div class="precip-scroll" id="precipScroll">
+              <div class="precip-inner" id="precipInner">
+                <div class="precip-chart-wrap"><canvas id="precipChart"></canvas></div>
+                <div class="precip-types" id="precipTypes"></div>
+                <div class="precip-days" id="precipDays"></div>
+              </div>
             </div>
+            <button class="scroll-arrow right" data-scroll-target="precipScroll" aria-label="Прокрутить вправо">›</button>
           </div>
-          <button class="scroll-arrow right" data-scroll-target="precipScroll" aria-label="Прокрутить вправо">›</button>
         </div>
       </div>
 

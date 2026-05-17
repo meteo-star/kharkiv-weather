@@ -1,4 +1,59 @@
 *{margin:0;padding:0;box-sizing:border-box}
+
+/* ============================================
+   SKELETON SCREEN — пока идёт первый fetch прогноза, скрываем
+   захардкоженные BASELINE-значения и показываем shimmer-плашки.
+   Класс body.app-bootstrap снимается после первого renderAll
+   (когда данные реально появились), и всё возвращается к норме.
+   ============================================ */
+@keyframes skel-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+body.app-bootstrap #heroTempNum,
+body.app-bootstrap #heroTempUnit,
+body.app-bootstrap #heroCondition,
+body.app-bootstrap #heroFeelsLine,
+body.app-bootstrap #heroSourceNote,
+body.app-bootstrap #sourceIndicatorName,
+body.app-bootstrap #metricWind,
+body.app-bootstrap #metricWindSub,
+body.app-bootstrap #metricRain,
+body.app-bootstrap #metricRainSub,
+body.app-bootstrap #metricPressure,
+body.app-bootstrap #metricPressureSub,
+body.app-bootstrap #metricHumidity,
+body.app-bootstrap #metricHumiditySub,
+body.app-bootstrap #dayLength,
+body.app-bootstrap #sunriseTime,
+body.app-bootstrap #sunsetTime,
+body.app-bootstrap #moonPhaseLabel,
+body.app-bootstrap #uvValue,
+body.app-bootstrap #uvLabel,
+body.app-bootstrap #aqiValue,
+body.app-bootstrap #aqiLabel {
+  color: transparent !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0.04) 100%) !important;
+  background-size: 200% 100% !important;
+  -webkit-background-clip: padding-box !important;
+  background-clip: padding-box !important;
+  border-radius: 6px !important;
+  animation: skel-shimmer 1.4s linear infinite;
+  user-select: none;
+}
+body.app-bootstrap #heroTempNum, body.app-bootstrap #heroTempUnit { display:inline-block; min-width: 1.5em; }
+body.app-bootstrap #heroCondition { min-width: 60%; }
+body.app-bootstrap .day-temp, body.app-bootstrap .day-cond {
+  color: transparent !important;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0.04) 100%) !important;
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skel-shimmer 1.4s linear infinite;
+}
+/* Кнопки, скроллы, иконки — оставляем как есть, не маскируем */
+body.app-bootstrap .hero-loader,
+body.app-bootstrap .hero-loader-text { display: none; }
+
 html{scroll-behavior:smooth;background-color:#02061a}
 body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;overflow-x:hidden;background-color:#02061a;
   background:
@@ -287,6 +342,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .voice-list-empty{padding:14px;text-align:center;color:rgba(232,240,255,0.5);font-size:12px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:10px}
 
 /* MODAL */
+/* «Мост» между двумя модалками: пока обе анимируются (одна закрывается,
+   другая открывается), их backdrop'ы полупрозрачны и сквозь них на доли
+   секунды виден главный экран. Body.modal-bridge накидывает плотный
+   статичный фон поверх всего, чтобы переход был полностью бесшовным. */
+body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;background:rgba(5,10,38,0.7);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);pointer-events:none}
+
 .modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(5,10,38,0);backdrop-filter:blur(0px) saturate(100%);-webkit-backdrop-filter:blur(0px) saturate(100%);display:flex;align-items:flex-start;justify-content:center;padding:max(48px, env(safe-area-inset-top, 0px) + 28px) 20px max(24px, env(safe-area-inset-bottom, 0px) + 16px) 20px;opacity:0;pointer-events:none;transition:opacity 0.36s ease-out,background 0.36s ease-out,backdrop-filter 0.36s ease-out,-webkit-backdrop-filter 0.36s ease-out;overflow-y:auto}
 .modal-backdrop.open{opacity:1;pointer-events:auto;background:rgba(5,10,38,0.6);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%)}
 .modal{width:100%;max-width:760px;max-height:calc(100vh - max(72px, env(safe-area-inset-top, 0px) + 44px) - max(24px, env(safe-area-inset-bottom, 0px) + 16px));overflow-y:auto;background:linear-gradient(135deg, rgba(20,30,70,0.85) 0%, rgba(10,15,45,0.85) 100%);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border:1px solid rgba(255,255,255,0.12);border-radius:28px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.15),0 30px 90px rgba(0,0,0,0.5),0 0 60px rgba(0,212,255,0.1);position:relative;padding:28px;transform:scale(0.88) translateY(36px);opacity:0;filter:blur(6px);transition:transform 0.48s cubic-bezier(0.16,1,0.3,1) 0.06s,opacity 0.42s cubic-bezier(0.16,1,0.3,1) 0.06s,filter 0.42s cubic-bezier(0.16,1,0.3,1) 0.06s}
@@ -555,6 +616,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
 .precip-card{padding:24px;margin-bottom:18px}
 .precip-card .pc-emoji{margin-right:8px;font-size:18px}
+.precip-scroll-wrap{display:flex;align-items:stretch;gap:0}
+.precip-y-axis{flex:0 0 54px;position:relative;pointer-events:none}
+.precip-scroll-area{flex:1 1 auto;min-width:0;position:relative}
+.pya-tick{position:absolute;right:10px;text-align:right;font-size:10px;color:rgba(232,240,255,0.6);font-family:'JetBrains Mono',monospace;transform:translateY(-50%);white-space:nowrap;line-height:1}
 .precip-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);padding-bottom:8px;-webkit-overflow-scrolling:touch}
 .precip-scroll::-webkit-scrollbar{height:6px}
 .precip-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.04);border-radius:3px}
@@ -918,10 +983,165 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 /* Цветная риска внизу карточки дня — индикатор согласия для этого дня */
 .day{position:relative}
 .day-confidence-bar{position:absolute;left:10%;right:10%;bottom:6px;height:3px;border-radius:2px;background:var(--day-conf-color,rgba(74,222,128,0.5));box-shadow:0 0 8px var(--day-conf-color,rgba(74,222,128,0.4));opacity:0.85;pointer-events:none}
+/* ============================================
+   COMPARE MODE — режим сравнения двух городов
+   ============================================ */
+.compare-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.35);border-radius:100px;color:#e8f0ff;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(10px);-webkit-tap-highlight-color:transparent}
+.compare-chip:hover{background:rgba(167,139,250,0.16);border-color:rgba(167,139,250,0.55);transform:translateY(-1px)}
+.compare-chip.active{background:rgba(167,139,250,0.25);border-color:rgba(167,139,250,0.7);box-shadow:0 0 16px rgba(167,139,250,0.35)}
+.compare-icon{font-size:14px;line-height:1}
+.compare-chip-label{font-weight:500}
+
+/* Банер активного режима сравнения */
+.compare-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:14px;background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(167,139,250,0.14));border:1px solid rgba(167,139,250,0.4);border-radius:14px;font-size:13px;color:#e8f0ff}
+.compare-banner .cb-icon{font-size:18px;line-height:1}
+.compare-banner .cb-text{flex:1;min-width:0}
+.compare-banner .cb-text strong{color:#fff;font-weight:600}
+.compare-banner .cb-vs{color:rgba(167,139,250,0.85);margin:0 6px;font-weight:600}
+.compare-banner .cb-close{flex-shrink:0;width:30px;height:30px;border:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:50%;color:#e8f0ff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s}
+.compare-banner .cb-close:hover{background:rgba(255,80,80,0.18);border-color:rgba(255,100,100,0.45);transform:rotate(90deg)}
+
+/* Когда compare активен: скрываем все обычные карточки. Сравнительный режим
+   фокусирует на быстром визуальном A↔B; пыльца/климат/окна возможностей/
+   астро-фото нерелевантны в этом контексте. */
+body.compare-mode .glass.hero,
+body.compare-mode .metrics,
+body.compare-mode .astro-row,
+body.compare-mode .hourly-card,
+body.compare-mode #daysWrap,
+body.compare-mode .days,
+body.compare-mode .activity-windows,
+body.compare-mode .pollen-card,
+body.compare-mode .climate-card,
+body.compare-mode .astro-photo { display:none !important }
+
+/* Dual hero */
+.compare-view{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+.compare-heros{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center}
+.compare-hero{padding:22px 18px;background:linear-gradient(135deg,rgba(0,212,255,0.10),rgba(0,212,255,0.04));border:1px solid rgba(0,212,255,0.25);border-radius:20px;text-align:center;backdrop-filter:blur(20px);position:relative;overflow:hidden}
+.compare-hero[data-side="b"]{background:linear-gradient(135deg,rgba(167,139,250,0.10),rgba(167,139,250,0.04));border-color:rgba(167,139,250,0.3)}
+.compare-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.45),transparent)}
+.compare-hero[data-side="b"]::before{background:linear-gradient(90deg,transparent,rgba(167,139,250,0.5),transparent)}
+.ch-swap{position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:rgba(232,240,255,0.7);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;-webkit-tap-highlight-color:transparent;z-index:2}
+.ch-swap:hover{background:rgba(255,255,255,0.12);color:#fff;transform:rotate(45deg)}
+.compare-hero[data-side="a"] .ch-swap:hover{border-color:rgba(0,212,255,0.5);box-shadow:0 0 12px rgba(0,212,255,0.3)}
+.compare-hero[data-side="b"] .ch-swap:hover{border-color:rgba(167,139,250,0.5);box-shadow:0 0 12px rgba(167,139,250,0.3)}
+.ch-city{font-size:13px;font-weight:600;color:rgba(232,240,255,0.7);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;padding:0 36px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compare-hero[data-side="a"] .ch-city{color:#00d4ff}
+.compare-hero[data-side="b"] .ch-city{color:#a78bfa}
+.ch-icon{display:flex;justify-content:center;margin:4px 0 8px;height:64px;align-items:center}
+.ch-temp{font-size:46px;font-weight:300;color:#fff;letter-spacing:-0.03em;line-height:1}
+.ch-temp-unit{font-size:22px;color:rgba(232,240,255,0.6);margin-left:2px}
+.ch-cond{font-size:13px;color:rgba(232,240,255,0.8);margin-top:4px}
+.ch-feels{font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px}
+.compare-divider-vs{font-size:24px;color:rgba(232,240,255,0.4);font-weight:300;align-self:center}
+
+/* "Где лучше" summary */
+.compare-summary{padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:14px;color:#e8f0ff}
+.cs-icon{font-size:18px;line-height:1;flex-shrink:0}
+
+/* Key metrics */
+.compare-metrics{padding:14px 18px;display:flex;flex-direction:column;gap:2px}
+.cm-row{display:grid;grid-template-columns:1fr auto auto auto 1fr;gap:12px;align-items:center;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.cm-row:last-child{border-bottom:none}
+.cm-label{font-size:12px;color:rgba(232,240,255,0.6);text-transform:uppercase;letter-spacing:0.05em;justify-self:start}
+.cm-a,.cm-b{font-size:14px;font-weight:600;font-feature-settings:'tnum'}
+.cm-a{color:#00d4ff;justify-self:end;min-width:80px;text-align:right}
+.cm-b{color:#a78bfa;justify-self:start;min-width:80px;text-align:left}
+.cm-vs{color:rgba(232,240,255,0.3);font-size:14px;font-weight:300}
+.cm-a.better{text-shadow:0 0 10px rgba(0,212,255,0.6)}
+.cm-b.better{text-shadow:0 0 10px rgba(167,139,250,0.6)}
+
+/* Combined hourly chart card */
+.compare-chart-card{padding:18px}
+.ccc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.ccc-header h2{font-size:14px;font-weight:600;color:#fff;margin:0}
+.ccc-legend{display:flex;gap:14px;font-size:12px;color:rgba(232,240,255,0.7)}
+.ccc-legend > span{display:inline-flex;align-items:center;gap:6px}
+.ccc-dot{display:inline-block;width:12px;height:3px;border-radius:2px}
+.ccc-dot.a{background:#00d4ff;box-shadow:0 0 6px #00d4ff}
+.ccc-dot.b{background:#a78bfa;box-shadow:0 0 6px #a78bfa}
+.compare-chart-wrap{position:relative;height:180px}
+
+/* Dual 10-day forecast (горизонтальный скролл) */
+.compare-days{padding:18px}
+.compare-days h2{font-size:14px;font-weight:600;color:#fff;margin-bottom:14px}
+.cd-rows{display:flex;flex-direction:column;gap:12px}
+.cd-row{display:flex;flex-direction:column;gap:8px;min-width:0}
+.cd-row-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding-left:2px}
+.cd-row[data-side="a"] .cd-row-label{color:#00d4ff}
+.cd-row[data-side="b"] .cd-row-label{color:#a78bfa}
+.cd-cells{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(78px,1fr);grid-template-columns:repeat(5,1fr);gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04)}
+.cd-cells::-webkit-scrollbar{height:5px}
+.cd-cells::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.cd-row[data-side="b"] .cd-cells{scrollbar-color:rgba(167,139,250,0.3) rgba(255,255,255,0.04)}
+.cd-row[data-side="b"] .cd-cells::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.3)}
+.cd-cell{padding:12px 6px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;text-align:center;font-size:11px;line-height:1.25;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;min-height:140px}
+.cd-row[data-side="a"] .cd-cell{border-color:rgba(0,212,255,0.18);background:rgba(0,212,255,0.04)}
+.cd-row[data-side="b"] .cd-cell{border-color:rgba(167,139,250,0.18);background:rgba(167,139,250,0.04)}
+.cd-cell .day{font-size:11px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:0.04em}
+.cd-cell .date{font-size:10px;color:rgba(232,240,255,0.55);font-feature-settings:'tnum';margin-bottom:2px}
+.cd-cell .icon{display:flex;justify-content:center;height:40px;align-items:center;margin:2px 0}
+.cd-cell .t{font-size:13px;font-weight:600;color:#fff;font-feature-settings:'tnum'}
+.cd-cell .t .hi{color:#fff}
+.cd-cell .t .lo{color:rgba(232,240,255,0.55);margin-left:4px}
+.cd-cell .prec{font-size:10.5px;color:#00d4ff;font-feature-settings:'tnum';display:flex;align-items:center;justify-content:center;gap:2px}
+.cd-row[data-side="b"] .cd-cell .prec{color:#67e8f9}
+.cd-cell .wind{font-size:10px;color:rgba(232,240,255,0.6);font-feature-settings:'tnum'}
+
+/* Mobile: stacked layout */
+@media(max-width:680px){
+  .compare-heros{grid-template-columns:1fr;gap:10px}
+  .compare-divider-vs{display:none}
+  .compare-hero{padding:18px 14px}
+  .ch-temp{font-size:38px}
+  .ch-icon{height:54px}
+  .cm-row{grid-template-columns:1fr auto 1fr;column-gap:8px}
+  .cm-vs{display:none}
+  .cm-a,.cm-b{min-width:0}
+  .cd-cells{grid-template-columns:repeat(4,minmax(72px,1fr));gap:6px}
+  .cd-cell{padding:10px 4px;min-height:130px}
+  .cd-cell .icon{height:36px}
+  .cd-cell .t{font-size:12px}
+  .compare-chart-wrap{height:160px}
+}
+
+/* === Алерт-баннер для экстремальной температуры (жара / холод) === */
+.weather-alert-banner{display:flex;align-items:center;gap:14px;padding:13px 18px;margin:0 0 14px;border-radius:14px;background:linear-gradient(135deg,rgba(239,68,68,0.18),rgba(251,146,60,0.12));border:1px solid rgba(239,68,68,0.35);box-shadow:0 4px 18px rgba(239,68,68,0.18),inset 0 1px 0 rgba(255,255,255,0.08);animation:wa-pulse 3s ease-in-out infinite}
+.weather-alert-banner.cold{background:linear-gradient(135deg,rgba(96,165,250,0.18),rgba(125,211,252,0.12));border-color:rgba(125,211,252,0.4);box-shadow:0 4px 18px rgba(125,211,252,0.2),inset 0 1px 0 rgba(255,255,255,0.08)}
+.weather-alert-banner .wa-icon{font-size:24px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,180,80,0.7))}
+.weather-alert-banner.cold .wa-icon{filter:drop-shadow(0 0 8px rgba(125,211,252,0.7))}
+.weather-alert-banner .wa-content{flex:1;min-width:0}
+.weather-alert-banner .wa-title{font-size:14px;font-weight:600;color:#fff;letter-spacing:-0.01em;margin-bottom:2px}
+.weather-alert-banner .wa-msg{font-size:12px;color:rgba(232,240,255,0.85);line-height:1.35}
+@keyframes wa-pulse{0%,100%{box-shadow:0 4px 18px rgba(239,68,68,0.18),inset 0 1px 0 rgba(255,255,255,0.08)}50%{box-shadow:0 4px 24px rgba(239,68,68,0.32),inset 0 1px 0 rgba(255,255,255,0.08)}}
+@media(max-width:540px){
+  .weather-alert-banner{padding:11px 14px;gap:11px}
+  .weather-alert-banner .wa-icon{font-size:20px}
+  .weather-alert-banner .wa-title{font-size:13px}
+  .weather-alert-banner .wa-msg{font-size:11.5px}
+}
+
 .day-confidence-bar.high   { --day-conf-color:#4ade80 }
 .day-confidence-bar.mid    { --day-conf-color:#facc15 }
 .day-confidence-bar.low    { --day-conf-color:#fb923c }
 .day-confidence-bar.veryLow{ --day-conf-color:#ef4444 }
+
+/* Легенда «согласие моделей» под кнопкой AVG в модалке источника */
+.conf-hint{margin:14px 2px 16px;padding:12px 14px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px}
+.conf-hint-text{font-size:11.5px;color:rgba(232,240,255,0.7);margin-bottom:9px;line-height:1.4}
+.conf-hint-legend{display:flex;flex-wrap:wrap;gap:10px 16px}
+.chl-item{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:rgba(232,240,255,0.75)}
+.chl-bar{display:inline-block;width:22px;height:3px;border-radius:2px;background:var(--chl-c);box-shadow:0 0 6px var(--chl-c)}
+.chl-bar.high   { --chl-c:#4ade80 }
+.chl-bar.mid    { --chl-c:#facc15 }
+.chl-bar.low    { --chl-c:#fb923c }
+.chl-bar.veryLow{ --chl-c:#ef4444 }
+@media (max-width:540px){
+  .conf-hint{padding:10px 12px}
+  .conf-hint-legend{gap:8px 12px}
+  .chl-item{font-size:10.5px}
+}
 
 /* Inline-чип согласия моделей в hero (рядом с "По данным усреднения 7 моделей") */
 .hero-conf{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,0.05);border:1px solid var(--conf-color,#4ade80);font-family:'JetBrains Mono',monospace;font-size:10px;color:#fff;font-weight:600;margin-left:6px;vertical-align:middle;cursor:help;transition:all 0.2s}
