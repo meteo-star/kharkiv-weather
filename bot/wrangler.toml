@@ -27,15 +27,15 @@ ADMIN_USER_ID = "151252296"
 
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS"
-id = "REPLACE_ME_AFTER_kv_namespace_create"
+id = "74dcbaeeff3c48a0a24d1b38506b8c0e"
 
 [[kv_namespaces]]
 binding = "PAIRING"
-id = "REPLACE_ME_AFTER_kv_namespace_create"
+id = "e1e5057893a14f64bb8c2b406f6e38ba"
 
 [[kv_namespaces]]
 binding = "STATS"
-id = "REPLACE_ME_AFTER_kv_namespace_create"
+id = "32f4dd2c3a4a4d488fbfc92538035c30"
 
 # === Cron Trigger ===
 # Каждые 30 минут проверяем прогноз для каждой подписки и отправляем
