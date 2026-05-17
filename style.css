@@ -98,13 +98,14 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @media (max-width: 640px){
   .header{flex-direction:column;align-items:stretch;gap:12px;margin-bottom:18px}
   .header-right{justify-content:flex-start;flex-wrap:wrap;gap:8px;width:100%}
-  /* Source-indicator на мобиле — только цветная точка в кружке.
-     Текст "Среднее по 7 моделям" не помещался → выкидывал индикатор
-     на отдельную строку. Тап по точке всё равно открывает модалку
-     источника со всей инфой. */
-  .source-indicator{padding:0;width:34px;height:34px;justify-content:center;border-radius:50%;gap:0}
+  /* Source-indicator на мобиле — компактная пилюля «● Источник».
+     Полный лейбл "Источник данных" + название модели не помещались;
+     круглая точка без текста была непонятной. Одно короткое слово
+     даёт ясность и помещается рядом с чипами в одну строку. */
+  .source-indicator{padding:7px 12px;gap:7px;border-radius:100px}
   .source-indicator > div{display:none}
-  .source-indicator .si-dot{width:11px;height:11px}
+  .source-indicator .si-mobile-label{display:inline-block;font-size:12px;font-weight:500;color:rgba(232,240,255,0.9);letter-spacing:0.01em}
+  .source-indicator .si-dot{width:8px;height:8px}
   .location-text h1{font-size:18px}
   .location-text p{font-size:12px}
 }
@@ -115,6 +116,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
 /* Source indicator (replaces live-badge) */
 .source-indicator{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--src-color,rgba(0,212,255,0.35));border-radius:100px;font-size:12px;color:#fff;font-weight:500;backdrop-filter:blur(10px);transition:all 0.35s ease;box-shadow:0 0 20px var(--src-glow,rgba(0,212,255,0.15));cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.si-mobile-label{display:none}
 .source-indicator:hover{background:rgba(255,255,255,0.07);transform:translateY(-1px)}
 .source-indicator:focus-visible{outline:2px solid var(--src-color,#00d4ff);outline-offset:3px}
 .source-data-modal .sources-card,
