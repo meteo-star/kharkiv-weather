@@ -7513,7 +7513,11 @@ function setupHeroSticky() {
   function check() {
     // В compare-mode hero скрыт — sticky не нужен
     if (document.body.classList.contains('compare-mode')) {
-      if (lastStuck) { hero.classList.remove('stuck'); lastStuck = false; }
+      if (lastStuck) {
+        hero.classList.remove('stuck');
+        document.body.classList.remove('hero-stuck');
+        lastStuck = false;
+      }
       return;
     }
     const rect = hero.getBoundingClientRect();
@@ -7521,6 +7525,8 @@ function setupHeroSticky() {
     const isStuck = rect.top <= safeTop + 0.5;
     if (isStuck !== lastStuck) {
       hero.classList.toggle('stuck', isStuck);
+      // body.hero-stuck активирует solid-overlay за карточкой
+      document.body.classList.toggle('hero-stuck', isStuck);
       lastStuck = isStuck;
     }
   }
