@@ -54,13 +54,56 @@ body.app-bootstrap .day-temp, body.app-bootstrap .day-cond {
 body.app-bootstrap .hero-loader,
 body.app-bootstrap .hero-loader-text { display: none; }
 
-html{scroll-behavior:smooth;background-color:#02061a}
+html{scroll-behavior:smooth;background-color:#02061a;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.22) transparent}
 body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;overflow-x:hidden;background-color:#02061a;
   background:
     radial-gradient(ellipse at 20% 0%, #1a1f5c 0%, transparent 50%),
     radial-gradient(ellipse at 80% 100%, #003a8c 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, #050a26 0%, #02061a 100%);
   background-attachment:fixed;
+}
+
+/* ============================================
+   Главный скроллбар окна — glass-стиль в цвет акцентов плиток.
+   На iOS Safari/PWA дефолтный скроллбар выглядит «системно-серым»,
+   что выбивается из Liquid Glass. Делаем тонкий, полупрозрачный,
+   с бирюзово-фиолетовым градиентом (как indicator подсветки).
+   ============================================ */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar{width:8px;height:8px;background:transparent}
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track{background:rgba(8,14,40,0.35);border-radius:8px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg, rgba(0,212,255,0.45) 0%, rgba(96,165,250,0.4) 50%, rgba(167,139,250,0.42) 100%);
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:0 0 8px rgba(0,212,255,0.25), inset 0 0 4px rgba(255,255,255,0.12);
+  backdrop-filter:blur(14px) saturate(160%);
+  -webkit-backdrop-filter:blur(14px) saturate(160%);
+}
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg, rgba(0,212,255,0.65) 0%, rgba(96,165,250,0.6) 50%, rgba(167,139,250,0.62) 100%);
+  box-shadow:0 0 14px rgba(0,212,255,0.45), inset 0 0 6px rgba(255,255,255,0.2);
+}
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner{background:transparent}
+
+/* На мобильных делаем ещё тоньше и менее заметнее — там скроллбар
+   появляется только во время свайпа, не должен мозолить глаза. */
+@media (max-width: 640px){
+  html,body{scrollbar-color:rgba(0,212,255,0.18) transparent}
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar{width:5px;height:5px}
+  html::-webkit-scrollbar-track,
+  body::-webkit-scrollbar-track{background:transparent}
+  html::-webkit-scrollbar-thumb,
+  body::-webkit-scrollbar-thumb{
+    background:linear-gradient(180deg, rgba(0,212,255,0.35) 0%, rgba(167,139,250,0.35) 100%);
+    border:none;
+    box-shadow:0 0 6px rgba(0,212,255,0.2);
+  }
 }
 body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:radial-gradient(circle at 15% 25%, rgba(0,212,255,0.08) 0%, transparent 25%),radial-gradient(circle at 85% 75%, rgba(167,139,250,0.06) 0%, transparent 25%),radial-gradient(circle at 50% 50%, rgba(96,165,250,0.04) 0%, transparent 40%);animation:bgFloat 20s ease-in-out infinite alternate}
 @keyframes bgFloat{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-20px,20px) scale(1.05)}}
