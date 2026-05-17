@@ -188,10 +188,11 @@
       <div class="compare-chart-wrap"><canvas id="compareChart"></canvas></div>
     </div>
 
-    <!-- Dual 7-day forecast: 2 параллельные ленты -->
+    <!-- Dual 10-day forecast: ОДИН общий скролл, два ряда внутри.
+         Лейблы городов sticky-залипают слева, ячейки скроллятся синхронно. -->
     <div class="compare-days glass">
-      <h2 data-i18n="compare.daysTitle">7 дней</h2>
-      <div class="cd-rows">
+      <h2 data-i18n="compare.daysTitle">10 дней</h2>
+      <div class="cd-table">
         <div class="cd-row" data-side="a">
           <div class="cd-row-label" id="cdRowLabelA">—</div>
           <div class="cd-cells" id="cdCellsA"></div>
