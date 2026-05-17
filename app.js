@@ -229,6 +229,10 @@ const I18N = {
     'storm.risk2': 'умеренный',
     'storm.risk3': 'высокий',
     'storm.risk4': 'опасный',
+    'storm.desc1': 'возможны отдалённые грозы, без осадков',
+    'storm.desc2': 'локальные грозы с дождём',
+    'storm.desc3': 'ливни с грозами, шквалы',
+    'storm.desc4': 'сильные грозы, риск града и шквалов',
     'storm.axisNow': 'сейчас',
     'storm.alertSoon': 'Гроза прогнозируется в ближайшие {hours}ч',
     'storm.alertNow': 'Гроза идёт сейчас',
@@ -305,6 +309,13 @@ const I18N = {
     'settings.aria': 'Настройки',
     'settings.label': 'Настройки',
     'settings.title': 'Язык и единицы измерения',
+    'settings.theme.title': 'Тема оформления',
+    'settings.theme.dark.unit': '🌙',
+    'settings.theme.dark.full': 'Тёмная',
+    'settings.theme.light.unit': '☀️',
+    'settings.theme.light.full': 'Светлая',
+    'settings.theme.system.unit': '🖥',
+    'settings.theme.system.full': 'Системная',
     'settings.lang.title': 'Язык интерфейса',
     'settings.temp.title': 'Температура',
     'settings.temp.c': 'Цельсий',
@@ -602,6 +613,10 @@ const I18N = {
     'storm.risk2': 'помірний',
     'storm.risk3': 'високий',
     'storm.risk4': 'небезпечно',
+    'storm.desc1': 'можливі віддалені грози, без опадів',
+    'storm.desc2': 'локальні грози з дощем',
+    'storm.desc3': 'зливи з грозами, шквали',
+    'storm.desc4': 'сильні грози, ризик граду та шквалів',
     'storm.axisNow': 'зараз',
     'storm.alertSoon': 'Гроза прогнозується найближчі {hours}год',
     'storm.alertNow': 'Гроза йде зараз',
@@ -678,6 +693,13 @@ const I18N = {
     'settings.aria': 'Налаштування',
     'settings.label': 'Налаштування',
     'settings.title': 'Мова та одиниці виміру',
+    'settings.theme.title': 'Оформлення',
+    'settings.theme.dark.unit': '🌙',
+    'settings.theme.dark.full': 'Темна',
+    'settings.theme.light.unit': '☀️',
+    'settings.theme.light.full': 'Світла',
+    'settings.theme.system.unit': '🖥',
+    'settings.theme.system.full': 'Системна',
     'settings.lang.title': 'Мова інтерфейсу',
     'settings.temp.title': 'Температура',
     'settings.temp.c': 'Цельсій',
@@ -975,6 +997,10 @@ const I18N = {
     'storm.risk2': 'moderate',
     'storm.risk3': 'high',
     'storm.risk4': 'dangerous',
+    'storm.desc1': 'distant thunder possible, no rain',
+    'storm.desc2': 'localized thunderstorms with rain',
+    'storm.desc3': 'heavy rain with thunder, squalls',
+    'storm.desc4': 'severe storms, risk of hail and gusts',
     'storm.axisNow': 'now',
     'storm.alertSoon': 'Storm expected within {hours}h',
     'storm.alertNow': 'Storm in progress now',
@@ -1051,6 +1077,13 @@ const I18N = {
     'settings.aria': 'Settings',
     'settings.label': 'Settings',
     'settings.title': 'Language and units',
+    'settings.theme.title': 'Appearance',
+    'settings.theme.dark.unit': '🌙',
+    'settings.theme.dark.full': 'Dark',
+    'settings.theme.light.unit': '☀️',
+    'settings.theme.light.full': 'Light',
+    'settings.theme.system.unit': '🖥',
+    'settings.theme.system.full': 'System',
     'settings.lang.title': 'Interface language',
     'settings.temp.title': 'Temperature',
     'settings.temp.c': 'Celsius',
@@ -1137,8 +1170,68 @@ const state = {
   units: { temp: 'C', wind: 'ms', pressure: 'mmhg' },
   // Голос озвучки: voiceURI = идентификатор системного голоса (null = автоматический),
   // rate = 0.85 / 1.0 / 1.2 (медленно / норма / быстро)
-  voice: { voiceURI: null, rate: 1.0 }
+  voice: { voiceURI: null, rate: 1.0 },
+  // Тема: 'dark' (default), 'light' (peach/ivory), 'system' (по prefers-color-scheme)
+  theme: 'dark'
 };
+
+/* ============================================
+   THEME — переключение dark/light/system
+   ============================================ */
+let _themeMql = null;
+function resolveTheme(value) {
+  if (value === 'system') {
+    if (!_themeMql) _themeMql = window.matchMedia('(prefers-color-scheme: dark)');
+    return _themeMql.matches ? 'dark' : 'light';
+  }
+  return value === 'light' ? 'light' : 'dark';
+}
+function applyTheme() {
+  const effective = resolveTheme(state.theme);
+  if (effective === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  // meta theme-color (статус-бар iOS PWA, Android Chrome)
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', effective === 'light' ? '#ffeacc' : '#02061a');
+  // apple status-bar — в light PWA должна быть default (тёмный текст на светлом)
+  const apple = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+  if (apple) apple.setAttribute('content', effective === 'light' ? 'default' : 'black-translucent');
+}
+function setTheme(value) {
+  if (!['dark','light','system'].includes(value)) value = 'dark';
+  state.theme = value;
+  applyTheme();
+  saveSettings();
+  // Перевызываем source-theme и source-buttons — они пересчитывают
+  // --src-color/--src-bg/--src-glow в зависимости от темы
+  if (typeof applySourceTheme === 'function') applySourceTheme();
+  if (typeof renderSourceButtons === 'function') renderSourceButtons();
+  // Перерисовываем hero-scene — путь к фото зависит от темы
+  // (assets/scenes/light/* vs assets/scenes/*)
+  try {
+    const af = (typeof getForecast === 'function') ? getForecast(currentSourceId) : null;
+    if (af && af[0] && typeof renderHeroScene === 'function') renderHeroScene(af[0]);
+  } catch (e) { /* hero ещё не отрисован */ }
+  // Слушатель системной темы — только когда в system-режиме
+  if (value === 'system') {
+    if (!_themeMql) _themeMql = window.matchMedia('(prefers-color-scheme: dark)');
+    if (_themeMql && !_themeMql._themeListener) {
+      const handler = () => {
+        if (state.theme === 'system') {
+          applyTheme();
+          if (typeof applySourceTheme === 'function') applySourceTheme();
+          if (typeof renderSourceButtons === 'function') renderSourceButtons();
+        }
+      };
+      _themeMql._themeListener = handler;
+      if (_themeMql.addEventListener) _themeMql.addEventListener('change', handler);
+      else _themeMql.addListener(handler);
+    }
+  }
+}
 
 function t(key, params) {
   let s = (I18N[state.lang] && I18N[state.lang][key]);
@@ -1476,6 +1569,7 @@ function loadSavedSettings() {
         if (typeof s.voice.voiceURI === 'string') state.voice.voiceURI = s.voice.voiceURI;
         if (typeof s.voice.rate === 'number' && s.voice.rate >= 0.5 && s.voice.rate <= 2) state.voice.rate = s.voice.rate;
       }
+      if (['dark','light','system'].includes(s.theme)) state.theme = s.theme;
     }
   } catch (e) {
     console.warn('Не удалось прочитать настройки:', e);
@@ -1486,7 +1580,8 @@ function saveSettings() {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
       lang: state.lang,
       units: { ...state.units },
-      voice: { ...state.voice }
+      voice: { ...state.voice },
+      theme: state.theme
     }));
   } catch (e) {
     console.warn('Не удалось сохранить настройки:', e);
@@ -1987,12 +2082,32 @@ let currentModalMetric = 'temp';
 
 function getCurrentSource() { return getSrc(currentSourceId); }
 
+// Тёмные варианты source-цветов для светлой темы — бирюзовый/циан/пастельные
+// сливаются с peach-фоном, поэтому в light режиме показываем насыщенные
+// тёплые/глубокие варианты тех же оттенков.
+const SOURCE_COLORS_LIGHT = {
+  avg:   '#c0532a',  // terracotta вместо cyan
+  ecmwf: '#2563eb',  // deep blue
+  gfs:   '#7c3aed',  // deep purple
+  icon:  '#0d9488',  // teal-dark
+  gem:   '#ea580c',  // orange-dark
+  jma:   '#ca8a04',  // gold-dark
+  mf:    '#db2777',  // pink-dark
+  ukmo:  '#16a34a'   // green-dark
+};
+function effectiveSourceColor(s) {
+  if (state.theme && resolveTheme(state.theme) === 'light') {
+    return SOURCE_COLORS_LIGHT[s.id] || s.color;
+  }
+  return s.color;
+}
 function applySourceTheme() {
   const s = getCurrentSource();
+  const color = effectiveSourceColor(s);
   const root = document.documentElement;
-  root.style.setProperty('--src-color', s.color);
-  root.style.setProperty('--src-bg', hexToRgba(s.color, 0.18));
-  root.style.setProperty('--src-glow', hexToRgba(s.color, 0.25));
+  root.style.setProperty('--src-color', color);
+  root.style.setProperty('--src-bg', hexToRgba(color, 0.18));
+  root.style.setProperty('--src-glow', hexToRgba(color, 0.25));
 }
 
 function renderSourceIndicator() {
@@ -2010,10 +2125,16 @@ function computeTimeOfDay(today) {
   const nowMin = now.getHours()*60 + now.getMinutes();
   const riseMin = hhmmToMin(today.sunrise) ?? 360;
   const setMin  = hhmmToMin(today.sunset)  ?? 1200;
-  // dawn: за 60 мин до восхода → +90 мин после; dusk: за 90 мин до заката → +60 мин после
-  if (nowMin >= riseMin - 60 && nowMin < riseMin + 90) return { tod: 'dawn', nowMin, riseMin, setMin };
-  if (nowMin >= riseMin + 90 && nowMin < setMin - 90)  return { tod: 'day', nowMin, riseMin, setMin };
-  if (nowMin >= setMin - 90 && nowMin < setMin + 60)   return { tod: 'dusk', nowMin, riseMin, setMin };
+  // Окна сужены до естественных по civil-twilight:
+  //   dawn: за 40 мин до восхода → +50 мин после (момент рассвета + утреннее освещение)
+  //   day:  +50 мин после восхода → -50 мин до заката (большая часть дня)
+  //   dusk: -50 мин до заката → +25 мин после заката (момент заката + civil twilight)
+  //   night: +25 мин после заката и далее (как только сумерки заканчиваются)
+  // Раньше dusk тянулся +60 мин после заката, и в 21:30 (при закате 20:50) показывался
+  // оранжевый dusk-фото, хотя визуально уже ночь.
+  if (nowMin >= riseMin - 40 && nowMin < riseMin + 50) return { tod: 'dawn', nowMin, riseMin, setMin };
+  if (nowMin >= riseMin + 50 && nowMin < setMin - 50)  return { tod: 'day', nowMin, riseMin, setMin };
+  if (nowMin >= setMin - 50 && nowMin < setMin + 25)   return { tod: 'dusk', nowMin, riseMin, setMin };
   return { tod: 'night', nowMin, riseMin, setMin };
 }
 
@@ -2125,7 +2246,12 @@ function renderHeroScene(today) {
   if (heroEl.dataset.tod !== tod) heroEl.dataset.tod = tod;
   const grp = window.__heroCondOverride || conditionGroup(today.condition);
   if (heroEl.dataset.cond !== grp) heroEl.dataset.cond = grp;
-  sceneEl.style.backgroundImage = `url('assets/scenes/${tod}-${grp}.webp')`;
+  // В light-теме используем светлую серию фото из assets/scenes/light/.
+  // Названия файлов те же — отличается только префикс пути.
+  const scenePath = (state.theme && resolveTheme(state.theme) === 'light')
+    ? `assets/scenes/light/${tod}-${grp}.webp`
+    : `assets/scenes/${tod}-${grp}.webp`;
+  sceneEl.style.backgroundImage = `url('${scenePath}')`;
   // Данные текущего часа для интенсивности и ветра
   const nowH = (today.hourly && today.hourly[NOW_HOUR]) || {};
   const mmH = (typeof nowH.pmm === 'number') ? nowH.pmm : 0;
@@ -4267,9 +4393,10 @@ function renderSourceButtons() {
     const btn = document.createElement('button');
     btn.className = 'source-btn' + (currentSourceId === s.id ? ' active' : '');
     btn.dataset.source = s.id;
-    btn.style.setProperty('--src-color', s.color);
-    btn.style.setProperty('--src-bg', hexToRgba(s.color, 0.15));
-    btn.style.setProperty('--src-glow', hexToRgba(s.color, 0.2));
+    const sColor = effectiveSourceColor(s);
+    btn.style.setProperty('--src-color', sColor);
+    btn.style.setProperty('--src-bg', hexToRgba(sColor, 0.15));
+    btn.style.setProperty('--src-glow', hexToRgba(sColor, 0.2));
     const badge = (s.id === bestId)
       ? `<span class="src-badge" title="${t('accuracy.bestBadge')}">🏆</span>`
       : '';
@@ -4710,10 +4837,18 @@ function renderStorm() {
     });
   }
 
-  // Легенда (5 уровней)
+  // Легенда (4 ненулевых уровня — для нулевого «нет риска» отдельная
+  // плашка не нужна, его и так видно по неактивным ячейкам).
+  // Каждый уровень = название + краткое описание что значит на практике.
   if (legendEl) {
-    legendEl.innerHTML = [0,1,2,3,4].map(lvl =>
-      `<span class="sl-item"><span class="sl-sw r${lvl}"></span>${escapeHtml(t('storm.risk' + lvl))}</span>`
+    legendEl.innerHTML = [1,2,3,4].map(lvl =>
+      `<span class="sl-item">
+        <span class="sl-sw r${lvl}"></span>
+        <span class="sl-text">
+          <span class="sl-name">${escapeHtml(t('storm.risk' + lvl))}</span>
+          <span class="sl-desc">${escapeHtml(t('storm.desc' + lvl))}</span>
+        </span>
+      </span>`
     ).join('');
   }
 
@@ -6372,6 +6507,7 @@ function setActiveInGroup(groupId, val) {
   group.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === val));
 }
 function refreshSegmentedActive() {
+  setActiveInGroup('segTheme',    state.theme);
   setActiveInGroup('segLang',     state.lang);
   setActiveInGroup('segTemp',     state.units.temp);
   setActiveInGroup('segWind',     state.units.wind);
@@ -6381,6 +6517,8 @@ function refreshSegmentedActive() {
 
 function setupSegmentedHandlers() {
   const groups = [
+    { id: 'segTheme',    allowed: ['dark','light','system'],   apply: v => { setTheme(v); },
+      skipApplyAll: true /* setTheme сам всё делает, applyAll не нужен */ },
     { id: 'segLang',     allowed: ['ru','uk','en'],            apply: v => { state.lang = v; } },
     { id: 'segTemp',     allowed: ['C','F'],                   apply: v => { state.units.temp = v; } },
     { id: 'segWind',     allowed: ['ms','kmh','mph','kn'],     apply: v => { state.units.wind = v; } },
@@ -7498,7 +7636,6 @@ function setupHeroSticky() {
   if (!hero) return;
 
   // Узнаём фактический safe-area-inset-top (на iOS PWA это высота notch).
-  // Через временный fixed-элемент с top:env() — самый надёжный способ.
   let safeTop = 0;
   function measureSafeTop() {
     const probe = document.createElement('div');
@@ -7509,7 +7646,27 @@ function setupHeroSticky() {
   }
   measureSafeTop();
 
+  // Запоминаем оригинальный document-offset hero (до того как stuck).
+  // ВАЖНО: при stuck размер hero меняется → если мы будем использовать
+  // getBoundingClientRect().top то получим feedback loop (stuck → размер
+  // меняется → top меняется → unstuck → размер меняется → stuck → ...).
+  // Решение: считаем по scrollY от стабильного origin = offsetTop из
+  // unstuck-состояния. offsetTop у position:sticky не меняется при stuck.
+  let heroOrigin = 0;
+  function measureOrigin() {
+    // Снимаем stuck чтобы получить «настоящую» геометрию без анимации
+    const wasStuck = hero.classList.contains('stuck');
+    if (wasStuck) hero.classList.remove('stuck');
+    heroOrigin = hero.offsetTop;
+    if (wasStuck) hero.classList.add('stuck');
+  }
+  measureOrigin();
+
+  // Гистерезис ~20px — стик и unstuck происходят на разных порогах,
+  // что устраняет дрожание на границе.
+  const HYSTERESIS = 18;
   let lastStuck = false;
+
   function check() {
     // В compare-mode hero скрыт — sticky не нужен
     if (document.body.classList.contains('compare-mode')) {
@@ -7519,9 +7676,16 @@ function setupHeroSticky() {
       }
       return;
     }
-    const rect = hero.getBoundingClientRect();
-    // Hero «прилип» когда его верхняя граница достигла sticky-точки
-    const isStuck = rect.top <= safeTop + 0.5;
+    const sy = window.scrollY || window.pageYOffset || 0;
+    // Порог прилипания = оригинальная позиция hero минус safe-area top
+    const threshold = heroOrigin - safeTop;
+    let isStuck;
+    if (lastStuck) {
+      // Был залипшим — отлипаем только когда явно скроллим назад
+      isStuck = sy >= threshold - HYSTERESIS;
+    } else {
+      isStuck = sy >= threshold;
+    }
     if (isStuck !== lastStuck) {
       hero.classList.toggle('stuck', isStuck);
       lastStuck = isStuck;
@@ -7536,7 +7700,12 @@ function setupHeroSticky() {
     requestAnimationFrame(() => { rafScheduled = false; check(); });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', () => { measureSafeTop(); check(); });
+  window.addEventListener('resize', () => {
+    measureSafeTop();
+    // Перемерять origin — если шапка/чипы изменили высоту
+    measureOrigin();
+    check();
+  });
   check(); // initial
 }
 
@@ -7706,6 +7875,14 @@ function setupSwipeToClose() {
 
 // Read settings + location from localStorage, hook up segmented controls, paint everything
 loadSavedSettings();
+applyTheme();
+// Применяем source-цвета для текущей темы СРАЗУ (до первого рендера),
+// иначе будет короткая вспышка дефолтного cyan на light-теме.
+if (typeof applySourceTheme === 'function') applySourceTheme();
+// Если тема = system — слушать смену OS-темы
+if (state.theme === 'system') {
+  setTheme('system'); // повторно, чтобы навесить слушатель matchMedia
+}
 loadInitialLocation();
 setupSegmentedHandlers();
 setupHourlyTabs();

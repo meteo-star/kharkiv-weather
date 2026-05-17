@@ -4,11 +4,12 @@
 > Содержит актуальное состояние проекта, что уже сделано, что осталось.
 >
 > **Дата обновления:** 17 мая 2026
-> **Текущая версия:** v1.20.4
+> **Текущая версия:** v1.21.3
 > **Статус фаз А–Л:** ✅ закрыты (см. раздел 5)
 > **Статус фазы М (Модуляризация):** ✅ закрыта (v1.16, v1.17)
 > **Статус фазы Н (Perf + Compare Mode + alerts):** ✅ закрыта (v1.18, v1.19)
 > **Статус фазы О (PWA force-update + sticky hero):** ✅ закрыта (v1.20)
+> **Статус фазы П (Glass scrollbar + светлая тема + 8 hero-фото):** ✅ закрыта (v1.20.5, v1.21.0 → v1.21.3)
 > **Live URL:** https://meteo-star.github.io/kharkiv-weather/
 > **GitHub:** https://github.com/meteo-star/kharkiv-weather
 
@@ -285,14 +286,36 @@
 | О1 | `v1.20.0` | **Pull-to-refresh:** свайп вниз с верха главного экрана показывает индикатор «Потяни вниз для обновления». За порогом (~170px свайпа): «Отпусти для обновления». На релизе: caches.delete() всех кэшей + registration.update() + skipWaiting + controllerchange listener auto-reload'ит. Решает проблему iOS PWA где старая версия живёт до полного перезапуска через task switcher. Жест не срабатывает внутри горизонтальных скроллов (compare-days, hourly, precip) и поверх модалок. Rubber-band с ×0.55 ratio для natural iOS feel. **Sticky hero:** карточка «Сейчас» становится position:sticky;top:env(safe-area-inset-top). При скролле плавно (0.42s cubic-bezier) сжимается в компактную (padding 28→14px, min-height 220→0, фото-фон затемняется до 38%, скрываются "СЕЙЧАС"/feels/source-note, шрифт темпы 46→38px). Backdrop-filter:blur 24→36px — усиленный glass-эффект. Карточка сохраняет border-radius и ширину контейнера, выглядит как floating glass над скроллящимся контентом без какой-либо подложки. Детекция через rAF-throttled scroll + getBoundingClientRect. В compare-mode sticky-логика автоматически выключается. |
 | О1.x | `v1.20.1 → v1.20.4` | **Доводки sticky hero:** 4 итерации пробовали разные варианты «как закрыть просвечивающий фон за скруглёнными уголками». Финал — **БЕЗ overlay**: карточка floating, контент скроллится естественно вверх и проходит под неё, glass-blur делает это плавным. Усиленный backdrop-filter (36px blur, 190% saturate) + чуть прозрачнее фото-фон (0.38) + тонкий hairline rgba(255,255,255,0.07). Угловые артефакты приемлемые на фоне общего «floating glass» вида. |
 
+### Фаза П: Glass scrollbar + Светлая тема + 8 hero-фото (v1.20.5 → v1.21.3)
+
+✅ **Статус: закрыта.**
+
+| Шаг | Tag | Что |
+|---|---|---|
+| П1 | `v1.20.5` | **Glass-стиль главного скроллбара.** Дефолтный системный скроллбар на iOS PWA выбивался из Liquid Glass. В обоих темах главный скролл `html`/`body` получил тонкий полупрозрачный thumb с бирюзово-фиолетовым градиентом, белым highlight сверху и тёмной нижней тенью — выглядит как кусочек glass. Mobile: уменьшено до 5px и упрощено. |
+| П2 | `v1.21.0` | **Базовая инфраструктура темы:** CSS-переменные `--theme-*` на `:root` (default dark) + `:root[data-theme="light"]`. `state.theme = 'dark' \| 'light' \| 'system'` сохраняется в `kw:settings:v1.theme`. Функции `resolveTheme(value)`, `applyTheme()`, `setTheme(value)`. Слушатель `matchMedia('(prefers-color-scheme: dark)')` навешивается только в режиме system. Динамический `<meta name="theme-color">` и `apple-mobile-web-app-status-bar-style` обновляются при смене темы. UI: секция «Тема оформления» в Settings модалке — segmented `🌙 Тёмная / ☀️ Светлая / 🖥 Системная`, переводы на 3 языка. Эмодзи как seg-main для визуальной идентификации. |
+| П2.1 | `v1.21.0` | **Светлая палитра (тёплый персик/слоновая кость + терракотовые акценты):** body bg — radial-gradient `#fcc99a` deep peach (после ряда итераций — то слишком светлый, то слишком тёмный); карточки `.glass` — `rgba(255,250,237,0.92)` кремовое стекло с 1.5px coral border `rgba(192,83,42,0.45)` и terracotta-тенью `rgba(192,83,42,0.18)` (двухслойной для глубины); внутренние плитки (`hour-cell`, `.day`, `cd-cell`, `aw-cell`, `pollen-cell`, `climate-metric`, `mini-m`, `modal-astro-cell`, `acc-row` и т.д.) — solid `#fffaf0` с 1.5px coral border. Текст — `#2d1a10` (тёплый dark-brown). Source-цвета через карту `SOURCE_COLORS_LIGHT` подменяются на тёмные глубокие варианты (cyan → terracotta, blue → deep-blue, и т.д.) — `applySourceTheme()` использует `effectiveSourceColor()`. UV/AQI status pills — inline-стиль перекрыт через `!important`, текст всегда тёмный по соответствующему уровню (amber/green/etc.). Pollen-cell.pl-* — насыщенные level-фоны (зелёный/жёлтый/оранжевый/красный) с границами в тон. Унифицированная подсветка `.day.today` ≡ `.hour-cell.now` — мягкий peach gradient `#ffd9b8 → #ffbf90` + 2px coral border + glow. Hero-overlay тёплый peach вместо тёмно-синего. |
+| П2.2 | `v1.21.1 → v1.21.2` | **Доводки тем-логики:** (1) Скроллбар не применялся в light-теме — баг в селекторе: `:root[data-theme="light"] html` означает «html внутри root, который сам html» — match невозможен. Заменено на `:root[data-theme="light"]::-webkit-scrollbar`. (2) Гроза-heatmap в light-теме всегда показывал нейтральный beige — мои overrides таргетили `.storm-h.risk-N`, а JS добавляет `.r1`/`.r2`/`.r3`/`.r4`. Глобальная замена `storm-h.risk-` → `storm-h.r`. Дополнительно: гроза получила solid яркие цвета (без gradient — он начинался с белого и сливался с фоном). Legend `.sl-sw.r1-r4` восстановлены через высокоспецифичный `:root[data-theme="light"] .storm-legend .sl-sw.rN` (ранние late-overrides перекрывали с одинаковой специфичностью). |
+| П2.3 | `v1.21.2` | **Гроза-индикатор переработан полностью:** heatmap высота 38→46px, ячейки 4px border-radius, inset 1.5px dark border для чёткости в обеих темах, наружный glow по уровню риска. Легенда — grid `auto-fit minmax(110px)`: каждый уровень = карточка swatch+название+описание. Описания на 3 языках добавлены: `storm.desc1-4` («возможны отдалённые грозы, без осадков» / «локальные грозы с дождём» / «ливни с грозами, шквалы» / «сильные грозы, риск града и шквалов»). |
+| П2.4 | `v1.21.2` | **HDM модалки (Ветер/Давление/Осадки/Влажность) — заголовок:** `.hdm-top` имел `rgba(8,13,38,0.85)` navy background из dark-темы. В light текст становился тёмным через `.hdm-sheet *`, но фон шапки оставался navy → чёрный на тёмном. Override: peach gradient в шапке, coral border снизу, тёмный текст. Аналогично для `.pdm-top`. **Метрика модалки**: HDM chart text fill через CSS `fill:#2d1a10 !important` (CSS перебивает inline `fill="#e8f0ff"` презентационный атрибут). **Mobile hero scroll flicker fix:** на ПК hero иногда мерцал/зависал при стике/анстике из-за feedback loop (rect.top менялся пока transition анимировал размер). Перешли с `getBoundingClientRect().top` на `window.scrollY` + кэшированный `offsetTop` + гистерезис 18px — стик и unstuck на разных порогах. |
+| П3 | `v1.21.3` | **8 светлых hero-фото:** загружены с Unsplash (CC0) для каждой комбинации `{dawn,day,dusk,night}-{clear,cloudy}`, конвертированы в WebP 1600×600 q=82, ~170 KB всего. Положены в `assets/scenes/light/`. `renderHeroScene()` выбирает путь по теме: `assets/scenes/light/{tod}-{grp}.webp` в light, `assets/scenes/{tod}-{grp}.webp` в dark. `setTheme()` перерисовывает hero при смене темы. CSS: текст hero theme-aware (`dawn`/`day` → **тёмный** `#2d1a10` с белым гало для контраста на светлых фото; `dusk`/`night` → **белый** с тёмной тенью). Overlay соответствующий: `rgba(255,250,237,0.55)` cream для светлых, `rgba(80,30,15,0.55)` deep brown для тёмных. Sticky-stuck состояние получает усиленный overlay для читаемости компактного текста. **Сужены окна `computeTimeOfDay()`:** dawn `-40/+50`, day `+50/-50`, dusk `-50/+25` (раньше `+60`), night сверх. Это убрало проблему «уже после заката, но всё ещё dusk-фото» — теперь через 25 мин после заката автоматически night. |
+
+#### Уроки фазы П
+
+1. **CSS-специфичность и source order — главный источник багов в темах.** Десятки правил `:root[data-theme="light"] .X` с равной специфичностью к существующим dark-правилам — побеждает source order. Late-overrides могут случайно перекрыть сами себя. Решение: всегда добавлять `!important` к финальным правилам и тщательно проверять, что специфичность override строго выше базы.
+2. **`:root` ЭТО `html` элемент.** Селектор `:root[data-theme=...] html` означает «html внутри html» = ничего. Должно быть `:root[data-theme=...]::pseudo` или `html[data-theme=...]::pseudo`.
+3. **Class names в JS могут не совпадать с CSS селекторами.** В коде `storm-h.r1`/`.r2`, а я писал `.risk-1`/`.risk-2`. Регулярно grep'ать имена классов из render-функций перед написанием CSS-правил.
+4. **Inline `style="..."` побеждает внешний CSS без `!important`.** UV/AQI status pills в HTML имели hardcoded `color:#facc15` — пришлось override через `!important`. CSS `fill` всё же перебивает презентационный атрибут SVG `fill="..."` без `!important` (специфичный edge case).
+5. **Feedback loop при position:sticky + transition.** Использование `getBoundingClientRect().top` для определения «залип ли элемент» приводит к колебанию: stuck → размер меняется → top меняется → unstuck → ... Решение — измерять оригинальный `offsetTop` до stuck-состояния и сравнивать с `scrollY` + гистерезис.
+6. **Окна time-of-day должны соответствовать civil twilight (~25 мин)**, а не астрономическим градусам. Раньше dusk тянулся +60 мин после заката (включал nautical twilight), что визуально уже выглядело как ночь.
+
 ---
 
 ## 6. ОСТАЛОСЬ СДЕЛАТЬ
 
-Все фазы А → О закрыты. **Следующие направления выбраны пользователем** (см. раздел 11):
+Все фазы А → П закрыты. **Следующее запланированное направление:**
 
-1. **Выбор темы в настройках** — dark / light с градиентом / system (автопереключение)
-2. **Telegram-бот для push-уведомлений** — пользователь = главный админ (детальный план в разделе 12)
+1. **Telegram-бот для push-уведомлений** — пользователь = главный админ (детальный план в разделе 12)
 
 Остальной бэклог — раздел 7 (опционально).
 
@@ -366,7 +389,8 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 | `manifest.json` | PWA-манифест (имя, иконки, theme_color, start_url, display:standalone) |
 | `service-worker.js` | PWA service worker — офлайн-кэш + cache strategies (cache-first / network-first / stale-while-revalidate) |
 | `icons/` | PNG-иконки PWA: 192, 512, maskable 192/512, apple-touch 180, favicon 32 |
-| `assets/scenes/` | 8 фото-фонов hero (Unsplash CC0, WebP 1600×600, ~217 КБ всего): day/dawn/dusk/night × clear/cloudy |
+| `assets/scenes/` | 8 фото-фонов hero для **dark-темы** (Unsplash CC0, WebP 1600×600, ~217 КБ): day/dawn/dusk/night × clear/cloudy |
+| `assets/scenes/light/` | 8 фото-фонов hero для **light-темы** (Unsplash CC0, WebP 1600×600, ~170 КБ): те же категории, но светлые тона (pastel sunrise / bright sky / golden sunset / blue hour) |
 | `scripts/gen-icons.py` | Генератор иконок через PIL/Pillow (запускается вручную при изменении дизайна иконки) |
 | `README.md` | Краткое описание проекта (видно на GitHub) |
 | `SECURITY.md` | Контракт безопасности и приватности – все внешние сервисы, что они видят |
@@ -386,7 +410,7 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 
 ---
 
-*Документ обновлён: 17 мая 2026 после серии релизов v1.16 → v1.20.4 (фазы М, Н, О закрыты). Главные достижения этой сессии: модуляризация (8500 → 700+1200+6700 строк по 3 файлам), Compare Mode полноценный с dual hero + 10-day sync-скролл, лень-загрузка Chart.js, yielding parsing, Visibility API timers, skeleton screen, алерты экстремальной температуры, sun arc real-time, фиксы inverse search, легенда confidence, pull-to-refresh для принудительного обновления iOS PWA, sticky floating hero card с glass-эффектом. **Пользователь следующими шагами выбрал: выбор темы в настройках и Telegram-бот с админом-собой** (см. разделы 11–12).*
+*Документ обновлён: 17 мая 2026 после серии релизов v1.16 → v1.21.3 (фазы М, Н, О, П закрыты). Главные достижения этой сессии: модуляризация (8500 → 700+1200+6700 строк по 3 файлам), Compare Mode полноценный с dual hero + 10-day sync-скролл, лень-загрузка Chart.js, yielding parsing, Visibility API timers, skeleton screen, алерты экстремальной температуры, sun arc real-time, фиксы inverse search, легенда confidence, pull-to-refresh для принудительного обновления iOS PWA, sticky floating hero card с glass-эффектом, **переключатель темы dark/light/system с тёплой персиково-коралловой палитрой и отдельной серией из 8 светлых hero-фото, переработанный glass-стиль скроллбара, гроза-индикатор с расширенными описаниями уровней риска**. **Следующий шаг: Telegram-бот с админом-собой** (см. раздел 12).*
 
 ### Заметка по В6
 По итогам обсуждения от прямого WebSocket к Blitzortung отказались (закрытое API, нестабильный handshake, требует прокси). Вместо этого реализован **прогнозный** индикатор грозы на 48ч из Open-Meteo с использованием `weather_code` (95/96/99), `cape` и `lifted_index`. Real-time трекер молний может вернуться отдельной фичей В6.5 через Cloudflare Worker-прокси, если возникнет потребность.
@@ -398,7 +422,12 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 
 ---
 
-## 11. СЛЕДУЮЩИЙ ШАГ: Выбор темы в настройках
+## 11. ✅ ВЫПОЛНЕНО: Выбор темы в настройках (фаза П, v1.21.0 → v1.21.3)
+
+> История раздела сохранена для контекста. Реализовано — см. фазу П в разделе 5.
+> Финальная палитра: тёплая персиково-коралловая (а не blue→pink→peach из изначального плана) — пользователь выбрал «тёплый персик/слоновая кость» с terracotta-акцентами. Hero-фото для светлой темы — 8 новых из Unsplash (а не gradient/filter fallback). 6 итераций контраста плиток (фон и плитки сначала слишком сливались, потом слишком тёмные, потом just-right).
+
+### План реализации (исторический)
 
 **Что хочет пользователь:** добавить в настройки выбор темы оформления — три варианта:
 
@@ -406,7 +435,7 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 2. **☀️ Светлая с градиентом** — светлая палитра с градиентным backdrop (мягкий blue→pink→peach), сохраняющая стилистику Liquid Glass но в инверсии
 3. **🖥 Системная** — авто-переключение через `prefers-color-scheme: dark` / `light`
 
-### План реализации (~3-4 часа)
+### План реализации (исторический, ~3-4 часа изначально, по факту ~10 часов с фотофиксами)
 
 **Этап 1 — переменные:**
 - Все цвета в CSS перевести на custom properties (`--bg-base`, `--text-primary`, `--card-bg`, `--accent`, ...) объявленные на `:root`

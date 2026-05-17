@@ -1,10 +1,56 @@
-*{margin:0;padding:0;box-sizing:border-box}
+﻿*{margin:0;padding:0;box-sizing:border-box}
 
 /* ============================================
-   SKELETON SCREEN — пока идёт первый fetch прогноза, скрываем
-   захардкоженные BASELINE-значения и показываем shimmer-плашки.
-   Класс body.app-bootstrap снимается после первого renderAll
-   (когда данные реально появились), и всё возвращается к норме.
+   THEME VARIABLES вЂ” Dark (default) + Light (peach/ivory)
+   РџРѕР»РЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РѕСЃС‚Р°СЋС‚СЃСЏ РїСЂРѕРїРёСЃР°РЅРЅС‹РјРё РІ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёС… РїСЂР°РІРёР»Р°С… РґР»СЏ
+   СЃС‚Р°Р±РёР»СЊРЅРѕСЃС‚Рё dark-СЂРµР¶РёРјР°. Override РґР»СЏ light Р¶РёРІС‘С‚ РІ РѕРґРЅРѕРј Р±Р»РѕРєРµ
+   РІ СЃР°РјРѕРј РєРѕРЅС†Рµ С„Р°Р№Р»Р°, РїРѕРґ СЃРµР»РµРєС‚РѕСЂРѕРј :root[data-theme="light"].
+   ============================================ */
+:root {
+  --theme-bg-base: #02061a;
+  --theme-bg-grad-1: #1a1f5c;
+  --theme-bg-grad-2: #003a8c;
+  --theme-bg-grad-3: #050a26;
+  --theme-text-primary: #e8f0ff;
+  --theme-text-secondary: rgba(232,240,255,0.7);
+  --theme-text-muted: rgba(232,240,255,0.5);
+  --theme-text-faint: rgba(232,240,255,0.4);
+  --theme-glass-bg: rgba(255,255,255,0.06);
+  --theme-glass-bg-soft: rgba(255,255,255,0.04);
+  --theme-glass-border: rgba(255,255,255,0.08);
+  --theme-glass-border-strong: rgba(255,255,255,0.14);
+  --theme-accent-1: #00d4ff;
+  --theme-accent-2: #a78bfa;
+  --theme-accent-3: #60a5fa;
+  --theme-shadow-card: 0 8px 32px rgba(0,0,0,0.3);
+  --theme-meta-color: #02061a;
+}
+
+:root[data-theme="light"] {
+  --theme-bg-base: #fdf3e3;
+  --theme-bg-grad-1: #ffe7d0;
+  --theme-bg-grad-2: #ffd9bd;
+  --theme-bg-grad-3: #fff1e0;
+  --theme-text-primary: #2d1a10;
+  --theme-text-secondary: rgba(45,26,16,0.72);
+  --theme-text-muted: rgba(45,26,16,0.55);
+  --theme-text-faint: rgba(45,26,16,0.4);
+  --theme-glass-bg: rgba(255,255,255,0.55);
+  --theme-glass-bg-soft: rgba(255,255,255,0.4);
+  --theme-glass-border: rgba(180,120,80,0.2);
+  --theme-glass-border-strong: rgba(180,120,80,0.32);
+  --theme-accent-1: #d9602f;
+  --theme-accent-2: #c0532a;
+  --theme-accent-3: #b87333;
+  --theme-shadow-card: 0 8px 32px rgba(180,110,60,0.16);
+  --theme-meta-color: #ffeacc;
+}
+
+/* ============================================
+   SKELETON SCREEN вЂ” РїРѕРєР° РёРґС‘С‚ РїРµСЂРІС‹Р№ fetch РїСЂРѕРіРЅРѕР·Р°, СЃРєСЂС‹РІР°РµРј
+   Р·Р°С…Р°СЂРґРєРѕР¶РµРЅРЅС‹Рµ BASELINE-Р·РЅР°С‡РµРЅРёСЏ Рё РїРѕРєР°Р·С‹РІР°РµРј shimmer-РїР»Р°С€РєРё.
+   РљР»Р°СЃСЃ body.app-bootstrap СЃРЅРёРјР°РµС‚СЃСЏ РїРѕСЃР»Рµ РїРµСЂРІРѕРіРѕ renderAll
+   (РєРѕРіРґР° РґР°РЅРЅС‹Рµ СЂРµР°Р»СЊРЅРѕ РїРѕСЏРІРёР»РёСЃСЊ), Рё РІСЃС‘ РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ Рє РЅРѕСЂРјРµ.
    ============================================ */
 @keyframes skel-shimmer {
   0%   { background-position: -200% 0; }
@@ -50,7 +96,7 @@ body.app-bootstrap .day-temp, body.app-bootstrap .day-cond {
   border-radius: 4px;
   animation: skel-shimmer 1.4s linear infinite;
 }
-/* Кнопки, скроллы, иконки — оставляем как есть, не маскируем */
+/* РљРЅРѕРїРєРё, СЃРєСЂРѕР»Р»С‹, РёРєРѕРЅРєРё вЂ” РѕСЃС‚Р°РІР»СЏРµРј РєР°Рє РµСЃС‚СЊ, РЅРµ РјР°СЃРєРёСЂСѓРµРј */
 body.app-bootstrap .hero-loader,
 body.app-bootstrap .hero-loader-text { display: none; }
 
@@ -64,10 +110,10 @@ body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;ove
 }
 
 /* ============================================
-   Главный скроллбар окна — glass-стиль в цвет акцентов плиток.
-   На iOS Safari/PWA дефолтный скроллбар выглядит «системно-серым»,
-   что выбивается из Liquid Glass. Делаем тонкий, полупрозрачный,
-   с бирюзово-фиолетовым градиентом (как indicator подсветки).
+   Р“Р»Р°РІРЅС‹Р№ СЃРєСЂРѕР»Р»Р±Р°СЂ РѕРєРЅР° вЂ” glass-СЃС‚РёР»СЊ РІ С†РІРµС‚ Р°РєС†РµРЅС‚РѕРІ РїР»РёС‚РѕРє.
+   РќР° iOS Safari/PWA РґРµС„РѕР»С‚РЅС‹Р№ СЃРєСЂРѕР»Р»Р±Р°СЂ РІС‹РіР»СЏРґРёС‚ В«СЃРёСЃС‚РµРјРЅРѕ-СЃРµСЂС‹РјВ»,
+   С‡С‚Рѕ РІС‹Р±РёРІР°РµС‚СЃСЏ РёР· Liquid Glass. Р”РµР»Р°РµРј С‚РѕРЅРєРёР№, РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹Р№,
+   СЃ Р±РёСЂСЋР·РѕРІРѕ-С„РёРѕР»РµС‚РѕРІС‹Рј РіСЂР°РґРёРµРЅС‚РѕРј (РєР°Рє indicator РїРѕРґСЃРІРµС‚РєРё).
    ============================================ */
 html::-webkit-scrollbar,
 body::-webkit-scrollbar{width:8px;height:8px;background:transparent}
@@ -90,8 +136,8 @@ body::-webkit-scrollbar-thumb:hover{
 html::-webkit-scrollbar-corner,
 body::-webkit-scrollbar-corner{background:transparent}
 
-/* На мобильных делаем ещё тоньше и менее заметнее — там скроллбар
-   появляется только во время свайпа, не должен мозолить глаза. */
+/* РќР° РјРѕР±РёР»СЊРЅС‹С… РґРµР»Р°РµРј РµС‰С‘ С‚РѕРЅСЊС€Рµ Рё РјРµРЅРµРµ Р·Р°РјРµС‚РЅРµРµ вЂ” С‚Р°Рј СЃРєСЂРѕР»Р»Р±Р°СЂ
+   РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕР»СЊРєРѕ РІРѕ РІСЂРµРјСЏ СЃРІР°Р№РїР°, РЅРµ РґРѕР»Р¶РµРЅ РјРѕР·РѕР»РёС‚СЊ РіР»Р°Р·Р°. */
 @media (max-width: 640px){
   html,body{scrollbar-color:rgba(0,212,255,0.18) transparent}
   html::-webkit-scrollbar,
@@ -109,8 +155,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @keyframes bgFloat{0%{transform:translate(0,0) scale(1)}100%{transform:translate(-20px,20px) scale(1.05)}}
 
 .particle{position:fixed;width:3px;height:3px;border-radius:50%;background:rgba(0,212,255,0.4);box-shadow:0 0 10px rgba(0,212,255,0.6);pointer-events:none;z-index:0;animation:float-up 18s linear infinite}
-/* Пять разных траекторий — каждой частице назначается своя через inline animation-name.
-   Cubic-bezier-подобные waypoints дают плавно изогнутые пути, заметно отличающиеся друг от друга. */
+/* РџСЏС‚СЊ СЂР°Р·РЅС‹С… С‚СЂР°РµРєС‚РѕСЂРёР№ вЂ” РєР°Р¶РґРѕР№ С‡Р°СЃС‚РёС†Рµ РЅР°Р·РЅР°С‡Р°РµС‚СЃСЏ СЃРІРѕСЏ С‡РµСЂРµР· inline animation-name.
+   Cubic-bezier-РїРѕРґРѕР±РЅС‹Рµ waypoints РґР°СЋС‚ РїР»Р°РІРЅРѕ РёР·РѕРіРЅСѓС‚С‹Рµ РїСѓС‚Рё, Р·Р°РјРµС‚РЅРѕ РѕС‚Р»РёС‡Р°СЋС‰РёРµСЃСЏ РґСЂСѓРі РѕС‚ РґСЂСѓРіР°. */
 @keyframes float-up{0%{transform:translate(0,110vh);opacity:0}10%,90%{opacity:1}35%{transform:translate(30px,65vh)}65%{transform:translate(-25px,30vh)}100%{transform:translate(50px,-10vh);opacity:0}}
 @keyframes float-down{0%{transform:translate(0,-10vh);opacity:0}10%,90%{opacity:1}35%{transform:translate(-35px,30vh)}65%{transform:translate(25px,70vh)}100%{transform:translate(-55px,110vh);opacity:0}}
 @keyframes float-diag-right{0%{transform:translate(-12vw,110vh);opacity:0}10%,90%{opacity:1}50%{transform:translate(4vw,45vh)}100%{transform:translate(22vw,-10vh);opacity:0}}
@@ -118,16 +164,16 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @keyframes float-zigzag{0%{transform:translate(0,110vh);opacity:0}10%,90%{opacity:1}25%{transform:translate(45px,80vh)}50%{transform:translate(-45px,50vh)}75%{transform:translate(55px,20vh)}100%{transform:translate(-30px,-10vh);opacity:0}}
 
 .container{max-width:1180px;margin:0 auto;padding:max(28px, calc(env(safe-area-inset-top, 0px) + 14px)) max(20px, env(safe-area-inset-right, 0px)) max(40px, calc(env(safe-area-inset-bottom, 0px) + 16px)) max(20px, env(safe-area-inset-left, 0px));position:relative;z-index:1}
-/* На мобильных в установленной PWA Dynamic Island/notch требует больше места.
-   max() гарантирует минимум 70px от верха независимо от env() — на случай
-   если iOS вернёт неточное значение safe-area-inset-top. */
+/* РќР° РјРѕР±РёР»СЊРЅС‹С… РІ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅРѕР№ PWA Dynamic Island/notch С‚СЂРµР±СѓРµС‚ Р±РѕР»СЊС€Рµ РјРµСЃС‚Р°.
+   max() РіР°СЂР°РЅС‚РёСЂСѓРµС‚ РјРёРЅРёРјСѓРј 70px РѕС‚ РІРµСЂС…Р° РЅРµР·Р°РІРёСЃРёРјРѕ РѕС‚ env() вЂ” РЅР° СЃР»СѓС‡Р°Р№
+   РµСЃР»Рё iOS РІРµСЂРЅС‘С‚ РЅРµС‚РѕС‡РЅРѕРµ Р·РЅР°С‡РµРЅРёРµ safe-area-inset-top. */
 @media (max-width: 640px){
   .container{padding-top:max(70px, calc(env(safe-area-inset-top, 0px) + 24px))}
 }
-/* iOS PWA standalone mode (галочка "Открыть как Web App" включена) — iOS
-   некорректно применяет env(safe-area-inset-top), контент уходит под Dynamic
-   Island/notch. Принудительно даём 95px минимум для верха экрана. В Safari
-   (обычной вкладке) это правило не действует — display-mode: browser. */
+/* iOS PWA standalone mode (РіР°Р»РѕС‡РєР° "РћС‚РєСЂС‹С‚СЊ РєР°Рє Web App" РІРєР»СЋС‡РµРЅР°) вЂ” iOS
+   РЅРµРєРѕСЂСЂРµРєС‚РЅРѕ РїСЂРёРјРµРЅСЏРµС‚ env(safe-area-inset-top), РєРѕРЅС‚РµРЅС‚ СѓС…РѕРґРёС‚ РїРѕРґ Dynamic
+   Island/notch. РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РґР°С‘Рј 95px РјРёРЅРёРјСѓРј РґР»СЏ РІРµСЂС…Р° СЌРєСЂР°РЅР°. Р’ Safari
+   (РѕР±С‹С‡РЅРѕР№ РІРєР»Р°РґРєРµ) СЌС‚Рѕ РїСЂР°РІРёР»Рѕ РЅРµ РґРµР№СЃС‚РІСѓРµС‚ вЂ” display-mode: browser. */
 @media (display-mode: standalone), (display-mode: fullscreen){
   .container{padding-top:max(95px, calc(env(safe-area-inset-top, 0px) + 50px)) !important}
 }
@@ -136,15 +182,15 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 }
 
 .header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:28px}
-/* Мобильная шапка: location-block во всю ширину, чипы и source-indicator —
-   на отдельной строке, выровнены слева, компактный source-indicator. */
+/* РњРѕР±РёР»СЊРЅР°СЏ С€Р°РїРєР°: location-block РІРѕ РІСЃСЋ С€РёСЂРёРЅСѓ, С‡РёРїС‹ Рё source-indicator вЂ”
+   РЅР° РѕС‚РґРµР»СЊРЅРѕР№ СЃС‚СЂРѕРєРµ, РІС‹СЂРѕРІРЅРµРЅС‹ СЃР»РµРІР°, РєРѕРјРїР°РєС‚РЅС‹Р№ source-indicator. */
 @media (max-width: 640px){
   .header{flex-direction:column;align-items:stretch;gap:12px;margin-bottom:18px}
   .header-right{justify-content:flex-start;flex-wrap:wrap;gap:8px;width:100%}
-  /* Source-indicator на мобиле — компактная пилюля «● Источник».
-     Полный лейбл "Источник данных" + название модели не помещались;
-     круглая точка без текста была непонятной. Одно короткое слово
-     даёт ясность и помещается рядом с чипами в одну строку. */
+  /* Source-indicator РЅР° РјРѕР±РёР»Рµ вЂ” РєРѕРјРїР°РєС‚РЅР°СЏ РїРёР»СЋР»СЏ В«в—Џ РСЃС‚РѕС‡РЅРёРєВ».
+     РџРѕР»РЅС‹Р№ Р»РµР№Р±Р» "РСЃС‚РѕС‡РЅРёРє РґР°РЅРЅС‹С…" + РЅР°Р·РІР°РЅРёРµ РјРѕРґРµР»Рё РЅРµ РїРѕРјРµС‰Р°Р»РёСЃСЊ;
+     РєСЂСѓРіР»Р°СЏ С‚РѕС‡РєР° Р±РµР· С‚РµРєСЃС‚Р° Р±С‹Р»Р° РЅРµРїРѕРЅСЏС‚РЅРѕР№. РћРґРЅРѕ РєРѕСЂРѕС‚РєРѕРµ СЃР»РѕРІРѕ
+     РґР°С‘С‚ СЏСЃРЅРѕСЃС‚СЊ Рё РїРѕРјРµС‰Р°РµС‚СЃСЏ СЂСЏРґРѕРј СЃ С‡РёРїР°РјРё РІ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ. */
   .source-indicator{padding:7px 12px;gap:7px;border-radius:100px}
   .source-indicator > div{display:none}
   .source-indicator .si-mobile-label{display:inline-block;font-size:12px;font-weight:500;color:rgba(232,240,255,0.9);letter-spacing:0.01em}
@@ -174,24 +220,24 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);pointer-events:none}
 
 .hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:sticky;top:max(env(safe-area-inset-top,0px),0px);z-index:50;isolation:isolate;min-height:220px;will-change:padding,min-height;transition:padding 0.42s cubic-bezier(0.4,0,0.2,1),min-height 0.42s cubic-bezier(0.4,0,0.2,1),box-shadow 0.42s cubic-bezier(0.4,0,0.2,1),border-radius 0.42s cubic-bezier(0.4,0,0.2,1)}
-/* COMPACT — когда залип сверху при скролле. Карточка сохраняет ширину
-   и скруглённые края, никакой подложки/overlay сзади. Она просто
-   «висит в воздухе» как настоящий floating glass — скроллящийся
-   контент идёт под её основное тело (с blur через .glass backdrop-filter)
-   и виден через скруглённые уголки как нормальная часть страницы. */
+/* COMPACT вЂ” РєРѕРіРґР° Р·Р°Р»РёРї СЃРІРµСЂС…Сѓ РїСЂРё СЃРєСЂРѕР»Р»Рµ. РљР°СЂС‚РѕС‡РєР° СЃРѕС…СЂР°РЅСЏРµС‚ С€РёСЂРёРЅСѓ
+   Рё СЃРєСЂСѓРіР»С‘РЅРЅС‹Рµ РєСЂР°СЏ, РЅРёРєР°РєРѕР№ РїРѕРґР»РѕР¶РєРё/overlay СЃР·Р°РґРё. РћРЅР° РїСЂРѕСЃС‚Рѕ
+   В«РІРёСЃРёС‚ РІ РІРѕР·РґСѓС…РµВ» РєР°Рє РЅР°СЃС‚РѕСЏС‰РёР№ floating glass вЂ” СЃРєСЂРѕР»Р»СЏС‰РёР№СЃСЏ
+   РєРѕРЅС‚РµРЅС‚ РёРґС‘С‚ РїРѕРґ РµС‘ РѕСЃРЅРѕРІРЅРѕРµ С‚РµР»Рѕ (СЃ blur С‡РµСЂРµР· .glass backdrop-filter)
+   Рё РІРёРґРµРЅ С‡РµСЂРµР· СЃРєСЂСѓРіР»С‘РЅРЅС‹Рµ СѓРіРѕР»РєРё РєР°Рє РЅРѕСЂРјР°Р»СЊРЅР°СЏ С‡Р°СЃС‚СЊ СЃС‚СЂР°РЅРёС†С‹. */
 .hero.stuck{
   padding:14px 22px;
   min-height:0;
-  /* Усиленный glass — backdrop-filter с большим blur делает «стеклянный»
-     эффект сильнее, скроллящийся контент под карточкой становится мягче.
-     Базовый .glass blur:24px → 36px только в stuck. */
+  /* РЈСЃРёР»РµРЅРЅС‹Р№ glass вЂ” backdrop-filter СЃ Р±РѕР»СЊС€РёРј blur РґРµР»Р°РµС‚ В«СЃС‚РµРєР»СЏРЅРЅС‹Р№В»
+     СЌС„С„РµРєС‚ СЃРёР»СЊРЅРµРµ, СЃРєСЂРѕР»Р»СЏС‰РёР№СЃСЏ РєРѕРЅС‚РµРЅС‚ РїРѕРґ РєР°СЂС‚РѕС‡РєРѕР№ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РјСЏРіС‡Рµ.
+     Р‘Р°Р·РѕРІС‹Р№ .glass blur:24px в†’ 36px С‚РѕР»СЊРєРѕ РІ stuck. */
   backdrop-filter:blur(36px) saturate(190%);
   -webkit-backdrop-filter:blur(36px) saturate(190%);
   box-shadow:0 14px 38px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.07)
 }
-/* Подсветка-линия сверху от .glass — в stuck выглядит как шов */
+/* РџРѕРґСЃРІРµС‚РєР°-Р»РёРЅРёСЏ СЃРІРµСЂС…Сѓ РѕС‚ .glass вЂ” РІ stuck РІС‹РіР»СЏРґРёС‚ РєР°Рє С€РѕРІ */
 .glass.hero.stuck::before{opacity:0}
-/* Фото-фон чуть прозрачнее в stuck — даём glass-эффекту проявиться сильнее */
+/* Р¤РѕС‚Рѕ-С„РѕРЅ С‡СѓС‚СЊ РїСЂРѕР·СЂР°С‡РЅРµРµ РІ stuck вЂ” РґР°С‘Рј glass-СЌС„С„РµРєС‚Сѓ РїСЂРѕСЏРІРёС‚СЊСЃСЏ СЃРёР»СЊРЅРµРµ */
 .hero.stuck .hero-scene{opacity:0.38}
 .hero.stuck .hero-scene{opacity:0.45}
 .hero.stuck .hero-overlay{background:linear-gradient(90deg,rgba(5,10,38,0.88) 0%,rgba(5,10,38,0.7) 60%,rgba(5,10,38,0.4) 100%)}
@@ -206,22 +252,22 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-scene{position:absolute;inset:0;z-index:0;border-radius:24px;overflow:hidden;background-color:#0a1838;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.6s ease-in-out}
 .hero-overlay{position:absolute;inset:0;z-index:1;border-radius:24px;background:linear-gradient(90deg,rgba(5,10,38,0.78) 0%,rgba(5,10,38,0.55) 35%,rgba(5,10,38,0.22) 70%,rgba(5,10,38,0.05) 100%);pointer-events:none;transition:background 0.6s ease}
 .hero-info{position:relative;z-index:2}
-/* Адаптация overlay под палитру time-of-day (фото уже несёт цвет — оверлей только подкрашивает левую часть для читаемости) */
+/* РђРґР°РїС‚Р°С†РёСЏ overlay РїРѕРґ РїР°Р»РёС‚СЂСѓ time-of-day (С„РѕС‚Рѕ СѓР¶Рµ РЅРµСЃС‘С‚ С†РІРµС‚ вЂ” РѕРІРµСЂР»РµР№ С‚РѕР»СЊРєРѕ РїРѕРґРєСЂР°С€РёРІР°РµС‚ Р»РµРІСѓСЋ С‡Р°СЃС‚СЊ РґР»СЏ С‡РёС‚Р°РµРјРѕСЃС‚Рё) */
 .hero[data-tod="night"] .hero-overlay{background:linear-gradient(90deg,rgba(4,8,31,0.85) 0%,rgba(4,8,31,0.6) 35%,rgba(4,8,31,0.2) 70%,rgba(4,8,31,0.05) 100%)}
 .hero[data-tod="dusk"]  .hero-overlay{background:linear-gradient(90deg,rgba(35,12,40,0.78) 0%,rgba(35,12,40,0.5) 35%,rgba(35,12,40,0.15) 75%,rgba(35,12,40,0.02) 100%)}
 .hero[data-tod="dawn"]  .hero-overlay{background:linear-gradient(90deg,rgba(40,20,55,0.72) 0%,rgba(40,20,55,0.45) 35%,rgba(40,20,55,0.12) 75%,rgba(40,20,55,0.02) 100%)}
 .hero[data-tod="day"]   .hero-overlay{background:linear-gradient(90deg,rgba(8,20,55,0.7) 0%,rgba(8,20,55,0.42) 35%,rgba(8,20,55,0.12) 75%,rgba(8,20,55,0) 100%)}
-/* Слои погодных частиц (Этап 2) */
+/* РЎР»РѕРё РїРѕРіРѕРґРЅС‹С… С‡Р°СЃС‚РёС† (Р­С‚Р°Рї 2) */
 .hs-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;border-radius:24px}
 .hs-celestial{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:24px;overflow:hidden}
-/* Дождь — три варианта по ветру: штиль / ветрено / шторм */
+/* Р”РѕР¶РґСЊ вЂ” С‚СЂРё РІР°СЂРёР°РЅС‚Р° РїРѕ РІРµС‚СЂСѓ: С€С‚РёР»СЊ / РІРµС‚СЂРµРЅРѕ / С€С‚РѕСЂРј */
 .hs-raindrop{position:absolute;top:-20px;width:1.5px;height:16px;background:linear-gradient(180deg,rgba(180,220,255,0.85) 0%,rgba(180,220,255,0) 100%);border-radius:1px;animation:hs-rain-calm linear infinite;will-change:transform}
 @keyframes hs-rain-calm{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-4px)}}
 @keyframes hs-rain-wind{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-32px)}}
 @keyframes hs-rain-storm{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-72px)}}
 .hs-bg[data-wind="windy"] .hs-raindrop{animation-name:hs-rain-wind;height:20px}
 .hs-bg[data-wind="storm"] .hs-raindrop{animation-name:hs-rain-storm;height:24px;width:2px}
-/* Снег — амплитуда и снос растут с ветром */
+/* РЎРЅРµРі вЂ” Р°РјРїР»РёС‚СѓРґР° Рё СЃРЅРѕСЃ СЂР°СЃС‚СѓС‚ СЃ РІРµС‚СЂРѕРј */
 .hs-snowflake{position:absolute;top:-12px;border-radius:50%;background:radial-gradient(circle,#fff 0%,rgba(255,255,255,0.7) 60%,transparent 100%);box-shadow:0 0 4px rgba(255,255,255,0.6);animation:hs-snowfall-calm linear infinite,hs-snowsway-calm ease-in-out infinite alternate;will-change:transform}
 @keyframes hs-snowfall-calm{0%{transform:translateY(0)}100%{transform:translateY(260px)}}
 @keyframes hs-snowfall-wind{0%{transform:translateY(0) translateX(0)}100%{transform:translateY(260px) translateX(-50px)}}
@@ -230,21 +276,21 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 @keyframes hs-snowsway-wind{0%{margin-left:-22px}100%{margin-left:22px}}
 .hs-bg[data-wind="windy"] .hs-snowflake{animation-name:hs-snowfall-wind,hs-snowsway-wind}
 .hs-bg[data-wind="storm"] .hs-snowflake{animation-name:hs-snowfall-storm,hs-snowsway-wind}
-/* Стрики ветра при штормовом ветре (>12 м/с) — независимый слой, появляется для любой сцены */
+/* РЎС‚СЂРёРєРё РІРµС‚СЂР° РїСЂРё С€С‚РѕСЂРјРѕРІРѕРј РІРµС‚СЂРµ (>12 Рј/СЃ) вЂ” РЅРµР·Р°РІРёСЃРёРјС‹Р№ СЃР»РѕР№, РїРѕСЏРІР»СЏРµС‚СЃСЏ РґР»СЏ Р»СЋР±РѕР№ СЃС†РµРЅС‹ */
 .hs-windstreak{position:absolute;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(220,230,255,0.55) 50%,rgba(255,255,255,0) 100%);animation:hs-streak linear infinite;will-change:transform}
 @keyframes hs-streak{0%{transform:translateX(110%)}100%{transform:translateX(-110%)}}
-/* Туман — три плывущих горизонтальных слоя */
+/* РўСѓРјР°РЅ вЂ” С‚СЂРё РїР»С‹РІСѓС‰РёС… РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹С… СЃР»РѕСЏ */
 .hs-fogband{position:absolute;left:-30%;width:160%;height:60px;background:linear-gradient(90deg,transparent 0%,rgba(220,225,230,0.45) 25%,rgba(220,225,230,0.55) 50%,rgba(220,225,230,0.45) 75%,transparent 100%);filter:blur(8px);animation:hs-fogdrift linear infinite;will-change:transform}
 @keyframes hs-fogdrift{0%{transform:translateX(0)}100%{transform:translateX(20%)}}
-/* Молнии — overlay-вспышка (центральная, для грозового condition) */
+/* РњРѕР»РЅРёРё вЂ” overlay-РІСЃРїС‹С€РєР° (С†РµРЅС‚СЂР°Р»СЊРЅР°СЏ, РґР»СЏ РіСЂРѕР·РѕРІРѕРіРѕ condition) */
 .hs-lightning{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 25%,rgba(255,255,210,0.9) 0%,rgba(255,250,180,0.4) 25%,rgba(255,250,180,0) 60%);opacity:0;mix-blend-mode:screen;animation:hs-flash 7s steps(1,end) infinite;will-change:opacity}
 @keyframes hs-flash{
   0%,100%{opacity:0}
   2%{opacity:0.95}3%{opacity:0.3}3.4%{opacity:0.8}4%{opacity:0}
-  /* пауза */
+  /* РїР°СѓР·Р° */
   60%{opacity:0}62%{opacity:0.85}62.5%{opacity:0.2}63%{opacity:0.6}64%{opacity:0}
 }
-/* Далёкая гроза — тусклее, реже, смещена в верхний угол (Этап 4) */
+/* Р”Р°Р»С‘РєР°СЏ РіСЂРѕР·Р° вЂ” С‚СѓСЃРєР»РµРµ, СЂРµР¶Рµ, СЃРјРµС‰РµРЅР° РІ РІРµСЂС…РЅРёР№ СѓРіРѕР» (Р­С‚Р°Рї 4) */
 .hs-lightning-distant{position:absolute;top:0;left:0;right:0;height:65%;background:radial-gradient(ellipse at 80% 22%,rgba(255,250,200,0.55) 0%,rgba(255,250,180,0.2) 28%,rgba(255,250,180,0) 60%);opacity:0;mix-blend-mode:screen;animation:hs-flash-distant 22s steps(1,end) infinite;will-change:opacity}
 @keyframes hs-flash-distant{
   0%,100%{opacity:0}
@@ -342,7 +388,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .day-wind{font-size:10px;color:rgba(232,240,255,0.45);font-feature-settings:'tnum'}
 .day-tap{font-size:9px;color:rgba(0,212,255,0.5);text-transform:uppercase;letter-spacing:0.1em;margin-top:2px;font-weight:600}
 
-/* SOURCES CARD — new structure */
+/* SOURCES CARD вЂ” new structure */
 .sources-card{padding:26px;margin-bottom:14px}
 .sources-card h2{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px}
 .sources-card .sources-sub{font-size:12px;color:rgba(232,240,255,0.55);margin-bottom:18px}
@@ -432,11 +478,11 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
 /* MODAL */
 /* ============================================
-   PULL-TO-REFRESH — свайп вниз с верха страницы принудительно обновляет
-   PWA. Нужно потому что на iOS установленная PWA не подхватывает новые
-   версии HTML/CSS/JS даже с network-first SW — только при полном
-   закрытии и перезапуске. Этот gesture делает то же самое внутри
-   приложения, без необходимости копаться в настройках iOS.
+   PULL-TO-REFRESH вЂ” СЃРІР°Р№Рї РІРЅРёР· СЃ РІРµСЂС…Р° СЃС‚СЂР°РЅРёС†С‹ РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РѕР±РЅРѕРІР»СЏРµС‚
+   PWA. РќСѓР¶РЅРѕ РїРѕС‚РѕРјСѓ С‡С‚Рѕ РЅР° iOS СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅР°СЏ PWA РЅРµ РїРѕРґС…РІР°С‚С‹РІР°РµС‚ РЅРѕРІС‹Рµ
+   РІРµСЂСЃРёРё HTML/CSS/JS РґР°Р¶Рµ СЃ network-first SW вЂ” С‚РѕР»СЊРєРѕ РїСЂРё РїРѕР»РЅРѕРј
+   Р·Р°РєСЂС‹С‚РёРё Рё РїРµСЂРµР·Р°РїСѓСЃРєРµ. Р­С‚РѕС‚ gesture РґРµР»Р°РµС‚ С‚Рѕ Р¶Рµ СЃР°РјРѕРµ РІРЅСѓС‚СЂРё
+   РїСЂРёР»РѕР¶РµРЅРёСЏ, Р±РµР· РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё РєРѕРїР°С‚СЊСЃСЏ РІ РЅР°СЃС‚СЂРѕР№РєР°С… iOS.
    ============================================ */
 .pull-refresh{position:fixed;top:0;left:0;right:0;padding-top:max(env(safe-area-inset-top,0px),12px);padding-bottom:14px;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:auto;min-height:74px;transform:translateY(-110%);pointer-events:none;color:#00d4ff;background:linear-gradient(to bottom,rgba(2,6,26,0.92) 0%,rgba(2,6,26,0.85) 70%,rgba(2,6,26,0) 100%);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);will-change:transform}
 .pull-refresh.transitioning{transition:transform 0.32s cubic-bezier(0.4,0,0.2,1)}
@@ -448,10 +494,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .pull-refresh.ready .prr-text{color:#5eead4}
 .pull-refresh.refreshing .prr-text{color:#5eead4}
 
-/* «Мост» между двумя модалками: пока обе анимируются (одна закрывается,
-   другая открывается), их backdrop'ы полупрозрачны и сквозь них на доли
-   секунды виден главный экран. Body.modal-bridge накидывает плотный
-   статичный фон поверх всего, чтобы переход был полностью бесшовным. */
+/* В«РњРѕСЃС‚В» РјРµР¶РґСѓ РґРІСѓРјСЏ РјРѕРґР°Р»РєР°РјРё: РїРѕРєР° РѕР±Рµ Р°РЅРёРјРёСЂСѓСЋС‚СЃСЏ (РѕРґРЅР° Р·Р°РєСЂС‹РІР°РµС‚СЃСЏ,
+   РґСЂСѓРіР°СЏ РѕС‚РєСЂС‹РІР°РµС‚СЃСЏ), РёС… backdrop'С‹ РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹ Рё СЃРєРІРѕР·СЊ РЅРёС… РЅР° РґРѕР»Рё
+   СЃРµРєСѓРЅРґС‹ РІРёРґРµРЅ РіР»Р°РІРЅС‹Р№ СЌРєСЂР°РЅ. Body.modal-bridge РЅР°РєРёРґС‹РІР°РµС‚ РїР»РѕС‚РЅС‹Р№
+   СЃС‚Р°С‚РёС‡РЅС‹Р№ С„РѕРЅ РїРѕРІРµСЂС… РІСЃРµРіРѕ, С‡С‚РѕР±С‹ РїРµСЂРµС…РѕРґ Р±С‹Р» РїРѕР»РЅРѕСЃС‚СЊСЋ Р±РµСЃС€РѕРІРЅС‹Рј. */
 body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;background:rgba(5,10,38,0.7);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);pointer-events:none}
 
 .modal-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(5,10,38,0);backdrop-filter:blur(0px) saturate(100%);-webkit-backdrop-filter:blur(0px) saturate(100%);display:flex;align-items:flex-start;justify-content:center;padding:max(48px, env(safe-area-inset-top, 0px) + 28px) 20px max(24px, env(safe-area-inset-bottom, 0px) + 16px) 20px;opacity:0;pointer-events:none;transition:opacity 0.36s ease-out,background 0.36s ease-out,backdrop-filter 0.36s ease-out,-webkit-backdrop-filter 0.36s ease-out;overflow-y:auto}
@@ -461,13 +507,13 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(0,212,255,0.6), rgba(167,139,250,0.4), transparent);border-radius:28px 28px 0 0}
 .modal-close{position:absolute;top:18px;right:18px;width:38px;height:38px;border:none;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:50%;color:#e8f0ff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;backdrop-filter:blur(10px)}
 
-/* Swipe-handle на мобильных: визуальная подсказка «потяни вниз чтобы закрыть» */
+/* Swipe-handle РЅР° РјРѕР±РёР»СЊРЅС‹С…: РІРёР·СѓР°Р»СЊРЅР°СЏ РїРѕРґСЃРєР°Р·РєР° В«РїРѕС‚СЏРЅРё РІРЅРёР· С‡С‚РѕР±С‹ Р·Р°РєСЂС‹С‚СЊВ» */
 .swipe-handle{display:none}
 @media (max-width: 640px){
   .modal, .hdm-sheet{ touch-action: pan-y; }
   .swipe-handle{display:block;position:absolute;top:8px;left:50%;transform:translateX(-50%);width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,0.28);z-index:25;pointer-events:none}
   .hdm-sheet .swipe-handle{top:6px}
-  /* Модалки с swipe-handle: чуть больше padding-top чтобы handle не наезжал на заголовок */
+  /* РњРѕРґР°Р»РєРё СЃ swipe-handle: С‡СѓС‚СЊ Р±РѕР»СЊС€Рµ padding-top С‡С‚РѕР±С‹ handle РЅРµ РЅР°РµР·Р¶Р°Р» РЅР° Р·Р°РіРѕР»РѕРІРѕРє */
   .modal{padding-top:30px}
   .hdm-top{padding-top:calc(26px + env(safe-area-inset-top, 0px))}
 }
@@ -538,7 +584,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .scroll-arrow.disabled{opacity:0;pointer-events:none}
 .scroll-wrap > .days,.scroll-wrap > .hours-scroll,.scroll-wrap > .precip-scroll{margin-bottom:0}
 
-/* ===== Hourly Detail Modal — полноэкранная карточка "Почасовой" ===== */
+/* ===== Hourly Detail Modal вЂ” РїРѕР»РЅРѕСЌРєСЂР°РЅРЅР°СЏ РєР°СЂС‚РѕС‡РєР° "РџРѕС‡Р°СЃРѕРІРѕР№" ===== */
 .hdm-backdrop{position:fixed;inset:0;z-index:1100;background:rgba(5,10,38,0);backdrop-filter:blur(0px) saturate(100%);-webkit-backdrop-filter:blur(0px) saturate(100%);opacity:0;pointer-events:none;transition:opacity 0.4s ease-out,background 0.4s ease-out,backdrop-filter 0.4s ease-out,-webkit-backdrop-filter 0.4s ease-out;display:flex;align-items:stretch;justify-content:center}
 .hdm-backdrop.open{opacity:1;pointer-events:auto;background:rgba(3,7,28,0.78);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%)}
 .hdm-sheet{position:relative;width:100%;max-width:980px;background:linear-gradient(160deg,rgba(20,30,70,0.88) 0%,rgba(8,13,42,0.92) 100%);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border-left:1px solid rgba(255,255,255,0.06);border-right:1px solid rgba(255,255,255,0.06);box-shadow:inset 0 1px 0 rgba(255,255,255,0.1),0 -20px 80px rgba(0,0,0,0.5);display:flex;flex-direction:column;transform:translateY(80px) scale(0.94);opacity:0;filter:blur(8px);transition:transform 0.55s cubic-bezier(0.16,1,0.3,1) 0.08s,opacity 0.45s cubic-bezier(0.16,1,0.3,1) 0.08s,filter 0.45s cubic-bezier(0.16,1,0.3,1) 0.08s}
@@ -582,7 +628,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .scroll-arrow.hdm-arrow.right{right:14px;left:auto}
 .scroll-arrow.hdm-arrow:hover{background:rgba(0,212,255,0.28);border-color:rgba(0,212,255,0.85);box-shadow:0 8px 28px rgba(0,212,255,0.35)}
 
-/* ===== Precip Detail Modal — вертикальный скролл внутри hdm-sheet с обычными карточками ===== */
+/* ===== Precip Detail Modal вЂ” РІРµСЂС‚РёРєР°Р»СЊРЅС‹Р№ СЃРєСЂРѕР»Р» РІРЅСѓС‚СЂРё hdm-sheet СЃ РѕР±С‹С‡РЅС‹РјРё РєР°СЂС‚РѕС‡РєР°РјРё ===== */
 .pdm-scroll{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding:18px 18px 28px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);-webkit-overflow-scrolling:touch}
 .pdm-scroll::-webkit-scrollbar{width:8px}
 .pdm-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.03)}
@@ -619,7 +665,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .radar-status{font-size:12px;color:rgba(232,240,255,0.55);margin-top:14px;text-align:center;padding:8px;font-style:italic}
 .radar-status.error{color:#ff8080}
 
-/* Табы переключения «Радар / Прогноз» */
+/* РўР°Р±С‹ РїРµСЂРµРєР»СЋС‡РµРЅРёСЏ В«Р Р°РґР°СЂ / РџСЂРѕРіРЅРѕР·В» */
 .radar-tabs{display:flex;gap:6px;margin-bottom:14px;padding:4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px}
 .radar-tab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;background:transparent;border:none;color:rgba(232,240,255,0.65);cursor:pointer;font-family:'Onest',sans-serif;font-size:12px;font-weight:500;border-radius:10px;transition:all 0.2s ease;white-space:nowrap;user-select:none}
 .radar-tab .rt-emoji{font-size:14px}
@@ -648,7 +694,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   .pdm-scroll{padding:14px 14px 24px}
 }
 
-/* ===== Search Modal (Inverse search — «когда будет ...») ===== */
+/* ===== Search Modal (Inverse search вЂ” В«РєРѕРіРґР° Р±СѓРґРµС‚ ...В») ===== */
 .search-modal{max-width:680px}
 .search-modal .modal-day-label{color:#00d4ff}
 .search-input-row{display:flex;gap:10px;margin-bottom:18px}
@@ -768,7 +814,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   .container{padding:16px 14px 30px}
   .header{flex-direction:column;align-items:flex-start;gap:10px}
   .hero{padding:22px;grid-template-columns:1fr auto}
-  /* В stuck — компактный padding, ширина и скруглённые углы остаются как у обычной карточки */
+  /* Р’ stuck вЂ” РєРѕРјРїР°РєС‚РЅС‹Р№ padding, С€РёСЂРёРЅР° Рё СЃРєСЂСѓРіР»С‘РЅРЅС‹Рµ СѓРіР»С‹ РѕСЃС‚Р°СЋС‚СЃСЏ РєР°Рє Сѓ РѕР±С‹С‡РЅРѕР№ РєР°СЂС‚РѕС‡РєРё */
   .hero.stuck{padding:12px 18px}
   .weather-icon-3d{width:90px;height:90px;margin-top:0}
   .hero-temp-num{font-size:64px}
@@ -849,7 +895,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .geo-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(94,234,212,0.85);background:rgba(94,234,212,0.1);border:1px solid rgba(94,234,212,0.25);padding:2px 7px;border-radius:100px;font-weight:500;margin-left:6px;vertical-align:middle}
 .geo-tag.manual{color:rgba(167,139,250,0.85);background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.25)}
 
-/* City modal — uses .modal-backdrop / .modal base styles, adds its own internal layout */
+/* City modal вЂ” uses .modal-backdrop / .modal base styles, adds its own internal layout */
 .city-modal .modal-day-label{color:#00d4ff}
 .city-modal .modal-day-title{margin-bottom:14px}
 .city-geo-btn{width:100%;padding:14px 18px;background:linear-gradient(135deg,rgba(94,234,212,0.12) 0%,rgba(0,212,255,0.06) 100%);border:1.5px solid rgba(94,234,212,0.3);border-radius:14px;color:#5eead4;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.2s;margin-bottom:14px;text-align:left}
@@ -930,7 +976,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .search-chip .search-icon{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:#00d4ff;transition:transform 0.3s ease}
 .search-chip:hover .search-icon{transform:scale(1.15)}
 
-/* ===== Favorites row — чипы любимых городов под header'ом ===== */
+/* ===== Favorites row вЂ” С‡РёРїС‹ Р»СЋР±РёРјС‹С… РіРѕСЂРѕРґРѕРІ РїРѕРґ header'РѕРј ===== */
 .favorites-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) transparent;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .favorites-row::-webkit-scrollbar{height:4px}
 .favorites-row::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
@@ -951,13 +997,13 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   .fav-chip.add{padding:6px 11px}
 }
 
-/* Звезда в city-modal для добавления в избранное */
+/* Р—РІРµР·РґР° РІ city-modal РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РІ РёР·Р±СЂР°РЅРЅРѕРµ */
 .city-item-fav-btn{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(232,240,255,0.5);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;font-size:14px;line-height:1;transition:all 0.18s ease;margin-left:auto}
 .city-item-fav-btn:hover{background:rgba(252,211,77,0.15);border-color:rgba(252,211,77,0.4);color:#fbbf24;transform:scale(1.1)}
 .city-item-fav-btn.active{background:rgba(252,211,77,0.18);border-color:rgba(252,211,77,0.45);color:#fbbf24}
 .city-item-fav-btn.active:hover{background:rgba(255,100,100,0.15);border-color:rgba(255,100,100,0.35);color:#ff8080}
 
-/* Заголовок секции в списке городов city-modal */
+/* Р—Р°РіРѕР»РѕРІРѕРє СЃРµРєС†РёРё РІ СЃРїРёСЃРєРµ РіРѕСЂРѕРґРѕРІ city-modal */
 .city-section-header{padding:14px 4px 6px;font-size:10px;color:rgba(232,240,255,0.45);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;font-family:'JetBrains Mono',monospace}
 .city-section-header:first-child{padding-top:6px}
 
@@ -1000,7 +1046,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 /* ============================================
    API LOADER + ERROR BANNER
    ============================================ */
-/* .hero{position:relative} — было дубликатом, теперь .hero выше = sticky */
+/* .hero{position:relative} вЂ” Р±С‹Р»Рѕ РґСѓР±Р»РёРєР°С‚РѕРј, С‚РµРїРµСЂСЊ .hero РІС‹С€Рµ = sticky */
 .hero.loading::after{content:'';position:absolute;inset:0;border-radius:24px;background:rgba(5,10,38,0.4);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;z-index:3;transition:opacity 0.25s}
 .hero-loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border:3px solid rgba(0,212,255,0.2);border-top-color:#00d4ff;border-radius:50%;animation:spin 0.9s linear infinite;z-index:4;display:none}
 .hero.loading .hero-loader{display:block}
@@ -1022,7 +1068,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 }
 
 /* ============================================
-   ASTRO / PHOTO CARD (В1)
+   ASTRO / PHOTO CARD (Р’1)
    ============================================ */
 .astro-photo{padding:22px;margin-bottom:18px}
 .astro-photo .card-title{margin-bottom:14px}
@@ -1073,7 +1119,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 }
 
 /* ============================================
-   FORECAST CONFIDENCE (В2) — индекс согласия моделей
+   FORECAST CONFIDENCE (Р’2) вЂ” РёРЅРґРµРєСЃ СЃРѕРіР»Р°СЃРёСЏ РјРѕРґРµР»РµР№
    ============================================ */
 .confidence-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid var(--conf-color,rgba(74,222,128,0.4));font-family:'JetBrains Mono',monospace;font-size:11px;color:#fff;backdrop-filter:blur(8px);transition:all 0.25s ease;cursor:help}
 .confidence-chip:hover{box-shadow:0 0 16px var(--conf-glow,rgba(74,222,128,0.25));transform:translateY(-1px)}
@@ -1082,17 +1128,17 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .confidence-chip .cc-val{font-weight:700;color:var(--conf-color,#4ade80);font-size:13px}
 .confidence-chip .cc-status{font-size:11px;color:rgba(232,240,255,0.7);font-family:'Onest',sans-serif;font-weight:500}
 
-/* Cветовые кодировки уровня согласия */
+/* CРІРµС‚РѕРІС‹Рµ РєРѕРґРёСЂРѕРІРєРё СѓСЂРѕРІРЅСЏ СЃРѕРіР»Р°СЃРёСЏ */
 .cc-high   { --conf-color: #4ade80; --conf-glow: rgba(74,222,128,0.25); }
 .cc-mid    { --conf-color: #facc15; --conf-glow: rgba(250,204,21,0.22); }
 .cc-low    { --conf-color: #fb923c; --conf-glow: rgba(251,146,60,0.22); }
 .cc-veryLow{ --conf-color: #ef4444; --conf-glow: rgba(239,68,68,0.22); }
 
-/* Цветная риска внизу карточки дня — индикатор согласия для этого дня */
+/* Р¦РІРµС‚РЅР°СЏ СЂРёСЃРєР° РІРЅРёР·Сѓ РєР°СЂС‚РѕС‡РєРё РґРЅСЏ вЂ” РёРЅРґРёРєР°С‚РѕСЂ СЃРѕРіР»Р°СЃРёСЏ РґР»СЏ СЌС‚РѕРіРѕ РґРЅСЏ */
 .day{position:relative}
 .day-confidence-bar{position:absolute;left:10%;right:10%;bottom:6px;height:3px;border-radius:2px;background:var(--day-conf-color,rgba(74,222,128,0.5));box-shadow:0 0 8px var(--day-conf-color,rgba(74,222,128,0.4));opacity:0.85;pointer-events:none}
 /* ============================================
-   COMPARE MODE — режим сравнения двух городов
+   COMPARE MODE вЂ” СЂРµР¶РёРј СЃСЂР°РІРЅРµРЅРёСЏ РґРІСѓС… РіРѕСЂРѕРґРѕРІ
    ============================================ */
 .compare-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.35);border-radius:100px;color:#e8f0ff;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(10px);-webkit-tap-highlight-color:transparent}
 .compare-chip:hover{background:rgba(167,139,250,0.16);border-color:rgba(167,139,250,0.55);transform:translateY(-1px)}
@@ -1100,7 +1146,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .compare-icon{font-size:14px;line-height:1}
 .compare-chip-label{font-weight:500}
 
-/* Банер активного режима сравнения */
+/* Р‘Р°РЅРµСЂ Р°РєС‚РёРІРЅРѕРіРѕ СЂРµР¶РёРјР° СЃСЂР°РІРЅРµРЅРёСЏ */
 .compare-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:14px;background:linear-gradient(135deg,rgba(0,212,255,0.12),rgba(167,139,250,0.14));border:1px solid rgba(167,139,250,0.4);border-radius:14px;font-size:13px;color:#e8f0ff}
 .compare-banner .cb-icon{font-size:18px;line-height:1}
 .compare-banner .cb-text{flex:1;min-width:0}
@@ -1109,9 +1155,9 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .compare-banner .cb-close{flex-shrink:0;width:30px;height:30px;border:none;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:50%;color:#e8f0ff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.2s}
 .compare-banner .cb-close:hover{background:rgba(255,80,80,0.18);border-color:rgba(255,100,100,0.45);transform:rotate(90deg)}
 
-/* Когда compare активен: скрываем все обычные карточки. Сравнительный режим
-   фокусирует на быстром визуальном A↔B; пыльца/климат/окна возможностей/
-   астро-фото нерелевантны в этом контексте. */
+/* РљРѕРіРґР° compare Р°РєС‚РёРІРµРЅ: СЃРєСЂС‹РІР°РµРј РІСЃРµ РѕР±С‹С‡РЅС‹Рµ РєР°СЂС‚РѕС‡РєРё. РЎСЂР°РІРЅРёС‚РµР»СЊРЅС‹Р№ СЂРµР¶РёРј
+   С„РѕРєСѓСЃРёСЂСѓРµС‚ РЅР° Р±С‹СЃС‚СЂРѕРј РІРёР·СѓР°Р»СЊРЅРѕРј Aв†”B; РїС‹Р»СЊС†Р°/РєР»РёРјР°С‚/РѕРєРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚РµР№/
+   Р°СЃС‚СЂРѕ-С„РѕС‚Рѕ РЅРµСЂРµР»РµРІР°РЅС‚РЅС‹ РІ СЌС‚РѕРј РєРѕРЅС‚РµРєСЃС‚Рµ. */
 body.compare-mode .glass.hero,
 body.compare-mode .metrics,
 body.compare-mode .astro-row,
@@ -1144,7 +1190,7 @@ body.compare-mode .astro-photo { display:none !important }
 .ch-feels{font-size:11px;color:rgba(232,240,255,0.55);margin-top:2px}
 .compare-divider-vs{font-size:24px;color:rgba(232,240,255,0.4);font-weight:300;align-self:center}
 
-/* "Где лучше" summary */
+/* "Р“РґРµ Р»СѓС‡С€Рµ" summary */
 .compare-summary{padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:14px;color:#e8f0ff}
 .cs-icon{font-size:18px;line-height:1;flex-shrink:0}
 
@@ -1171,10 +1217,10 @@ body.compare-mode .astro-photo { display:none !important }
 .ccc-dot.b{background:#a78bfa;box-shadow:0 0 6px #a78bfa}
 .compare-chart-wrap{position:relative;height:180px}
 
-/* Dual 10-day forecast — ОДИН общий горизонтальный скролл, два ряда внутри.
-   Лейблы городов sticky-залипают на левый край, обе ленты двигаются вместе
-   нативной inertia-прокруткой. Никакого JS-синхрона между двумя скролл-
-   контейнерами не нужно — это родная фишка sticky. */
+/* Dual 10-day forecast вЂ” РћР”РРќ РѕР±С‰РёР№ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ СЃРєСЂРѕР»Р», РґРІР° СЂСЏРґР° РІРЅСѓС‚СЂРё.
+   Р›РµР№Р±Р»С‹ РіРѕСЂРѕРґРѕРІ sticky-Р·Р°Р»РёРїР°СЋС‚ РЅР° Р»РµРІС‹Р№ РєСЂР°Р№, РѕР±Рµ Р»РµРЅС‚С‹ РґРІРёРіР°СЋС‚СЃСЏ РІРјРµСЃС‚Рµ
+   РЅР°С‚РёРІРЅРѕР№ inertia-РїСЂРѕРєСЂСѓС‚РєРѕР№. РќРёРєР°РєРѕРіРѕ JS-СЃРёРЅС…СЂРѕРЅР° РјРµР¶РґСѓ РґРІСѓРјСЏ СЃРєСЂРѕР»Р»-
+   РєРѕРЅС‚РµР№РЅРµСЂР°РјРё РЅРµ РЅСѓР¶РЅРѕ вЂ” СЌС‚Рѕ СЂРѕРґРЅР°СЏ С„РёС€РєР° sticky. */
 .compare-days{padding:18px}
 .compare-days h2{font-size:14px;font-weight:600;color:#fff;margin-bottom:14px}
 .cd-table{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);position:relative}
@@ -1216,7 +1262,7 @@ body.compare-mode .astro-photo { display:none !important }
   .compare-chart-wrap{height:160px}
 }
 
-/* === Алерт-баннер для экстремальной температуры (жара / холод) === */
+/* === РђР»РµСЂС‚-Р±Р°РЅРЅРµСЂ РґР»СЏ СЌРєСЃС‚СЂРµРјР°Р»СЊРЅРѕР№ С‚РµРјРїРµСЂР°С‚СѓСЂС‹ (Р¶Р°СЂР° / С…РѕР»РѕРґ) === */
 .weather-alert-banner{display:flex;align-items:center;gap:14px;padding:13px 18px;margin:0 0 14px;border-radius:14px;background:linear-gradient(135deg,rgba(239,68,68,0.18),rgba(251,146,60,0.12));border:1px solid rgba(239,68,68,0.35);box-shadow:0 4px 18px rgba(239,68,68,0.18),inset 0 1px 0 rgba(255,255,255,0.08);animation:wa-pulse 3s ease-in-out infinite}
 .weather-alert-banner.cold{background:linear-gradient(135deg,rgba(96,165,250,0.18),rgba(125,211,252,0.12));border-color:rgba(125,211,252,0.4);box-shadow:0 4px 18px rgba(125,211,252,0.2),inset 0 1px 0 rgba(255,255,255,0.08)}
 .weather-alert-banner .wa-icon{font-size:24px;line-height:1;flex-shrink:0;filter:drop-shadow(0 0 8px rgba(255,180,80,0.7))}
@@ -1237,7 +1283,7 @@ body.compare-mode .astro-photo { display:none !important }
 .day-confidence-bar.low    { --day-conf-color:#fb923c }
 .day-confidence-bar.veryLow{ --day-conf-color:#ef4444 }
 
-/* Легенда «согласие моделей» под кнопкой AVG в модалке источника */
+/* Р›РµРіРµРЅРґР° В«СЃРѕРіР»Р°СЃРёРµ РјРѕРґРµР»РµР№В» РїРѕРґ РєРЅРѕРїРєРѕР№ AVG РІ РјРѕРґР°Р»РєРµ РёСЃС‚РѕС‡РЅРёРєР° */
 .conf-hint{margin:14px 2px 16px;padding:12px 14px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px}
 .conf-hint-text{font-size:11.5px;color:rgba(232,240,255,0.7);margin-bottom:9px;line-height:1.4}
 .conf-hint-legend{display:flex;flex-wrap:wrap;gap:10px 16px}
@@ -1253,7 +1299,7 @@ body.compare-mode .astro-photo { display:none !important }
   .chl-item{font-size:10.5px}
 }
 
-/* Inline-чип согласия моделей в hero (рядом с "По данным усреднения 7 моделей") */
+/* Inline-С‡РёРї СЃРѕРіР»Р°СЃРёСЏ РјРѕРґРµР»РµР№ РІ hero (СЂСЏРґРѕРј СЃ "РџРѕ РґР°РЅРЅС‹Рј СѓСЃСЂРµРґРЅРµРЅРёСЏ 7 РјРѕРґРµР»РµР№") */
 .hero-conf{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,0.05);border:1px solid var(--conf-color,#4ade80);font-family:'JetBrains Mono',monospace;font-size:10px;color:#fff;font-weight:600;margin-left:6px;vertical-align:middle;cursor:help;transition:all 0.2s}
 .hero-conf:hover{box-shadow:0 0 10px var(--conf-glow,rgba(74,222,128,0.3))}
 .hero-conf .hc-dot{width:5px;height:5px;border-radius:50%;background:var(--conf-color,#4ade80);box-shadow:0 0 6px var(--conf-color,#4ade80)}
@@ -1269,7 +1315,7 @@ body.compare-mode .astro-photo { display:none !important }
 }
 
 /* ============================================
-   ACTIVITY WINDOWS (В3) — окна возможностей
+   ACTIVITY WINDOWS (Р’3) вЂ” РѕРєРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚РµР№
    ============================================ */
 .activity-windows{padding:22px;margin-bottom:18px}
 .activity-windows h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -1294,7 +1340,7 @@ body.compare-mode .astro-photo { display:none !important }
 .aw-cell.aw-not-found .aw-result{color:rgba(232,240,255,0.55);font-family:'Onest',sans-serif;font-size:12px;font-weight:500}
 .aw-hint{font-size:10px;color:rgba(232,240,255,0.5);font-family:'JetBrains Mono',monospace}
 
-/* Цветовые акценты разных активностей */
+/* Р¦РІРµС‚РѕРІС‹Рµ Р°РєС†РµРЅС‚С‹ СЂР°Р·РЅС‹С… Р°РєС‚РёРІРЅРѕСЃС‚РµР№ */
 .aw-cell.aw-jogging  { --aw-accent:#4ade80; --aw-glow:rgba(74,222,128,0.15)  }
 .aw-cell.aw-kids     { --aw-accent:#a78bfa; --aw-glow:rgba(167,139,250,0.15) }
 .aw-cell.aw-bbq      { --aw-accent:#fb923c; --aw-glow:rgba(251,146,60,0.15)  }
@@ -1312,7 +1358,7 @@ body.compare-mode .astro-photo { display:none !important }
 }
 
 /* ============================================
-   CLIMATE CONTEXT (В4) — сравнение с климатической нормой
+   CLIMATE CONTEXT (Р’4) вЂ” СЃСЂР°РІРЅРµРЅРёРµ СЃ РєР»РёРјР°С‚РёС‡РµСЃРєРѕР№ РЅРѕСЂРјРѕР№
    ============================================ */
 .climate-card{padding:22px;margin-bottom:18px;display:flex;flex-direction:column;gap:14px}
 .climate-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -1351,7 +1397,7 @@ body.compare-mode .astro-photo { display:none !important }
 }
 
 /* ============================================
-   POLLEN CARD (В5)
+   POLLEN CARD (Р’5)
    ============================================ */
 .pollen-card{padding:22px;margin-bottom:18px}
 .pollen-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -1395,7 +1441,7 @@ body.compare-mode .astro-photo { display:none !important }
 }
 
 /* ============================================
-   STORM TRACKER (В6) — гроза-индикатор на 48ч
+   STORM TRACKER (Р’6) вЂ” РіСЂРѕР·Р°-РёРЅРґРёРєР°С‚РѕСЂ РЅР° 48С‡
    ============================================ */
 .storm-card{padding:22px;margin-bottom:18px}
 .storm-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -1443,7 +1489,7 @@ body.compare-mode .astro-photo { display:none !important }
   .storm-legend{gap:8px}
 }
 
-/* === Accuracy card (В7) — самооценка точности источников === */
+/* === Accuracy card (Р’7) вЂ” СЃР°РјРѕРѕС†РµРЅРєР° С‚РѕС‡РЅРѕСЃС‚Рё РёСЃС‚РѕС‡РЅРёРєРѕРІ === */
 .accuracy-card{padding:22px;margin-bottom:18px}
 .accuracy-card h2{font-size:14px;font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:4px}
 .accuracy-card h2 .ac-emoji{font-size:18px;filter:drop-shadow(0 0 6px rgba(94,234,212,0.55))}
@@ -1493,4 +1539,2116 @@ body.compare-mode .astro-photo { display:none !important }
   .acc-name{font-size:11px}
   .acc-metric{font-size:10px}
 }
+
+/* ============================================================
+   LIGHT THEME вЂ” peach / ivory СЃ РєРѕСЂР°Р»Р»РѕРІС‹РјРё Р°РєС†РµРЅС‚Р°РјРё
+   РћРґРёРЅ Р±РѕР»СЊС€РѕР№ override-Р±Р»РѕРє РІ РєРѕРЅС†Рµ С„Р°Р№Р»Р°, РІСЃРµ РїСЂР°РІРёР»Р° вЂ” РІС‹СЃРѕРєРѕР№
+   СЃРїРµС†РёС„РёС‡РЅРѕСЃС‚Рё С‡РµСЂРµР· :root[data-theme="light"], С‡С‚РѕР±С‹ РїРµСЂРµРєСЂС‹С‚СЊ
+   СЃСѓС‰РµСЃС‚РІСѓСЋС‰РёРµ dark-СЃС‚РёР»Рё Р±РµР· !important РіРґРµ РІРѕР·РјРѕР¶РЅРѕ.
+   ============================================================ */
+:root[data-theme="light"] html{background-color:#fdf3e3;scrollbar-color:rgba(217,96,47,0.3) transparent}
+:root[data-theme="light"] body{
+  color:#2d1a10;
+  background-color:#fcc99a;
+  background:
+    radial-gradient(ellipse at 20% 0%, #ffd6ad 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, #f5b27d 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 50%, #ffdeba 0%, #fac79a 100%);
+  background-attachment:fixed;
+}
+:root[data-theme="light"] body::before{
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(217,96,47,0.06) 0%, transparent 30%),
+    radial-gradient(circle at 85% 75%, rgba(192,83,42,0.05) 0%, transparent 30%),
+    radial-gradient(circle at 50% 50%, rgba(184,115,51,0.04) 0%, transparent 45%);
+}
+
+/* РЎРєСЂРѕР»Р»Р±Р°СЂ РІ СЃРІРµС‚Р»РѕР№ С‚РµРјРµ вЂ” glass-СЃС‚РёР»СЊ СЃ С‚С‘РїР»С‹РјРё РєРѕСЂР°Р»Р»РѕРІС‹РјРё С‚РѕРЅР°РјРё.
+   Р’РђР–РќРћ: :root == html, РїРѕСЌС‚РѕРјСѓ СЃРµР»РµРєС‚РѕСЂ :root[data-theme="light"] html
+   РЅРµ СЂР°Р±РѕС‚Р°РµС‚ (РЅРµС‚ html РІРЅСѓС‚СЂРё html). РЎРµР»РµРєС‚РѕСЂ Р±РµР· html вЂ” РєРѕСЂСЂРµРєС‚РЅРѕ. */
+:root[data-theme="light"]{scrollbar-color:#d9602f rgba(255,235,210,0.4)}
+:root[data-theme="light"] body{scrollbar-color:#d9602f rgba(255,235,210,0.4)}
+:root[data-theme="light"]::-webkit-scrollbar,
+:root[data-theme="light"] body::-webkit-scrollbar{width:12px;height:12px;background:transparent}
+:root[data-theme="light"]::-webkit-scrollbar-track,
+:root[data-theme="light"] body::-webkit-scrollbar-track{
+  background:linear-gradient(90deg, rgba(255,228,195,0.45) 0%, rgba(255,218,180,0.55) 100%);
+  border-radius:12px;
+  box-shadow:inset 0 0 4px rgba(160,90,40,0.15);
+}
+:root[data-theme="light"]::-webkit-scrollbar-thumb,
+:root[data-theme="light"] body::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,
+    #ffb185 0%,
+    #e8794a 30%,
+    #c0532a 60%,
+    #a8451c 100%);
+  border-radius:12px;
+  border:1.5px solid rgba(168,69,28,0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    inset 0 -1px 0 rgba(120,50,15,0.25),
+    0 0 8px rgba(192,83,42,0.32),
+    0 2px 6px rgba(120,50,15,0.2);
+  min-height:36px;
+}
+:root[data-theme="light"]::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] body::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,
+    #ffc4a0 0%,
+    #f08a5d 30%,
+    #d56330 60%,
+    #b85024 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.7),
+    inset 0 -1px 0 rgba(120,50,15,0.3),
+    0 0 14px rgba(192,83,42,0.55),
+    0 3px 10px rgba(120,50,15,0.28);
+}
+:root[data-theme="light"]::-webkit-scrollbar-thumb:active,
+:root[data-theme="light"] body::-webkit-scrollbar-thumb:active{
+  background:linear-gradient(180deg, #e8794a 0%, #a8451c 100%);
+}
+:root[data-theme="light"]::-webkit-scrollbar-corner,
+:root[data-theme="light"] body::-webkit-scrollbar-corner{background:transparent}
+
+/* Mobile вЂ” С‚РѕРЅСЊС€Рµ Рё РјРµРЅРµРµ Р·Р°РјРµС‚РЅРµРµ */
+@media (max-width: 640px){
+  :root[data-theme="light"]{scrollbar-color:rgba(192,83,42,0.55) transparent}
+  :root[data-theme="light"] body{scrollbar-color:rgba(192,83,42,0.55) transparent}
+  :root[data-theme="light"]::-webkit-scrollbar,
+  :root[data-theme="light"] body::-webkit-scrollbar{width:5px;height:5px}
+  :root[data-theme="light"]::-webkit-scrollbar-track,
+  :root[data-theme="light"] body::-webkit-scrollbar-track{background:transparent;box-shadow:none}
+  :root[data-theme="light"]::-webkit-scrollbar-thumb,
+  :root[data-theme="light"] body::-webkit-scrollbar-thumb{
+    background:linear-gradient(180deg, #e8794a 0%, #c0532a 100%);
+    border:none;
+    box-shadow:0 0 4px rgba(192,83,42,0.4);
+  }
+}
+
+/* Р’РЅСѓС‚СЂРµРЅРЅРёРµ СЃРєСЂРѕР»Р»С‹ (РґРЅРё, С‡Р°СЃС‹, РѕСЃР°РґРєРё, РјРѕРґР°Р»РєРё) вЂ” РµРґРёРЅР°СЏ С‚С‘РїР»Р°СЏ РїР°Р»РёС‚СЂР° */
+:root[data-theme="light"] .days::-webkit-scrollbar,
+:root[data-theme="light"] .hours-scroll::-webkit-scrollbar,
+:root[data-theme="light"] .precip-scroll::-webkit-scrollbar,
+:root[data-theme="light"] .hdm-scroll::-webkit-scrollbar,
+:root[data-theme="light"] .pdm-scroll::-webkit-scrollbar,
+:root[data-theme="light"] .voice-list::-webkit-scrollbar,
+:root[data-theme="light"] .city-list::-webkit-scrollbar,
+:root[data-theme="light"] .favorites-row::-webkit-scrollbar,
+:root[data-theme="light"] .cd-table::-webkit-scrollbar{
+  background:transparent;
+}
+:root[data-theme="light"] .days::-webkit-scrollbar-track,
+:root[data-theme="light"] .hours-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .precip-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .hdm-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .pdm-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .cd-table::-webkit-scrollbar-track{
+  background:rgba(192,83,42,0.1) !important;
+  border-radius:6px;
+}
+:root[data-theme="light"] .days::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .hours-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .precip-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .hdm-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .pdm-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .voice-list::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .city-list::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .favorites-row::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .cd-table::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg, #f08a5d 0%, #c0532a 100%) !important;
+  border-radius:6px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.4), 0 0 4px rgba(192,83,42,0.3);
+}
+:root[data-theme="light"] .days::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .hours-scroll::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .precip-scroll::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .hdm-scroll::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .pdm-scroll::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .voice-list::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .city-list::-webkit-scrollbar-thumb:hover,
+:root[data-theme="light"] .cd-table::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg, #ed7a50 0%, #a8451c 100%) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), 0 0 8px rgba(192,83,42,0.5);
+}
+
+/* Firefox scrollbar-width: thin РґР»СЏ РІРЅСѓС‚СЂРµРЅРЅРёС… СЃРєСЂРѕР»Р»РѕРІ */
+:root[data-theme="light"] .days,
+:root[data-theme="light"] .hours-scroll,
+:root[data-theme="light"] .precip-scroll,
+:root[data-theme="light"] .hdm-scroll,
+:root[data-theme="light"] .pdm-scroll,
+:root[data-theme="light"] .voice-list,
+:root[data-theme="light"] .city-list,
+:root[data-theme="light"] .favorites-row,
+:root[data-theme="light"] .cd-table{
+  scrollbar-color:#c0532a rgba(192,83,42,0.1);
+}
+
+/* Р§Р°СЃС‚РёС†С‹ вЂ” С‚С‘РїР»Р°СЏ РїР°Р»РёС‚СЂР° */
+:root[data-theme="light"] .particle{
+  background:rgba(217,96,47,0.4);
+  box-shadow:0 0 10px rgba(217,96,47,0.5);
+}
+
+/* Р‘Р°Р·РѕРІР°СЏ glass-РєР°СЂС‚РѕС‡РєР° в†’ Р±РµР»РѕРµ СЃС‚РµРєР»Рѕ РЅР° С‚С‘РїР»РѕРј С„РѕРЅРµ */
+:root[data-theme="light"] .glass{
+  background:linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,250,243,0.55) 100%);
+  border:1px solid rgba(180,120,80,0.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),inset 0 -1px 0 rgba(180,120,80,0.08),0 8px 32px rgba(180,110,60,0.12);
+}
+:root[data-theme="light"] .glass::before{
+  background:linear-gradient(90deg, transparent, rgba(217,96,47,0.35), transparent);
+}
+
+/* Р—Р°РіРѕР»РѕРІРѕРє Р»РѕРєР°С†РёРё, С‚РµРєСЃС‚ */
+:root[data-theme="light"] .location-icon{
+  background:rgba(217,96,47,0.14);
+  border:1px solid rgba(217,96,47,0.3);
+  box-shadow:0 0 20px rgba(217,96,47,0.15);
+  color:#c0532a;
+}
+:root[data-theme="light"] .location-text h1{color:#2d1a10}
+:root[data-theme="light"] .location-text p{color:rgba(45,26,16,0.6)}
+
+/* Source indicator (chip РІ С€Р°РїРєРµ) */
+:root[data-theme="light"] .source-indicator{
+  background:rgba(255,255,255,0.55);
+  color:#2d1a10;
+  border-color:var(--src-color, rgba(217,96,47,0.4));
+}
+:root[data-theme="light"] .source-indicator:hover{background:rgba(255,255,255,0.7)}
+:root[data-theme="light"] .source-indicator .si-label{color:rgba(45,26,16,0.55)}
+:root[data-theme="light"] .source-indicator .si-mobile-label{color:rgba(45,26,16,0.9)}
+:root[data-theme="light"] .source-indicator .si-name{color:var(--src-color, #c0532a)}
+
+/* Hero вЂ” overlay С‚РµРјРЅРёС‚, С‡С‚РѕР±С‹ Р±РµР»С‹Р№ С‚РµРєСЃС‚ РѕСЃС‚Р°Р»СЃСЏ С‡РёС‚Р°РµРјС‹Рј.
+   РњРѕР¶РЅРѕ РїРѕСЌС‚Р°РїРЅРѕ РїРѕРґРјРµРЅРёС‚СЊ РЅР° СЃРІРµС‚Р»С‹Рµ С„РѕС‚Рѕ (СЌС‚Р°Рї 2). */
+:root[data-theme="light"] .hero{
+  background:linear-gradient(135deg, rgba(255,255,255,0.65) 0%, rgba(255,250,243,0.5) 100%);
+  border:1px solid rgba(180,120,80,0.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.6),0 8px 32px rgba(180,110,60,0.16);
+}
+/* Р’ light theme hero-overlay РґРµР»Р°РµС‚ С„РѕС‚Рѕ Р±РѕР»РµРµ РІС‹Р¶Р¶РµРЅРЅС‹Рј/С‚С‘РїР»С‹Рј,
+   РЅРѕ РѕСЃС‚Р°РІР»СЏРµС‚ С‡РёС‚Р°РµРјРѕСЃС‚СЊ Р±РµР»РѕРіРѕ С‚РµРєСЃС‚Р° СЃРІРµСЂС…Сѓ */
+:root[data-theme="light"] .hero-overlay{
+  background:linear-gradient(90deg,rgba(60,30,15,0.65) 0%,rgba(60,30,15,0.4) 35%,rgba(60,30,15,0.1) 75%,rgba(60,30,15,0.02) 100%);
+}
+:root[data-theme="light"] .hero[data-tod="night"] .hero-overlay{
+  background:linear-gradient(90deg,rgba(35,18,8,0.7) 0%,rgba(35,18,8,0.45) 35%,rgba(35,18,8,0.15) 75%,rgba(35,18,8,0.05) 100%);
+}
+:root[data-theme="light"] .hero[data-tod="dusk"] .hero-overlay{
+  background:linear-gradient(90deg,rgba(120,50,20,0.55) 0%,rgba(120,50,20,0.32) 35%,rgba(120,50,20,0.08) 75%,rgba(120,50,20,0.02) 100%);
+}
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-overlay{
+  background:linear-gradient(90deg,rgba(160,90,40,0.45) 0%,rgba(160,90,40,0.25) 35%,rgba(160,90,40,0.05) 75%,rgba(160,90,40,0.02) 100%);
+}
+:root[data-theme="light"] .hero[data-tod="day"] .hero-overlay{
+  background:linear-gradient(90deg,rgba(80,40,20,0.4) 0%,rgba(80,40,20,0.2) 35%,rgba(80,40,20,0.04) 75%,rgba(80,40,20,0) 100%);
+}
+:root[data-theme="light"] .hero-temp-num{
+  color:#fff;
+  text-shadow:0 2px 16px rgba(60,20,5,0.6), 0 0 40px rgba(217,96,47,0.3);
+}
+:root[data-theme="light"] .hero.stuck .hero-overlay{
+  background:linear-gradient(90deg,rgba(60,30,15,0.7) 0%,rgba(60,30,15,0.5) 60%,rgba(60,30,15,0.25) 100%);
+}
+:root[data-theme="light"] .hero-feels strong{color:#ffd1a8}
+
+/* РњРµС‚СЂРёРєРё, РґРЅРё, hourly, РѕР±С‰РёРµ РєР°СЂС‚РѕС‡РєРё вЂ” Р·Р°РјРµРЅСЏРµРј РІСЃРµ В«Р±РµР»РѕРµ СЃС‚РµРєР»Рѕ РЅР° С‚С‘РјРЅРѕРјВ»
+   РЅР° В«Р±РµР»РѕРµ СЃС‚РµРєР»Рѕ РЅР° С‚С‘РїР»РѕРјВ» С‡РµСЂРµР· С€РёСЂРѕРєСѓСЋ РіСЂСѓРїРїСѓ СЃРµР»РµРєС‚РѕСЂРѕРІ */
+:root[data-theme="light"] .metric,
+:root[data-theme="light"] .astro-card,
+:root[data-theme="light"] .hourly-card,
+:root[data-theme="light"] .days .day,
+:root[data-theme="light"] .precip-card,
+:root[data-theme="light"] .storm-card,
+:root[data-theme="light"] .activity-card,
+:root[data-theme="light"] .pollen-card,
+:root[data-theme="light"] .climate-card,
+:root[data-theme="light"] .astro-photo-card,
+:root[data-theme="light"] .accuracy-card,
+:root[data-theme="light"] .sources-card,
+:root[data-theme="light"] .acc-row{
+  background:linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,250,243,0.55) 100%);
+  border-color:rgba(180,120,80,0.2);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.55), 0 4px 18px rgba(180,110,60,0.1);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .metric:hover,
+:root[data-theme="light"] .days .day:hover{
+  background:linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,250,243,0.7) 100%);
+  border-color:rgba(217,96,47,0.4);
+}
+
+/* РўРµРєСЃС‚ Рё РїРѕРґРїРёСЃРё РІРЅСѓС‚СЂРё РєР°СЂС‚РѕС‡РµРє */
+:root[data-theme="light"] .metric-label,
+:root[data-theme="light"] .card-label,
+:root[data-theme="light"] .day-label,
+:root[data-theme="light"] .day-date,
+:root[data-theme="light"] .hourly-tab,
+:root[data-theme="light"] .acc-name,
+:root[data-theme="light"] .acc-metric{color:rgba(45,26,16,0.6)}
+:root[data-theme="light"] .metric-value,
+:root[data-theme="light"] .card-title,
+:root[data-theme="light"] .day-temp-max,
+:root[data-theme="light"] .day-condition,
+:root[data-theme="light"] .acc-value{color:#2d1a10}
+:root[data-theme="light"] .metric-sub,
+:root[data-theme="light"] .day-temp-min{color:rgba(45,26,16,0.55)}
+
+/* Р—Р°РіРѕР»РѕРІРѕРє СЃРµРєС†РёР№ / SVG-РёРєРѕРЅРєРё СЃРµРєС†РёР№ */
+:root[data-theme="light"] .card-title-row,
+:root[data-theme="light"] .climate-title,
+:root[data-theme="light"] .pollen-title,
+:root[data-theme="light"] .storm-title,
+:root[data-theme="light"] .activity-title{color:#2d1a10}
+
+/* РњРѕРґР°Р»РєРё */
+:root[data-theme="light"] .modal-backdrop{background:rgba(80,40,20,0.32)}
+:root[data-theme="light"] .modal,
+:root[data-theme="light"] .hdm-sheet,
+:root[data-theme="light"] .settings-modal,
+:root[data-theme="light"] .search-modal{
+  background:linear-gradient(135deg, rgba(255,250,243,0.97) 0%, rgba(255,243,228,0.95) 100%);
+  border:1px solid rgba(180,120,80,0.25);
+  color:#2d1a10;
+  box-shadow:0 24px 80px rgba(80,40,20,0.25);
+}
+:root[data-theme="light"] .modal-day-title,
+:root[data-theme="light"] .modal h2,
+:root[data-theme="light"] .modal h3,
+:root[data-theme="light"] .modal-day-label{color:#2d1a10}
+:root[data-theme="light"] .modal-day-date{color:rgba(45,26,16,0.6)}
+:root[data-theme="light"] .modal-close{
+  background:rgba(180,120,80,0.12);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .modal-close:hover{background:rgba(180,120,80,0.2)}
+:root[data-theme="light"] .swipe-handle{background:rgba(180,120,80,0.3)}
+
+/* Segmented controls (РІРєР»СЋС‡Р°СЏ Р±СѓРґСѓС‰РёР№ segTheme) */
+:root[data-theme="light"] .segmented{
+  background:rgba(255,235,210,0.6);
+  border:1px solid rgba(180,120,80,0.2);
+}
+:root[data-theme="light"] .seg-btn{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .seg-btn:hover{color:#2d1a10;background:rgba(255,255,255,0.4)}
+:root[data-theme="light"] .seg-btn.active{
+  background:linear-gradient(135deg, #d9602f 0%, #c0532a 100%);
+  color:#fff;
+  box-shadow:0 4px 14px rgba(217,96,47,0.35);
+}
+:root[data-theme="light"] .seg-sub{color:inherit;opacity:0.7}
+
+/* Settings sections */
+:root[data-theme="light"] .settings-section-title{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .sec-icon{
+  background:rgba(217,96,47,0.12);
+  color:#c0532a;
+}
+
+/* Р§РёРїС‹ РІ С€Р°РїРєРµ (settings, search, compare, tts, favorites) */
+:root[data-theme="light"] .chip-btn,
+:root[data-theme="light"] .header-chip,
+:root[data-theme="light"] .fav-chip,
+:root[data-theme="light"] .source-pill{
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(180,120,80,0.2);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .chip-btn:hover,
+:root[data-theme="light"] .header-chip:hover,
+:root[data-theme="light"] .fav-chip:hover,
+:root[data-theme="light"] .source-pill:hover{
+  background:rgba(255,255,255,0.85);
+  border-color:rgba(217,96,47,0.4);
+}
+:root[data-theme="light"] .fav-chip.active,
+:root[data-theme="light"] .source-pill.active{
+  background:linear-gradient(135deg, rgba(217,96,47,0.18), rgba(192,83,42,0.14));
+  border-color:rgba(217,96,47,0.5);
+  box-shadow:0 0 14px rgba(217,96,47,0.25);
+}
+
+/* РљРЅРѕРїРєР°-РґРѕР±Р°РІРёС‚СЊ (+ Р”РѕР±Р°РІРёС‚СЊ РіРѕСЂРѕРґ) */
+:root[data-theme="light"] .fav-add-btn{
+  background:transparent;
+  border:1px dashed rgba(180,120,80,0.4);
+  color:rgba(45,26,16,0.55);
+}
+:root[data-theme="light"] .fav-add-btn:hover{
+  border-color:rgba(217,96,47,0.7);
+  color:#c0532a;
+}
+
+/* Days (10-РґРЅРµРІРЅС‹Р№ РїСЂРѕРіРЅРѕР·) */
+:root[data-theme="light"] .days::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .hours-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .precip-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .hdm-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .pdm-scroll::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .voice-list::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .city-list::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .favorites-row::-webkit-scrollbar-thumb,
+:root[data-theme="light"] .cd-table::-webkit-scrollbar-thumb{
+  background:rgba(217,96,47,0.4);
+}
+
+/* City modal вЂ” СЃРїРёСЃРѕРє РіРѕСЂРѕРґРѕРІ */
+:root[data-theme="light"] .city-item{
+  background:rgba(255,255,255,0.5);
+  border:1px solid rgba(180,120,80,0.18);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .city-item:hover,
+:root[data-theme="light"] .city-item.active{
+  background:rgba(255,255,255,0.85);
+  border-color:rgba(217,96,47,0.4);
+}
+:root[data-theme="light"] .city-section-label{color:rgba(45,26,16,0.55)}
+:root[data-theme="light"] .city-search-input{
+  background:rgba(255,255,255,0.65);
+  border:1px solid rgba(180,120,80,0.25);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .city-search-input::placeholder{color:rgba(45,26,16,0.45)}
+
+/* Search modal */
+:root[data-theme="light"] .search-input,
+:root[data-theme="light"] .search-input-wrap{
+  background:rgba(255,255,255,0.65);
+  border-color:rgba(180,120,80,0.25);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .search-input::placeholder{color:rgba(45,26,16,0.5)}
+:root[data-theme="light"] .search-submit-btn{
+  background:linear-gradient(135deg, #d9602f 0%, #c0532a 100%);
+  color:#fff;
+}
+:root[data-theme="light"] .search-preset{
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(180,120,80,0.2);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .search-preset:hover{background:rgba(255,255,255,0.8);border-color:rgba(217,96,47,0.4)}
+:root[data-theme="light"] .search-result-card{
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(180,120,80,0.2);
+  color:#2d1a10;
+}
+
+/* Hourly metric tabs */
+:root[data-theme="light"] .hourly-tab.active{
+  background:linear-gradient(135deg, #d9602f 0%, #c0532a 100%);
+  color:#fff;
+}
+:root[data-theme="light"] .hourly-tab{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .hour-tile,
+:root[data-theme="light"] .hdm-hour-cell{
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(180,120,80,0.18);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .hour-tile.now,
+:root[data-theme="light"] .hdm-hour-cell.now{
+  background:linear-gradient(135deg, rgba(217,96,47,0.2), rgba(192,83,42,0.15));
+  border-color:rgba(217,96,47,0.5);
+}
+
+/* Footer */
+:root[data-theme="light"] .footer{color:rgba(45,26,16,0.55)}
+:root[data-theme="light"] .footer button,
+:root[data-theme="light"] .refresh-btn{
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(180,120,80,0.25);
+  color:#2d1a10;
+}
+
+/* РЎРєСЂРѕР»Р»Р±Р°СЂ СЃС‚СЂРµР»РѕС‡РЅС‹Рµ РєРЅРѕРїРєРё */
+:root[data-theme="light"] .scroll-arrow{
+  background:rgba(255,255,255,0.7);
+  border:1px solid rgba(180,120,80,0.25);
+  color:#c0532a;
+}
+:root[data-theme="light"] .scroll-arrow:hover{background:rgba(255,255,255,0.95)}
+
+/* РђР»РµСЂС‚С‹ Рё Р±Р°РЅРЅРµСЂС‹ вЂ” РѕСЃС‚Р°РІР»СЏРµРј yellow/red РєР°Рє РµСЃС‚СЊ (Р·Р°РјРµС‚РЅРѕСЃС‚СЊ РІР°Р¶РЅРµРµ С‚РµРјС‹) */
+
+/* Р’ СЃС‚Р°РЅРґР°Р»РѕРЅРµ PWA вЂ” meta theme-color СѓРїСЂР°РІР»СЏРµС‚СЃСЏ РёР· JS */
+
+/* ============================================================
+   LIGHT THEME вЂ” РџРћР›РќР«Р™ РћР‘РҐРћР” (С‡Р°СЃС‚СЊ 2)
+   Р’СЃРµ РІРЅСѓС‚СЂРµРЅРЅРёРµ РїР»РёС‚РєРё Рё sub-СЌР»РµРјРµРЅС‚С‹, С‡С‚Рѕ РёСЃРїРѕР»СЊР·РѕРІР°Р»Рё
+   rgba(255,255,255,*) вЂ” Р·Р°РјРµРЅСЏРµРј РЅР° Р±РµР»РѕРµ СЃС‚РµРєР»Рѕ СЃ С‡С‘С‚РєРёРјРё
+   С‚С‘РїР»С‹РјРё РіСЂР°РЅРёС†Р°РјРё.
+   ============================================================ */
+
+/* РЈРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№ РѕС…РІР°С‚ РІСЃРµС… РїР»РёС‚РѕРє РІРЅСѓС‚СЂРё РєР°СЂС‚РѕС‡РµРє */
+:root[data-theme="light"] .speak-chip,
+:root[data-theme="light"] .search-chip,
+:root[data-theme="light"] .settings-chip,
+:root[data-theme="light"] .voice-item,
+:root[data-theme="light"] .voice-list-empty,
+:root[data-theme="light"] .modal-close,
+:root[data-theme="light"] .modal-hero,
+:root[data-theme="light"] .mini-m,
+:root[data-theme="light"] .modal-astro-cell,
+:root[data-theme="light"] .modal-hourly,
+:root[data-theme="light"] .modal-hours-list,
+:root[data-theme="light"] .hour-cell,
+:root[data-theme="light"] .hdm-back,
+:root[data-theme="light"] .radar-controls,
+:root[data-theme="light"] .radar-tabs,
+:root[data-theme="light"] .search-clear-btn,
+:root[data-theme="light"] .search-empty,
+:root[data-theme="light"] .ht-tab,
+:root[data-theme="light"] .city-search-clear,
+:root[data-theme="light"] .fav-chip-remove,
+:root[data-theme="light"] .city-item-fav-btn,
+:root[data-theme="light"] .settings-section,
+:root[data-theme="light"] .seg-btn,
+:root[data-theme="light"] .ap-cell,
+:root[data-theme="light"] .confidence-chip,
+:root[data-theme="light"] .ch-swap,
+:root[data-theme="light"] .cd-cell,
+:root[data-theme="light"] .conf-hint,
+:root[data-theme="light"] .hero-conf,
+:root[data-theme="light"] .aw-cell,
+:root[data-theme="light"] .climate-metric,
+:root[data-theme="light"] .climate-spark,
+:root[data-theme="light"] .pollen-cell,
+:root[data-theme="light"] .acc-row{
+  background:rgba(255,255,255,0.65);
+  border:1px solid rgba(180,120,80,0.28);
+  color:#2d1a10;
+  box-shadow:0 2px 10px rgba(180,110,60,0.08);
+}
+
+/* Hover/active РёРЅС‚РµСЂР°РєС‚РёРІРЅС‹С… РїР»РёС‚РѕРє */
+:root[data-theme="light"] .speak-chip:hover,
+:root[data-theme="light"] .search-chip:hover,
+:root[data-theme="light"] .settings-chip:hover,
+:root[data-theme="light"] .voice-item:hover,
+:root[data-theme="light"] .ht-tab:hover,
+:root[data-theme="light"] .hour-cell:hover,
+:root[data-theme="light"] .cd-cell:hover,
+:root[data-theme="light"] .aw-cell:hover,
+:root[data-theme="light"] .ap-cell:hover,
+:root[data-theme="light"] .pollen-cell:hover,
+:root[data-theme="light"] .modal-astro-cell:hover,
+:root[data-theme="light"] .city-item-fav-btn:hover{
+  background:rgba(255,255,255,0.88);
+  border-color:rgba(217,96,47,0.5);
+}
+
+/* РРєРѕРЅРєРё РІРЅСѓС‚СЂРё РїР»РёС‚РѕРє (СЃ Р·Р°Р»РёРІРєРѕР№) */
+:root[data-theme="light"] .aw-icon,
+:root[data-theme="light"] .pollen-icon{
+  background:rgba(217,96,47,0.12);
+  box-shadow:inset 0 0 8px rgba(217,96,47,0.08);
+}
+
+/* РџРѕР»РѕСЃРєРё РїСЂРѕРіСЂРµСЃСЃР° Рё С‚СЂРµРєРµСЂС‹ */
+:root[data-theme="light"] .pollen-bar,
+:root[data-theme="light"] .acc-bar-wrap,
+:root[data-theme="light"] .storm-h{
+  background:rgba(180,120,80,0.18);
+}
+
+/* Sticky-РїРѕР»РѕСЃР° С‡Р°СЃРѕРІ РІ Hourly Detail */
+:root[data-theme="light"] .hdm-sticky-hours{
+  background:linear-gradient(180deg,rgba(255,250,243,0.96) 0%,rgba(255,243,228,0.9) 100%);
+  border-bottom:1px solid rgba(180,120,80,0.2);
+}
+
+/* Search results card */
+:root[data-theme="light"] .search-result-card{
+  background:rgba(255,255,255,0.65);
+  border:1px solid rgba(217,96,47,0.28);
+  color:#2d1a10;
+}
+
+/* Settings section РІС‹РїР°РґР°СЋС‰РёР№ РІРЅРµС€РЅРёР№ РєРѕРЅС‚РµР№РЅРµСЂ СЃ РіСЂСѓРїРїР°РјРё */
+:root[data-theme="light"] .settings-section{
+  background:rgba(255,235,210,0.45);
+  border:1px solid rgba(180,120,80,0.22);
+}
+
+/* РљРѕРЅС„-С‡РёРї (СЃРѕРіР»Р°СЃРёРµ РјРѕРґРµР»РµР№) */
+:root[data-theme="light"] .confidence-chip{
+  color:#2d1a10;
+}
+
+/* ============================================================
+   РўР•РљРЎРўР« вЂ” РїРµСЂРµРѕРїСЂРµРґРµР»СЏРµРј РІСЃРµ Р±РµР»С‹Рµ/СЃРІРµС‚Р»С‹Рµ С†РІРµС‚Р°
+   ============================================================ */
+:root[data-theme="light"] body,
+:root[data-theme="light"] .modal,
+:root[data-theme="light"] .hdm-sheet,
+:root[data-theme="light"] .hero-condition,
+:root[data-theme="light"] .seg-btn.active,
+:root[data-theme="light"] .speak-chip,
+:root[data-theme="light"] .search-chip,
+:root[data-theme="light"] .settings-chip,
+:root[data-theme="light"] .voice-item,
+:root[data-theme="light"] .city-item,
+:root[data-theme="light"] .source-indicator,
+:root[data-theme="light"] .source-indicator > div,
+:root[data-theme="light"] .fav-chip,
+:root[data-theme="light"] .ht-tab,
+:root[data-theme="light"] .hour-cell,
+:root[data-theme="light"] .cd-cell,
+:root[data-theme="light"] .aw-cell,
+:root[data-theme="light"] .ap-cell,
+:root[data-theme="light"] .pollen-cell,
+:root[data-theme="light"] .climate-metric,
+:root[data-theme="light"] .acc-row,
+:root[data-theme="light"] .modal-astro-cell,
+:root[data-theme="light"] .mini-m{
+  color:#2d1a10;
+}
+
+/* hero-temp-num вЂ” Р±РµР»С‹Р№ С‚РѕР»СЊРєРѕ РЅР° С‚С‘РјРЅРѕРј overlay С„РѕС‚Рѕ */
+:root[data-theme="light"] .hero-condition{color:#fff;text-shadow:0 1px 6px rgba(60,20,5,0.6)}
+:root[data-theme="light"] .hero-feels{color:rgba(255,235,210,0.95);text-shadow:0 1px 4px rgba(60,20,5,0.6)}
+:root[data-theme="light"] .hero-source-note{color:rgba(255,235,210,0.9);text-shadow:0 1px 4px rgba(60,20,5,0.6)}
+:root[data-theme="light"] .hero-label{color:rgba(255,235,210,0.85);text-shadow:0 1px 4px rgba(60,20,5,0.5)}
+:root[data-theme="light"] .hero-temp-unit{color:rgba(255,235,210,0.9);text-shadow:0 1px 4px rgba(60,20,5,0.5)}
+
+/* РђРєС‚РёРІРЅР°СЏ РєРЅРѕРїРєР° СЃРµРіРјРµРЅС‚Р° вЂ” Р±РµР»С‹Р№ С‚РµРєСЃС‚ РЅР° РєРѕСЂР°Р»Р»РѕРІРѕРј */
+:root[data-theme="light"] .seg-btn.active{color:#fff}
+:root[data-theme="light"] .seg-btn.active .seg-sub{color:rgba(255,255,255,0.85)}
+
+/* Р—Р°РіРѕР»РѕРІРєРё Рё РїРѕРґРїРёСЃРё РІРЅСѓС‚СЂРё РєР°СЂС‚РѕС‡РµРє */
+:root[data-theme="light"] .card-title,
+:root[data-theme="light"] .acc-title,
+:root[data-theme="light"] .accuracy-card .acc-title{color:#2d1a10}
+
+/* Hourly tabs вЂ” С‚Р°Р±С‹ РІРІРµСЂС…Сѓ РїРѕС‡Р°СЃРѕРІРѕР№ РєР°СЂС‚РѕС‡РєРё */
+:root[data-theme="light"] .ht-tab{color:rgba(45,26,16,0.7);background:rgba(255,255,255,0.6);border-color:rgba(180,120,80,0.22)}
+:root[data-theme="light"] .ht-tab.active{
+  background:linear-gradient(135deg, #d9602f 0%, #c0532a 100%);
+  color:#fff;
+  border-color:rgba(217,96,47,0.6);
+  box-shadow:0 4px 14px rgba(217,96,47,0.3);
+}
+
+/* Hour cell РІ РїРѕС‡Р°СЃРѕРІРѕР№ Р»РµРЅС‚Рµ вЂ” Р°РєС‚РёРІРЅС‹Р№ (NOW) */
+:root[data-theme="light"] .hour-cell.now,
+:root[data-theme="light"] .cd-cell.now{
+  background:linear-gradient(135deg, rgba(217,96,47,0.22), rgba(192,83,42,0.15));
+  border-color:rgba(217,96,47,0.55);
+  box-shadow:0 0 16px rgba(217,96,47,0.2);
+}
+
+/* Voice item active state */
+:root[data-theme="light"] .voice-item.active{
+  background:linear-gradient(135deg, rgba(217,96,47,0.18), rgba(192,83,42,0.12));
+  border-color:rgba(217,96,47,0.5);
+}
+
+/* РџРѕР»СЏ РїРѕРёСЃРєР° */
+:root[data-theme="light"] .search-input,
+:root[data-theme="light"] .city-search-input{
+  background:rgba(255,255,255,0.7);
+  border:1px solid rgba(217,96,47,0.32);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .search-input:focus,
+:root[data-theme="light"] .city-search-input:focus{
+  border-color:rgba(217,96,47,0.6);
+  box-shadow:0 0 0 3px rgba(217,96,47,0.12);
+}
+:root[data-theme="light"] .search-input::placeholder,
+:root[data-theme="light"] .city-search-input::placeholder{color:rgba(45,26,16,0.5)}
+
+/* Search clear / close micro-buttons */
+:root[data-theme="light"] .search-clear-btn,
+:root[data-theme="light"] .city-search-clear,
+:root[data-theme="light"] .fav-chip-remove{
+  background:rgba(180,120,80,0.18);
+  color:rgba(45,26,16,0.75);
+}
+:root[data-theme="light"] .search-clear-btn:hover,
+:root[data-theme="light"] .city-search-clear:hover,
+:root[data-theme="light"] .fav-chip-remove:hover{
+  background:rgba(217,96,47,0.3);
+  color:#2d1a10;
+}
+
+/* Search preset chips */
+:root[data-theme="light"] .search-preset{
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(180,120,80,0.25);
+  color:rgba(45,26,16,0.85);
+}
+:root[data-theme="light"] .search-preset:hover{
+  background:rgba(255,255,255,0.85);
+  border-color:rgba(217,96,47,0.5);
+  color:#2d1a10;
+}
+
+/* Compare swap-РєРЅРѕРїРєРё */
+:root[data-theme="light"] .ch-swap{
+  background:rgba(255,255,255,0.65);
+  border-color:rgba(217,96,47,0.35);
+  color:#c0532a;
+}
+
+/* Compare days table cells */
+:root[data-theme="light"] .cd-cell{
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(180,120,80,0.22);
+  color:#2d1a10;
+}
+
+/* Р’СЃРµ РѕСЃС‚. Р»РµР№Р±Р»С‹ РєР°СЂС‚РѕС‡РµРє */
+:root[data-theme="light"] [class*="-label"],
+:root[data-theme="light"] [class*="-sub"],
+:root[data-theme="light"] [class*="-hint"]:not(.conf-hint),
+:root[data-theme="light"] [class*="-cap"]{
+  color:rgba(45,26,16,0.65);
+}
+:root[data-theme="light"] .conf-hint{color:rgba(45,26,16,0.75)}
+
+/* РЈСЃРёР»РµРЅРёРµ РіСЂР°РЅРёС† РґР»СЏ РІСЃРµС… РєР°СЂС‚РѕС‡РµРє, С‡С‚РѕР±С‹ РѕРЅРё С‡С‘С‚РєРѕ РІС‹РґРµР»СЏР»РёСЃСЊ */
+:root[data-theme="light"] .glass{
+  border-color:rgba(180,120,80,0.3);
+  box-shadow:0 2px 8px rgba(180,110,60,0.06),
+             0 8px 28px rgba(180,110,60,0.12),
+             inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+/* SVG-stroke РёРєРѕРЅРѕРє РІ С€Р°РїРєРµ СЃРµРєС†РёР№ вЂ” currentColor РЅР°СЃР»РµРґСѓРµС‚СЃСЏ */
+:root[data-theme="light"] .sec-icon svg{stroke:#c0532a}
+:root[data-theme="light"] .sec-icon{color:#c0532a;background:rgba(217,96,47,0.13);border:1px solid rgba(217,96,47,0.25)}
+
+/* Footer Рё refresh */
+:root[data-theme="light"] .footer{color:rgba(45,26,16,0.6)}
+:root[data-theme="light"] .footer button{
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(180,120,80,0.28);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .footer button:hover{background:rgba(255,255,255,0.85);border-color:rgba(217,96,47,0.5)}
+
+/* Footer С‡Р°СЃ/РѕР±РЅРѕРІР»РµРЅРѕ */
+:root[data-theme="light"] #clock,
+:root[data-theme="light"] #updated{color:rgba(45,26,16,0.55)}
+
+/* Toggle РјРµР¶РґСѓ СЃРєСЂРѕР»Р»Р°РјРё РІ hdm/pdm */
+:root[data-theme="light"] .scroll-arrow{
+  background:rgba(255,255,255,0.85);
+  border:1px solid rgba(180,120,80,0.3);
+  color:#c0532a;
+  box-shadow:0 4px 12px rgba(180,110,60,0.18);
+}
+:root[data-theme="light"] .scroll-arrow:hover{background:#fff;border-color:rgba(217,96,47,0.5)}
+:root[data-theme="light"] .scroll-arrow.disabled{opacity:0.3}
+
+/* Sources-card pills */
+:root[data-theme="light"] .source-pill{
+  background:rgba(255,255,255,0.6);
+  border:1px solid rgba(180,120,80,0.25);
+  color:#2d1a10;
+}
+:root[data-theme="light"] .source-pill .src-name{color:#2d1a10}
+:root[data-theme="light"] .source-pill.avg{
+  background:linear-gradient(135deg, rgba(217,96,47,0.16), rgba(192,83,42,0.1));
+  border-color:rgba(217,96,47,0.4);
+}
+
+/* Header chips group: location chip Рё settings chip */
+:root[data-theme="light"] [class$="-chip"]:not(.fav-chip):not(.source-pill):not(.confidence-chip):not(.hero-conf){
+  background:rgba(255,255,255,0.62);
+  border-color:rgba(217,96,47,0.32);
+  color:#2d1a10;
+  box-shadow:0 2px 10px rgba(180,110,60,0.1);
+}
+
+/* Conf hint */
+:root[data-theme="light"] .conf-hint{
+  background:rgba(255,255,255,0.6);
+  border-color:rgba(180,120,80,0.22);
+  color:rgba(45,26,16,0.75);
+}
+
+/* Astro-photo cells */
+:root[data-theme="light"] .ap-cell .ap-label{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .ap-cell .ap-value{color:#2d1a10}
+
+/* SVG-paths РєРѕС‚РѕСЂС‹Рµ РІРЅСѓС‚СЂРё РїР»РёС‚РѕРє СЃ stroke="currentColor" Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё
+   РїРѕР»СѓС‡Р°С‚ С‚С‘РјРЅРѕ-С‚С‘РїР»С‹Р№ С†РІРµС‚ С‡РµСЂРµР· color:#2d1a10. Р”Р»СЏ СЃРїРµС†РёР°Р»СЊРЅРѕ СЃРІРµС‚Р»С‹С…
+   SVG-РёРєРѕРЅРѕРє РїРѕРіРѕРґС‹ (ICONS object) вЂ” РѕСЃС‚Р°РІР»СЏРµРј РєР°Рє РµСЃС‚СЊ, РѕРЅРё РґРµРєРѕСЂР°С‚РёРІРЅС‹Рµ. */
+
+/* Sun arc вЂ” Sun&Moon РєР°СЂС‚РѕС‡РєР° */
+:root[data-theme="light"] .sun-arc{stroke:rgba(217,96,47,0.3)}
+:root[data-theme="light"] .moon-phase{stroke:rgba(45,26,16,0.6)}
+
+/* Aqi marker (СЃС‚СЂРµР»РєР° РЅР° С€РєР°Р»Рµ AQI) */
+:root[data-theme="light"] .aqi-marker{
+  background:#2d1a10;
+  box-shadow:0 0 6px rgba(60,30,15,0.4);
+}
+
+/* Sources-card source-pill рџЏ† leader badge */
+:root[data-theme="light"] .source-pill .source-leader-badge{color:#d9602f}
+
+/* Compare A/B accent colors РѕСЃС‚Р°СЋС‚СЃСЏ РєР°Рє РµСЃС‚СЊ (С„РёРѕР»РµС‚/С†РёР°РЅ) РЅРѕ
+   С‚РµРєСЃС‚ РІ plain СЃРѕРґРµСЂР¶РёРјРѕРј С‚С‘РјРЅС‹Р№ */
+:root[data-theme="light"] .ch-meta-label{color:rgba(45,26,16,0.6)}
+
+/* Climate spark вЂ” С‚РµРєСЃС‚ */
+:root[data-theme="light"] .climate-spark text{fill:rgba(45,26,16,0.65)}
+
+/* Inverse search results вЂ” Р»РµР№Р±Р»С‹ */
+:root[data-theme="light"] .search-result-card .src-name,
+:root[data-theme="light"] .search-result-card .res-meta{color:rgba(45,26,16,0.7)}
+
+/* Final catch-all: РІСЃРµ inline-СЃС‚РёР»Рё СЃ rgba(232,240,255,*) РќР• РїРµСЂРµРєСЂС‹РІР°СЋС‚СЃСЏ
+   CSS, РЅРѕ СЌС‚Рѕ СЂРµРґРєРѕСЃС‚СЊ РІ РЅР°С€РµРј РєРѕРґРµ вЂ” РїРѕС‡С‚Рё РІСЃС‘ С‡РµСЂРµР· РєР»Р°СЃСЃС‹. */
+
+/* ============================================================
+   LIGHT THEME вЂ” РґРµС‚Р°Р»СЊРЅС‹Рµ РґРѕС‡РµСЂРЅРёРµ СЌР»РµРјРµРЅС‚С‹ РїР»РёС‚РѕРє
+   (С‚РµРєСЃС‚ РІРЅСѓС‚СЂРё hour-cell, hdm-hour-cell, cd-cell, Рё С‚.Рґ.)
+   ============================================================ */
+
+/* Hour cell вЂ” С‡Р°СЃС‹ РІ РїРѕС‡Р°СЃРѕРІРѕР№ Р»РµРЅС‚Рµ РЅР° РіР»Р°РІРЅРѕРј СЌРєСЂР°РЅРµ */
+:root[data-theme="light"] .hour-cell .h{color:rgba(45,26,16,0.7)}
+:root[data-theme="light"] .hour-cell .t{color:#2d1a10}
+:root[data-theme="light"] .hour-cell .t .hc-unit{color:rgba(45,26,16,0.5)}
+:root[data-theme="light"] .hour-cell .p{color:#c0532a}
+:root[data-theme="light"] .hour-cell:hover{
+  background:rgba(255,255,255,0.95);
+  border-color:rgba(217,96,47,0.45);
+}
+:root[data-theme="light"] .hour-cell.now{
+  background:linear-gradient(135deg, rgba(217,96,47,0.22), rgba(192,83,42,0.14));
+  border-color:rgba(217,96,47,0.55);
+  box-shadow:0 4px 16px rgba(217,96,47,0.18);
+}
+:root[data-theme="light"] .hour-cell.now .h,
+:root[data-theme="light"] .hour-cell.now .t{color:#8b3a1f;font-weight:700}
+
+/* HDM hour cell вЂ” sticky-РїРѕР»РѕСЃР° С‡Р°СЃРѕРІ РІ РјРѕРґР°Р»РєРµ "РџРѕС‡Р°СЃРѕРІРѕР№" */
+:root[data-theme="light"] .hdm-hour-cell .hh{color:rgba(45,26,16,0.75)}
+:root[data-theme="light"] .hdm-hour-cell.now .hh{color:#c0532a;font-weight:700}
+:root[data-theme="light"] .hdm-hour-cell.now::before{
+  background:#c0532a;
+  box-shadow:0 0 6px #c0532a;
+}
+
+/* CD cell вЂ” compare days */
+:root[data-theme="light"] .cd-cell .cd-hh,
+:root[data-theme="light"] .cd-cell .cd-temp,
+:root[data-theme="light"] .cd-cell *{color:#2d1a10}
+:root[data-theme="light"] .cd-cell .cd-label,
+:root[data-theme="light"] .cd-cell .cd-meta{color:rgba(45,26,16,0.65)}
+
+/* Astro-photo cell РєРѕРЅС‚РµРЅС‚ */
+:root[data-theme="light"] .ap-cell .ap-label,
+:root[data-theme="light"] .ap-cell .ap-time,
+:root[data-theme="light"] .ap-cell .ap-quality{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .ap-cell .ap-value,
+:root[data-theme="light"] .ap-cell .ap-h,
+:root[data-theme="light"] .ap-cell .ap-name{color:#2d1a10}
+
+/* Activity window cell */
+:root[data-theme="light"] .aw-cell .aw-name,
+:root[data-theme="light"] .aw-cell .aw-time,
+:root[data-theme="light"] .aw-cell *{color:#2d1a10}
+:root[data-theme="light"] .aw-cell .aw-label,
+:root[data-theme="light"] .aw-cell .aw-empty{color:rgba(45,26,16,0.6)}
+
+/* Pollen cell */
+:root[data-theme="light"] .pollen-cell .p-name,
+:root[data-theme="light"] .pollen-cell .p-level{color:#2d1a10}
+:root[data-theme="light"] .pollen-cell .p-sub{color:rgba(45,26,16,0.6)}
+
+/* Climate metric */
+:root[data-theme="light"] .climate-metric .cm-label{color:rgba(45,26,16,0.6)}
+:root[data-theme="light"] .climate-metric .cm-value,
+:root[data-theme="light"] .climate-metric .cm-delta{color:#2d1a10}
+
+/* Mini-m (РјРѕРґР°Р»РєР° РґРЅСЏ вЂ” РјРёРЅРё-РјРµС‚СЂРёРєРё) */
+:root[data-theme="light"] .mini-m .mm-label{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .mini-m .mm-value{color:#2d1a10}
+
+/* Modal-astro-cell вЂ” astro РїР»Р°С€РєРё РІ РјРѕРґР°Р»РєРµ РґРЅСЏ */
+:root[data-theme="light"] .modal-astro-cell .mac-label{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .modal-astro-cell .mac-value{color:#2d1a10}
+
+/* Accuracy row */
+:root[data-theme="light"] .acc-row .acc-name,
+:root[data-theme="light"] .acc-row .acc-metric{color:rgba(45,26,16,0.7)}
+:root[data-theme="light"] .acc-row .acc-value{color:#2d1a10;font-weight:600}
+:root[data-theme="light"] .acc-thead{color:rgba(45,26,16,0.55)}
+
+/* Source pill вЂ” РІСЃРµ .src-* РІРЅСѓС‚СЂРё */
+:root[data-theme="light"] .source-pill *{color:#2d1a10}
+:root[data-theme="light"] .source-pill .src-tag{color:rgba(45,26,16,0.55)}
+:root[data-theme="light"] .source-pill.active{
+  background:linear-gradient(135deg, rgba(217,96,47,0.18), rgba(192,83,42,0.1));
+  border-color:rgba(217,96,47,0.5);
+  box-shadow:0 0 14px rgba(217,96,47,0.22);
+}
+
+/* Day РєР°СЂС‚РѕС‡РєР° РІ 10-РґРЅРµРІРЅРѕРј РїСЂРѕРіРЅРѕР·Рµ */
+:root[data-theme="light"] .days .day,
+:root[data-theme="light"] .days .day *{color:#2d1a10}
+:root[data-theme="light"] .days .day .day-label,
+:root[data-theme="light"] .days .day .day-date,
+:root[data-theme="light"] .days .day .day-min{color:rgba(45,26,16,0.6)}
+:root[data-theme="light"] .days .day .day-max{color:#2d1a10;font-weight:600}
+
+/* Modal-hero (РјРѕРґР°Р»РєР° РґРЅСЏ вЂ” Р±РѕР»СЊС€Р°СЏ РїР»Р°С€РєР° СЃ РїРѕРіРѕРґРѕР№) */
+:root[data-theme="light"] .modal-hero,
+:root[data-theme="light"] .modal-hero *{color:#2d1a10}
+:root[data-theme="light"] .modal-hero .modal-condition{color:rgba(45,26,16,0.8)}
+
+/* Р’СЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ tnum-С†РёС„СЂС‹ Рё monospace РјРµС‚СЂРёРєРё вЂ” С‚С‘РјРЅС‹Р№ */
+:root[data-theme="light"] [style*="color:#fff"],
+:root[data-theme="light"] [style*="color: #fff"]{color:#2d1a10 !important}
+
+/* Hourly card sub-title (РЈСЃСЂРµРґРЅРµРЅРѕ РїРѕ 7 РјРѕРґРµР»СЏРј) вЂ” С‚РµРїРµСЂСЊ terracotta С‡РµСЂРµР· --src-color */
+:root[data-theme="light"] .hourly-card .card-title .sub#chartSourceSub{color:var(--src-color, #c0532a)}
+
+/* Modal hourly chart вЂ” С‚РµРєСЃС‚ РІРЅСѓС‚СЂРё */
+:root[data-theme="light"] .modal-hourly,
+:root[data-theme="light"] .modal-hourly *{color:#2d1a10}
+:root[data-theme="light"] .modal-hours-list,
+:root[data-theme="light"] .modal-hours-list *{color:#2d1a10}
+
+/* Confidence chip Рё hero-conf */
+:root[data-theme="light"] .confidence-chip,
+:root[data-theme="light"] .confidence-chip *,
+:root[data-theme="light"] .hero-conf,
+:root[data-theme="light"] .hero-conf *{color:#2d1a10}
+
+/* Storm-card вЂ” СЃС‚Р°С‚СѓСЃ-СЃС‚СЂРѕРєР°/Р±Р°РЅРЅРµСЂ СЂРёСЃРєР° */
+:root[data-theme="light"] .storm-status,
+:root[data-theme="light"] .storm-status *{color:#2d1a10}
+:root[data-theme="light"] .storm-hour-label{color:rgba(45,26,16,0.7)}
+
+/* HDM metric chart sub-labels */
+:root[data-theme="light"] .hdm-chart text{fill:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .hdm-chart-title{color:#2d1a10}
+
+/* РћРєРЅР° РІРѕР·РјРѕР¶РЅРѕСЃС‚РµР№ вЂ” title СЃРµРєС†РёРё */
+:root[data-theme="light"] .activity-card .card-title,
+:root[data-theme="light"] .activity-card .card-title *{color:#2d1a10}
+
+/* Final defense: Р»СЋР±РѕР№ СЌР»РµРјРµРЅС‚ СЃ color:#fff РёР»Рё color:#e8f0ff inline РёР»Рё
+   С‡РµСЂРµР· СЃРїРµС†РёС„РёС‡РЅС‹Рµ РїСЂР°РІРёР»Р° вЂ” РѕР±С‰Р°СЏ С€РёСЂРёРЅР° СЃРµР»РµРєС‚РѕСЂР° (РЅРёР·РєР°СЏ СЃРїРµС†РёС„РёС‡РЅРѕСЃС‚СЊ,
+   override С‚РѕР»СЊРєРѕ РєРѕРіРґР° РЅРµ Р·Р°РґР°РЅРѕ Р±РѕР»РµРµ С‚РѕС‡РЅРѕ) */
+:root[data-theme="light"] .card-title{color:#2d1a10}
+:root[data-theme="light"] .card-title .sub{color:rgba(45,26,16,0.65)}
+
+/* ============================================================
+   LIGHT THEME вЂ” Р¤РРќРђР›Р¬РќР«Р™ РђР“Р Р•РЎРЎРР’РќР«Р™ РћР’Р•Р Р РђР™Р”
+   РџРѕСЃР»Рµ РїСЂРµРґС‹РґСѓС‰РёС… РёС‚РµСЂР°С†РёР№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ РІРёРґРёС‚ Р±РµР»С‹Р№ С‚РµРєСЃС‚ Рё
+   РїР»РёС‚РєРё, СЃР»РёРІР°СЋС‰РёРµСЃСЏ СЃ С„РѕРЅРѕРј. РџСЂРёС‡РёРЅС‹:
+   1) Page bg РїРѕС‡С‚Рё Р±РµР»С‹Р№ в†’ Р±РµР»С‹Рµ РїР»РёС‚РєРё РЅРµ РІС‹РґРµР»СЏСЋС‚СЃСЏ
+   2) Р“Р»СѓР±РѕРєРѕ РІР»РѕР¶РµРЅРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹ СЃ СЏРІРЅС‹Рј color:#fff / color:#e8f0ff
+      РЅРµ РїРѕРєСЂС‹РІР°СЋС‚СЃСЏ РїСЂРµРґС‹РґСѓС‰РёРјРё СЃРµР»РµРєС‚РѕСЂР°РјРё
+   3) SVG-С‚РµРєСЃС‚С‹ РІ РіСЂР°С„РёРєР°С… РёРјРµСЋС‚ inline-Р°С‚СЂРёР±СѓС‚ fill="#e8f0ff"
+   Р РµС€РµРЅРёРµ: СѓРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Р№ СЃРµР»РµРєС‚РѕСЂ РІРЅСѓС‚СЂРё РєР°СЂС‚РѕС‡РµРє + !important
+   РЅР° РєСЂРёС‚РёС‡РЅС‹С… СЃРІРѕР№СЃС‚РІР°С… + РїР»РѕС‚РЅС‹Рµ fills РґР»СЏ РїР»РёС‚РѕРє.
+   ============================================================ */
+
+/* РњРћР©РќР«Р™ РћР’Р•Р Р РђР™Р”: РІСЃС‘ С‡С‚Рѕ РІР»РѕР¶РµРЅРѕ РІ РѕСЃРЅРѕРІРЅС‹Рµ РєР°СЂС‚РѕС‡РєРё Рё РјРѕРґР°Р»РєРё вЂ”
+   С‚С‘РјРЅРѕ-С‚С‘РїР»С‹Р№ С†РІРµС‚. РСЃРєР»СЋС‡РµРЅРёСЏ С‡РµСЂРµР· :not() РґР»СЏ РёРєРѕРЅРѕРє, С†РІРµС‚РЅС‹С… РјРµС‚РѕРє
+   Рё РіСЂР°РґРёРµРЅС‚РЅС‹С… Р°РєС‚РёРІРЅС‹С… СЃРѕСЃС‚РѕСЏРЅРёР№. */
+:root[data-theme="light"] .glass,
+:root[data-theme="light"] .glass *,
+:root[data-theme="light"] .modal,
+:root[data-theme="light"] .modal *,
+:root[data-theme="light"] .hdm-sheet,
+:root[data-theme="light"] .hdm-sheet *{
+  color:#2d1a10;
+}
+/* Р’РѕР·РІСЂР°С‰Р°РµРј Р‘Р•Р›Р«Р™ С‚РѕР»СЊРєРѕ РґР»СЏ hero (РіРґРµ С‚С‘РјРЅС‹Р№ overlay РЅР° С„РѕС‚Рѕ) Рё Р°РєС‚РёРІРЅС‹С… РєРЅРѕРїРѕРє */
+:root[data-theme="light"] .hero,
+:root[data-theme="light"] .hero *{color:#fff !important;text-shadow:0 1px 4px rgba(60,20,5,0.6)}
+:root[data-theme="light"] .hero-temp-num{
+  color:#fff !important;
+  text-shadow:0 2px 16px rgba(60,20,5,0.7), 0 0 40px rgba(217,96,47,0.3) !important;
+}
+:root[data-theme="light"] .seg-btn.active,
+:root[data-theme="light"] .seg-btn.active *,
+:root[data-theme="light"] .search-submit-btn,
+:root[data-theme="light"] .ht-tab.active{
+  color:#fff !important;
+}
+
+/* РџР»РёС‚РєРё вЂ” РіРѕСЂР°Р·РґРѕ Р±РѕР»РµРµ РїР»РѕС‚РЅС‹Р№ С„РѕРЅ + РєРѕРЅС‚СЂР°СЃС‚РЅС‹Рµ РіСЂР°РЅРёС†С‹.
+   РљСЂРµР°РјРѕ-Р±РµР»С‹Р№ РѕС‚С‡С‘С‚Р»РёРІРѕ РІС‹РґРµР»СЏРµС‚СЃСЏ РѕС‚ РїРµСЂСЃРёРєРѕРІРѕРіРѕ С„РѕРЅР° СЃС‚СЂР°РЅРёС†С‹. */
+:root[data-theme="light"] .glass,
+:root[data-theme="light"] .hero,
+:root[data-theme="light"] .metric,
+:root[data-theme="light"] .hourly-card,
+:root[data-theme="light"] .precip-card,
+:root[data-theme="light"] .storm-card,
+:root[data-theme="light"] .activity-card,
+:root[data-theme="light"] .pollen-card,
+:root[data-theme="light"] .climate-card,
+:root[data-theme="light"] .astro-photo-card,
+:root[data-theme="light"] .accuracy-card,
+:root[data-theme="light"] .sources-card,
+:root[data-theme="light"] .astro-card{
+  background:linear-gradient(135deg, rgba(255,253,247,0.96) 0%, rgba(255,247,235,0.92) 100%) !important;
+  border:1.5px solid rgba(140,80,40,0.32) !important;
+  box-shadow:0 4px 16px rgba(120,70,30,0.14),
+             0 12px 36px rgba(120,70,30,0.1),
+             inset 0 1px 0 rgba(255,255,255,0.7) !important;
+}
+
+/* Sub-РїР»РёС‚РєРё (РІРЅСѓС‚СЂРµРЅРЅРёРµ РїР»Р°С€РєРё, С‡Р°СЃС‹, РґРЅРё, РјРµС‚СЂРёРєРё) вЂ” Р·Р°РјРµС‚РЅР°СЏ РєРѕРЅС‚СЂР°СЃС‚РЅР°СЏ Р·Р°Р»РёРІРєР° */
+:root[data-theme="light"] .hour-cell,
+:root[data-theme="light"] .days .day,
+:root[data-theme="light"] .cd-cell,
+:root[data-theme="light"] .aw-cell,
+:root[data-theme="light"] .ap-cell,
+:root[data-theme="light"] .pollen-cell,
+:root[data-theme="light"] .climate-metric,
+:root[data-theme="light"] .climate-spark,
+:root[data-theme="light"] .acc-row,
+:root[data-theme="light"] .mini-m,
+:root[data-theme="light"] .modal-astro-cell,
+:root[data-theme="light"] .modal-hero,
+:root[data-theme="light"] .modal-hourly,
+:root[data-theme="light"] .modal-hours-list,
+:root[data-theme="light"] .hour-cell,
+:root[data-theme="light"] .hdm-hour-cell,
+:root[data-theme="light"] .ht-tab,
+:root[data-theme="light"] .source-pill,
+:root[data-theme="light"] .city-item,
+:root[data-theme="light"] .voice-item,
+:root[data-theme="light"] .search-result-card,
+:root[data-theme="light"] .search-preset,
+:root[data-theme="light"] .radar-controls,
+:root[data-theme="light"] .radar-tabs,
+:root[data-theme="light"] .settings-section{
+  background:rgba(255,253,247,0.92) !important;
+  border:1.5px solid rgba(140,80,40,0.28) !important;
+  box-shadow:0 2px 8px rgba(120,70,30,0.1) !important;
+}
+
+/* Hover/active sub-РїР»РёС‚РѕРє */
+:root[data-theme="light"] .hour-cell:hover,
+:root[data-theme="light"] .days .day:hover,
+:root[data-theme="light"] .cd-cell:hover,
+:root[data-theme="light"] .aw-cell:hover,
+:root[data-theme="light"] .ap-cell:hover,
+:root[data-theme="light"] .pollen-cell:hover,
+:root[data-theme="light"] .ht-tab:hover,
+:root[data-theme="light"] .source-pill:hover,
+:root[data-theme="light"] .city-item:hover,
+:root[data-theme="light"] .search-result-card:hover,
+:root[data-theme="light"] .search-preset:hover{
+  background:rgba(255,255,255,1) !important;
+  border-color:rgba(217,96,47,0.55) !important;
+  box-shadow:0 4px 14px rgba(217,96,47,0.18) !important;
+}
+
+/* РђРєС‚РёРІРЅС‹Рµ/NOW СЃРѕСЃС‚РѕСЏРЅРёСЏ вЂ” Р·Р°РјРµС‚РЅР°СЏ РєРѕСЂР°Р»Р»РѕРІР°СЏ Р·Р°Р»РёРІРєР° */
+:root[data-theme="light"] .hour-cell.now,
+:root[data-theme="light"] .cd-cell.now,
+:root[data-theme="light"] .ht-tab.active,
+:root[data-theme="light"] .source-pill.active,
+:root[data-theme="light"] .seg-btn.active{
+  background:linear-gradient(135deg, #d9602f 0%, #b34a1f 100%) !important;
+  border-color:#a8451c !important;
+  color:#fff !important;
+  box-shadow:0 4px 16px rgba(217,96,47,0.4) !important;
+}
+:root[data-theme="light"] .hour-cell.now *,
+:root[data-theme="light"] .cd-cell.now *,
+:root[data-theme="light"] .ht-tab.active *,
+:root[data-theme="light"] .source-pill.active *,
+:root[data-theme="light"] .seg-btn.active *{color:#fff !important}
+
+/* SVG-С‚РµРєСЃС‚С‹ РІ РіСЂР°С„РёРєР°С… вЂ” fill С‡РµСЂРµР· CSS РїРµСЂРµРєСЂС‹РІР°РµС‚ inline-Р°С‚СЂРёР±СѓС‚ fill="#e8f0ff" */
+:root[data-theme="light"] .glass svg text,
+:root[data-theme="light"] .modal svg text,
+:root[data-theme="light"] .hdm-sheet svg text,
+:root[data-theme="light"] svg.climate-spark text,
+:root[data-theme="light"] .hdm-sheet text{
+  fill:#2d1a10 !important;
+}
+/* Р‘Р»РµРґРЅС‹Рµ РїРѕРґРїРёСЃРё РіРѕРґРѕРІ РЅР° РєР»РёРјР°С‚-СЃРїР°СЂРєР»Р°Р№РЅРµ вЂ” СЃСЂРµРґРЅРёР№ РєРѕРЅС‚СЂР°СЃС‚ */
+:root[data-theme="light"] .climate-spark text:last-of-type,
+:root[data-theme="light"] svg text[fill*="232,240,255"],
+:root[data-theme="light"] svg text[fill="rgba(232,240,255,0.55)"]{
+  fill:rgba(45,26,16,0.65) !important;
+}
+
+/* SVG-РѕР±РІРѕРґРєРё Р±РµР»РѕРіРѕ С†РІРµС‚Р° (РЅР° РєСЂСѓР¶РєР°С… С‚РѕС‡РµРє, РёРєРѕРЅРєР°С…) вЂ” РѕСЃС‚Р°РІР»СЏРµРј
+   РєР°Рє С‚С‘РјРЅС‹Рµ РѕР±РІРѕРґРєРё, С‡С‚РѕР±С‹ РЅРµ СЃР»РёРІР°Р»РёСЃСЊ СЃ Р±РµР»С‹Рј С„РѕРЅРѕРј РїР»РёС‚РєРё */
+:root[data-theme="light"] svg circle[stroke="#fff"],
+:root[data-theme="light"] svg circle[stroke="#ffffff"]{
+  stroke:#fef5e8 !important;
+  /* РЎРІРµС‚Р»Рѕ-РєСЂРµРјРѕРІС‹Р№ "Р±РµР»С‹Р№" СЃРѕС…СЂР°РЅСЏРµС‚ РІРёР·СѓР°Р»СЊРЅС‹Р№ СЃРјС‹СЃР» РѕР±РІРѕРґРєРё */
+}
+
+/* РРєРѕРЅРєРё РїРѕРіРѕРґС‹ (ICONS object SVG) вЂ” РѕСЃС‚Р°РІР»СЏРµРј СЂР°Р·РЅРѕС†РІРµС‚РЅС‹РјРё, РѕРЅРё РЅСѓР¶РЅС‹
+   РґР»СЏ РІРёР·СѓР°Р»СЊРЅРѕРіРѕ СЂР°СЃРїРѕР·РЅР°РІР°РЅРёСЏ. РўРѕР»СЊРєРѕ РєРѕСЂСЂРµРєС‚РёСЂСѓРµРј С‚РµРЅРё/РѕР±РІРѕРґРєРё. */
+
+/* Settings modal вЂ” РѕСЃРѕР±Рѕ С‚С‰Р°С‚РµР»СЊРЅРѕ */
+:root[data-theme="light"] .settings-modal,
+:root[data-theme="light"] .settings-modal *{color:#2d1a10}
+:root[data-theme="light"] .settings-section-title{color:rgba(45,26,16,0.7) !important}
+:root[data-theme="light"] .settings-section-title .sec-icon{color:#c0532a !important}
+:root[data-theme="light"] .seg-btn{
+  background:rgba(255,253,247,0.85) !important;
+  border:1px solid rgba(140,80,40,0.25) !important;
+  color:rgba(45,26,16,0.8) !important;
+}
+:root[data-theme="light"] .seg-btn:hover{
+  background:rgba(255,255,255,1) !important;
+  border-color:rgba(217,96,47,0.5) !important;
+  color:#2d1a10 !important;
+}
+
+/* Header chips вЂ” РІС‹РґРµР»РµРЅРЅС‹Рµ РїРёР»СЋР»Рё */
+:root[data-theme="light"] .speak-chip,
+:root[data-theme="light"] .search-chip,
+:root[data-theme="light"] .settings-chip,
+:root[data-theme="light"] .source-indicator,
+:root[data-theme="light"] .fav-chip,
+:root[data-theme="light"] .compare-chip{
+  background:rgba(255,253,247,0.9) !important;
+  border:1.5px solid rgba(140,80,40,0.32) !important;
+  color:#2d1a10 !important;
+  box-shadow:0 2px 10px rgba(120,70,30,0.12) !important;
+}
+
+/* РђРєС‚РёРІРЅС‹Р№ favorite chip вЂ” РєРѕСЂР°Р»Р»РѕРІС‹Р№ */
+:root[data-theme="light"] .fav-chip.active{
+  background:linear-gradient(135deg, rgba(217,96,47,0.22), rgba(192,83,42,0.14)) !important;
+  border-color:rgba(217,96,47,0.6) !important;
+  color:#8b3a1f !important;
+  box-shadow:0 4px 16px rgba(217,96,47,0.25) !important;
+}
+
+/* Location icon вЂ” РєРѕСЂР°Р»Р» */
+:root[data-theme="light"] .location-icon{
+  background:rgba(217,96,47,0.18) !important;
+  border:1.5px solid rgba(217,96,47,0.4) !important;
+  color:#8b3a1f !important;
+}
+:root[data-theme="light"] .location-icon svg{stroke:#8b3a1f !important}
+
+/* Sun arc / Moon вЂ” Р»РёРЅРёРё РІ astro-РєР°СЂС‚РѕС‡РєРµ */
+:root[data-theme="light"] .sun-arc{stroke:rgba(140,80,40,0.35) !important}
+:root[data-theme="light"] .sun-path-active{stroke:#d9602f !important}
+:root[data-theme="light"] .moon-phase{stroke:rgba(45,26,16,0.7) !important}
+
+/* UV gauge / AQI scale вЂ” РѕСЃС‚Р°РІР»СЏРµРј С†РІРµС‚РЅС‹РјРё */
+
+/* Р’РѕР·РІСЂР°С‚ Рє РЅРѕСЂРјР°Р»СЊРЅРѕРјСѓ РґР»СЏ cd-* Р»РµР№Р±Р»РѕРІ РІРЅСѓС‚СЂРё compare */
+:root[data-theme="light"] .ch-meta-label,
+:root[data-theme="light"] .ch-meta-value{color:#2d1a10}
+
+/* Footer */
+:root[data-theme="light"] .footer{color:rgba(45,26,16,0.65)}
+:root[data-theme="light"] .footer button{
+  background:rgba(255,253,247,0.88) !important;
+  border:1.5px solid rgba(140,80,40,0.32) !important;
+  color:#2d1a10 !important;
+  box-shadow:0 2px 10px rgba(120,70,30,0.1) !important;
+}
+:root[data-theme="light"] .footer button:hover{
+  background:#fff !important;
+  border-color:rgba(217,96,47,0.5) !important;
+}
+
+/* Inputs */
+:root[data-theme="light"] .search-input,
+:root[data-theme="light"] .city-search-input{
+  background:rgba(255,253,247,0.92) !important;
+  border:1.5px solid rgba(140,80,40,0.32) !important;
+  color:#2d1a10 !important;
+}
+:root[data-theme="light"] .search-input::placeholder,
+:root[data-theme="light"] .city-search-input::placeholder{color:rgba(45,26,16,0.5) !important}
+
+/* Search submit / refresh РєРЅРѕРїРєРё */
+:root[data-theme="light"] .search-submit-btn{
+  background:linear-gradient(135deg, #d9602f 0%, #b34a1f 100%) !important;
+  color:#fff !important;
+  border:none !important;
+  box-shadow:0 4px 14px rgba(217,96,47,0.35) !important;
+}
+
+/* Modal headers Рё close-button */
+:root[data-theme="light"] .modal-day-label{color:rgba(45,26,16,0.55) !important;font-weight:600}
+:root[data-theme="light"] .modal-day-title{color:#2d1a10 !important}
+:root[data-theme="light"] .modal-day-date{color:rgba(45,26,16,0.65) !important}
+:root[data-theme="light"] .modal-close{
+  background:rgba(140,80,40,0.14) !important;
+  border:1px solid rgba(140,80,40,0.25) !important;
+  color:#2d1a10 !important;
+}
+:root[data-theme="light"] .modal-close:hover{background:rgba(140,80,40,0.24) !important}
+:root[data-theme="light"] .swipe-handle{background:rgba(140,80,40,0.35) !important}
+
+/* Sticky-РїРѕР»РѕСЃР° С‡Р°СЃРѕРІ РІ HDM РјРѕРґР°Р»РєРµ */
+:root[data-theme="light"] .hdm-sticky-hours{
+  background:linear-gradient(180deg,rgba(255,250,243,0.97) 0%,rgba(255,243,225,0.92) 100%) !important;
+  border-bottom:1.5px solid rgba(140,80,40,0.28) !important;
+}
+
+/* HDM scroll Р°СЂСЂРѕСѓ */
+:root[data-theme="light"] .scroll-arrow{
+  background:rgba(255,253,247,0.95) !important;
+  border:1.5px solid rgba(140,80,40,0.4) !important;
+  color:#8b3a1f !important;
+  box-shadow:0 4px 14px rgba(120,70,30,0.2) !important;
+}
+
+/* Hour cell РІ РїРѕС‡Р°СЃРѕРІРѕР№ Р»РµРЅС‚Рµ вЂ” С„РёРЅР°Р» */
+:root[data-theme="light"] .hour-cell .h{color:rgba(45,26,16,0.75) !important;font-weight:600}
+:root[data-theme="light"] .hour-cell .t{color:#2d1a10 !important;font-weight:700}
+:root[data-theme="light"] .hour-cell .t .hc-unit{color:rgba(45,26,16,0.55) !important}
+:root[data-theme="light"] .hour-cell .p{color:#c0532a !important}
+
+/* HDM hour cell */
+:root[data-theme="light"] .hdm-hour-cell .hh{color:rgba(45,26,16,0.8) !important}
+:root[data-theme="light"] .hdm-hour-cell.now .hh{color:#c0532a !important;font-weight:700}
+:root[data-theme="light"] .hdm-hour-cell.now::before{
+  background:#c0532a !important;
+  box-shadow:0 0 6px #c0532a !important;
+}
+
+/* Backdrop РјРѕРґР°Р»РѕРє вЂ” Р±РѕР»СЊС€Рµ Р·Р°С‚РµРјРЅРµРЅРёСЏ РґР»СЏ РєРѕРЅС‚СЂР°СЃС‚Р° СЃ peach */
+:root[data-theme="light"] .modal-backdrop,
+:root[data-theme="light"] .hdm-backdrop{
+  background:rgba(80,40,15,0.45) !important;
+  backdrop-filter:blur(8px) !important;
+  -webkit-backdrop-filter:blur(8px) !important;
+}
+
+/* Days .day-icon (РёРєРѕРЅРєР° РїРѕРіРѕРґС‹ РІРЅСѓС‚СЂРё РґРЅСЏ) вЂ” РѕСЃС‚Р°РІР»СЏРµРј С†РІРµС‚РЅРѕР№ РєР°Рє РёРєРѕРЅРєР° */
+
+/* AQI/UV markers вЂ” РѕСЃС‚Р°РІР»СЏРµРј РєР°Рє РµСЃС‚СЊ, РѕРЅРё СЃРјС‹СЃР»РѕРІС‹Рµ */
+
+/* РҐРѕСЃСѓСЃ: any element with explicit text-shadow РґР»СЏ С‚С‘РјРЅРѕРіРѕ С„РѕРЅР° вЂ” СѓР±РёСЂР°РµРј
+   РІ СЃРІРµС‚Р»РѕР№ С‚РµРјРµ (С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ В«РґРІРѕР№РЅРѕРіРѕВ» СЂР°СЃСЃРµСЏРЅРёСЏ) */
+:root[data-theme="light"] .glass *,
+:root[data-theme="light"] .modal *{text-shadow:none}
+/* РќРѕ hero РѕСЃС‚Р°РІР»СЏРµРј СЃ С‚РµРЅСЊСЋ РґР»СЏ С‡РёС‚Р°РµРјРѕСЃС‚Рё Р±РµР»РѕРіРѕ РЅР° С„РѕС‚Рѕ */
+:root[data-theme="light"] .hero *{text-shadow:0 1px 4px rgba(60,20,5,0.6) !important}
+:root[data-theme="light"] .hero-temp-num{text-shadow:0 2px 16px rgba(60,20,5,0.7), 0 0 40px rgba(217,96,47,0.3) !important}
+
+/* Storm-h РІ РіСЂРѕР·Р°-РёРЅРґРёРєР°С‚РѕСЂРµ вЂ” Р·Р°РјРµС‚РЅС‹Рµ СЏС‡РµР№РєРё */
+:root[data-theme="light"] .storm-h{
+  background:rgba(140,80,40,0.18) !important;
+}
+:root[data-theme="light"] .storm-h.r1{background:rgba(250,204,21,0.5) !important}
+:root[data-theme="light"] .storm-h.r2{background:rgba(251,146,60,0.65) !important}
+:root[data-theme="light"] .storm-h.r3{background:rgba(239,68,68,0.7) !important}
+:root[data-theme="light"] .storm-h.r4{background:rgba(220,38,38,0.85) !important}
+
+/* Pollen-bar Рё acc-bar-wrap вЂ” С‚С‘РјРЅР°СЏ РїРѕРґР»РѕР¶РєР° */
+:root[data-theme="light"] .pollen-bar,
+:root[data-theme="light"] .acc-bar-wrap{background:rgba(140,80,40,0.22) !important}
+
+/* РЎРєСЂРѕР»Р»С‹ РІРЅСѓС‚СЂРё РїР»РёС‚РѕРє */
+:root[data-theme="light"] .hours-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .days::-webkit-scrollbar-track,
+:root[data-theme="light"] .precip-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .hdm-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .pdm-scroll::-webkit-scrollbar-track,
+:root[data-theme="light"] .cd-table::-webkit-scrollbar-track,
+:root[data-theme="light"] .favorites-row::-webkit-scrollbar-track{background:rgba(140,80,40,0.1) !important}
+
+/* Compare mode hero / cells */
+:root[data-theme="light"] .ch-hero,
+:root[data-theme="light"] .ch-hero *{color:#2d1a10}
+:root[data-theme="light"] .ch-temp{color:#2d1a10 !important;font-weight:600}
+:root[data-theme="light"] .ch-summary{color:#2d1a10}
+
+/* РќР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№ catch-all РґР»СЏ РєР»Р°СЃСЃР° СЃ inline white */
+:root[data-theme="light"] [style*="color:#fff"],
+:root[data-theme="light"] [style*="color: #fff"],
+:root[data-theme="light"] [style*="color:rgb(255,255,255)"],
+:root[data-theme="light"] [style*="color: rgb(255, 255, 255)"]{
+  color:#2d1a10 !important;
+}
+
+/* ============================================================
+   LIGHT THEME вЂ” РёС‚РµСЂР°С†РёСЏ 3: С‚РѕС‡РµС‡РЅС‹Рµ С„РёРєСЃС‹ РїРѕ С„РёРґР±СЌРєСѓ
+   1) В°C / unit-Р·РЅР°Рє вЂ” opacity 0.55 РґРµР»Р°Р» С‚РµРєСЃС‚ РЅРµРІРёРґРёРјС‹Рј
+   2) РџР»РёС‚РєРё РїРѕС‡Р°СЃРѕРІРѕРіРѕ/РґРЅРё вЂ” СѓСЃРёР»РёС‚СЊ РєРѕРЅС‚СЂР°СЃС‚ СЃ С„РѕРЅРѕРј СЃС‚СЂР°РЅРёС†С‹
+   3) Pollen вЂ” Р°РєС‚РёРІРЅС‹Рµ СѓСЂРѕРІРЅРё РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р·Р°РјРµС‚РЅРµРµ
+   4) Days .today вЂ” РѕСЃРѕР±Р°СЏ РїРѕРґСЃРІРµС‚РєР° РєРѕСЂР°Р»Р»РѕРІР°СЏ
+   ============================================================ */
+
+/* В°C unit РІ РїРѕС‡Р°СЃРѕРІРѕР№ Р»РµРЅС‚Рµ вЂ” opacity:0.55 + С†РІРµС‚ СЃ alpha 0.55 РґР°С‘С‚ 0.30,
+   С‡С‚Рѕ РїРѕС‡С‚Рё РЅРµРІРёРґРёРјРѕ. РџСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ opacity:1 Рё Р±РѕР»РµРµ РЅР°СЃС‹С‰РµРЅРЅС‹Р№ С†РІРµС‚. */
+:root[data-theme="light"] .hour-cell .t .hc-unit{
+  color:#5a3520 !important;
+  opacity:1 !important;
+  font-weight:500 !important;
+}
+:root[data-theme="light"] .hdm-hour-cell .hc-unit,
+:root[data-theme="light"] .day .hc-unit,
+:root[data-theme="light"] .cd-cell .hc-unit,
+:root[data-theme="light"] .modal-hero .hc-unit,
+:root[data-theme="light"] .mini-m .hc-unit,
+:root[data-theme="light"] .modal-astro-cell .hc-unit,
+:root[data-theme="light"] [class*="hour"] .hc-unit{
+  color:#5a3520 !important;
+  opacity:0.85 !important;
+}
+
+/* РџР»РёС‚РєРё РїРѕС‡Р°СЃРѕРІРѕРіРѕ Рё 10-РґРЅРµРІРЅРѕРіРѕ вЂ” РєСЂРµРјРѕРІС‹Р№ С†РІРµС‚ СЃ Р·Р°РјРµС‚РЅРѕР№ С‚С‘РїР»РѕР№
+   РіСЂР°РЅРёС†РµР№. Page bg С‚РµРїРµСЂСЊ РЅР°СЃС‹С‰РµРЅРЅС‹Р№ РїРµСЂСЃРёРє (#f5b585), РїРѕСЌС‚РѕРјСѓ РєСЂРµРјРѕРІР°СЏ
+   РїР»РёС‚РєР° СЏРІРЅРѕ РІС‹РґРµР»СЏРµС‚СЃСЏ. РЈСЃРёР»РёРІР°РµРј РєРѕРЅС‚СЂР°СЃС‚ РµС‰С‘ СЃРёР»СЊРЅРµРµ. */
+:root[data-theme="light"] .hour-cell,
+:root[data-theme="light"] .days .day,
+:root[data-theme="light"] .cd-cell,
+:root[data-theme="light"] .aw-cell,
+:root[data-theme="light"] .ap-cell,
+:root[data-theme="light"] .pollen-cell,
+:root[data-theme="light"] .climate-metric,
+:root[data-theme="light"] .acc-row{
+  background:#fffaf0 !important;  /* СЃРѕР»РёРґРЅС‹Р№ РєСЂРµРјРѕРІС‹Р№, Р±РµР· РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚Рё */
+  border:2px solid #c98855 !important;
+  box-shadow:0 3px 10px rgba(120,60,20,0.18),
+             0 1px 2px rgba(120,60,20,0.1) !important;
+}
+
+:root[data-theme="light"] .hour-cell:hover,
+:root[data-theme="light"] .days .day:hover,
+:root[data-theme="light"] .cd-cell:hover,
+:root[data-theme="light"] .aw-cell:hover,
+:root[data-theme="light"] .ap-cell:hover,
+:root[data-theme="light"] .pollen-cell:hover{
+  background:#ffffff !important;
+  border-color:#a8451c !important;
+  box-shadow:0 6px 18px rgba(168,69,28,0.28),
+             0 2px 4px rgba(168,69,28,0.18) !important;
+  transform:translateY(-1px);
+}
+
+/* "РЎР•Р“РћР”РќРЇ" РІ 10-РґРЅРµРІРЅРѕРј РїСЂРѕРіРЅРѕР·Рµ вЂ” РЅР°СЃС‹С‰РµРЅРЅР°СЏ РєРѕСЂР°Р»Р»РѕРІР°СЏ РїРѕРґСЃРІРµС‚РєР° */
+:root[data-theme="light"] .day.today{
+  background:linear-gradient(135deg, #ffe5d0 0%, #ffd2a8 100%) !important;
+  border:2px solid #d9602f !important;
+  box-shadow:0 6px 20px rgba(217,96,47,0.32),
+             0 2px 6px rgba(217,96,47,0.2),
+             inset 0 1px 0 rgba(255,255,255,0.6) !important;
+}
+:root[data-theme="light"] .day.today *{color:#2d1a10 !important}
+:root[data-theme="light"] .day.today .day-label{color:#a8451c !important;font-weight:700}
+
+/* РЎРµРіРѕРґРЅСЏ РІ compare-days */
+:root[data-theme="light"] .cd-cell.today,
+:root[data-theme="light"] .cd-cell.now{
+  background:linear-gradient(135deg, #ffe5d0 0%, #ffd2a8 100%) !important;
+  border:2px solid #d9602f !important;
+  box-shadow:0 4px 16px rgba(217,96,47,0.3) !important;
+}
+
+/* Pollen вЂ” РЅР°РјРЅРѕРіРѕ Р±РѕР»РµРµ РЅР°СЃС‹С‰РµРЅРЅС‹Рµ СѓСЂРѕРІРЅРµРІС‹Рµ Р·Р°Р»РёРІРєРё */
+:root[data-theme="light"] .pollen-cell.pl-none{
+  background:#fffaf0 !important;
+  border:2px solid rgba(200,150,110,0.4) !important;
+  opacity:0.7;
+}
+:root[data-theme="light"] .pollen-cell.pl-low{
+  background:linear-gradient(135deg, #d5f5dc 0%, #b8ebc4 100%) !important;
+  border:2px solid #4ade80 !important;
+  box-shadow:0 3px 12px rgba(74,222,128,0.25) !important;
+}
+:root[data-theme="light"] .pollen-cell.pl-mid{
+  background:linear-gradient(135deg, #fef3c0 0%, #fde795 100%) !important;
+  border:2px solid #eab308 !important;
+  box-shadow:0 3px 12px rgba(234,179,8,0.28) !important;
+}
+:root[data-theme="light"] .pollen-cell.pl-high{
+  background:linear-gradient(135deg, #ffd6b0 0%, #ffba80 100%) !important;
+  border:2px solid #ea580c !important;
+  box-shadow:0 3px 14px rgba(234,88,12,0.32) !important;
+}
+:root[data-theme="light"] .pollen-cell.pl-veryHigh{
+  background:linear-gradient(135deg, #ffc4c4 0%, #ff9a9a 100%) !important;
+  border:2px solid #dc2626 !important;
+  box-shadow:0 3px 16px rgba(220,38,38,0.35) !important;
+}
+
+/* Pollen icon - С‚С‘РјРЅР°СЏ РїРѕРґР»РѕР¶РєР° РЅР° С†РІРµС‚РЅРѕРј С„РѕРЅРµ */
+:root[data-theme="light"] .pollen-cell.pl-low .pollen-icon{
+  background:rgba(34,150,68,0.18) !important;
+  box-shadow:inset 0 0 8px rgba(34,150,68,0.3) !important;
+}
+:root[data-theme="light"] .pollen-cell.pl-mid .pollen-icon{
+  background:rgba(180,130,5,0.18) !important;
+  box-shadow:inset 0 0 8px rgba(180,130,5,0.3) !important;
+}
+:root[data-theme="light"] .pollen-cell.pl-high .pollen-icon{
+  background:rgba(180,70,10,0.2) !important;
+  box-shadow:inset 0 0 8px rgba(180,70,10,0.3) !important;
+}
+:root[data-theme="light"] .pollen-cell.pl-veryHigh .pollen-icon{
+  background:rgba(180,30,30,0.2) !important;
+  box-shadow:inset 0 0 8px rgba(180,30,30,0.3) !important;
+}
+
+/* Pollen level text вЂ” РЅР°СЃС‹С‰РµРЅРЅС‹Рµ С‚С‘РјРЅС‹Рµ РѕС‚С‚РµРЅРєРё СѓСЂРѕРІРЅРµРІС‹С… С†РІРµС‚РѕРІ */
+:root[data-theme="light"] .pollen-cell.pl-low .pollen-level     { color:#15803d !important;font-weight:700 }
+:root[data-theme="light"] .pollen-cell.pl-mid .pollen-level     { color:#a16207 !important;font-weight:700 }
+:root[data-theme="light"] .pollen-cell.pl-high .pollen-level    { color:#c2410c !important;font-weight:700 }
+:root[data-theme="light"] .pollen-cell.pl-veryHigh .pollen-level{ color:#b91c1c !important;font-weight:700 }
+:root[data-theme="light"] .pollen-cell.pl-none .pollen-level{color:rgba(45,26,16,0.5) !important}
+
+/* Pollen-bar вЂ” С‚С‘РјРЅР°СЏ РїРѕРґР»РѕР¶РєР° */
+:root[data-theme="light"] .pollen-bar{background:rgba(120,70,30,0.25) !important}
+
+/* Р‘РѕР»СЊС€РёРµ РєР°СЂС‚РѕС‡РєРё (.glass) вЂ” РѕСЃС‚Р°РІР»СЏРµРј С‡СѓС‚СЊ РїСЂРѕР·СЂР°С‡РЅС‹Рµ РєСЂРµРјРѕРІС‹Рµ */
+:root[data-theme="light"] .glass,
+:root[data-theme="light"] .hourly-card,
+:root[data-theme="light"] .precip-card,
+:root[data-theme="light"] .storm-card,
+:root[data-theme="light"] .activity-card,
+:root[data-theme="light"] .pollen-card,
+:root[data-theme="light"] .climate-card,
+:root[data-theme="light"] .astro-photo-card,
+:root[data-theme="light"] .accuracy-card,
+:root[data-theme="light"] .sources-card,
+:root[data-theme="light"] .astro-card,
+:root[data-theme="light"] .metric{
+  background:rgba(255,250,237,0.86) !important;
+  backdrop-filter:blur(20px) saturate(140%) !important;
+  -webkit-backdrop-filter:blur(20px) saturate(140%) !important;
+  border:2px solid rgba(168,90,40,0.32) !important;
+  box-shadow:0 6px 20px rgba(120,60,20,0.16),
+             0 2px 6px rgba(120,60,20,0.1),
+             inset 0 1px 0 rgba(255,255,255,0.6) !important;
+}
+
+/* В°C РЅР° hero вЂ” РѕСЃС‚Р°РІР»СЏРµРј Р±РµР»С‹Рј (РЅР° С„РѕС‚Рѕ-С„РѕРЅРµ) */
+:root[data-theme="light"] .hero-temp-unit{
+  color:rgba(255,235,210,0.95) !important;
+  opacity:1 !important;
+  text-shadow:0 2px 8px rgba(60,20,5,0.7) !important;
+}
+
+/* "РЈСЃСЂРµРґРЅРµРЅРѕ РїРѕ 7 РјРѕРґРµР»СЏРј" вЂ” С‚РѕС‡РЅРѕ terracotta */
+:root[data-theme="light"] .hourly-card #chartSourceSub,
+:root[data-theme="light"] .hourly-card .sub#chartSourceSub{
+  color:#c0532a !important;
+}
+
+/* Storm-h heatmap вЂ” Р·Р°РјРµС‚РЅС‹Рµ СЏС‡РµР№РєРё СЃРІРµСЂС… РїСЂРµРґС‹РґСѓС‰РёС… РїСЂР°РІРёР» */
+:root[data-theme="light"] .storm-h{background:rgba(120,70,30,0.2) !important}
+
+/* HDM modal sticky-РїРѕР»РѕСЃР° С‡Р°СЃРѕРІ вЂ” РЅР°СЃС‹С‰РµРЅРЅС‹Р№ С„РѕРЅ */
+:root[data-theme="light"] .hdm-sticky-hours{
+  background:linear-gradient(180deg, #fffaf0 0%, #fff3df 100%) !important;
+  border-bottom:2px solid #c98855 !important;
+  box-shadow:0 2px 8px rgba(120,60,20,0.15) !important;
+}
+
+/* Р¤РёРЅР°Р»СЊРЅС‹Р№ С‚РµРєСЃС‚РѕРІС‹Р№ СѓРЅРёРІРµСЂСЃР°Р» РґР»СЏ Р»РµР№Р±Р»РѕРІ РІРЅСѓС‚СЂРё РїР»РёС‚РѕРє */
+:root[data-theme="light"] .glass [class*="-label"],
+:root[data-theme="light"] .glass [class*="-sub"],
+:root[data-theme="light"] .modal [class*="-label"],
+:root[data-theme="light"] .modal [class*="-sub"]{
+  color:rgba(45,26,16,0.7) !important;
+}
+
+/* ============================================================
+   LIGHT THEME вЂ” РёС‚РµСЂР°С†РёСЏ 4: С‚РµСЂСЂР°РєРѕС‚РѕРІС‹Рµ С‚РµРЅРё Рё РіР°СЂРјРѕРЅРёР·Р°С†РёСЏ
+   1) РўРµРЅРё РІСЃРµС… РїР»РёС‚РѕРє в†’ С‚РµСЂСЂР°РєРѕС‚РѕРІС‹Рµ (rgba(192,83,42,*)) вЂ” РµРґРёРЅР°СЏ
+      С†РІРµС‚РѕРІР°СЏ СЃРёСЃС‚РµРјР°, СЃРёР»СЊРЅРѕ СѓСЃРёР»РёРІР°РµС‚ РєРѕРЅС‚СЂР°СЃС‚ РіСЂР°РЅРёС†
+   2) Body bg С‡СѓС‚СЊ РѕСЃРІРµС‚Р»С‘РЅ РґРѕ #fcc99a вЂ” РјРѕРґР°Р»РєРё Рё РіР»Р°РІРЅС‹Р№ СЌРєСЂР°РЅ
+      С‚РµРїРµСЂСЊ РІРёР·СѓР°Р»СЊРЅРѕ РїРѕС…РѕР¶Рё (РѕР±С‰РёР№ С‚С‘РїР»С‹Р№ peach)
+   3) Р“СЂРѕР·Р°-РёРЅРґРёРєР°С‚РѕСЂ: С‚РµРєСЃС‚ СЃС‚Р°С‚СѓСЃР° РІРёРґРёРјС‹Р№, status-pills СЃ
+      РєРѕСЂР°Р»Р»РѕРІС‹РјРё РіСЂР°РЅРёС†Р°РјРё РЅР° Р±РµР»С‹С… С‚РёР»Р°С…
+   4) РњРѕРґР°Р»РєР° РґРЅСЏ: РІРЅСѓС‚СЂРµРЅРЅРёРµ РїР»РёС‚РєРё РїРѕР»СѓС‡Р°СЋС‚ С‚РѕС‚ Р¶Рµ СЃС‚РёР»СЊ
+      С‡С‚Рѕ Рё РїР»РёС‚РєРё РіР»Р°РІРЅРѕРіРѕ СЌРєСЂР°РЅР°
+   ============================================================ */
+
+/* РўР•Р Р РђРљРћРўРћР’Р«Р• РўР•РќР вЂ” Р·Р°РјРµРЅСЏРµРј РІСЃРµ brown/dark С‚РµРЅРё РЅР° coral/terracotta,
+   СЃРѕР·РґР°РІР°СЏ РµРґРёРЅС‹Р№ С†РІРµС‚РѕРІРѕР№ Р°РєС†РµРЅС‚ РЅР° РіСЂР°РЅРёС†Р°С… РїР»РёС‚РѕРє */
+
+/* Р‘РѕР»СЊС€РёРµ .glass РєР°СЂС‚РѕС‡РєРё */
+:root[data-theme="light"] .glass,
+:root[data-theme="light"] .hourly-card,
+:root[data-theme="light"] .precip-card,
+:root[data-theme="light"] .storm-card,
+:root[data-theme="light"] .activity-card,
+:root[data-theme="light"] .pollen-card,
+:root[data-theme="light"] .climate-card,
+:root[data-theme="light"] .astro-photo-card,
+:root[data-theme="light"] .accuracy-card,
+:root[data-theme="light"] .sources-card,
+:root[data-theme="light"] .astro-card,
+:root[data-theme="light"] .metric{
+  background:rgba(255,250,237,0.92) !important;
+  border:1.5px solid rgba(192,83,42,0.45) !important;
+  box-shadow:
+    0 4px 14px rgba(192,83,42,0.18),
+    0 1px 3px rgba(192,83,42,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.7) !important;
+}
+
+/* Р’РЅСѓС‚СЂРµРЅРЅРёРµ РїР»РёС‚РєРё (С‡Р°СЃС‹, РґРЅРё, РѕРєРЅР°, РєР»РёРјР°С‚ Рё С‚.Рґ.) */
+:root[data-theme="light"] .hour-cell,
+:root[data-theme="light"] .days .day,
+:root[data-theme="light"] .cd-cell,
+:root[data-theme="light"] .aw-cell,
+:root[data-theme="light"] .ap-cell,
+:root[data-theme="light"] .pollen-cell,
+:root[data-theme="light"] .climate-metric,
+:root[data-theme="light"] .acc-row,
+:root[data-theme="light"] .mini-m,
+:root[data-theme="light"] .modal-astro-cell,
+:root[data-theme="light"] .modal-hourly,
+:root[data-theme="light"] .modal-hours-list,
+:root[data-theme="light"] .modal-hero,
+:root[data-theme="light"] .ht-tab,
+:root[data-theme="light"] .source-pill,
+:root[data-theme="light"] .city-item,
+:root[data-theme="light"] .voice-item,
+:root[data-theme="light"] .search-result-card,
+:root[data-theme="light"] .search-preset,
+:root[data-theme="light"] .radar-controls,
+:root[data-theme="light"] .radar-tabs,
+:root[data-theme="light"] .settings-section{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:
+    0 3px 10px rgba(192,83,42,0.16),
+    0 1px 2px rgba(192,83,42,0.1) !important;
+}
+
+/* Hover/active вЂ” СѓСЃРёР»РµРЅРЅР°СЏ РєРѕСЂР°Р»Р»РѕРІР°СЏ РіСЂР°РЅРёС†Р° Рё С‚РµРЅСЊ */
+:root[data-theme="light"] .hour-cell:hover,
+:root[data-theme="light"] .days .day:hover,
+:root[data-theme="light"] .cd-cell:hover,
+:root[data-theme="light"] .aw-cell:hover,
+:root[data-theme="light"] .ap-cell:hover,
+:root[data-theme="light"] .source-pill:hover,
+:root[data-theme="light"] .city-item:hover,
+:root[data-theme="light"] .voice-item:hover,
+:root[data-theme="light"] .search-result-card:hover,
+:root[data-theme="light"] .search-preset:hover,
+:root[data-theme="light"] .modal-astro-cell:hover{
+  background:#fffefb !important;
+  border-color:#c0532a !important;
+  box-shadow:
+    0 6px 18px rgba(192,83,42,0.3),
+    0 2px 4px rgba(192,83,42,0.2) !important;
+}
+
+/* РњРѕРґР°Р»РєР° РґРЅСЏ (СЃС‚Р°РЅРґР°СЂС‚РЅР°СЏ .modal sheet) вЂ” С„РѕРЅ РІ С‚РѕРЅ body, С‡С‚РѕР±С‹
+   РїСЂРё РѕС‚РєСЂС‹С‚РёРё РЅРµ Р±С‹Р»Рѕ СЂРµР·РєРѕРіРѕ РєРѕРЅС‚СЂР°СЃС‚Р° СЃ РіР»Р°РІРЅС‹Рј СЌРєСЂР°РЅРѕРј */
+:root[data-theme="light"] .modal,
+:root[data-theme="light"] .settings-modal,
+:root[data-theme="light"] .search-modal,
+:root[data-theme="light"] .hdm-sheet{
+  background:linear-gradient(135deg, rgba(255,238,205,0.97) 0%, rgba(255,225,180,0.95) 100%) !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:
+    0 24px 60px rgba(120,50,20,0.3),
+    0 8px 24px rgba(192,83,42,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.6) !important;
+}
+
+/* Backdrop РјРѕРґР°Р»РѕРє вЂ” РјСЏРіРєРёР№ С‚С‘РїР»С‹Р№, РЅРµ Р°РіСЂРµСЃСЃРёРІРЅРѕ С‚С‘РјРЅС‹Р№ */
+:root[data-theme="light"] .modal-backdrop,
+:root[data-theme="light"] .hdm-backdrop{
+  background:rgba(140,70,30,0.42) !important;
+}
+
+/* ============================================================
+   Р“Р РћР—Рђ вЂ” РёРЅРґРёРєР°С‚РѕСЂ Рё СЃС‚Р°С‚СѓСЃ
+   ============================================================ */
+
+/* РЎС‚Р°С‚СѓСЃ-СЃС‚СЂРѕРєР° РЅР°Рґ heatmap */
+:root[data-theme="light"] .storm-status-text{color:#2d1a10 !important;font-weight:600}
+
+/* Status-pill вЂ” РЅР°СЃС‹С‰РµРЅРЅС‹Рµ С†РІРµС‚Р° СЂРёСЃРєР° РЅР° Р±РµР»РѕРј С„РѕРЅРµ */
+:root[data-theme="light"] .storm-status.st-r0 .storm-status-pill{
+  color:#0d9488 !important;background:rgba(94,234,212,0.2) !important;border:1.5px solid #14b8a6 !important;
+}
+:root[data-theme="light"] .storm-status.st-r1 .storm-status-pill{
+  color:#854d0e !important;background:rgba(250,204,21,0.25) !important;border:1.5px solid #ca8a04 !important;
+}
+:root[data-theme="light"] .storm-status.st-r2 .storm-status-pill{
+  color:#9a3412 !important;background:rgba(251,146,60,0.25) !important;border:1.5px solid #ea580c !important;
+}
+:root[data-theme="light"] .storm-status.st-r3 .storm-status-pill{
+  color:#991b1b !important;background:rgba(239,68,68,0.22) !important;border:1.5px solid #dc2626 !important;
+}
+:root[data-theme="light"] .storm-status.st-r4 .storm-status-pill{
+  color:#6b21a8 !important;background:rgba(168,85,247,0.22) !important;border:1.5px solid #9333ea !important;
+}
+
+/* Heatmap СЏС‡РµР№РєРё вЂ” РЅР°СЃС‹С‰РµРЅРЅС‹Рµ СЂРёСЃРєРё, С‚С‘РјРЅС‹Р№ В«РЅРµС‚ СЂРёСЃРєР°В» */
+:root[data-theme="light"] .storm-h{background:rgba(120,70,30,0.22) !important}
+:root[data-theme="light"] .storm-h.r1{background:#facc15 !important;box-shadow:0 0 4px rgba(250,204,21,0.6) !important}
+:root[data-theme="light"] .storm-h.r2{background:#fb923c !important;box-shadow:0 0 4px rgba(251,146,60,0.7) !important}
+:root[data-theme="light"] .storm-h.r3{background:#ef4444 !important;box-shadow:0 0 5px rgba(239,68,68,0.7) !important}
+:root[data-theme="light"] .storm-h.r4{background:#a855f7 !important;box-shadow:0 0 5px rgba(168,85,247,0.7) !important}
+
+/* Р›РµРіРµРЅРґР° СЃРЅРёР·Сѓ */
+:root[data-theme="light"] .storm-legend{color:rgba(45,26,16,0.7) !important;font-weight:500}
+:root[data-theme="light"] .storm-legend .sl-sw{background:rgba(120,70,30,0.2)}
+
+/* Storm hour labels (РµСЃР»Рё РµСЃС‚СЊ РїРѕРґРїРёСЃРё С‡Р°СЃРѕРІ РїРѕРґ heatmap) */
+:root[data-theme="light"] .storm-row-label,
+:root[data-theme="light"] .storm-hour-label{color:rgba(45,26,16,0.7) !important}
+
+/* ============================================================
+   РњРћР”РђР›РљРђ Р”РќРЇ вЂ” РіР°СЂРјРѕРЅРёР·Р°С†РёСЏ
+   ============================================================ */
+
+/* Р—Р°РіРѕР»РѕРІРѕРє РґРЅСЏ Рё РґР°С‚Р° */
+:root[data-theme="light"] .modal-day-title{color:#2d1a10 !important;font-weight:700}
+:root[data-theme="light"] .modal-day-label{color:#c0532a !important;font-weight:700;letter-spacing:0.08em}
+:root[data-theme="light"] .modal-day-date{color:rgba(45,26,16,0.7) !important}
+
+/* Modal-hero (Р±РѕР»СЊС€Р°СЏ РїР»Р°С€РєР° СЃ РїРѕРіРѕРґРѕР№ РІ РјРѕРґР°Р»РєРµ РґРЅСЏ) */
+:root[data-theme="light"] .modal-hero{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:0 4px 14px rgba(192,83,42,0.18) !important;
+}
+:root[data-theme="light"] .modal-hero *{color:#2d1a10 !important;text-shadow:none !important}
+:root[data-theme="light"] .modal-hero .modal-condition{color:rgba(45,26,16,0.85) !important}
+
+/* Mini-РјРµС‚СЂРёРєРё (4 РїР»РёС‚РєРё РІ РјРѕРґР°Р»РєРµ РґРЅСЏ) */
+:root[data-theme="light"] .mini-m{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:0 2px 8px rgba(192,83,42,0.15) !important;
+}
+:root[data-theme="light"] .mini-m .mm-label{color:rgba(45,26,16,0.7) !important;font-weight:600}
+:root[data-theme="light"] .mini-m .mm-value{color:#2d1a10 !important;font-weight:700}
+
+/* Modal-astro-cell вЂ” astro-РїР»Р°С€РєРё */
+:root[data-theme="light"] .modal-astro-cell{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:0 2px 8px rgba(192,83,42,0.15) !important;
+}
+:root[data-theme="light"] .modal-astro-cell .mac-label{color:rgba(45,26,16,0.7) !important;font-weight:600}
+:root[data-theme="light"] .modal-astro-cell .mac-value{color:#2d1a10 !important;font-weight:700}
+
+/* Modal-hourly / modal-hours-list */
+:root[data-theme="light"] .modal-hourly,
+:root[data-theme="light"] .modal-hours-list{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:0 2px 8px rgba(192,83,42,0.14) !important;
+}
+
+/* Hour-cell РІРЅСѓС‚СЂРё РјРѕРґР°Р»РєРё РґРЅСЏ (РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅС‹Р№ scroll С‡Р°СЃРѕРІ) */
+:root[data-theme="light"] .modal-hours-list .hour-cell,
+:root[data-theme="light"] .modal-hourly .hour-cell{
+  background:#fff5e3 !important;  /* С‡СѓС‚СЊ С‚РµРїР»РµРµ С‡РµРј .modal-hours-list */
+  border:1.5px solid rgba(192,83,42,0.35) !important;
+}
+
+/* Astro-card sun/moon С„РѕРЅ */
+:root[data-theme="light"] .astro-card .ac-title,
+:root[data-theme="light"] .astro-card .ac-label{color:rgba(45,26,16,0.7) !important;font-weight:600}
+:root[data-theme="light"] .astro-card .ac-value{color:#2d1a10 !important;font-weight:700}
+
+/* РўРµРєСЃС‚ РІ graphics (HDM SVG) вЂ” С„РёРЅР°Р»СЊРЅРѕ РїСЂРѕРєРѕРЅС‚СЂРѕР»РёСЂРѕРІР°С‚СЊ */
+:root[data-theme="light"] svg text{
+  fill:#2d1a10 !important;
+}
+:root[data-theme="light"] svg text[fill*="rgba(232,240,255,0.55)"],
+:root[data-theme="light"] .climate-spark svg text:nth-of-type(2n){
+  fill:rgba(45,26,16,0.6) !important;
+}
+
+/* Header strong / chip РєРѕРЅС‚СЂР°СЃС‚ */
+:root[data-theme="light"] .header-chip,
+:root[data-theme="light"] .source-indicator{
+  background:rgba(255,250,237,0.95) !important;
+  border:1.5px solid rgba(192,83,42,0.45) !important;
+  color:#2d1a10 !important;
+  box-shadow:0 3px 10px rgba(192,83,42,0.18) !important;
+}
+
+/* Footer button вЂ” РµРґРёРЅР°СЏ С‚РµРЅСЊ */
+:root[data-theme="light"] .footer button,
+:root[data-theme="light"] .refresh-btn{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.42) !important;
+  color:#2d1a10 !important;
+  box-shadow:0 3px 10px rgba(192,83,42,0.16) !important;
+}
+
+/* Scroll-arrows */
+:root[data-theme="light"] .scroll-arrow{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.5) !important;
+  color:#c0532a !important;
+  box-shadow:0 4px 12px rgba(192,83,42,0.22) !important;
+}
+
+/* Settings-section вЂ” РєСЂРµРјРѕРІС‹Р№ Р±Р»РѕРє */
+:root[data-theme="light"] .settings-section{
+  background:rgba(255,242,220,0.7) !important;
+  border:1.5px solid rgba(192,83,42,0.32) !important;
+  box-shadow:0 2px 8px rgba(192,83,42,0.1) !important;
+}
+
+/* Seg-btn вЂ” РєСЂРµРјРѕРІС‹Рµ СЃ РєРѕСЂР°Р»Р»РѕРІРѕР№ РіСЂР°РЅРёС†РµР№ */
+:root[data-theme="light"] .seg-btn{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.35) !important;
+  color:rgba(45,26,16,0.8) !important;
+  box-shadow:0 1px 3px rgba(192,83,42,0.1) !important;
+}
+
+/* Pollen вЂ” РЅР°СЃС‹С‰РµРЅРЅС‹Рµ РїР»РёС‚РєРё СѓР¶Рµ СЃС‚РёР»РёР·РѕРІР°РЅС‹ РІС‹С€Рµ, РґРѕР±Р°РІР»СЏРµРј С‚РµРЅСЊ */
+:root[data-theme="light"] .pollen-cell.pl-low,
+:root[data-theme="light"] .pollen-cell.pl-mid,
+:root[data-theme="light"] .pollen-cell.pl-high,
+:root[data-theme="light"] .pollen-cell.pl-veryHigh{
+  box-shadow:0 4px 14px rgba(192,83,42,0.18), 0 1px 3px rgba(192,83,42,0.12) !important;
+}
+
+/* Hero вЂ” coral shadow РІРјРµСЃС‚Рѕ brown */
+:root[data-theme="light"] .hero{
+  box-shadow:
+    0 8px 28px rgba(192,83,42,0.22),
+    0 3px 8px rgba(192,83,42,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.55) !important;
+}
+
+/* Stuck hero вЂ” РєРѕРјРїР°РєС‚РЅС‹Р№, С‚РѕР¶Рµ coral shadow */
+:root[data-theme="light"] .hero.stuck{
+  box-shadow:
+    0 8px 24px rgba(120,50,15,0.32),
+    0 2px 6px rgba(192,83,42,0.2) !important;
+}
+
+/* ============================================================
+   LIGHT THEME вЂ” РёС‚РµСЂР°С†РёСЏ 5
+   1) РЈРЅРёС„РёС†РёСЂРѕРІР°РЅРЅР°СЏ РїРѕРґСЃРІРµС‚РєР° "РЎРµРіРѕРґРЅСЏ" (.day.today) Рё "СЃРµР№С‡Р°СЃ"
+      (.hour-cell.now): РјСЏРіРєРёР№ РєРѕСЂР°Р»Р»-РїРµСЂСЃРёРє, С‡С‘СЂРЅС‹Р№ С‚РµРєСЃС‚, С‡С‘С‚РєР°СЏ
+      coral-РіСЂР°РЅРёС†Р°. Р Р°РЅСЊС€Рµ .hour-cell.now Р±С‹Р» СЃР»РёС€РєРѕРј С‚С‘РјРЅС‹Рј
+      (solid #d9602f), С‚РµРїРµСЂСЊ СЃРІРµС‚Р»РµРµ Рё С‡РёС‚Р°РµРјРµРµ.
+   2) UV-РёРЅРґРµРєСЃ / AQI status (inline-styled СЌР»РµРјРµРЅС‚С‹): РїРµСЂРµРѕРїСЂРµРґРµР»СЏРµРј
+      inline С‡РµСЂРµР· !important вЂ” bg Р±РѕР»РµРµ РЅР°СЃС‹С‰РµРЅРЅС‹Р№, text РІСЃРµРіРґР°
+      С‚С‘РјРЅС‹Р№ РґР»СЏ С‡РёС‚Р°РµРјРѕСЃС‚Рё, РіСЂР°РЅРёС†Р° 1.5px РїРѕ С‚РѕРЅСѓ.
+   ============================================================ */
+
+/* "РЎР•Р“РћР”РќРЇ" РІ 10-РґРЅРµРІРЅРѕРј РїСЂРѕРіРЅРѕР·Рµ Р "РЎР•Р™Р§РђРЎ" РІ РїРѕС‡Р°СЃРѕРІРѕРј вЂ” РѕРґРёРЅ СЃС‚РёР»СЊ */
+:root[data-theme="light"] .day.today,
+:root[data-theme="light"] .hour-cell.now,
+:root[data-theme="light"] .cd-cell.now,
+:root[data-theme="light"] .cd-cell.today{
+  background:linear-gradient(135deg, #ffd9b8 0%, #ffbf90 100%) !important;
+  border:2px solid #d9602f !important;
+  box-shadow:
+    0 4px 16px rgba(217,96,47,0.3),
+    0 1px 4px rgba(217,96,47,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.5) !important;
+}
+
+/* РўРµРєСЃС‚ РІРЅСѓС‚СЂРё Р°РєС‚РёРІРЅС‹С… РїР»РёС‚РѕРє вЂ” С‚С‘РјРЅС‹Р№ (С‡РёС‚Р°РµРјРѕ РЅР° РїРµСЂСЃРёРєРµ) */
+:root[data-theme="light"] .day.today *,
+:root[data-theme="light"] .hour-cell.now *,
+:root[data-theme="light"] .cd-cell.now *,
+:root[data-theme="light"] .cd-cell.today *{
+  color:#2d1a10 !important;
+  text-shadow:none !important;
+}
+
+/* Р”РµРЅСЊ "РЎРµРіРѕРґРЅСЏ" вЂ” Р»РµР№Р±Р» СЃРёР»СЊРЅРµРµ РІС‹РґРµР»РёС‚СЊ (РІРјРµСЃС‚Рѕ С‚С‘РјРЅРѕРіРѕ вЂ” РЅР°СЃС‹С‰РµРЅРЅС‹Р№ РєРѕСЂР°Р»Р») */
+:root[data-theme="light"] .day.today .day-label,
+:root[data-theme="light"] .hour-cell.now .h{
+  color:#a8451c !important;
+  font-weight:700 !important;
+  letter-spacing:0.04em;
+}
+
+/* РўРµРјРїРµСЂР°С‚СѓСЂР° РІ Р°РєС‚РёРІРЅРѕР№ РїР»РёС‚РєРµ С‡Р°СЃР° вЂ” РѕСЃРѕР±Рѕ РІС‹РґРµР»РµРЅР° */
+:root[data-theme="light"] .hour-cell.now .t{
+  color:#2d1a10 !important;
+  font-weight:800 !important;
+  font-size:15px !important;
+}
+:root[data-theme="light"] .hour-cell.now .t .hc-unit{
+  color:rgba(45,26,16,0.7) !important;
+  opacity:1 !important;
+}
+:root[data-theme="light"] .hour-cell.now .p{color:#a8451c !important;font-weight:600}
+
+/* Hover РЅР° Р°РєС‚РёРІРЅС‹С… вЂ” С‡СѓС‚СЊ СЏСЂС‡Рµ */
+:root[data-theme="light"] .day.today:hover,
+:root[data-theme="light"] .hour-cell.now:hover{
+  background:linear-gradient(135deg, #ffd0a8 0%, #ffaf78 100%) !important;
+  box-shadow:
+    0 6px 20px rgba(217,96,47,0.4),
+    0 2px 6px rgba(217,96,47,0.25) !important;
+}
+
+/* HDM hour-cell.now (sticky-РїРѕР»РѕСЃР° РІ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅРѕР№ РјРѕРґР°Р»РєРµ) вЂ” С‚РѕР¶Рµ СѓРЅРёС„РёС†РёСЂРѕРІР°С‚СЊ */
+:root[data-theme="light"] .hdm-hour-cell.now{
+  /* sticky-row РЅРµ РёРјРµРµС‚ С„РѕРЅР° СЏС‡РµРµРє, С‚РѕР»СЊРєРѕ С‚РµРєСЃС‚-РјР°СЂРєРµСЂ */
+}
+:root[data-theme="light"] .hdm-hour-cell.now .hh{
+  color:#a8451c !important;
+  font-weight:700 !important;
+}
+:root[data-theme="light"] .hdm-hour-cell.now::before{
+  background:#d9602f !important;
+  box-shadow:0 0 8px rgba(217,96,47,0.6) !important;
+  width:3px !important;
+  height:8px !important;
+}
+
+/* ============================================================
+   UV-РёРЅРґРµРєСЃ Рё AQI вЂ” inline-style СЌР»РµРјРµРЅС‚С‹. РўРѕР»СЊРєРѕ !important
+   РїРѕР±РµР¶РґР°РµС‚ inline. Р”РµР»Р°РµРј РѕР±Р° С‡РёС‚Р°РµРјС‹РјРё РЅР° РєСЂРµРјРѕРІРѕРј С„РѕРЅРµ:
+   - bg С‡СѓС‚СЊ РЅР°СЃС‹С‰РµРЅРЅРµРµ (0.15 в†’ 0.3)
+   - text вЂ” РІСЃРµРіРґР° С‚С‘РјРЅС‹Р№ (РІРЅРµ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СѓСЂРѕРІРЅСЏ)
+   - border вЂ” Р·Р°РјРµС‚РЅР°СЏ 1.5px РєРѕСЂР°Р»Р»РѕРІР°СЏ
+   ============================================================ */
+
+/* UV СЃС‚Р°С‚СѓСЃ */
+:root[data-theme="light"] #uvStatus{
+  background:rgba(250,204,21,0.35) !important;
+  color:#713f12 !important;
+  border:1.5px solid #b8860b !important;
+  font-weight:700 !important;
+  padding:5px 12px !important;
+  box-shadow:0 2px 6px rgba(202,138,4,0.18) !important;
+}
+
+/* AQI СЃС‚Р°С‚СѓСЃ */
+:root[data-theme="light"] #aqiStatus{
+  background:rgba(74,222,128,0.32) !important;
+  color:#14532d !important;
+  border:1.5px solid #15803d !important;
+  font-weight:700 !important;
+  padding:5px 12px !important;
+  box-shadow:0 2px 6px rgba(34,150,68,0.18) !important;
+}
+
+/* UV-card Рё AQI-card СЃР°РјРё вЂ” РѕСЃС‚Р°РІР»СЏРµРј РєСЂРµРјРѕРІС‹Рµ СЃ coral-РіСЂР°РЅРёС†РµР№.
+   РЈР¶Рµ РїРѕРєСЂС‹С‚Рѕ .astro-card override РІС‹С€Рµ. РЈСЃРёР»РёРІР°РµРј Р»РµР№Р±Р»С‹. */
+:root[data-theme="light"] .uv-card .lbl,
+:root[data-theme="light"] .aqi-card .lbl{
+  color:rgba(45,26,16,0.65) !important;
+  font-weight:600 !important;
+}
+
+/* UV gauge СЃС‚СЂРµР»РєР° Рё С€РєР°Р»Р° вЂ” С‚С‘РјРЅР°СЏ СЃС‚СЂРµР»РєР° РЅР° С†РІРµС‚РЅРѕР№ С€РєР°Р»Рµ */
+:root[data-theme="light"] .uv-arrow{stroke:#2d1a10 !important;fill:#2d1a10 !important}
+:root[data-theme="light"] .uv-scale text{fill:#2d1a10 !important;font-weight:600}
+
+/* AQI С€РєР°Р»Р° marker */
+:root[data-theme="light"] .aqi-marker{
+  background:#2d1a10 !important;
+  box-shadow:0 0 8px rgba(60,30,15,0.5) !important;
+}
+
+/* ============================================================
+   LIGHT THEME вЂ” РёС‚РµСЂР°С†РёСЏ 6
+   1) HDM РјРѕРґР°Р»РєРё (Р’РµС‚РµСЂ/Р”Р°РІР»РµРЅРёРµ/РћСЃР°РґРєРё/Р’Р»Р°Р¶РЅРѕСЃС‚СЊ) вЂ” Р·Р°РіРѕР»РѕРІРѕРє
+      Р±С‹Р» С‚С‘РјРЅРѕ-СЃРёРЅРёР№ СЃ Р±РµР»С‹Рј С‚РµРєСЃС‚РѕРј РёР· dark-С‚РµРјС‹. Р’ light РјС‹
+      СЃРґРµР»Р°Р»Рё С‚РµРєСЃС‚ С‚С‘РјРЅС‹Рј С‡РµСЂРµР· .hdm-sheet *, РЅРѕ С„РѕРЅ С€Р°РїРєРё
+      РѕСЃС‚Р°Р»СЃСЏ navy в†’ С‡С‘СЂРЅС‹Р№ РЅР° С‚С‘РјРЅРѕРј.
+   2) Р“СЂРѕР·Р°-РёРЅРґРёРєР°С‚РѕСЂ: heatmap-СЏС‡РµР№РєРё СЃРґРµР»Р°С‚СЊ РІС‹С€Рµ Рё Р·Р°РјРµС‚РЅРµРµ,
+      Р»РµРіРµРЅРґР° СЃ СЂР°СЃС€РёСЂРµРЅРЅС‹РјРё РѕРїРёСЃР°РЅРёСЏРјРё.
+   ============================================================ */
+
+/* HDM top вЂ” Р·Р°РіРѕР»РѕРІРѕС‡РЅР°СЏ РїР°РЅРµР»СЊ РїРѕР»РЅРѕСЌРєСЂР°РЅРЅС‹С… РјРѕРґР°Р»РѕРє (РџРѕС‡Р°СЃРѕРІРѕР№,
+   Р’РµС‚РµСЂ, Р”Р°РІР»РµРЅРёРµ, РћСЃР°РґРєРё, Р’Р»Р°Р¶РЅРѕСЃС‚СЊ, Р Р°РґР°СЂ РѕСЃР°РґРєРѕРІ) */
+:root[data-theme="light"] .hdm-top{
+  background:linear-gradient(180deg, rgba(255,238,205,0.98) 0%, rgba(255,228,180,0.95) 100%) !important;
+  border-bottom:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:0 2px 12px rgba(192,83,42,0.15) !important;
+}
+:root[data-theme="light"] .hdm-title{
+  color:#2d1a10 !important;
+  font-weight:700 !important;
+}
+:root[data-theme="light"] .hdm-day-label{
+  color:rgba(45,26,16,0.7) !important;
+  font-weight:600 !important;
+}
+:root[data-theme="light"] .hdm-back{
+  background:rgba(192,83,42,0.14) !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  color:#a8451c !important;
+}
+:root[data-theme="light"] .hdm-back:hover{
+  background:rgba(192,83,42,0.24) !important;
+  border-color:#a8451c !important;
+}
+
+/* PDM (precip detail modal) top вЂ” Сѓ precipDetailModal РґСЂСѓРіРѕР№ РєР»Р°СЃСЃ РЅР° С‚РѕРїРµ */
+:root[data-theme="light"] .pdm-top{
+  background:linear-gradient(180deg, rgba(255,238,205,0.98) 0%, rgba(255,228,180,0.95) 100%) !important;
+  border-bottom:1.5px solid rgba(192,83,42,0.4) !important;
+  box-shadow:0 2px 12px rgba(192,83,42,0.15) !important;
+}
+:root[data-theme="light"] .pdm-title{color:#2d1a10 !important;font-weight:700 !important}
+
+/* HDM chart title (subtitle РЅР°Рґ РєР°Р¶РґС‹Рј РёР· 11 РіСЂР°С„РёРєРѕРІ) */
+:root[data-theme="light"] .hdm-metric-title,
+:root[data-theme="light"] .hdm-chart-title,
+:root[data-theme="light"] .hdm-metric-row .label{
+  color:#2d1a10 !important;
+  font-weight:700 !important;
+}
+
+/* Containers РІРЅСѓС‚СЂРё HDM */
+:root[data-theme="light"] .hdm-metric-row,
+:root[data-theme="light"] .hdm-metric-block{
+  background:rgba(255,250,237,0.6) !important;
+  border:1.5px solid rgba(192,83,42,0.28) !important;
+  border-radius:14px;
+  box-shadow:0 2px 8px rgba(192,83,42,0.1) !important;
+}
+
+/* ============================================================
+   Р“Р РћР—Рђ вЂ” РїРµСЂРµСЂР°Р±РѕС‚РєР° РІРёР·СѓР°Р»Р° С€РєР°Р»С‹
+   Heatmap: СЏС‡РµР№РєРё РІС‹С€Рµ, РєРѕРЅС‚СЂР°СЃС‚РЅРµРµ. Р›РµРіРµРЅРґР°: СЂР°СЃС€РёСЂРµРЅРЅС‹Рµ РїРѕСЏСЃРЅРµРЅРёСЏ.
+   ============================================================ */
+
+/* Heatmap РІС‹СЃРѕС‚Р° вЂ” С‚Р°Р¶Рµ РІ РѕР±РѕРёС… С‚РµРјР°С…, РЅРѕ СЃРґРµР»Р°С‚СЊ СЏС‡РµР№РєРё Р·Р°РјРµС‚РЅРµРµ */
+.storm-heatmap{height:46px;gap:2px}
+@media (max-width: 640px){
+  .storm-heatmap{height:40px;gap:1px}
+}
+.storm-h{border-radius:4px;transition:transform 0.18s ease, box-shadow 0.18s ease}
+
+/* DARK THEME вЂ” СѓСЃРёР»РµРЅРёРµ РєРѕРЅС‚СЂР°СЃС‚Р° СЏС‡РµРµРє РіСЂРѕР·Р°-С€РєР°Р»С‹ */
+.storm-h{background:rgba(255,255,255,0.06)}
+.storm-h.r1{background:linear-gradient(180deg, #fef08a 0%, #facc15 100%);box-shadow:0 0 8px rgba(250,204,21,0.5)}
+.storm-h.r2{background:linear-gradient(180deg, #fdba74 0%, #fb923c 100%);box-shadow:0 0 8px rgba(251,146,60,0.55)}
+.storm-h.r3{background:linear-gradient(180deg, #fca5a5 0%, #ef4444 100%);box-shadow:0 0 9px rgba(239,68,68,0.55)}
+.storm-h.r4{background:linear-gradient(180deg, #d8b4fe 0%, #a855f7 100%);box-shadow:0 0 10px rgba(168,85,247,0.6)}
+
+/* Storm axis (РїРѕРґ heatmap: СЃРµР№С‡Р°СЃ +12С‡ +24С‡ +36С‡ +48С‡) */
+.storm-axis{
+  display:flex;
+  justify-content:space-between;
+  padding:6px 2px 4px;
+  font-size:10px;
+  color:rgba(232,240,255,0.5);
+  font-family:'JetBrains Mono', monospace;
+  letter-spacing:0.04em;
+  border-top:1px dashed rgba(255,255,255,0.06);
+  margin-top:4px;
+}
+
+/* Storm legend вЂ” Р±РѕР»СЊС€РёРµ swatches СЃ РѕРїРёСЃР°РЅРёРµРј СѓСЂРѕРІРЅСЏ */
+.storm-legend{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));
+  gap:8px;
+  margin-top:14px;
+  font-size:11px;
+  font-family:'Onest', sans-serif;
+}
+.storm-legend .sl-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:8px;
+}
+.storm-legend .sl-sw{
+  flex-shrink:0;
+  width:14px;
+  height:14px;
+  border-radius:4px;
+  background:rgba(255,255,255,0.08);
+  box-shadow:0 0 6px rgba(255,255,255,0.15);
+}
+.storm-legend .sl-text{
+  font-size:11px;
+  font-weight:500;
+  color:rgba(232,240,255,0.85);
+  line-height:1.25;
+}
+.storm-legend .sl-text .sl-name{display:block;font-weight:700;color:#fff}
+.storm-legend .sl-text .sl-desc{display:block;color:rgba(232,240,255,0.6);font-size:10px}
+
+/* LIGHT THEME вЂ” РіСЂРѕР·Р°. SOLID РЅР°СЃС‹С‰РµРЅРЅС‹Рµ С†РІРµС‚Р° Р±РµР· gradient
+   (gradient РѕС‚ СЃРІРµС‚Р»РѕРіРѕ РЅР°С‡РёРЅР°Р» СЏС‡РµР№РєСѓ Р±РµР»РѕР№, СЃР»РёРІР°СЏ СЃ С„РѕРЅРѕРј).
+   Inset border РґРµР»Р°РµС‚ СЏС‡РµР№РєСѓ С‡С‘С‚РєРѕР№ СЃРѕ РІСЃРµС… СЃС‚РѕСЂРѕРЅ. */
+:root[data-theme="light"] .storm-h{
+  background:rgba(140,90,55,0.16) !important;
+  box-shadow:inset 0 0 0 1px rgba(140,90,55,0.2) !important;
+}
+:root[data-theme="light"] .storm-h.r1{
+  background:#fbbf24 !important;
+  box-shadow:inset 0 0 0 1.5px #a16207, 0 0 6px rgba(251,191,36,0.5) !important;
+}
+:root[data-theme="light"] .storm-h.r2{
+  background:#f97316 !important;
+  box-shadow:inset 0 0 0 1.5px #9a3412, 0 0 6px rgba(249,115,22,0.55) !important;
+}
+:root[data-theme="light"] .storm-h.r3{
+  background:#dc2626 !important;
+  box-shadow:inset 0 0 0 1.5px #7f1d1d, 0 0 7px rgba(220,38,38,0.55) !important;
+}
+:root[data-theme="light"] .storm-h.r4{
+  background:#9333ea !important;
+  box-shadow:inset 0 0 0 1.5px #4c1d95, 0 0 8px rgba(147,51,234,0.6) !important;
+}
+
+:root[data-theme="light"] .storm-axis{
+  color:rgba(45,26,16,0.75) !important;
+  border-top:1px dashed rgba(192,83,42,0.32) !important;
+  font-weight:600;
+}
+
+:root[data-theme="light"] .storm-legend .sl-item{
+  background:rgba(255,250,237,0.85) !important;
+  border:1.5px solid rgba(192,83,42,0.32) !important;
+  box-shadow:0 2px 6px rgba(192,83,42,0.12) !important;
+}
+:root[data-theme="light"] .storm-legend .sl-text{color:rgba(45,26,16,0.85) !important}
+:root[data-theme="light"] .storm-legend .sl-text .sl-name{color:#2d1a10 !important}
+:root[data-theme="light"] .storm-legend .sl-text .sl-desc{color:rgba(45,26,16,0.6) !important}
+
+/* Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј С†РІРµС‚РЅС‹Рµ swatches РІ Р»РµРіРµРЅРґРµ. Р Р°РЅРµРµ .sl-sw Р±С‹Р»
+   РїРµСЂРµРєСЂС‹С‚ РЅРµР№С‚СЂР°Р»СЊРЅС‹Рј background С‡РµСЂРµР· late override СЂР°РІРЅРѕР№
+   СЃРїРµС†РёС„РёС‡РЅРѕСЃС‚Рё (source order winnered). РСЃРїРѕР»СЊР·СѓРµРј !important
+   С‡С‚РѕР±С‹ РіР°СЂР°РЅС‚РёСЂРѕРІР°С‚СЊ solid С†РІРµС‚. */
+:root[data-theme="light"] .storm-legend .sl-sw{
+  background:rgba(140,90,55,0.18) !important;
+  box-shadow:inset 0 0 0 1px rgba(140,90,55,0.3) !important;
+}
+:root[data-theme="light"] .storm-legend .sl-sw.r1{
+  background:#fbbf24 !important;
+  box-shadow:inset 0 0 0 1.5px #a16207, 0 0 5px rgba(251,191,36,0.5) !important;
+}
+:root[data-theme="light"] .storm-legend .sl-sw.r2{
+  background:#f97316 !important;
+  box-shadow:inset 0 0 0 1.5px #9a3412, 0 0 5px rgba(249,115,22,0.55) !important;
+}
+:root[data-theme="light"] .storm-legend .sl-sw.r3{
+  background:#dc2626 !important;
+  box-shadow:inset 0 0 0 1.5px #7f1d1d, 0 0 5px rgba(220,38,38,0.55) !important;
+}
+:root[data-theme="light"] .storm-legend .sl-sw.r4{
+  background:#9333ea !important;
+  box-shadow:inset 0 0 0 1.5px #4c1d95, 0 0 5px rgba(147,51,234,0.6) !important;
+}
+
+/* ============================================================
+   LIGHT THEME — итерация 7: новые светлые фото hero
+   Папка: assets/scenes/light/{dawn|day|dusk|night}-{clear|cloudy}.webp
+   Photo-IDs всех 8 фото подобраны через Unsplash, светлые/тёплые тона.
+
+   Текст hero меняется в зависимости от tod:
+   - dawn / day:  светлый фон → ТЁМНЫЙ текст (с белым гало для контраста)
+   - dusk / night: средне-тёмный фон → СВЕТЛЫЙ текст (с тёмной тенью)
+   ============================================================ */
+
+/* DAWN и DAY — светлые фото, нужен тёмный текст */
+:root[data-theme="light"] .hero[data-tod="day"] .hero-overlay,
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-overlay{
+  background:linear-gradient(90deg,
+    rgba(255,250,237,0.55) 0%,
+    rgba(255,240,215,0.32) 35%,
+    rgba(255,235,200,0.08) 75%,
+    rgba(255,235,200,0) 100%) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"] *,
+:root[data-theme="light"] .hero[data-tod="dawn"] *{
+  color:#2d1a10 !important;
+  text-shadow:0 1px 3px rgba(255,255,255,0.7), 0 0 12px rgba(255,255,255,0.5) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"] .hero-temp-num,
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-temp-num{
+  color:#2d1a10 !important;
+  text-shadow:
+    0 2px 8px rgba(255,255,255,0.7),
+    0 0 28px rgba(255,255,255,0.5),
+    0 0 40px rgba(217,96,47,0.18) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"] .hero-temp-unit,
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-temp-unit{
+  color:rgba(45,26,16,0.7) !important;
+  text-shadow:0 1px 4px rgba(255,255,255,0.6) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"] .hero-label,
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-label{
+  color:#a8451c !important;
+  text-shadow:0 1px 3px rgba(255,255,255,0.7) !important;
+  font-weight:700;
+}
+:root[data-theme="light"] .hero[data-tod="day"] .hero-feels strong,
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-feels strong{
+  color:#c0532a !important;
+}
+
+/* DUSK и NIGHT — средние/тёмные фото, оставляем белый текст */
+:root[data-theme="light"] .hero[data-tod="dusk"] .hero-overlay{
+  background:linear-gradient(90deg,
+    rgba(80,30,15,0.55) 0%,
+    rgba(80,30,15,0.32) 35%,
+    rgba(80,30,15,0.08) 75%,
+    rgba(80,30,15,0.02) 100%) !important;
+}
+:root[data-theme="light"] .hero[data-tod="night"] .hero-overlay{
+  background:linear-gradient(90deg,
+    rgba(20,15,40,0.6) 0%,
+    rgba(20,15,40,0.4) 35%,
+    rgba(20,15,40,0.12) 75%,
+    rgba(20,15,40,0.04) 100%) !important;
+}
+:root[data-theme="light"] .hero[data-tod="dusk"] *,
+:root[data-theme="light"] .hero[data-tod="night"] *{
+  color:#fff !important;
+  text-shadow:0 1px 4px rgba(0,0,0,0.7), 0 0 8px rgba(60,20,5,0.5) !important;
+}
+:root[data-theme="light"] .hero[data-tod="dusk"] .hero-temp-num,
+:root[data-theme="light"] .hero[data-tod="night"] .hero-temp-num{
+  color:#fff !important;
+  text-shadow:
+    0 2px 12px rgba(0,0,0,0.7),
+    0 0 30px rgba(217,96,47,0.45) !important;
+}
+:root[data-theme="light"] .hero[data-tod="dusk"] .hero-temp-unit,
+:root[data-theme="light"] .hero[data-tod="night"] .hero-temp-unit{
+  color:rgba(255,235,210,0.95) !important;
+}
+:root[data-theme="light"] .hero[data-tod="dusk"] .hero-feels strong,
+:root[data-theme="light"] .hero[data-tod="night"] .hero-feels strong{
+  color:#ffb89c !important;
+}
+
+/* STUCK (компактный sticky hero при скролле) — на светлых фото нужен
+   усиленный overlay для читаемости компактного текста */
+:root[data-theme="light"] .hero[data-tod="day"].stuck .hero-overlay,
+:root[data-theme="light"] .hero[data-tod="dawn"].stuck .hero-overlay{
+  background:linear-gradient(90deg,
+    rgba(255,250,237,0.85) 0%,
+    rgba(255,240,215,0.6) 60%,
+    rgba(255,235,200,0.3) 100%) !important;
+}
+:root[data-theme="light"] .hero[data-tod="dusk"].stuck .hero-overlay,
+:root[data-theme="light"] .hero[data-tod="night"].stuck .hero-overlay{
+  background:linear-gradient(90deg,
+    rgba(60,25,10,0.78) 0%,
+    rgba(60,25,10,0.55) 60%,
+    rgba(60,25,10,0.3) 100%) !important;
+}
+
 
