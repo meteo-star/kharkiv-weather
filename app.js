@@ -7963,7 +7963,13 @@ function refreshNotifPane() {
     paneU.style.display = 'none';
     paneC.style.display = 'none';
     paneL.style.display = 'block';
-    document.getElementById('notifLinkedName').textContent = `${tg.firstName || tg.username || 'chat'} · ${tg.name || ''}`;
+    // Для группового чата показываем название группы с префиксом 👥
+    // Для личного — firstName / username
+    const isGroup = tg.chatType && tg.chatType !== 'private';
+    const displayName = isGroup
+      ? `👥 ${tg.chatTitle || 'Группа'}`
+      : (tg.firstName || tg.username || 'chat');
+    document.getElementById('notifLinkedName').textContent = `${displayName} · ${tg.name || ''}`;
     fetchAndRenderRules(tg);
   } else {
     paneU.style.display = 'block';
@@ -8043,7 +8049,9 @@ async function pollPairing(code) {
         pairToken: data.pairToken,
         name: data.name,
         username: data.username,
-        firstName: data.firstName
+        firstName: data.firstName,
+        chatType: data.chatType || 'private',
+        chatTitle: data.chatTitle || null
       });
       refreshNotifPane();
     }

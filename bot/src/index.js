@@ -126,7 +126,7 @@ async function processUpdate(update, env) {
       case '/status':      return handleStatus(env, chatId);
       case '/stop':        return handleStop(env, chatId);
       case '/location':    return handleLocation(env, chatId, args);
-      case '/pair':        return handlePair(env, chatId, userId, msg.from, args, chatType);
+      case '/pair':        return handlePair(env, chatId, userId, msg.from, args, chatType, msg.chat);
       case '/unpair':      return handleUnpair(env, chatId);
       case '/setup':       return handleSetup(env, chatId, userId, chatType, msg);
     }
@@ -350,7 +350,7 @@ function formatRule(r) {
 }
 
 // /pair <code>  — связать чат с сайтом по коду из сайта
-async function handlePair(env, chatId, userId, fromObj, args, chatType = 'private') {
+async function handlePair(env, chatId, userId, fromObj, args, chatType = 'private', chatObj = null) {
   const code = (args || '').trim();
   if (!/^\d{6}$/.test(code)) {
     return sendMessage(env, chatId,
@@ -377,6 +377,7 @@ async function handlePair(env, chatId, userId, fromObj, args, chatType = 'privat
     return sendMessage(env, chatId, `⚠ Этот код уже использован другим чатом.`);
   }
 
+  const isGroup = chatType !== 'private';
   // Создаём подписку если её нет
   let sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
   if (!sub) {
@@ -384,8 +385,16 @@ async function handlePair(env, chatId, userId, fromObj, args, chatType = 'privat
       chatId,
       userId,
       chatType,
-      username: fromObj?.username || null,
-      firstName: fromObj?.first_name || null,
+      // Для группы — храним название группы и инициатора отдельно.
+      // Для лички — username/firstName юзера в основных полях.
+      username: isGroup ? null : (fromObj?.username || null),
+      firstName: isGroup ? null : (fromObj?.first_name || null),
+      chatTitle: isGroup ? (chatObj?.title || `Группа ${chatId}`) : null,
+      initiator: isGroup ? {
+        userId: fromObj?.id,
+        username: fromObj?.username || null,
+        firstName: fromObj?.first_name || null
+      } : null,
       lat: 49.9, lon: 36.21, name: 'Высокий',
       lang: fromObj?.language_code === 'uk' ? 'uk' : (fromObj?.language_code === 'en' ? 'en' : 'ru'),
       rules: [],
@@ -394,6 +403,18 @@ async function handlePair(env, chatId, userId, fromObj, args, chatType = 'privat
       lastFired: {}
     };
     await incrementStat(env, 'subscribed');
+  } else if (isGroup) {
+    // Группа — обновляем chatTitle и chatType (миграция со старого формата
+    // где username/firstName было заполнено данными инициатора)
+    sub.chatType = chatType;
+    if (chatObj?.title) sub.chatTitle = chatObj.title;
+    sub.username = null;
+    sub.firstName = null;
+    sub.initiator = sub.initiator || {
+      userId: fromObj?.id,
+      username: fromObj?.username || null,
+      firstName: fromObj?.first_name || null
+    };
   }
 
   // Генерим pairToken (32 hex символа)
@@ -726,7 +747,9 @@ async function handleApi(url, request, env, ctx) {
       pairToken: data.pairToken,
       name: sub?.name || null,
       username: sub?.username || null,
-      firstName: sub?.firstName || null
+      firstName: sub?.firstName || null,
+      chatType: sub?.chatType || 'private',
+      chatTitle: sub?.chatTitle || null
     }), origin);
   }
 
