@@ -130,7 +130,20 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .glass{background:linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border:1px solid rgba(255,255,255,0.08);border-radius:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.1),inset 0 -1px 0 rgba(0,0,0,0.2),0 8px 32px rgba(0,0,0,0.3);position:relative;overflow:hidden}
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);pointer-events:none}
 
-.hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:relative;isolation:isolate;min-height:220px}
+.hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:sticky;top:max(env(safe-area-inset-top,0px),0px);z-index:50;isolation:isolate;min-height:220px;will-change:padding,min-height;transition:padding 0.42s cubic-bezier(0.4,0,0.2,1),min-height 0.42s cubic-bezier(0.4,0,0.2,1),box-shadow 0.42s cubic-bezier(0.4,0,0.2,1),border-radius 0.42s cubic-bezier(0.4,0,0.2,1)}
+/* COMPACT — когда залип сверху при скролле. Снижаем высоту и убираем
+   менее важные элементы; вид сохраняет идентичность (фото-фон, темп, иконка). */
+.hero.stuck{padding:14px 22px;min-height:0;border-radius:0 0 22px 22px;box-shadow:0 14px 40px rgba(0,0,0,0.55),0 0 0 1px rgba(0,212,255,0.12)}
+.hero.stuck .hero-scene{opacity:0.45}
+.hero.stuck .hero-overlay{background:linear-gradient(90deg,rgba(5,10,38,0.88) 0%,rgba(5,10,38,0.7) 60%,rgba(5,10,38,0.4) 100%)}
+.hero.stuck .hero-label,
+.hero.stuck .hero-feels,
+.hero.stuck .hero-source-note{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
+.hero.stuck .hero-temp{font-size:0;line-height:1;margin:0}
+.hero.stuck .hero-temp-num{font-size:38px}
+.hero.stuck .hero-temp-unit{font-size:18px}
+.hero.stuck .hero-condition{font-size:13px;margin-top:2px}
+.hero-scene,.hero-overlay,.hero-label,.hero-feels,.hero-source-note,.hero-temp-num,.hero-temp-unit,.hero-condition{transition:opacity 0.4s ease,max-height 0.42s cubic-bezier(0.4,0,0.2,1),margin 0.42s cubic-bezier(0.4,0,0.2,1),font-size 0.42s cubic-bezier(0.4,0,0.2,1),background 0.42s ease}
 .hero-scene{position:absolute;inset:0;z-index:0;border-radius:24px;overflow:hidden;background-color:#0a1838;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.6s ease-in-out}
 .hero-overlay{position:absolute;inset:0;z-index:1;border-radius:24px;background:linear-gradient(90deg,rgba(5,10,38,0.78) 0%,rgba(5,10,38,0.55) 35%,rgba(5,10,38,0.22) 70%,rgba(5,10,38,0.05) 100%);pointer-events:none;transition:background 0.6s ease}
 .hero-info{position:relative;z-index:2}
@@ -359,6 +372,23 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .voice-list-empty{padding:14px;text-align:center;color:rgba(232,240,255,0.5);font-size:12px;background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.1);border-radius:10px}
 
 /* MODAL */
+/* ============================================
+   PULL-TO-REFRESH — свайп вниз с верха страницы принудительно обновляет
+   PWA. Нужно потому что на iOS установленная PWA не подхватывает новые
+   версии HTML/CSS/JS даже с network-first SW — только при полном
+   закрытии и перезапуске. Этот gesture делает то же самое внутри
+   приложения, без необходимости копаться в настройках iOS.
+   ============================================ */
+.pull-refresh{position:fixed;top:0;left:0;right:0;padding-top:max(env(safe-area-inset-top,0px),12px);padding-bottom:14px;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:auto;min-height:74px;transform:translateY(-110%);pointer-events:none;color:#00d4ff;background:linear-gradient(to bottom,rgba(2,6,26,0.92) 0%,rgba(2,6,26,0.85) 70%,rgba(2,6,26,0) 100%);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);will-change:transform}
+.pull-refresh.transitioning{transition:transform 0.32s cubic-bezier(0.4,0,0.2,1)}
+.prr-spinner{width:24px;height:24px;border-radius:50%;border:2.5px solid rgba(0,212,255,0.22);border-top-color:#00d4ff;margin-bottom:5px;transition:transform 0.15s ease-out}
+.pull-refresh.ready .prr-spinner{transform:rotate(180deg);border-color:rgba(94,234,212,0.3);border-top-color:#5eead4}
+.pull-refresh.refreshing .prr-spinner{animation:prr-spin 0.85s linear infinite;border-top-color:#5eead4}
+@keyframes prr-spin{to{transform:rotate(360deg)}}
+.prr-text{font-size:11.5px;font-weight:500;letter-spacing:0.02em;color:rgba(232,240,255,0.85);transition:color 0.2s}
+.pull-refresh.ready .prr-text{color:#5eead4}
+.pull-refresh.refreshing .prr-text{color:#5eead4}
+
 /* «Мост» между двумя модалками: пока обе анимируются (одна закрывается,
    другая открывается), их backdrop'ы полупрозрачны и сквозь них на доли
    секунды виден главный экран. Body.modal-bridge накидывает плотный
@@ -909,7 +939,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 /* ============================================
    API LOADER + ERROR BANNER
    ============================================ */
-.hero{position:relative}
+/* .hero{position:relative} — было дубликатом, теперь .hero выше = sticky */
 .hero.loading::after{content:'';position:absolute;inset:0;border-radius:24px;background:rgba(5,10,38,0.4);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;z-index:3;transition:opacity 0.25s}
 .hero-loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border:3px solid rgba(0,212,255,0.2);border-top-color:#00d4ff;border-radius:50%;animation:spin 0.9s linear infinite;z-index:4;display:none}
 .hero.loading .hero-loader{display:block}
