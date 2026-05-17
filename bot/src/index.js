@@ -143,6 +143,7 @@ async function processUpdate(update, env) {
         case '/admin_cron':      return handleAdminCron(env, chatId);
         case '/admin_addrule':   return handleAdminAddRule(env, chatId, args);
         case '/admin_clearrules':return handleAdminClearRules(env, chatId);
+        case '/admin_cooldowns': return handleAdminCooldowns(env, chatId, args);
       }
     }
 
@@ -249,7 +250,8 @@ async function handleHelp(env, chatId, isAdmin) {
       `<code>/admin_test &lt;chat_id&gt;</code> — отправить тестовое сообщение\n` +
       `<code>/admin_cron</code> — запустить cron-проверку вручную\n` +
       `<code>/admin_addrule &lt;тип&gt; [параметры]</code> — добавить правило себе\n` +
-      `<code>/admin_clearrules</code> — удалить все свои правила`;
+      `<code>/admin_clearrules</code> — удалить все свои правила\n` +
+      `<code>/admin_cooldowns [chat_id]</code> — показать когда сработают правила (по умолч. свой)`;
   }
 
   return sendMessage(env, chatId, text, { parse_mode: 'HTML' });
@@ -653,6 +655,54 @@ async function handleAdminClearRules(env, chatId) {
   sub.lastFired = {};
   await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
   return sendMessage(env, chatId, `🗑 Все правила удалены.`);
+}
+
+// /admin_cooldowns [chat_id]
+// Без аргумента — для текущего чата. С аргументом — для указанной подписки.
+async function handleAdminCooldowns(env, chatId, args) {
+  const targetId = args.trim() || String(chatId);
+  const sub = await env.SUBSCRIPTIONS.get(`sub:${targetId}`, { type: 'json' });
+  if (!sub) return sendMessage(env, chatId, `Подписка ${esc(targetId)} не найдена.`);
+
+  if (!sub.rules || sub.rules.length === 0) {
+    return sendMessage(env, chatId, `У подписки ${targetId} нет правил.`);
+  }
+
+  const now = Date.now();
+  const todayISO = new Date().toISOString().slice(0,10);
+  const lines = [];
+  for (const rule of sub.rules) {
+    const key = ruleKeyOf(rule);
+    const last = (sub.lastFired || {})[key];
+    const cooldownMs = COOLDOWNS_MS[rule.type];
+    let status;
+    if (rule.type === 'morning_summary') {
+      if (last === todayISO) status = `сегодня уже было, ждёт завтра`;
+      else if (last) status = `последнее: ${esc(last)}, готово к отправке`;
+      else status = `никогда не срабатывало, готово`;
+    } else if (cooldownMs) {
+      if (!last) {
+        status = `никогда, готово к отправке`;
+      } else {
+        const lastMs = new Date(last).getTime();
+        const remaining = (lastMs + cooldownMs) - now;
+        if (remaining <= 0) {
+          status = `готово (cooldown истёк)`;
+        } else {
+          const h = Math.floor(remaining / 3600000);
+          const m = Math.floor((remaining % 3600000) / 60000);
+          status = `cooldown ещё ${h}ч ${m}м`;
+        }
+      }
+    } else {
+      status = '?';
+    }
+    lines.push(`${esc(formatRule(rule))}\n   <i>${status}</i>`);
+  }
+
+  return sendMessage(env, chatId,
+    `⏱ <b>Cooldown'ы подписки ${esc(targetId)}:</b>\n\n` + lines.join('\n\n'),
+    { parse_mode: 'HTML' });
 }
 
 // ============================================================
