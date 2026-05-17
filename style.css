@@ -131,25 +131,37 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);pointer-events:none}
 
 .hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:sticky;top:max(env(safe-area-inset-top,0px),0px);z-index:50;isolation:isolate;min-height:220px;will-change:padding,min-height;transition:padding 0.42s cubic-bezier(0.4,0,0.2,1),min-height 0.42s cubic-bezier(0.4,0,0.2,1),box-shadow 0.42s cubic-bezier(0.4,0,0.2,1),border-radius 0.42s cubic-bezier(0.4,0,0.2,1)}
-/* COMPACT — когда залип сверху при скролле. Сжимаем + растягиваем на
-   всю ширину viewport (negative margin компенсирует padding контейнера),
-   убираем border-radius и border, чтобы за скруглёнными краями не торчал
-   тёмный фон. Выглядит как нативный top-bar / status overlay. */
+/* COMPACT — когда залип сверху при скролле. Карточка сохраняет ширину
+   и скруглённые края, но появляется solid-фон позади (hero-stuck-bg),
+   который маскирует пиксели за скруглёнными уголками — чтобы там не
+   просвечивал «грязный» body-фон с частицами или скроллящийся контент. */
 .hero.stuck{
   padding:14px 22px;
   min-height:0;
-  border-radius:0;
-  border:none;
-  margin-left:calc(-1 * max(20px, env(safe-area-inset-left, 0px)));
-  margin-right:calc(-1 * max(20px, env(safe-area-inset-right, 0px)));
-  box-shadow:0 10px 32px rgba(0,0,0,0.55),0 1px 0 rgba(0,212,255,0.18)
+  box-shadow:0 10px 30px rgba(0,0,0,0.45),0 1px 0 rgba(0,212,255,0.18)
 }
-/* Подсветка-линия сверху от .glass — в stuck это горизонталь, не нужна */
-.glass.hero.stuck::before{display:none}
-/* Hero-scene и overlay имеют свой border-radius:24px — в stuck сглаживаем
-   до 0, иначе фото-фон обрезается рамкой а карточка уже не скругленная */
-.hero.stuck .hero-scene,
-.hero.stuck .hero-overlay{border-radius:0}
+/* Подсветка-линия сверху от .glass — в stuck может выглядеть как шов */
+.glass.hero.stuck::before{opacity:0}
+
+/* Сплошной фон-«подложка» за залипшим hero. Появляется ТОЛЬКО когда
+   body.hero-stuck — иначе невидим (height:0). Цвет идентичен body bg,
+   так что выглядит как естественное продолжение страницы; скроллящийся
+   контент уходит ПОД него (z-index:49 ниже hero=50, но выше всего
+   остального), а за скруглёнными уголками hero видна именно эта
+   подложка — никаких «фиолетовых пятен от частиц» больше нет. */
+.hero-stuck-bg{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:0;
+  background:#02061a;
+  z-index:49;
+  pointer-events:none;
+  transition:height 0.42s cubic-bezier(0.4,0,0.2,1)
+}
+body.hero-stuck .hero-stuck-bg{
+  /* safe-area (notch на iOS PWA) + высота сжатого hero (~96px) */
+  height:calc(env(safe-area-inset-top, 0px) + 100px)
+}
 .hero.stuck .hero-scene{opacity:0.45}
 .hero.stuck .hero-overlay{background:linear-gradient(90deg,rgba(5,10,38,0.88) 0%,rgba(5,10,38,0.7) 60%,rgba(5,10,38,0.4) 100%)}
 .hero.stuck .hero-label,
@@ -725,8 +737,9 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   .container{padding:16px 14px 30px}
   .header{flex-direction:column;align-items:flex-start;gap:10px}
   .hero{padding:22px;grid-template-columns:1fr auto}
-  /* В stuck состоянии — расширяем за padding контейнера (14px) до краёв viewport */
-  .hero.stuck{padding:12px 16px;margin-left:-14px;margin-right:-14px}
+  /* В stuck — компактный padding, ширина и скруглённые углы остаются как у обычной карточки */
+  .hero.stuck{padding:12px 18px}
+  body.hero-stuck .hero-stuck-bg{height:calc(env(safe-area-inset-top, 0px) + 92px)}
   .weather-icon-3d{width:90px;height:90px;margin-top:0}
   .hero-temp-num{font-size:64px}
   .hero-temp-unit{font-size:22px}
