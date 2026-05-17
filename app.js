@@ -134,6 +134,37 @@ const I18N = {
     'sources.avgSub': 'Агрегация 7 моделей · ансамблевый прогноз',
     'sources.avgShort': 'Среднее по 7 моделям',
     'sources.dividerOr': 'или конкретный источник',
+    'sources.confHint': 'Цветная полоска под карточкой дня — согласие 7 моделей:',
+    'sources.confLegend.high': 'надёжный',
+    'sources.confLegend.mid': 'средний',
+    'sources.confLegend.low': 'шаткий',
+    'sources.confLegend.veryLow': 'большой разброс',
+    'alert.heat.title': 'Сильная жара ({t}°)',
+    'alert.heat.msg': 'Пейте воду каждый час, избегайте солнца с 11 до 16. Лёгкая одежда, головной убор',
+    'alert.extremeHeat.title': 'Экстремальная жара ({t}°)',
+    'alert.extremeHeat.msg': 'Опасно для здоровья. Ограничьте активность на улице, риск теплового удара',
+    'alert.cold.title': 'Сильный мороз ({t}°)',
+    'alert.cold.msg': 'Тепло одевайтесь, прикройте лицо и руки. Избегайте долгих прогулок',
+    'alert.extremeCold.title': 'Экстремальный мороз ({t}°)',
+    'alert.extremeCold.msg': 'Риск обморожения за 10–20 минут. Без необходимости — не выходите на улицу',
+    'compare.chip': 'Сравнить',
+    'compare.chipAria': 'Сравнить погоду с другим городом',
+    'compare.bannerLabel': 'Сравнение',
+    'compare.exitAria': 'Выйти из режима сравнения',
+    'compare.pickLabel': 'Сравнить с',
+    'compare.pickTitle': 'Выберите второй город',
+    'compare.pickHint': 'Избранные или поиск по миру',
+    'compare.hourlyTitle': 'Почасовая температура · сегодня',
+    'compare.daysTitle': '7 дней',
+    'compare.summary.same': 'Сегодня погода похожая в обоих городах',
+    'compare.summary.warmerA': 'Сегодня теплее в {a} на {d}°',
+    'compare.summary.warmerB': 'Сегодня теплее в {b} на {d}°',
+    'compare.summary.drierA': '{a} суше, осадки {pa}% vs {pb}%',
+    'compare.summary.drierB': '{b} суше, осадки {pb}% vs {pa}%',
+    'compare.loading': 'Загружаем погоду в {city}…',
+    'compare.error': 'Не удалось загрузить погоду для {city}',
+    'compare.swapA': 'Сменить первый город',
+    'compare.swapB': 'Сменить второй город',
     'confidence.label': 'Согласие моделей',
     'confidence.high': 'высокое',
     'confidence.mid': 'среднее',
@@ -470,6 +501,37 @@ const I18N = {
     'sources.sub': 'Обери джерело або використовуй середнє по 7 моделях',
     'sources.avgTitle': 'Середнє по всіх сервісах',
     'sources.avgSub': 'Агрегація 7 моделей · ансамблевий прогноз',
+    'sources.confHint': 'Кольорова смужка під карткою дня — згода 7 моделей:',
+    'sources.confLegend.high': 'надійний',
+    'sources.confLegend.mid': 'середній',
+    'sources.confLegend.low': 'хиткий',
+    'sources.confLegend.veryLow': 'великий розкид',
+    'alert.heat.title': 'Сильна спека ({t}°)',
+    'alert.heat.msg': 'Пийте воду щогодини, уникайте сонця з 11 до 16. Легкий одяг, головний убір',
+    'alert.extremeHeat.title': 'Екстремальна спека ({t}°)',
+    'alert.extremeHeat.msg': 'Небезпечно для здоровʼя. Обмежте активність надворі, ризик теплового удару',
+    'alert.cold.title': 'Сильний мороз ({t}°)',
+    'alert.cold.msg': 'Тепло вдягайтеся, прикрийте обличчя й руки. Уникайте довгих прогулянок',
+    'alert.extremeCold.title': 'Екстремальний мороз ({t}°)',
+    'alert.extremeCold.msg': 'Ризик обмороження за 10–20 хвилин. Без потреби — не виходьте на вулицю',
+    'compare.chip': 'Порівняти',
+    'compare.chipAria': 'Порівняти погоду з іншим містом',
+    'compare.bannerLabel': 'Порівняння',
+    'compare.exitAria': 'Вийти з режиму порівняння',
+    'compare.pickLabel': 'Порівняти з',
+    'compare.pickTitle': 'Виберіть друге місто',
+    'compare.pickHint': 'Обрані або пошук по світу',
+    'compare.hourlyTitle': 'Погодинна температура · сьогодні',
+    'compare.daysTitle': '7 днів',
+    'compare.summary.same': 'Сьогодні погода схожа в обох містах',
+    'compare.summary.warmerA': 'Сьогодні тепліше в {a} на {d}°',
+    'compare.summary.warmerB': 'Сьогодні тепліше в {b} на {d}°',
+    'compare.summary.drierA': '{a} сухіше, опади {pa}% vs {pb}%',
+    'compare.summary.drierB': '{b} сухіше, опади {pb}% vs {pa}%',
+    'compare.loading': 'Завантажуємо погоду в {city}…',
+    'compare.error': 'Не вдалось завантажити погоду для {city}',
+    'compare.swapA': 'Змінити перше місто',
+    'compare.swapB': 'Змінити друге місто',
     'sources.avgShort': 'Середнє по 7 моделях',
     'sources.dividerOr': 'або конкретне джерело',
     'confidence.label': 'Згода моделей',
@@ -808,6 +870,37 @@ const I18N = {
     'sources.sub': 'Pick a source or use the average of all 7 models',
     'sources.avgTitle': 'Average of all services',
     'sources.avgSub': 'Aggregation of 7 models · ensemble forecast',
+    'sources.confHint': 'Coloured bar under the day card — agreement of 7 models:',
+    'sources.confLegend.high': 'reliable',
+    'sources.confLegend.mid': 'medium',
+    'sources.confLegend.low': 'shaky',
+    'sources.confLegend.veryLow': 'large spread',
+    'alert.heat.title': 'Severe heat ({t}°)',
+    'alert.heat.msg': 'Drink water every hour, avoid the sun from 11 to 16. Light clothing, hat',
+    'alert.extremeHeat.title': 'Extreme heat ({t}°)',
+    'alert.extremeHeat.msg': 'Health hazard. Limit outdoor activity, risk of heatstroke',
+    'alert.cold.title': 'Severe frost ({t}°)',
+    'alert.cold.msg': 'Dress warmly, cover your face and hands. Avoid long walks',
+    'alert.extremeCold.title': 'Extreme frost ({t}°)',
+    'alert.extremeCold.msg': 'Frostbite risk in 10–20 min. Stay indoors unless necessary',
+    'compare.chip': 'Compare',
+    'compare.chipAria': 'Compare weather with another city',
+    'compare.bannerLabel': 'Comparison',
+    'compare.exitAria': 'Exit comparison mode',
+    'compare.pickLabel': 'Compare with',
+    'compare.pickTitle': 'Pick second city',
+    'compare.pickHint': 'Favourites or worldwide search',
+    'compare.hourlyTitle': 'Hourly temperature · today',
+    'compare.daysTitle': '7 days',
+    'compare.summary.same': 'Similar weather in both cities today',
+    'compare.summary.warmerA': 'Warmer in {a} by {d}° today',
+    'compare.summary.warmerB': 'Warmer in {b} by {d}° today',
+    'compare.summary.drierA': '{a} is drier, precip {pa}% vs {pb}%',
+    'compare.summary.drierB': '{b} is drier, precip {pb}% vs {pa}%',
+    'compare.loading': 'Loading weather for {city}…',
+    'compare.error': 'Failed to load weather for {city}',
+    'compare.swapA': 'Change first city',
+    'compare.swapB': 'Change second city',
     'sources.avgShort': 'Average of 7 models',
     'sources.dividerOr': 'or a specific source',
     'confidence.label': 'Model agreement',
@@ -1386,6 +1479,37 @@ function saveSettings() {
   } catch (e) {
     console.warn('Не удалось сохранить настройки:', e);
   }
+}
+
+/* ============================================
+   COMPARE MODE — состояние и хранилище
+   ============================================ */
+const COMPARE_STATE = {
+  active: false,
+  cityB: null,         // { name, region, lat, lon }
+  forecastB: null      // распарсенный byModel второго города
+};
+const COMPARE_STORAGE_KEY = 'kw:compare:v1';
+
+function loadCompareState() {
+  try {
+    const raw = localStorage.getItem(COMPARE_STORAGE_KEY);
+    if (!raw) return;
+    const s = JSON.parse(raw);
+    if (s && s.active && s.cityB && typeof s.cityB.lat === 'number') {
+      COMPARE_STATE.active = true;
+      COMPARE_STATE.cityB = s.cityB;
+      // forecastB не персистится — догрузится при первом render'е
+    }
+  } catch (e) { /* ignore */ }
+}
+function saveCompareState() {
+  try {
+    localStorage.setItem(COMPARE_STORAGE_KEY, JSON.stringify({
+      active: COMPARE_STATE.active,
+      cityB: COMPARE_STATE.cityB
+    }));
+  } catch (e) { /* ignore */ }
 }
 
 /* ============================================
@@ -2529,6 +2653,14 @@ function closeHourlyDetail() {
     document.removeEventListener('keydown', hdmEscHandler);
     hdmEscHandler = null;
   }
+  // Если пришли из search modal — открываем search ПОВЕРХ закрывающейся
+  // модалки (без задержки) + поднимаем body.modal-bridge на время перехода,
+  // чтобы главный экран между ними не мелькнул.
+  if (_returnToSearchModal) {
+    _returnToSearchModal = false;
+    startModalBridge();
+    if (typeof openSearchModal === 'function') openSearchModal();
+  }
 }
 
 function setupHourlyDetailModal() {
@@ -2893,6 +3025,23 @@ function ensureWindyIframe() {
    ============================================ */
 
 let searchEscHandler = null;
+// Флаг: если из search modal открыли day/hourly-detail и юзер закроет ту модалку,
+// возвращаемся обратно в search (а не на главный экран). Сбрасывается при ручном
+// закрытии search или открытии других режимов.
+let _returnToSearchModal = false;
+// Помощник для «бесшовного» перехода между двумя модалками. Поднимает
+// body.modal-bridge на ~500мс — статичный плотный фон, скрывающий главный
+// экран пока обе модалки одновременно анимируются.
+let _modalBridgeTimer = null;
+function startModalBridge() {
+  if (!document.body) return;
+  document.body.classList.add('modal-bridge');
+  if (_modalBridgeTimer) clearTimeout(_modalBridgeTimer);
+  _modalBridgeTimer = setTimeout(() => {
+    document.body.classList.remove('modal-bridge');
+    _modalBridgeTimer = null;
+  }, 520);
+}
 
 // Разбирает текст запроса в структурированный фильтр {type, threshold?, minDuration?, preset?}.
 // Возвращает null если не понял.
@@ -2958,11 +3107,20 @@ function parseSearchQuery(text) {
 // Возвращает функцию-предикат (час → boolean) для фильтра.
 function makeSearchMatcher(filter) {
   if (!filter) return null;
-  // "Сухо": реальные осадки в мм/ч ниже порога.
-  // Не проверяем h.c (weather_code → condition) — он может быть 'rain' если 1-2 модели
-  // предсказывают морось, при этом среднее pmm всё равно ≈ 0.
-  // Достаточно факта осадков: pmm — это среднее количество мм/ч по 7 моделям.
+  // "Сухо" (мягкий критерий): только мм/ч. Используется для общих условий
+  // типа "когда без дождя 6 часов" — пользователь спрашивает количественно.
   const noRainCond = (h) => (typeof h.pmm === 'number' ? h.pmm : 0) < 0.1;
+  // "Сухо" (строгий, для активностей): три критерия защиты от
+  // ложноположительных «шашлык 9-13 в дождь»:
+  //   1) среднее количество осадков < 0.1 мм/ч
+  //   2) вероятность дождя < 35% (если большинство моделей ждут дождь, не предлагаем)
+  //   3) condition (по weather_code) не дождевой/снежный/грозовой
+  const noRainStrict = (h) => {
+    const pmm = typeof h.pmm === 'number' ? h.pmm : 0;
+    const prob = typeof h.p === 'number' ? h.p : 0;
+    const badConds = ['rain', 'heavy-rain', 'thunderstorm', 'snow'];
+    return pmm < 0.1 && prob < 35 && !badConds.includes(h.c);
+  };
   switch (filter.type) {
     case 'no_rain':     return noRainCond;
     case 'temp_above':  return (h) => h.t >= filter.threshold;
@@ -2972,16 +3130,27 @@ function makeSearchMatcher(filter) {
     case 'clear':       return (h) => (h.cl == null || h.cl < 30) && noRainCond(h);
     case 'thunderstorm':return (h) => h.c === 'thunderstorm' || (typeof h.wc === 'number' && h.wc >= 95 && h.wc <= 99);
     case 'snow':        return (h) => h.c === 'snow' || (typeof h.wc === 'number' && h.wc >= 71 && h.wc <= 77);
-    case 'preset':
+    case 'preset': {
+      // Социальные часы суток для активностей — никто не жарит шашлык в 3 ночи
+      // и не моет машину в час ночи, даже если погода технически "ок".
+      // [hourStart, hourEnd] включительно. Полив раннее утро + вечер
+      // (днём вредно — растения сгорят), у остальных — день/вечер.
+      const inRange = (h, range) => h.h >= range[0] && h.h <= range[1];
+      const inRanges = (h, ranges) => ranges.some(r => inRange(h, r));
+      // ВСЕ активности используют noRainStrict — это спасает от ложных
+      // "сухо" окон где иконка показывает дождь а среднее мм мало.
       switch (filter.preset) {
-        case 'run':     return (h) => noRainCond(h) && h.t >= 5 && h.t <= 25 && (h.w || 0) < 7;
-        case 'bbq':     return (h) => noRainCond(h) && h.t >= 15 && (h.w || 0) < 5;
-        case 'carwash': return (h) => noRainCond(h) && h.t > 0;
-        case 'walk':    return (h) => noRainCond(h) && h.t >= 0 && (h.w || 0) < 7;
-        case 'water':   return (h) => h.t >= 8 && h.t <= 25 && (h.cl == null || h.cl < 70);
-        case 'laundry': return (h) => noRainCond(h) && (h.hum == null || h.hum < 70) && (h.w || 0) < 10;
+        case 'run':     return (h) => inRange(h, [5, 21])  && noRainStrict(h) && h.t >= 5 && h.t <= 28 && (h.w || 0) < 8;
+        case 'bbq':     return (h) => inRange(h, [9, 22])  && noRainStrict(h) && h.t >= 12 && (h.w || 0) < 7;
+        case 'carwash': return (h) => inRange(h, [8, 20])  && noRainStrict(h) && h.t > 0;
+        case 'walk':    return (h) => inRange(h, [7, 22])  && noRainStrict(h) && h.t >= -2 && (h.w || 0) < 8;
+        // Полив: раннее утро 6-9 или вечер 18-21. Днём вредно (солнце сожжёт капли на листьях).
+        case 'water':   return (h) => inRanges(h, [[6, 9], [18, 21]]) && h.t >= 8 && h.t <= 25 && (h.cl == null || h.cl < 70);
+        // Бельё на улице: солнечная середина дня, чтобы успело высохнуть до вечерней росы.
+        case 'laundry': return (h) => inRange(h, [9, 18])  && noRainStrict(h) && (h.hum == null || h.hum < 70) && (h.w || 0) < 10;
         default: return null;
       }
+    }
     default: return null;
   }
 }
@@ -3092,7 +3261,11 @@ function renderSearchResults(windows, filter) {
     const dayName = w.dayIdx === 0 ? t('search.day.today')
                   : (w.dayIdx === 1 ? t('search.day.tomorrow')
                   : `${localizeDayShort(w.day.name)}, ${(w.day.date || '').slice(0,5)}`);
-    const range = `${String(w.hourStart).padStart(2,'0')}:00 – ${String(w.hourEnd).padStart(2,'0')}:00`;
+    // Конец часа = час +1 (час 22 = «с 22:00 до 23:00»). Иначе «22:00–22:00» выглядит
+    // как 0-часовое окно при duration:1. Час 23 → 24:00 (читается как «до полуночи»).
+    const endHourRaw = w.hourEnd + 1;
+    const endHourStr = endHourRaw === 24 ? '24' : String(endHourRaw).padStart(2,'0');
+    const range = `${String(w.hourStart).padStart(2,'0')}:00 – ${endHourStr}:00`;
     const durStr = t('search.duration.hours', { n: w.duration });
     const tLo = fmtTempNum(w.tMin), tHi = fmtTempNum(w.tMax);
     const tempStr = `${tLo}…${tHi}${unitTemp()}`;
@@ -3113,12 +3286,14 @@ function renderSearchResults(windows, filter) {
     card.addEventListener('click', () => {
       const dayIdx = parseInt(card.dataset.dayIdx, 10);
       const hour = parseInt(card.dataset.hour, 10);
+      // Поднимаем флаг — после закрытия day/hourly модалки возвращаемся в search.
+      _returnToSearchModal = true;
+      // Мост — плотный фон поверх всего на время перехода, чтобы не мелькнул
+      // главный экран между фейд-аутом search и фейд-ином day.
+      startModalBridge();
+      if (dayIdx === 0) openHourlyDetail(isNaN(hour) ? 0 : hour);
+      else openModal(dayIdx);
       closeSearchModal();
-      // Если это сегодня — открываем hourly detail на этом часе; иначе обычную day-модалку
-      setTimeout(() => {
-        if (dayIdx === 0) openHourlyDetail(isNaN(hour) ? 0 : hour);
-        else openModal(dayIdx);
-      }, 320);  // ждём пока закроется search modal
     });
   });
 }
@@ -3604,6 +3779,25 @@ const PRECIP_KIND_EMOJI = {
   storm: '⛈'
 };
 
+// Ленивая загрузка Chart.js — однократно, по требованию (первое открытие
+// модалки с графиком осадков или почасовой). Промис кешируется.
+let _chartJsPromise = null;
+function ensureChartJs() {
+  if (window.Chart) return Promise.resolve(window.Chart);
+  if (_chartJsPromise) return _chartJsPromise;
+  _chartJsPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+    s.integrity = 'sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4';
+    s.crossOrigin = 'anonymous';
+    s.referrerPolicy = 'no-referrer';
+    s.onload = () => resolve(window.Chart);
+    s.onerror = (e) => { _chartJsPromise = null; reject(new Error('Chart.js load failed')); };
+    document.head.appendChild(s);
+  });
+  return _chartJsPromise;
+}
+
 function renderPrecipChart(forecast) {
   const canvas = document.getElementById('precipChart');
   const inner = document.getElementById('precipInner');
@@ -3611,6 +3805,13 @@ function renderPrecipChart(forecast) {
   const typesBar = document.getElementById('precipTypes');
   if (!canvas || !inner || !daysBar || !typesBar) return;
   if (!forecast || !forecast[0] || !forecast[0].hourly) return;
+  // Lazy-load Chart.js — если ещё не загружен, дотягиваем и пере-вызываем себя
+  if (!window.Chart) {
+    ensureChartJs().then(() => renderPrecipChart(forecast)).catch(err => {
+      console.warn('Chart.js не загрузился:', err);
+    });
+    return;
+  }
 
   // Собираем последовательность из дней forecast, начиная с сегодня от NOW_HOUR.
   // Каждый сегмент: { day, hours } — где hours это кусок из day.hourly.
@@ -3811,10 +4012,38 @@ function renderPrecipChart(forecast) {
           grid: { color: 'rgba(255,255,255,0.04)' },
           border: { display: false }
         },
-        y: { min: 0, max: Math.ceil(maxVal * 1.2), ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, callback: v => v + ' ' + t('precip.legend') }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
-      }
+        y: { min: 0, max: Math.ceil(maxVal * 1.2), ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
+      },
+      // Y-подписи теперь живут в отдельной колонке .precip-y-axis СЛЕВА от
+      // скролла. Сам chart внутри scroll-зоны без левого padding — данные
+      // начинаются от x=0, граница колонки естественно отделяет ось от графика.
+      layout: { padding: { left: 0, right: 0 } }
     }
   });
+
+  // === Y-ось в отдельной DOM-колонке (не скроллится горизонтально) ===
+  // Колонка — flex-сосед .precip-scroll-area, фон у неё прозрачный → видно
+  // натуральный фон карточки .glass. Тики позиционируются абсолютно по высоте
+  // canvas (синхронно с chart.yScale).
+  const renderYAxisOverlay = () => {
+    const yScale = precipChartInstance && precipChartInstance.scales.y;
+    const chartWrap = document.querySelector('.precip-chart-wrap');
+    const yAxisEl = document.getElementById('precipYAxis');
+    if (!yScale || !chartWrap || !yAxisEl) return;
+    const ticks = yScale.ticks || [];
+    if (ticks.length === 0) return;
+    // Высота колонки = высота chart-wrap (200px), top уже совпадает (флекс align-items:stretch).
+    yAxisEl.style.height = chartWrap.offsetHeight + 'px';
+    const unit = t('precip.legend');
+    yAxisEl.innerHTML = ticks.map(tk => {
+      const y = yScale.getPixelForValue(tk.value);
+      if (!Number.isFinite(y)) return '';
+      return `<div class="pya-tick" style="top:${y}px">${tk.value} ${unit}</div>`;
+    }).join('');
+  };
+  renderYAxisOverlay();
+  requestAnimationFrame(renderYAxisOverlay);
+  setTimeout(renderYAxisOverlay, 200);
 
   // ВАЖНО: выровнять нижние полоски (типы осадков + дни) под РЕАЛЬНУЮ геометрию
   // chart.chartArea. Без этого они смещены ~на ширину Y-оси (~40px), и эмодзи/дни
@@ -3868,6 +4097,109 @@ function renderPrecipChart(forecast) {
   setTimeout(alignBars, 600);
 }
 
+// Снять skeleton-маску с UI. Идемпотентно. Вызывается после первого
+// рендера с реальными/кэшированными данными.
+function clearAppBootstrap() {
+  if (document.body && document.body.classList.contains('app-bootstrap')) {
+    document.body.classList.remove('app-bootstrap');
+  }
+}
+// Safety: даже если refreshForecast почему-то не запустится — снимаем skeleton
+// через 8 секунд, чтобы пользователь не залип в shimmer'ах вечно.
+setTimeout(clearAppBootstrap, 8000);
+
+// === localStorage cleanup =======================================
+// При структурных изменениях формата кэша мы поднимаем версию ключа
+// (forecast-cache :v5 → :v6 → :v7 → :v8 → :v9). Старые ключи остаются
+// в localStorage навсегда — после года использования это могут быть
+// мегабайты мусора, и при многих городах есть шанс упереться в 5–10МБ
+// квоту браузера. Это лучше прочистить разово при старте.
+//
+// Текущие "живые" версии указаны в *_CURRENT_VERSION ниже. Всё что
+// меньше или с неизвестной версией под этим префиксом — удаляется.
+const FORECAST_CACHE_CURRENT = 9;
+const CLIMATE_CACHE_CURRENT  = 1;
+function cleanupStaleLocalStorage() {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    const toDelete = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+      // forecast-cache: формат kw:forecast-cache:LAT_LON:vN
+      const fm = key.match(/^kw:forecast-cache:[^:]+:v(\d+)$/);
+      if (fm && parseInt(fm[1], 10) < FORECAST_CACHE_CURRENT) { toDelete.push(key); continue; }
+      // climate-cache: kw:climate-cache:LAT_LON:vN
+      const cm = key.match(/^kw:climate-cache:[^:]+:v(\d+)$/);
+      if (cm && parseInt(cm[1], 10) < CLIMATE_CACHE_CURRENT) { toDelete.push(key); continue; }
+    }
+    toDelete.forEach(k => { try { localStorage.removeItem(k); } catch (_) {} });
+    if (toDelete.length > 0) console.info(`[cleanup] удалено ${toDelete.length} устаревших ключей кэша`);
+  } catch (err) {
+    console.warn('localStorage cleanup пропущен:', err);
+  }
+}
+cleanupStaleLocalStorage();
+
+// === Алерт-баннер для экстремальной температуры =================
+// Показываем когда в ближайших 48ч (с NOW_HOUR) есть пик ≥+32°C
+// (жара) или ≤-15°C (мороз). Используем реальные хх часовые значения,
+// а не daily max — он округляет и сглаживает.
+// Пороги (по Цельсию, не зависят от настроек юзера — для здоровья
+// важна абсолютная температура).
+const HEAT_THRESHOLD         = 32;
+const EXTREME_HEAT_THRESHOLD = 38;
+const COLD_THRESHOLD         = -15;
+const EXTREME_COLD_THRESHOLD = -25;
+
+function renderWeatherAlert(forecast) {
+  const el = document.getElementById('weatherAlertBanner');
+  if (!el) return;
+  if (!forecast || !forecast.length) { el.style.display = 'none'; return; }
+
+  // Собираем все часы из ближайших 48ч начиная с NOW_HOUR
+  let collected = 0;
+  let peakHot = -Infinity, peakCold = Infinity;
+  for (let di = 0; di < forecast.length && collected < 48; di++) {
+    const day = forecast[di];
+    if (!day || !day.hourly) continue;
+    const startHour = (di === 0) ? NOW_HOUR : 0;
+    for (let i = startHour; i < day.hourly.length && collected < 48; i++, collected++) {
+      const t = day.hourly[i].t;
+      if (typeof t !== 'number') continue;
+      if (t > peakHot)  peakHot = t;
+      if (t < peakCold) peakCold = t;
+    }
+  }
+
+  let titleKey, msgKey, icon, cls, peakC;
+  if (peakHot >= EXTREME_HEAT_THRESHOLD) {
+    titleKey = 'alert.extremeHeat.title'; msgKey = 'alert.extremeHeat.msg';
+    icon = '🥵'; cls = 'hot'; peakC = peakHot;
+  } else if (peakHot >= HEAT_THRESHOLD) {
+    titleKey = 'alert.heat.title'; msgKey = 'alert.heat.msg';
+    icon = '🥵'; cls = 'hot'; peakC = peakHot;
+  } else if (peakCold <= EXTREME_COLD_THRESHOLD) {
+    titleKey = 'alert.extremeCold.title'; msgKey = 'alert.extremeCold.msg';
+    icon = '🥶'; cls = 'cold'; peakC = peakCold;
+  } else if (peakCold <= COLD_THRESHOLD) {
+    titleKey = 'alert.cold.title'; msgKey = 'alert.cold.msg';
+    icon = '🥶'; cls = 'cold'; peakC = peakCold;
+  } else {
+    el.style.display = 'none';
+    return;
+  }
+
+  // Конвертируем пик в текущие пользовательские единицы для отображения
+  const displayT = Math.round(convertTemp(peakC, state.units.temp));
+  const tStr = (displayT > 0 ? '+' : '') + displayT;
+  document.getElementById('weatherAlertIcon').textContent = icon;
+  document.getElementById('weatherAlertTitle').textContent = t(titleKey, { t: tStr });
+  document.getElementById('weatherAlertMsg').textContent   = t(msgKey);
+  el.classList.toggle('cold', cls === 'cold');
+  el.style.display = '';
+}
+
 function renderAll() {
   applySourceTheme();
   const forecast = getForecast(currentSourceId);
@@ -3875,7 +4207,15 @@ function renderAll() {
   renderHeroAndMetrics(forecast);
   renderDays(forecast);
   renderHourlyRow(forecast);
-  renderPrecipChart(forecast);
+  renderWeatherAlert(forecast);
+  // Compare mode — обновляем дубль-вьюшку при любом ре-рендере (смена источника, языка, units)
+  if (COMPARE_STATE.active) renderCompareView();
+  // Precip chart рендерим только если модалка открыта (chart внутри скрытой
+  // модалки рендерить бессмысленно + это блокировало бы lazy-load Chart.js).
+  const precipModalEl = document.getElementById('precipDetailModal');
+  if (precipModalEl && precipModalEl.classList.contains('open')) {
+    renderPrecipChart(forecast);
+  }
   renderConfidenceChip();
   // После любого ре-рендера пересчитать состояние стрелок прокрутки (ширина контента могла измениться)
   requestAnimationFrame(() => {
@@ -4079,6 +4419,14 @@ function closeModal() {
   modal.classList.remove('open');
   document.body.style.overflow = '';
   if (modalChartInstance) { modalChartInstance.destroy(); modalChartInstance = null; }
+  // Если пришли из search modal — открываем search ПОВЕРХ закрывающейся
+  // модалки (без задержки) + поднимаем body.modal-bridge на время перехода,
+  // чтобы главный экран между ними не мелькнул.
+  if (_returnToSearchModal) {
+    _returnToSearchModal = false;
+    startModalBridge();
+    if (typeof openSearchModal === 'function') openSearchModal();
+  }
 }
 
 modalClose.addEventListener('click', closeModal);
@@ -5023,10 +5371,35 @@ function updateClock() {
   const m = String(ts.getMinutes()).padStart(2,'0');
   el.textContent = t('footer.updated', { time: `${h}:${m}` });
 }
-setInterval(updateClock, 30_000);
+// === Managed intervals ===========================================
+// Все периодические задачи регистрируются через registerManagedInterval(),
+// при visibilitychange=hidden их таймеры останавливаются (экономия батареи
+// на телефоне в фоне), при возврате — стартуют заново + однократный
+// прогон тика чтобы догнать пропущенное состояние.
+const MANAGED_INTERVALS = [];
+function registerManagedInterval(fn, ms) {
+  const entry = { fn, ms, id: null };
+  entry.id = setInterval(fn, ms);
+  MANAGED_INTERVALS.push(entry);
+  return entry;
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    MANAGED_INTERVALS.forEach(e => { if (e.id) { clearInterval(e.id); e.id = null; } });
+  } else {
+    MANAGED_INTERVALS.forEach(e => {
+      if (!e.id) {
+        try { e.fn(); } catch (_) {}
+        e.id = setInterval(e.fn, e.ms);
+      }
+    });
+  }
+});
+
+registerManagedInterval(updateClock, 30_000);
 
 // Солнце на дуге двигается раз в минуту (без перерисовки остального).
-setInterval(() => {
+registerManagedInterval(() => {
   const d = getActiveForecast()[0];
   if (!d) return;
   const sunArcEl = document.getElementById('sunArc');
@@ -5052,7 +5425,7 @@ function updateDateLine() {
   const utcStr = offsetMM === 0 ? `UTC${sign}${offsetH}` : `UTC${sign}${offsetH}:${String(offsetMM).padStart(2,'0')}`;
   el.textContent = `${dayFull}, ${dateStr} · ${hh}:${mm} ${utcStr}`;
 }
-setInterval(updateDateLine, 60_000);
+registerManagedInterval(updateDateLine, 60_000);
 
 /* ============================================
    LOCATION / CITY PICKER
@@ -5586,6 +5959,357 @@ citySearchClear.addEventListener('click', () => {
   renderCityList(null, { sections: getDefaultCitySections() });
   citySearchInput.focus();
 });
+
+/* ============================================
+   COMPARE MODE — UI handlers, fetch, render
+   ============================================ */
+
+let _compareChartInstance = null;
+
+// Helper — берём AVG-прогноз второго города (или null если ещё не загружен)
+function compareForecastB() {
+  const m = COMPARE_STATE.forecastB;
+  if (!m || !m.avg) return null;
+  return m.avg;
+}
+
+// Fetch + парс прогноза для второго города. Кэш переиспользует существующую
+// инфраструктуру forecast-cache (по координатам).
+async function fetchCompareCityForecast(city) {
+  if (!city || typeof city.lat !== 'number') throw new Error('bad city');
+  // Сначала пробуем кэш
+  const cached = loadForecastCache(city.lat, city.lon);
+  if (cached) return cached.byModel;
+  // Иначе сеть
+  const modelIds = SOURCES.filter(s => s.model).map(s => s.model);
+  const data = await fetchOpenMeteo(city.lat, city.lon, modelIds);
+  const byModel = await parseAllModels(data, SOURCES);
+  if (!byModel.avg || byModel.avg.length === 0) throw new Error('empty parse');
+  // Дозальём AQI (но без блокировки)
+  fetchAirQuality(city.lat, city.lon).then(aqiData => {
+    const aqiByDay = parseAqiByDay(aqiData);
+    if (aqiByDay.length > 0) {
+      for (const sourceId of Object.keys(byModel)) {
+        byModel[sourceId].forEach((day, i) => {
+          if (aqiByDay[i] != null) { day.aqi = aqiByDay[i]; day.aqiLabel = aqiLabelFromValue(aqiByDay[i]); }
+        });
+      }
+    }
+  }).catch(() => {});
+  // Сохраним в кэш — пригодится и для основного, если юзер потом туда переключится
+  saveForecastCache(city.lat, city.lon, byModel);
+  return byModel;
+}
+
+// Активировать compare mode с конкретным городом B
+async function activateCompare(cityB) {
+  COMPARE_STATE.active = true;
+  COMPARE_STATE.cityB = cityB;
+  COMPARE_STATE.forecastB = null;
+  saveCompareState();
+  document.body.classList.add('compare-mode');
+  const banner = document.getElementById('compareBanner');
+  const view = document.getElementById('compareView');
+  if (banner) banner.style.display = '';
+  if (view) view.style.display = '';
+  // Промежуточный рендер (плейсхолдер) пока fetch не закончился
+  renderCompareView();
+  try {
+    COMPARE_STATE.forecastB = await fetchCompareCityForecast(cityB);
+    renderCompareView();
+  } catch (err) {
+    console.warn('Compare fetch failed:', err);
+    const summaryText = document.getElementById('compareSummaryText');
+    if (summaryText) summaryText.textContent = t('compare.error', { city: cityB.name || '—' });
+  }
+}
+
+function deactivateCompare() {
+  COMPARE_STATE.active = false;
+  COMPARE_STATE.cityB = null;
+  COMPARE_STATE.forecastB = null;
+  if (_compareChartInstance) { try { _compareChartInstance.destroy(); } catch (_) {} _compareChartInstance = null; }
+  saveCompareState();
+  document.body.classList.remove('compare-mode');
+  const banner = document.getElementById('compareBanner');
+  const view = document.getElementById('compareView');
+  if (banner) banner.style.display = 'none';
+  if (view) view.style.display = 'none';
+}
+
+// Главный render — заполняет dual-hero, метрики, summary, chart, 7-day
+function renderCompareView() {
+  if (!COMPARE_STATE.active) return;
+  const forecastA = getForecast(currentSourceId);
+  const forecastB = compareForecastB();
+  if (!forecastA || !forecastA[0]) return;
+  const dayA = forecastA[0];
+  const cityA = currentLocation ? (currentLocation.name || '—') : '—';
+  const cityB = COMPARE_STATE.cityB ? (COMPARE_STATE.cityB.name || '—') : '—';
+
+  // Банер
+  const labA = document.getElementById('compareLabelA');
+  const labB = document.getElementById('compareLabelB');
+  if (labA) labA.textContent = cityA;
+  if (labB) labB.textContent = cityB;
+
+  // Hero A
+  setText('chCityA', cityA);
+  document.getElementById('chIconA').innerHTML = weatherIcon(dayA.condition, 64);
+  const tempA = Math.round(convertTemp(dayA.max, state.units.temp));
+  setText('chTempA', String(tempA));
+  setText('chTempUnitA', unitTemp());
+  setText('chCondA', dayA.condLabel || '');
+  setText('chFeelsA', dayA.hourly && dayA.hourly[NOW_HOUR] && dayA.hourly[NOW_HOUR].feels != null
+    ? '~' + Math.round(convertTemp(dayA.hourly[NOW_HOUR].feels, state.units.temp)) + unitTemp() : '');
+
+  // Hero B (placeholders если ещё не загружено)
+  setText('chCityB', cityB);
+  if (forecastB && forecastB[0]) {
+    const dayB = forecastB[0];
+    document.getElementById('chIconB').innerHTML = weatherIcon(dayB.condition, 64);
+    const tempB = Math.round(convertTemp(dayB.max, state.units.temp));
+    setText('chTempB', String(tempB));
+    setText('chTempUnitB', unitTemp());
+    setText('chCondB', dayB.condLabel || '');
+    setText('chFeelsB', dayB.hourly && dayB.hourly[NOW_HOUR] && dayB.hourly[NOW_HOUR].feels != null
+      ? '~' + Math.round(convertTemp(dayB.hourly[NOW_HOUR].feels, state.units.temp)) + unitTemp() : '');
+  } else {
+    document.getElementById('chIconB').innerHTML = '';
+    setText('chTempB', '…');
+    setText('chTempUnitB', '');
+    setText('chCondB', t('compare.loading', { city: cityB }));
+    setText('chFeelsB', '');
+  }
+
+  // Метрики
+  fillCompareMetric('cmWind',     dayA.wind,        forecastB && forecastB[0] ? forecastB[0].wind     : null, fmtWind);
+  fillCompareMetric('cmRain',     dayA.precip,      forecastB && forecastB[0] ? forecastB[0].precip   : null, v => v + '%');
+  fillCompareMetric('cmPressure', dayA.pressure,    forecastB && forecastB[0] ? forecastB[0].pressure : null, v => Math.round(convertPressure(v, state.units.pressure)) + ' ' + shortMetricUnit('pressure'));
+  fillCompareMetric('cmHumidity', dayA.humidity,    forecastB && forecastB[0] ? forecastB[0].humidity : null, v => v + '%');
+
+  // Summary — кто теплее / суше
+  renderCompareSummary(dayA, forecastB && forecastB[0] ? forecastB[0] : null, cityA, cityB);
+
+  // Legend названия городов
+  setText('cccLegendA', cityA);
+  setText('cccLegendB', cityB);
+
+  // Chart — почасовая температура (lazy Chart.js)
+  renderCompareChart(dayA, forecastB && forecastB[0] ? forecastB[0] : null);
+
+  // 7-дневная лента
+  setText('cdRowLabelA', cityA);
+  setText('cdRowLabelB', cityB);
+  renderCompareDays('cdCellsA', forecastA);
+  renderCompareDays('cdCellsB', forecastB);
+}
+
+function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
+
+function fillCompareMetric(idPrefix, valA, valB, formatFn) {
+  const aEl = document.getElementById(idPrefix + 'A');
+  const bEl = document.getElementById(idPrefix + 'B');
+  if (!aEl || !bEl) return;
+  aEl.classList.remove('better'); bEl.classList.remove('better');
+  aEl.textContent = (valA != null && !Number.isNaN(valA)) ? formatFn(valA) : '—';
+  bEl.textContent = (valB != null && !Number.isNaN(valB)) ? formatFn(valB) : '—';
+  // Подсветка лучшего — для осадков/влажности меньше = лучше; для давления нейтрально
+  if (valA != null && valB != null && valA !== valB) {
+    if (idPrefix === 'cmRain' || idPrefix === 'cmHumidity' || idPrefix === 'cmWind') {
+      if (valA < valB) aEl.classList.add('better'); else bEl.classList.add('better');
+    }
+  }
+}
+
+function renderCompareSummary(dayA, dayB, cityA, cityB) {
+  const el = document.getElementById('compareSummaryText');
+  if (!el) return;
+  if (!dayB) { el.textContent = t('compare.loading', { city: cityB }); return; }
+  const dT = (dayA.max ?? 0) - (dayB.max ?? 0);
+  const dP = (dayA.precip ?? 0) - (dayB.precip ?? 0);
+  // Температура важнее — она основной критерий "лучше"
+  if (Math.abs(dT) >= 3) {
+    const winnerA = dT > 0;
+    const key = winnerA ? 'compare.summary.warmerA' : 'compare.summary.warmerB';
+    el.textContent = t(key, { a: cityA, b: cityB, d: Math.abs(Math.round(dT)) });
+    return;
+  }
+  // Если темпы близки — смотрим на осадки
+  if (Math.abs(dP) >= 15) {
+    const winnerA = dP < 0; // меньше осадков = лучше
+    const key = winnerA ? 'compare.summary.drierA' : 'compare.summary.drierB';
+    el.textContent = t(key, { a: cityA, b: cityB, pa: Math.round(dayA.precip), pb: Math.round(dayB.precip) });
+    return;
+  }
+  el.textContent = t('compare.summary.same');
+}
+
+function renderCompareChart(dayA, dayB) {
+  const canvas = document.getElementById('compareChart');
+  if (!canvas) return;
+  if (!window.Chart) {
+    ensureChartJs().then(() => renderCompareChart(dayA, dayB)).catch(() => {});
+    return;
+  }
+  const labels = dayA.hourly.map(h => String(h.h).padStart(2,'0'));
+  const dataA = dayA.hourly.map(h => Math.round(convertTemp(h.t, state.units.temp)));
+  const dataB = dayB && dayB.hourly ? dayB.hourly.map(h => Math.round(convertTemp(h.t, state.units.temp))) : labels.map(() => null);
+  if (_compareChartInstance) { try { _compareChartInstance.destroy(); } catch (_) {} _compareChartInstance = null; }
+  const ctx = canvas.getContext('2d');
+  _compareChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'A', data: dataA, borderColor: '#00d4ff', backgroundColor: 'rgba(0,212,255,0.10)', borderWidth: 2.5, tension: 0.35, pointRadius: 0, pointHoverRadius: 5, fill: false },
+        { label: 'B', data: dataB, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,0.10)', borderWidth: 2.5, tension: 0.35, pointRadius: 0, pointHoverRadius: 5, fill: false, spanGaps: true }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(10,17,40,0.95)', titleColor: '#e8f0ff', bodyColor: '#e8f0ff', borderColor: 'rgba(167,139,250,0.3)', borderWidth: 1, padding: 10, cornerRadius: 10 } },
+      scales: {
+        x: { ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0 }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } },
+        y: { ticks: { color: 'rgba(232,240,255,0.5)', font: { family: 'JetBrains Mono', size: 10 }, callback: v => v + unitTemp() }, grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false } }
+      }
+    }
+  });
+}
+
+function renderCompareDays(containerId, forecast) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!forecast || !forecast.length) {
+    el.innerHTML = Array.from({length: 10}, () => '<div class="cd-cell"><div class="day">—</div></div>').join('');
+    return;
+  }
+  el.innerHTML = forecast.slice(0, 10).map(d => {
+    const dayLabel = d.id === 0 ? t('day.today') : localizeDayShort(d.name);
+    const dateShort = d.date ? d.date.slice(0,5) : '';
+    const hi = Math.round(convertTemp(d.max, state.units.temp));
+    const lo = Math.round(convertTemp(d.min, state.units.temp));
+    return `<div class="cd-cell">
+      <div class="day">${dayLabel}</div>
+      <div class="date">${dateShort}</div>
+      <div class="icon">${weatherIcon(d.condition, 36)}</div>
+      <div class="t"><span class="hi">${hi}°</span><span class="lo">${lo}°</span></div>
+      <div class="prec">💧 ${d.precip}%</div>
+      <div class="wind">${fmtWind(d.wind, { withUnit: false })} ${unitWind()}</div>
+    </div>`;
+  }).join('');
+}
+
+// Compare picker modal
+function openComparePicker() {
+  const modal = document.getElementById('comparePickerModal');
+  if (!modal) return;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  renderComparePickerList('');
+  setTimeout(() => {
+    const inp = document.getElementById('comparePickerInput');
+    if (inp) inp.focus();
+  }, 320);
+}
+function closeComparePicker() {
+  const modal = document.getElementById('comparePickerModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderComparePickerList(query) {
+  const list = document.getElementById('comparePickerList');
+  if (!list) return;
+  query = (query || '').trim().toLowerCase();
+  const favs = loadFavorites();
+  const curLat = currentLocation ? currentLocation.lat : null;
+  const curLon = currentLocation ? currentLocation.lon : null;
+  let items = [];
+  // Favorites сначала (без текущего города)
+  for (const f of favs) {
+    if (Math.abs(f.lat - curLat) < 0.05 && Math.abs(f.lon - curLon) < 0.05) continue;
+    items.push({ name: f.name, region: f.region, country: f.country, lat: f.lat, lon: f.lon, kind: 'fav' });
+  }
+  if (query) {
+    items = items.filter(i => (i.name || '').toLowerCase().includes(query));
+  }
+  if (items.length === 0 && !query) {
+    list.innerHTML = `<div style="text-align:center;color:rgba(232,240,255,0.5);font-size:13px;padding:18px 8px">${t('compare.pickHint')}</div>`;
+    return;
+  }
+  list.innerHTML = items.map(i =>
+    `<div class="city-item" role="option" data-lat="${i.lat}" data-lon="${i.lon}" data-name="${(i.name||'').replace(/"/g,'&quot;')}" data-region="${(i.region||'').replace(/"/g,'&quot;')}">
+      <div class="city-pin">${i.kind === 'fav' ? '★' : '📍'}</div>
+      <div class="city-text">
+        <div class="city-name">${i.name}</div>
+        ${i.region ? `<div class="city-region">${i.region}</div>` : ''}
+      </div>
+    </div>`).join('');
+  list.querySelectorAll('.city-item').forEach(it => {
+    it.addEventListener('click', () => {
+      const city = { name: it.dataset.name, region: it.dataset.region, lat: parseFloat(it.dataset.lat), lon: parseFloat(it.dataset.lon) };
+      closeComparePicker();
+      activateCompare(city);
+    });
+  });
+  // Если поиск — также живой запрос через geocoding
+  if (query && query.length >= 2) {
+    searchCities(query).then(results => {
+      if (!results || !results.length) return;
+      const cur = document.getElementById('comparePickerList');
+      if (!cur) return;
+      const apiCards = results.slice(0, 10).map(r =>
+        `<div class="city-item" role="option" data-lat="${r.lat}" data-lon="${r.lon}" data-name="${(r.name||'').replace(/"/g,'&quot;')}" data-region="${(r.region||'').replace(/"/g,'&quot;')}">
+          <div class="city-pin">🌐</div>
+          <div class="city-text">
+            <div class="city-name">${r.name}</div>
+            ${r.region ? `<div class="city-region">${r.region}</div>` : ''}
+          </div>
+        </div>`).join('');
+      cur.insertAdjacentHTML('beforeend', apiCards);
+      cur.querySelectorAll('.city-item').forEach(it => {
+        it.onclick = () => {
+          const city = { name: it.dataset.name, region: it.dataset.region, lat: parseFloat(it.dataset.lat), lon: parseFloat(it.dataset.lon) };
+          closeComparePicker();
+          activateCompare(city);
+        };
+      });
+    }).catch(() => {});
+  }
+}
+
+// Event handlers
+function setupCompareMode() {
+  const chip = document.getElementById('compareChip');
+  const closeBtn = document.getElementById('compareCloseBtn');
+  const pickerClose = document.getElementById('comparePickerClose');
+  const pickerInput = document.getElementById('comparePickerInput');
+  const pickerClear = document.getElementById('comparePickerClear');
+  const pickerModal = document.getElementById('comparePickerModal');
+  const swapA = document.getElementById('chSwapA');
+  const swapB = document.getElementById('chSwapB');
+  if (chip) chip.addEventListener('click', () => {
+    if (COMPARE_STATE.active) deactivateCompare();
+    else openComparePicker();
+  });
+  if (closeBtn) closeBtn.addEventListener('click', deactivateCompare);
+  if (pickerClose) pickerClose.addEventListener('click', closeComparePicker);
+  if (pickerModal) pickerModal.addEventListener('click', (e) => { if (e.target === pickerModal) closeComparePicker(); });
+  if (pickerInput) pickerInput.addEventListener('input', (e) => renderComparePickerList(e.target.value));
+  if (pickerClear) pickerClear.addEventListener('click', () => { if (pickerInput) { pickerInput.value = ''; renderComparePickerList(''); pickerInput.focus(); } });
+  // Кнопка смены города A — открывает обычную модалку выбора локации (тот же
+  // механизм что в шапке: переключает currentLocation → refreshForecast → renderAll
+  // → renderCompareView). Compare mode остаётся активным.
+  if (swapA) swapA.addEventListener('click', (e) => { e.stopPropagation(); openCityModal(); });
+  // Кнопка смены города B — открывает compare picker (тот же что для первого выбора).
+  if (swapB) swapB.addEventListener('click', (e) => { e.stopPropagation(); openComparePicker(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && pickerModal && pickerModal.classList.contains('open')) closeComparePicker();
+  });
+}
 
 /* ============================================
    SETTINGS MENU — chip + modal + handlers
@@ -6305,10 +7029,17 @@ function parseOpenMeteoToForecast(data, suffix = '') {
 }
 
 // Парсит ответ Open-Meteo (который содержит данные по всем 7 моделям) в объект:
-//   { 'ecmwf': [5 days], 'gfs': [5 days], ..., 'avg': [5 days] }
-function parseAllModels(data, sources) {
+//   { 'ecmwf': [10 days], 'gfs': [10 days], ..., 'avg': [10 days] }
+//
+// АСИНХРОННАЯ через yielding: парсинг 7 моделей суммарно ~50–150мс на телефоне.
+// Чтобы не блокировать main thread одним куском, между моделями делаем
+// await setTimeout(0) — браузер успевает отрисовать промежуточные кадры,
+// принять пользовательский ввод и т.п. Каждый чанк (одна модель) занимает
+// ~10–20мс — это укладывается в 16мс-кадр без jank'а.
+async function parseAllModels(data, sources) {
   const result = {};
   const validForecasts = [];
+  const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 0));
 
   for (const src of sources) {
     if (!src.model) continue; // 'avg' пропускаем — вычисляем отдельно
@@ -6321,6 +7052,8 @@ function parseAllModels(data, sources) {
     } catch (e) {
       console.warn('Не удалось распарсить модель', src.model, e);
     }
+    // Отдаём управление браузеру между моделями — UI не фризит во время парса
+    await yieldToBrowser();
   }
 
   if (validForecasts.length > 0) {
@@ -6539,6 +7272,7 @@ async function refreshForecast(force = false) {
       renderSourceButtons();
       renderAll();
       updateClock();
+      clearAppBootstrap();
       return; // кэш свежий — основной сетевой запрос не делаем
     }
   }
@@ -6573,7 +7307,7 @@ async function refreshForecast(force = false) {
     const aqiData    = results[1].status === 'fulfilled' ? results[1].value : null;
     const climateData = results[2].status === 'fulfilled' ? results[2].value : null;
     CLIMATE_DATA = climateData;
-    const byModel = parseAllModels(data, SOURCES);
+    const byModel = await parseAllModels(data, SOURCES);
     if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
     }
@@ -6631,6 +7365,7 @@ async function refreshForecast(force = false) {
   } finally {
     API_STATE.loading = false;
     hideLoader();
+    clearAppBootstrap();
   }
 }
 
@@ -6775,8 +7510,14 @@ setupMetricCards();
 setupRainRadarControls();
 setupSearchModal();
 setupSpeakButton();
+setupCompareMode();
 setupSwipeToClose();
+loadCompareState();
 applyAll();
+// Если был активен compare mode перед перезагрузкой — переактивируем
+if (COMPARE_STATE.active && COMPARE_STATE.cityB) {
+  activateCompare(COMPARE_STATE.cityB);
+}
 
 // PWA: регистрируем service-worker для офлайн-кэша и установки приложения на главный экран.
 // Поддержка: Chrome/Edge/Firefox/Safari iOS 11.3+. Без push-уведомлений — только установка и cache-first/network-first стратегии.
