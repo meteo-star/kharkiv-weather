@@ -3771,6 +3771,64 @@ body.compare-mode .astro-photo { display:none !important }
 .notif-save-status{font-size:11px;color:rgba(74,222,128,0.85);margin-top:8px;text-align:center;min-height:14px;transition:opacity 0.3s}
 .notif-save-status.error{color:#fca5a5}
 
+/* Селектор активного аккаунта (показывается если связано 2+ чата) */
+.notif-account-switcher{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+  padding:10px 12px;
+  background:rgba(167,139,250,0.08);
+  border:1px solid rgba(167,139,250,0.28);
+  border-radius:12px;
+}
+.nas-label{font-size:11px;color:rgba(232,240,255,0.65);font-weight:500;flex-shrink:0}
+.nas-select{
+  flex:1;padding:7px 10px;
+  background:rgba(0,0,0,0.3);
+  border:1px solid rgba(167,139,250,0.4);
+  border-radius:8px;
+  color:#fff;font-family:inherit;font-size:13px;font-weight:600;
+  cursor:pointer;outline:none;
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 10px center;
+  padding-right:30px;
+}
+.nas-select option{background:#0a1838;color:#fff}
+
+/* Кнопка добавления ещё одного аккаунта */
+.notif-add-account-btn{
+  width:100%;padding:10px 14px;margin-top:12px;
+  background:transparent;
+  border:1.5px dashed rgba(0,212,255,0.4);
+  border-radius:12px;
+  color:rgba(0,212,255,0.85);font-family:inherit;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all 0.2s;
+}
+.notif-add-account-btn:hover{background:rgba(0,212,255,0.08);border-color:#00d4ff;color:#00d4ff}
+
+/* LIGHT THEME */
+:root[data-theme="light"] .notif-account-switcher{
+  background:rgba(192,83,42,0.1) !important;
+  border:1.5px solid rgba(192,83,42,0.35) !important;
+}
+:root[data-theme="light"] .nas-label{color:rgba(45,26,16,0.7) !important;font-weight:600}
+:root[data-theme="light"] .nas-select{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  color:#2d1a10 !important;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c0532a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") !important;
+  background-repeat:no-repeat !important;
+  background-position:right 10px center !important;
+}
+:root[data-theme="light"] .nas-select option{background:#fffaf0 !important;color:#2d1a10 !important}
+:root[data-theme="light"] .notif-add-account-btn{
+  border:1.5px dashed rgba(192,83,42,0.5) !important;
+  color:#c0532a !important;
+}
+:root[data-theme="light"] .notif-add-account-btn:hover{
+  background:rgba(192,83,42,0.08) !important;
+  border-color:#c0532a !important;
+}
+
 /* LIGHT THEME — переопределения */
 :root[data-theme="light"] .notif-hint{color:rgba(45,26,16,0.7)}
 :root[data-theme="light"] .notif-hint-small{color:rgba(45,26,16,0.6)}

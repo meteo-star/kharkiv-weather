@@ -761,8 +761,14 @@
         </div>
       </div>
 
-      <!-- Состояние «связан» — редактор правил -->
+      <!-- Состояние «связан» — селектор аккаунта + редактор правил -->
       <div class="notif-pane" id="notifPaneLinked" style="display:none">
+        <!-- Селектор активного аккаунта (если их несколько) -->
+        <div class="notif-account-switcher" id="notifAccountSwitcher" style="display:none">
+          <div class="nas-label" data-i18n="settings.notif.activeAccount">Активный аккаунт:</div>
+          <select class="nas-select" id="notifAccountSelect"></select>
+        </div>
+
         <div class="notif-status">
           <span class="ns-icon">✅</span>
           <div class="ns-info">
@@ -780,6 +786,10 @@
           <span data-i18n="settings.notif.save">Сохранить правила</span>
         </button>
         <div class="notif-save-status" id="notifSaveStatus"></div>
+
+        <button type="button" class="notif-add-account-btn" id="notifAddAccountBtn">
+          <span>+ </span><span data-i18n="settings.notif.addAccount">Добавить ещё один чат / группу</span>
+        </button>
       </div>
     </div>
   </div>

@@ -276,6 +276,8 @@ const I18N = {
     'settings.notif.linkedTitle': 'Связано с Telegram',
     'settings.notif.unlink': 'Отвязать',
     'settings.notif.save': 'Сохранить правила',
+    'settings.notif.activeAccount': 'Активный аккаунт:',
+    'settings.notif.addAccount': 'Добавить ещё один чат / группу',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
     'modal.day.forecast': 'Прогноз',
@@ -7890,7 +7892,9 @@ function setupSwipeToClose() {
    ============================================ */
 const BOT_API_BASE = 'https://meteo-star-bot.stanislav-perec.workers.dev';
 const BOT_TG_LINK = 'https://t.me/MeteoStarBot';
-const NOTIF_STORAGE_KEY = 'kw:telegram:v1';
+const NOTIF_STORAGE_KEY = 'kw:telegram:v1';            // legacy: single active account
+const NOTIF_ACCOUNTS_KEY = 'kw:telegram-accounts:v1';  // массив аккаунтов
+const NOTIF_ACTIVE_KEY = 'kw:telegram-active:v1';      // chatId активного аккаунта
 
 const RULE_DEFS = [
   { type: 'rain_soon',       icon: '🌧', defaults: { windowHours: 3 },
@@ -7919,20 +7923,94 @@ const RULE_DEFS = [
     desc: 'Ежедневная сводка погоды в указанное время' }
 ];
 
-function loadTelegramState() {
+// === Multi-account storage ===
+// На устройстве может быть несколько связок с ботом (личный чат + N групп).
+// Храним массив всех связок, плюс отдельно chatId «активной» (та что сейчас
+// редактируется на сайте). При смене активной — перерисовывается весь
+// notif-блок с правилами этого аккаунта.
+function loadAccounts() {
   try {
-    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-    if (!raw) return null;
-    const s = JSON.parse(raw);
-    if (s && typeof s.chatId !== 'undefined' && s.pairToken) return s;
-    return null;
-  } catch (e) { return null; }
+    const raw = localStorage.getItem(NOTIF_ACCOUNTS_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    }
+  } catch (e) {}
+  // Миграция со старого формата (single account)
+  try {
+    const legacy = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if (legacy) {
+      const s = JSON.parse(legacy);
+      if (s && s.chatId && s.pairToken) {
+        const arr = [s];
+        saveAccounts(arr);
+        localStorage.setItem(NOTIF_ACTIVE_KEY, String(s.chatId));
+        return arr;
+      }
+    }
+  } catch (e) {}
+  return [];
+}
+function saveAccounts(arr) {
+  try { localStorage.setItem(NOTIF_ACCOUNTS_KEY, JSON.stringify(arr)); } catch (e) {}
+}
+function getActiveAccountId() {
+  return localStorage.getItem(NOTIF_ACTIVE_KEY);
+}
+function setActiveAccountId(chatId) {
+  if (chatId == null) localStorage.removeItem(NOTIF_ACTIVE_KEY);
+  else localStorage.setItem(NOTIF_ACTIVE_KEY, String(chatId));
+}
+function getActiveAccount() {
+  const accounts = loadAccounts();
+  if (!accounts.length) return null;
+  const activeId = getActiveAccountId();
+  return accounts.find(a => String(a.chatId) === String(activeId)) || accounts[0];
+}
+function addOrUpdateAccount(acc) {
+  const accounts = loadAccounts();
+  const idx = accounts.findIndex(a => String(a.chatId) === String(acc.chatId));
+  if (idx >= 0) accounts[idx] = { ...accounts[idx], ...acc };
+  else accounts.push(acc);
+  saveAccounts(accounts);
+  setActiveAccountId(acc.chatId);
+  // Поддерживаем legacy ключ синхронным — для других мест где он читается
+  try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(acc)); } catch (e) {}
+  return acc;
+}
+function removeAccount(chatId) {
+  let accounts = loadAccounts();
+  accounts = accounts.filter(a => String(a.chatId) !== String(chatId));
+  saveAccounts(accounts);
+  if (String(getActiveAccountId()) === String(chatId)) {
+    if (accounts.length) setActiveAccountId(accounts[0].chatId);
+    else setActiveAccountId(null);
+  }
+  // Sync legacy
+  const active = getActiveAccount();
+  if (active) {
+    try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(active)); } catch (e) {}
+  } else {
+    try { localStorage.removeItem(NOTIF_STORAGE_KEY); } catch (e) {}
+  }
+}
+function accountDisplayName(acc) {
+  if (!acc) return '—';
+  const isGroup = acc.chatType && acc.chatType !== 'private';
+  if (isGroup) return `👥 ${acc.chatTitle || `Группа ${acc.chatId}`}`;
+  return acc.firstName || (acc.username ? `@${acc.username}` : `Чат ${acc.chatId}`);
+}
+
+// Совместимость со старым кодом — возвращает активный аккаунт или null
+function loadTelegramState() {
+  return getActiveAccount();
 }
 function saveTelegramState(s) {
-  try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(s)); } catch (e) {}
+  addOrUpdateAccount(s);
 }
 function clearTelegramState() {
-  try { localStorage.removeItem(NOTIF_STORAGE_KEY); } catch (e) {}
+  const active = getActiveAccount();
+  if (active) removeAccount(active.chatId);
 }
 
 // Текущее состояние формы (правил), копия для редактирования
@@ -7946,11 +8024,23 @@ function setupNotifSection() {
   const cancelBtn = document.getElementById('notifCancelBtn');
   const unlinkBtn = document.getElementById('notifUnlinkBtn');
   const saveBtn   = document.getElementById('notifSaveBtn');
+  const addAccountBtn = document.getElementById('notifAddAccountBtn');
+  const selectEl = document.getElementById('notifAccountSelect');
   if (!linkBtn) return;
   linkBtn.addEventListener('click', startPairing);
   cancelBtn.addEventListener('click', cancelPairing);
   unlinkBtn.addEventListener('click', unlinkTelegram);
   saveBtn.addEventListener('click', saveNotifRules);
+  if (addAccountBtn) addAccountBtn.addEventListener('click', startPairing);
+  if (selectEl) selectEl.addEventListener('change', () => {
+    setActiveAccountId(selectEl.value);
+    // Sync legacy storage с новым активным
+    const acc = getActiveAccount();
+    if (acc) {
+      try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(acc)); } catch (e) {}
+    }
+    refreshNotifPane();
+  });
 
   // Проверяем магическую ссылку из /login команды бота. Если в URL есть
   // ?auth=TOKEN — обмениваем у Worker'а на chatId+pairToken и логинимся
@@ -8007,27 +8097,45 @@ async function claimAuthToken(token) {
 }
 
 function refreshNotifPane() {
-  const tg = loadTelegramState();
+  const accounts = loadAccounts();
   const paneU = document.getElementById('notifPaneUnlinked');
   const paneC = document.getElementById('notifPaneCode');
   const paneL = document.getElementById('notifPaneLinked');
-  if (tg) {
-    paneU.style.display = 'none';
-    paneC.style.display = 'none';
-    paneL.style.display = 'block';
-    // Для группового чата показываем название группы с префиксом 👥
-    // Для личного — firstName / username
-    const isGroup = tg.chatType && tg.chatType !== 'private';
-    const displayName = isGroup
-      ? `👥 ${tg.chatTitle || 'Группа'}`
-      : (tg.firstName || tg.username || 'chat');
-    document.getElementById('notifLinkedName').textContent = `${displayName} · ${tg.name || ''}`;
-    fetchAndRenderRules(tg);
-  } else {
+  const switcher = document.getElementById('notifAccountSwitcher');
+  const selectEl = document.getElementById('notifAccountSelect');
+
+  if (accounts.length === 0) {
     paneU.style.display = 'block';
     paneC.style.display = 'none';
     paneL.style.display = 'none';
+    return;
   }
+
+  paneU.style.display = 'none';
+  paneC.style.display = 'none';
+  paneL.style.display = 'block';
+
+  // Селектор — показываем только если 2+ аккаунтов
+  if (accounts.length >= 2 && switcher) {
+    switcher.style.display = 'flex';
+    selectEl.innerHTML = '';
+    const activeId = String(getActiveAccountId() || accounts[0].chatId);
+    for (const acc of accounts) {
+      const opt = document.createElement('option');
+      opt.value = String(acc.chatId);
+      opt.textContent = `${accountDisplayName(acc)} · ${acc.name || ''}`;
+      if (String(acc.chatId) === activeId) opt.selected = true;
+      selectEl.appendChild(opt);
+    }
+  } else if (switcher) {
+    switcher.style.display = 'none';
+  }
+
+  const tg = getActiveAccount();
+  if (!tg) return;
+  document.getElementById('notifLinkedName').textContent =
+    `${accountDisplayName(tg)} · ${tg.name || ''}`;
+  fetchAndRenderRules(tg);
 }
 
 async function startPairing() {
