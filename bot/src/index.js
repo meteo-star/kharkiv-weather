@@ -142,6 +142,11 @@ function parseCommand(text) {
 // КОМАНДЫ ПОЛЬЗОВАТЕЛЯ
 // ============================================================
 
+function esc(s) {
+  // HTML-escape для безопасной вставки user-input в сообщение
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 async function handleStart(env, chatId, userId, fromObj) {
   // Создаём или обновляем подписку с дефолтами
   const key = `sub:${chatId}`;
@@ -150,9 +155,10 @@ async function handleStart(env, chatId, userId, fromObj) {
   if (existing) {
     return sendMessage(env, chatId,
       `👋 С возвращением! Ты уже подписан${existing.banned ? ', но твоя подписка ЗАБЛОКИРОВАНА' : ''}.\n\n` +
-      `📍 Локация: ${existing.name || 'не задана'}\n` +
+      `📍 Локация: ${esc(existing.name || 'не задана')}\n` +
       `🔔 Правил: ${(existing.rules || []).length}\n\n` +
-      `Напиши /help чтобы посмотреть команды.`
+      `Напиши /help чтобы посмотреть команды.`,
+      { parse_mode: 'HTML' }
     );
   }
 
@@ -177,38 +183,38 @@ async function handleStart(env, chatId, userId, fromObj) {
   await incrementStat(env, 'subscribed');
 
   return sendMessage(env, chatId,
-    `🌤 Привет! Я бот *Meteo Star* — буду присылать тебе уведомления о погоде.\n\n` +
-    `📍 Локация по умолчанию: *Высокий* (Харьковская обл.).\n` +
-    `   Сменить: /location <город>\n` +
-    `   Например: /location Київ\n\n` +
+    `🌤 Привет! Я бот <b>Meteo Star</b> — буду присылать тебе уведомления о погоде.\n\n` +
+    `📍 Локация по умолчанию: <b>Высокий</b> (Харьковская обл.).\n` +
+    `   Сменить: <code>/location &lt;город&gt;</code>\n` +
+    `   Например: <code>/location Київ</code>\n\n` +
     `🔔 Правила уведомлений настраиваются через веб-интерфейс приложения.\n` +
-    `   (скоро добавим)\n\n` +
+    `   <i>(скоро добавим)</i>\n\n` +
     `📋 Все команды: /help`,
-    { parse_mode: 'Markdown' }
+    { parse_mode: 'HTML' }
   );
 }
 
 async function handleHelp(env, chatId, isAdmin) {
   let text =
-    `📋 *Команды Meteo Star Bot:*\n\n` +
-    `/start — подписаться\n` +
-    `/status — твоя подписка и активные правила\n` +
-    `/location <город> — сменить локацию\n` +
-    `/stop — отписаться от всех уведомлений\n` +
-    `/help — эта подсказка`;
+    `📋 <b>Команды Meteo Star Bot:</b>\n\n` +
+    `<code>/start</code> — подписаться\n` +
+    `<code>/status</code> — твоя подписка и активные правила\n` +
+    `<code>/location &lt;город&gt;</code> — сменить локацию\n` +
+    `<code>/stop</code> — отписаться от всех уведомлений\n` +
+    `<code>/help</code> — эта подсказка`;
 
   if (isAdmin) {
     text +=
-      `\n\n👑 *Админ-команды:*\n` +
-      `/admin_stats — статистика бота\n` +
-      `/admin_list [N] — последние N подписавшихся\n` +
-      `/admin_broadcast <текст> — рассылка всем\n` +
-      `/admin_ban <chat_id> — заблокировать\n` +
-      `/admin_unban <chat_id> — разблокировать\n` +
-      `/admin_test <chat_id> — отправить тестовое сообщение`;
+      `\n\n👑 <b>Админ-команды:</b>\n` +
+      `<code>/admin_stats</code> — статистика бота\n` +
+      `<code>/admin_list [N]</code> — последние N подписавшихся\n` +
+      `<code>/admin_broadcast &lt;текст&gt;</code> — рассылка всем\n` +
+      `<code>/admin_ban &lt;chat_id&gt;</code> — заблокировать\n` +
+      `<code>/admin_unban &lt;chat_id&gt;</code> — разблокировать\n` +
+      `<code>/admin_test &lt;chat_id&gt;</code> — отправить тестовое сообщение`;
   }
 
-  return sendMessage(env, chatId, text, { parse_mode: 'Markdown' });
+  return sendMessage(env, chatId, text, { parse_mode: 'HTML' });
 }
 
 async function handleStatus(env, chatId) {
@@ -221,16 +227,16 @@ async function handleStatus(env, chatId) {
   }
 
   const rulesText = (sub.rules || []).length === 0
-    ? '   _(нет правил, добавь через веб-интерфейс)_'
-    : sub.rules.map(r => `   • ${formatRule(r)}`).join('\n');
+    ? '   <i>(нет правил, добавь через веб-интерфейс)</i>'
+    : sub.rules.map(r => `   • ${esc(formatRule(r))}`).join('\n');
 
   return sendMessage(env, chatId,
-    `📊 *Твоя подписка:*\n\n` +
-    `📍 Локация: *${sub.name}* (${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)})\n` +
+    `📊 <b>Твоя подписка:</b>\n\n` +
+    `📍 Локация: <b>${esc(sub.name)}</b> (${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)})\n` +
     `🌐 Язык: ${sub.lang.toUpperCase()}\n` +
     `📅 Подписан: ${new Date(sub.createdAt).toLocaleDateString('ru-RU')}\n\n` +
-    `🔔 *Правила уведомлений:*\n${rulesText}`,
-    { parse_mode: 'Markdown' }
+    `🔔 <b>Правила уведомлений:</b>\n${rulesText}`,
+    { parse_mode: 'HTML' }
   );
 }
 
@@ -248,8 +254,8 @@ async function handleStop(env, chatId) {
 async function handleLocation(env, chatId, args) {
   if (!args) {
     return sendMessage(env, chatId,
-      `📍 Сейчас укажи город:\n\`/location Київ\`\n\nИли пришли свои координаты в формате:\n\`/location 49.9 36.21\``,
-      { parse_mode: 'Markdown' }
+      `📍 Сейчас укажи город:\n<code>/location Київ</code>\n\nИли пришли свои координаты в формате:\n<code>/location 49.9 36.21</code>`,
+      { parse_mode: 'HTML' }
     );
   }
 
@@ -263,7 +269,7 @@ async function handleLocation(env, chatId, args) {
     sub.lon = parseFloat(coords[2]);
     sub.name = `${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)}`;
     await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
-    return sendMessage(env, chatId, `📍 Установил координаты: *${sub.name}*`, { parse_mode: 'Markdown' });
+    return sendMessage(env, chatId, `📍 Установил координаты: <b>${esc(sub.name)}</b>`, { parse_mode: 'HTML' });
   }
 
   // Имя города → Open-Meteo geocoding
@@ -274,15 +280,18 @@ async function handleLocation(env, chatId, args) {
     const data = await r.json();
     const place = data.results?.[0];
     if (!place) {
-      return sendMessage(env, chatId, `🤷 Не нашёл город *${args}*. Попробуй полное название или координаты: \`/location 49.9 36.21\``, { parse_mode: 'Markdown' });
+      return sendMessage(env, chatId,
+        `🤷 Не нашёл город <b>${esc(args)}</b>. Попробуй полное название или координаты: <code>/location 49.9 36.21</code>`,
+        { parse_mode: 'HTML' }
+      );
     }
     sub.lat = place.latitude;
     sub.lon = place.longitude;
     sub.name = place.name + (place.admin1 ? `, ${place.admin1}` : '');
     await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
     return sendMessage(env, chatId,
-      `📍 Локация обновлена: *${sub.name}*\n   (${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)})`,
-      { parse_mode: 'Markdown' }
+      `📍 Локация обновлена: <b>${esc(sub.name)}</b>\n   (${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)})`,
+      { parse_mode: 'HTML' }
     );
   } catch (err) {
     console.error('geocode err:', err);
@@ -311,14 +320,14 @@ async function handleAdminStats(env, chatId) {
   const stats = (await env.STATS.get(`stats:${today}`, { type: 'json' })) || {};
   const total = await countSubscriptions(env);
   return sendMessage(env, chatId,
-    `👑 *Статистика бота (${today}):*\n\n` +
-    `👥 Активных подписок: *${total}*\n` +
+    `👑 <b>Статистика бота (${today}):</b>\n\n` +
+    `👥 Активных подписок: <b>${total}</b>\n` +
     `➕ Подписалось сегодня: ${stats.subscribed || 0}\n` +
     `➖ Отписалось сегодня: ${stats.unsubscribed || 0}\n` +
     `📤 Отправлено уведомлений: ${stats.notifications || 0}\n` +
     `⚠ Ошибок отправки: ${stats.errors || 0}\n` +
     `⏰ Cron-запусков: ${stats.cron_runs || 0}`,
-    { parse_mode: 'Markdown' }
+    { parse_mode: 'HTML' }
   );
 }
 
@@ -329,12 +338,12 @@ async function handleAdminList(env, chatId, args) {
   for (const key of list.keys.slice(0, limit)) {
     const sub = await env.SUBSCRIPTIONS.get(key.name, { type: 'json' });
     if (!sub) continue;
-    rows.push(`${sub.chatId} · ${sub.name} · ${(sub.rules || []).length} правил${sub.banned ? ' · BAN' : ''}`);
+    rows.push(`${sub.chatId} · ${esc(sub.name)} · ${(sub.rules || []).length} правил${sub.banned ? ' · BAN' : ''}`);
   }
   return sendMessage(env, chatId,
-    `👑 *Последние ${rows.length} подписок:*\n\n` +
-    (rows.length ? rows.map(r => `\`${r}\``).join('\n') : '_(нет подписок)_'),
-    { parse_mode: 'Markdown' }
+    `👑 <b>Последние ${rows.length} подписок:</b>\n\n` +
+    (rows.length ? rows.map(r => `<code>${r}</code>`).join('\n') : '<i>(нет подписок)</i>'),
+    { parse_mode: 'HTML' }
   );
 }
 
@@ -356,7 +365,7 @@ async function handleAdminBroadcast(env, chatId, args) {
       failed++;
     }
   }
-  return sendMessage(env, chatId, `📤 Рассылка завершена: отправлено *${sent}*, ошибок *${failed}*`, { parse_mode: 'Markdown' });
+  return sendMessage(env, chatId, `📤 Рассылка завершена: отправлено <b>${sent}</b>, ошибок <b>${failed}</b>`, { parse_mode: 'HTML' });
 }
 
 async function handleAdminBan(env, chatId, args) {
