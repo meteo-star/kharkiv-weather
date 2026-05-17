@@ -44,7 +44,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .location-text p{font-size:13px;color:rgba(232,240,255,0.55);margin-top:2px;font-feature-settings:'tnum'}
 
 /* Source indicator (replaces live-badge) */
-.source-indicator{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--src-color,rgba(0,212,255,0.35));border-radius:100px;font-size:12px;color:#fff;font-weight:500;backdrop-filter:blur(10px);transition:all 0.35s ease;box-shadow:0 0 20px var(--src-glow,rgba(0,212,255,0.15))}
+.source-indicator{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--src-color,rgba(0,212,255,0.35));border-radius:100px;font-size:12px;color:#fff;font-weight:500;backdrop-filter:blur(10px);transition:all 0.35s ease;box-shadow:0 0 20px var(--src-glow,rgba(0,212,255,0.15));cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.source-indicator:hover{background:rgba(255,255,255,0.07);transform:translateY(-1px)}
+.source-indicator:focus-visible{outline:2px solid var(--src-color,#00d4ff);outline-offset:3px}
+.source-data-modal .sources-card,
+.source-data-modal .accuracy-card{margin-bottom:14px}
+.source-data-modal .accuracy-card{margin-bottom:0}
 .source-indicator .si-label{font-size:10px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:500}
 .source-indicator .si-name{color:var(--src-color,#00d4ff)}
 .source-indicator .si-dot{width:7px;height:7px;border-radius:50%;background:var(--src-color,#00d4ff);box-shadow:0 0 10px var(--src-color,#00d4ff);animation:pulse 1.8s ease-in-out infinite;flex-shrink:0}
@@ -142,7 +147,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .sun-moon{padding:16px 18px;display:grid;grid-template-columns:1fr 96px;gap:16px;align-items:center}
 .sun-section{position:relative}
 .sun-title{font-size:11px;color:rgba(232,240,255,0.55);text-transform:uppercase;letter-spacing:0.08em;font-weight:500;margin-bottom:8px}
-.sun-arc-wrap{position:relative;height:88px;width:100%}
+.sun-arc-wrap{position:relative;height:88px;width:100%;margin-top:10px}
 .sun-times{display:flex;justify-content:space-between;margin-top:2px;font-size:11px;color:rgba(232,240,255,0.65);font-feature-settings:'tnum'}
 .sun-times span{display:flex;flex-direction:column;gap:1px}
 .sun-times .lbl{font-size:9px;color:rgba(232,240,255,0.4);text-transform:uppercase;letter-spacing:0.06em}
@@ -563,7 +568,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .precip-type.snow{color:#dbeefd;filter:drop-shadow(0 0 4px rgba(219,238,253,0.55))}
 .precip-type.storm{color:#c4b5fd;filter:drop-shadow(0 0 4px rgba(196,181,253,0.6))}
 .precip-days{display:flex;margin-top:4px}
-.precip-day{flex:0 0 auto;text-align:center;border-top:1px solid rgba(0,212,255,0.3);padding-top:6px;font-size:11px;color:rgba(232,240,255,0.75);font-weight:500;font-feature-settings:'tnum';white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.precip-day{flex:0 0 auto;text-align:center;border-top:2px solid rgba(0,212,255,0.45);padding:7px 4px 5px;font-size:12px;color:#e8f0ff;font-weight:600;font-feature-settings:'tnum';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.01em;transition:background 0.2s;box-sizing:border-box}
+.precip-day[data-day-idx="0"]{background:rgba(0,212,255,0.08);border-top-color:rgba(0,212,255,0.55)}
+.precip-day[data-day-idx="1"]{background:rgba(167,139,250,0.10);border-top-color:rgba(167,139,250,0.55)}
+.precip-day[data-day-idx="2"]{background:rgba(94,234,212,0.08);border-top-color:rgba(94,234,212,0.55)}
 
 @media (max-width: 900px){
   .astro-row{grid-template-columns:1fr 1fr;gap:10px}
@@ -625,7 +633,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .ht-tab{padding:6px 11px;font-size:11px}
   .precip-card{padding:18px}
   .precip-chart-wrap{height:170px}
-  .precip-day{font-size:10px}
+  .precip-day{font-size:11px;padding:6px 3px 4px}
   .hour-cell{width:60px;padding:10px 5px;gap:5px}
   .hour-cell .ic{width:32px;height:32px}
   .hour-cell .h{font-size:10px}

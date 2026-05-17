@@ -1569,6 +1569,15 @@ function moonPhaseIcon(illumPercent, waxing) {
 // Сейчас: яркое солнце с двойным glow на своей позиции (или прозрачное «прошло/ещё не взошло»).
 // Под горизонтом — лёгкая «земля» с заливкой.
 // Тики через каждые ~2 часа на дуге для масштаба.
+// Текущее локальное время браузера в формате HH:MM (для позиции солнца на дуге).
+// Примечание: sunrise/sunset приходят из Open-Meteo в таймзоне выбранного города.
+// Если пользователь смотрит другой часовой пояс, позиция будет немного сдвинута —
+// для большинства случаев (свой город) совпадает с системным временем.
+function currentLocalHHMM() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+
 function sunArc(sunrise, sunset, nowHHMM) {
   const u = uid();
   const toMin = (t) => { if (!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; };
@@ -1578,38 +1587,38 @@ function sunArc(sunrise, sunset, nowHHMM) {
   const isDay = (now >= rise && now <= set);
   pos = Math.max(0, Math.min(1, pos));
 
-  // Параметры дуги: SVG viewBox 200×100
-  // Горизонт на y=78. Восход x=18, закат x=182. Пик дуги в y=8.
-  const ARC_X1 = 18, ARC_X2 = 182, ARC_Y = 78, ARC_PEAK_Y = 8;
-  // Квадратичная кривая: B(t) = (1-t)²P0 + 2(1-t)t*P1 + t²P2, P1 = (100, 2*ARC_PEAK_Y - ARC_Y)
-  const cpY = 2 * ARC_PEAK_Y - ARC_Y;  // control point Y чтобы вершина была в ARC_PEAK_Y
-  const sunX = (1-pos)*(1-pos)*ARC_X1 + 2*(1-pos)*pos*100 + pos*pos*ARC_X2;
+  // Параметры дуги: SVG viewBox 400×100 (растянут по горизонтали чтобы дуга
+  // охватывала всю ширину карточки). Солнце уменьшено (r_outer=16), чтобы
+  // помещалось в верхней точке дуги (peak y=18) и не обрезалось у краёв
+  // (отступы X1=20, X2=380 ≥ r_outer).
+  const VB_W = 400, VB_CENTER = 200;
+  const ARC_X1 = 22, ARC_X2 = VB_W - 22, ARC_Y = 78, ARC_PEAK_Y = 22;
+  const cpY = 2 * ARC_PEAK_Y - ARC_Y;
+  const sunX = (1-pos)*(1-pos)*ARC_X1 + 2*(1-pos)*pos*VB_CENTER + pos*pos*ARC_X2;
   const sunY = (1-pos)*(1-pos)*ARC_Y + 2*(1-pos)*pos*cpY + pos*pos*ARC_Y;
 
-  // Тики на дуге: 5 промежуточных точек
+  // Тики на дуге: 4 промежуточных точки
   const tickPositions = [0.2, 0.4, 0.6, 0.8];
   const ticks = tickPositions.map(t => {
-    const tx = (1-t)*(1-t)*ARC_X1 + 2*(1-t)*t*100 + t*t*ARC_X2;
+    const tx = (1-t)*(1-t)*ARC_X1 + 2*(1-t)*t*VB_CENTER + t*t*ARC_X2;
     const ty = (1-t)*(1-t)*ARC_Y + 2*(1-t)*t*cpY + t*t*ARC_Y;
-    return `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="1.4" fill="rgba(255,210,120,0.35)"/>`;
+    return `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="2.8" fill="rgba(255,210,120,0.35)"/>`;
   }).join('');
 
-  // Подписи времени (без отдельного блока ниже — они интегрированы)
-  const sunriseLabel = `<text x="${ARC_X1}" y="93" text-anchor="middle" fill="rgba(255,200,120,0.85)" font-size="9" font-family="JetBrains Mono, monospace" font-weight="500">${sunrise || ''}</text>`;
-  const sunsetLabel  = `<text x="${ARC_X2}" y="93" text-anchor="middle" fill="rgba(255,160,80,0.85)"  font-size="9" font-family="JetBrains Mono, monospace" font-weight="500">${sunset  || ''}</text>`;
+  const sunriseLabel = `<text x="${ARC_X1}" y="93" text-anchor="middle" fill="rgba(255,200,120,0.85)" font-size="11" font-family="JetBrains Mono, monospace" font-weight="500">${sunrise || ''}</text>`;
+  const sunsetLabel  = `<text x="${ARC_X2}" y="93" text-anchor="middle" fill="rgba(255,160,80,0.85)"  font-size="11" font-family="JetBrains Mono, monospace" font-weight="500">${sunset  || ''}</text>`;
 
   // Солнце — двойной glow + ядро + блик. Только когда день.
   const sunRender = isDay ? `
-    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="18" fill="url(#sg-outer-${u})" opacity="0.55"/>
-    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="11" fill="url(#sg-mid-${u})" opacity="0.85"/>
-    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="6.5" fill="url(#sg-core-${u})"/>
-    <ellipse cx="${(sunX-1.5).toFixed(1)}" cy="${(sunY-1.5).toFixed(1)}" rx="2" ry="1.5" fill="rgba(255,255,255,0.7)"/>
+    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="20" fill="url(#sg-outer-${u})" opacity="0.55"/>
+    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="13" fill="url(#sg-mid-${u})" opacity="0.85"/>
+    <circle cx="${sunX.toFixed(1)}" cy="${sunY.toFixed(1)}" r="8" fill="url(#sg-core-${u})"/>
+    <ellipse cx="${(sunX-2).toFixed(1)}" cy="${(sunY-2).toFixed(1)}" rx="2.8" ry="2" fill="rgba(255,255,255,0.7)"/>
   ` : `
-    <circle cx="${now < rise ? ARC_X1 : ARC_X2}" cy="${ARC_Y}" r="4" fill="rgba(180,200,230,0.3)" stroke="rgba(180,200,230,0.5)" stroke-width="0.6"/>
+    <circle cx="${now < rise ? ARC_X1 : ARC_X2}" cy="${ARC_Y}" r="5" fill="rgba(180,200,230,0.3)" stroke="rgba(180,200,230,0.5)" stroke-width="0.6"/>
   `;
 
-  // Состояние "сейчас" под дугой — фоновая «земля» с лёгкой заливкой
-  return `<svg viewBox="0 0 200 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 ${VB_W} 100" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="skyG-${u}" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" stop-color="#7c4dff" stop-opacity="0.18"/>
@@ -1643,19 +1652,13 @@ function sunArc(sunrise, sunset, nowHHMM) {
         <stop offset="100%" stop-color="rgba(255,150,40,0)"/>
       </radialGradient>
     </defs>
-    <!-- небо как заливка под дугой -->
-    <path d="M ${ARC_X1} ${ARC_Y} Q 100 ${cpY} ${ARC_X2} ${ARC_Y} L ${ARC_X2} ${ARC_Y} L ${ARC_X1} ${ARC_Y} Z" fill="url(#skyG-${u})"/>
-    <!-- земля под горизонтом -->
-    <rect x="0" y="${ARC_Y}" width="200" height="${100 - ARC_Y}" fill="url(#groundG-${u})"/>
-    <!-- линия горизонта -->
-    <line x1="4" y1="${ARC_Y}" x2="196" y2="${ARC_Y}" stroke="rgba(255,255,255,0.18)" stroke-width="0.6"/>
-    <!-- сама дуга -->
-    <path d="M ${ARC_X1} ${ARC_Y} Q 100 ${cpY} ${ARC_X2} ${ARC_Y}" stroke="url(#arcG-${u})" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.75" stroke-dasharray="3,2.5"/>
-    <!-- тики на дуге -->
+    <path d="M ${ARC_X1} ${ARC_Y} Q ${VB_CENTER} ${cpY} ${ARC_X2} ${ARC_Y} L ${ARC_X2} ${ARC_Y} L ${ARC_X1} ${ARC_Y} Z" fill="url(#skyG-${u})"/>
+    <rect x="0" y="${ARC_Y}" width="${VB_W}" height="${100 - ARC_Y}" fill="url(#groundG-${u})"/>
+    <line x1="4" y1="${ARC_Y}" x2="${VB_W - 4}" y2="${ARC_Y}" stroke="rgba(255,255,255,0.18)" stroke-width="0.6"/>
+    <path d="M ${ARC_X1} ${ARC_Y} Q ${VB_CENTER} ${cpY} ${ARC_X2} ${ARC_Y}" stroke="url(#arcG-${u})" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.75" stroke-dasharray="3,2.5"/>
     ${ticks}
-    <!-- маркеры восхода/заката (точки на горизонте) -->
-    <circle cx="${ARC_X1}" cy="${ARC_Y}" r="2.2" fill="#a78bfa" opacity="0.85"/>
-    <circle cx="${ARC_X2}" cy="${ARC_Y}" r="2.2" fill="#fb923c" opacity="0.85"/>
+    <circle cx="${ARC_X1}" cy="${ARC_Y}" r="3.6" fill="#a78bfa" opacity="0.85"/>
+    <circle cx="${ARC_X2}" cy="${ARC_Y}" r="3.6" fill="#fb923c" opacity="0.85"/>
     ${sunriseLabel}
     ${sunsetLabel}
     ${sunRender}
@@ -2264,13 +2267,19 @@ function renderHourlyRow(forecast) {
     });
   });
 
-  // Если пользователь раньше не скроллил (savedScroll === 0) — позиционируем на текущий час.
-  // Иначе восстанавливаем его позицию, чтобы переключение таба не сбрасывало вид.
+  // Если пользователь раньше не скроллил (savedScroll === 0) — центрируем текущий час
+  // в видимой области. Иначе восстанавливаем его позицию, чтобы переключение таба
+  // не сбрасывало вид. rAF — гарантирует что layout стабилизировался (clientWidth != 0).
   if (savedScroll > 0) {
     row.scrollLeft = savedScroll;
   } else {
-    const nowCell = row.querySelector('.hour-cell.now');
-    if (nowCell) row.scrollLeft = nowCell.offsetLeft;
+    const centerNow = () => {
+      const nowCell = row.querySelector('.hour-cell.now');
+      if (!nowCell) return;
+      const target = nowCell.offsetLeft - (row.clientWidth / 2) + (nowCell.offsetWidth / 2);
+      row.scrollLeft = Math.max(0, target);
+    };
+    requestAnimationFrame(centerNow);
   }
 }
 
@@ -3619,8 +3628,10 @@ function renderPrecipChart(forecast) {
     collected += hours.length;
   }
 
-  // Плоский массив всех часов для графика
-  const merged = segments.flatMap(s => s.hours);
+  // Плоский массив всех часов для графика; обогащаем каждый час индексом дня (сегмента),
+  // чтобы потом красить x-ticks в цвет своего дня.
+  const merged = [];
+  segments.forEach((s, si) => s.hours.forEach(h => merged.push(Object.assign({}, h, { _dayIdx: si }))));
   if (merged.length === 0) return;
 
   // Фикс. ширина: PRECIP_PX_PER_HOUR на каждый час. Получаем горизонтальный scroll, если viewport уже.
@@ -3628,13 +3639,14 @@ function renderPrecipChart(forecast) {
   inner.style.width = totalWidth + 'px';
 
   // Полоска дней под графиком: по одному сегменту на каждый день.
+  // Полное название (Среда, Четверг…) + чередующаяся подсветка тоном дня.
   daysBar.innerHTML = segments.map((s, i) => {
     const d = s.day;
     const dateShort = d.date ? d.date.slice(0,5) : '';
     const label = (i === 0 && d.id === 0)
       ? `${t('day.today')} · ${dateShort}`
-      : `${localizeDayShort(d.name)} · ${dateShort}`;
-    return `<div class="precip-day" style="width:${s.hours.length * PRECIP_PX_PER_HOUR}px">${label}</div>`;
+      : `${localizeDayFull(d.dayName) || localizeDayShort(d.name)} · ${dateShort}`;
+    return `<div class="precip-day" data-day-idx="${i % 3}" style="width:${s.hours.length * PRECIP_PX_PER_HOUR}px">${label}</div>`;
   }).join('');
 
   const labels = merged.map(h => String(h.h).padStart(2, '0'));
@@ -3667,7 +3679,10 @@ function renderPrecipChart(forecast) {
   fillGrad.addColorStop(0.5, 'rgba(77,171,247,0.18)');
   fillGrad.addColorStop(1, 'rgba(0,212,255,0.02)');
 
-  // Плагин для отрисовки пунктирных вертикальных линий на границах суток
+  // Helper: позиция границы между двумя сегментами — точно над tick'ом "00"
+  // нового дня. Новый день начинается ровно на 00:00.
+  const boundaryAtIdx = (xScale, idx) => xScale.getPixelForValue(idx);
+
   const dayDividersPlugin = {
     id: 'precipDayDividers',
     afterDatasetsDraw(chart) {
@@ -3675,14 +3690,12 @@ function renderPrecipChart(forecast) {
       const xScale = chart.scales.x;
       const yScale = chart.scales.y;
       dayBreakIndices.forEach(idx => {
-        const pxA = xScale.getPixelForValue(idx - 1);
-        const pxB = xScale.getPixelForValue(idx);
-        const x = (pxA + pxB) / 2;
+        const x = boundaryAtIdx(xScale, idx);
         c.save();
         c.beginPath();
-        c.strokeStyle = 'rgba(0,212,255,0.5)';
-        c.lineWidth = 1.5;
-        c.setLineDash([4, 3]);
+        c.strokeStyle = 'rgba(0,212,255,0.7)';
+        c.lineWidth = 2;
+        c.setLineDash([5, 3]);
         c.moveTo(x, yScale.top);
         c.lineTo(x, yScale.bottom);
         c.stroke();
@@ -3691,9 +3704,35 @@ function renderPrecipChart(forecast) {
     }
   };
 
+  const DAY_BG_COLORS = [
+    'rgba(0,212,255,0.08)',     // cyan — день 0
+    'rgba(167,139,250,0.10)',   // purple — день 1
+    'rgba(94,234,212,0.08)'     // teal — день 2
+  ];
+  const dayBackgroundPlugin = {
+    id: 'precipDayBackground',
+    beforeDatasetsDraw(chart) {
+      const c = chart.ctx;
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      let cursor = 0;
+      segments.forEach((s, si) => {
+        cursor += s.hours.length;
+        const isFirst = (si === 0);
+        const isLast  = (si === segments.length - 1);
+        const xStart = isFirst ? xScale.left  : boundaryAtIdx(xScale, cursor - s.hours.length);
+        const xEnd   = isLast  ? xScale.right : boundaryAtIdx(xScale, cursor);
+        c.save();
+        c.fillStyle = DAY_BG_COLORS[si % DAY_BG_COLORS.length];
+        c.fillRect(xStart, yScale.top, xEnd - xStart, yScale.bottom - yScale.top);
+        c.restore();
+      });
+    }
+  };
+
   precipChartInstance = new Chart(ctx, {
     type: 'line',
-    plugins: [dayDividersPlugin],
+    plugins: [dayBackgroundPlugin, dayDividersPlugin],
     data: {
       labels,
       datasets: [{
@@ -3743,7 +3782,7 @@ function renderPrecipChart(forecast) {
               const dateShort = day.date ? day.date.slice(0,5) : '';
               const dayLabel = (dayIdx === 0 && day.id === 0)
                 ? t('day.today')
-                : localizeDayShort(day.name);
+                : (localizeDayFull(day.dayName) || localizeDayShort(day.name));
               return `${String(h.h).padStart(2,'0')}:00 · ${dayLabel} · ${dateShort}`;
             },
             label: (c) => ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
@@ -3753,7 +3792,15 @@ function renderPrecipChart(forecast) {
       scales: {
         x: {
           ticks: {
-            color: (c) => (merged[c.index] && merged[c.index].h === 0) ? '#00d4ff' : 'rgba(232,240,255,0.5)',
+            // Цвет метки часа = цвет своего дня (cyan/purple/teal по индексу сегмента).
+            // Полуночный час "00" — более насыщенный и жирный, как маркер начала суток.
+            color: (c) => {
+              const m = merged[c.index];
+              if (!m) return 'rgba(232,240,255,0.5)';
+              const palette = ['#00d4ff', '#a78bfa', '#5eead4'];
+              const base = palette[m._dayIdx % palette.length];
+              return m.h === 0 ? base : base + 'b3'; // b3 ≈ 70% alpha
+            },
             font: (c) => ({
               family: 'JetBrains Mono',
               size: 10,
@@ -3768,6 +3815,57 @@ function renderPrecipChart(forecast) {
       }
     }
   });
+
+  // ВАЖНО: выровнять нижние полоски (типы осадков + дни) под РЕАЛЬНУЮ геометрию
+  // chart.chartArea. Без этого они смещены ~на ширину Y-оси (~40px), и эмодзи/дни
+  // не совпадают по часам с точками графика.
+  const alignBars = () => {
+    if (!precipChartInstance) return;
+    const cArea  = precipChartInstance.chartArea;
+    const xScale = precipChartInstance.scales.x;
+    if (!cArea || !xScale) return;
+    // Sanity check: chart должен быть полностью разложен
+    if (typeof cArea.left !== 'number' || cArea.right <= cArea.left) return;
+    if (typeof xScale.getPixelForValue !== 'function') return;
+    const testPx = xScale.getPixelForValue(1);
+    if (!Number.isFinite(testPx) || testPx <= 0) return;
+
+    // Граница над tick'ом "00" нового дня (та же логика что в dayDividers/dayBackground).
+    const bnd = (idx) => xScale.getPixelForValue(idx);
+    let cursor = 0;
+    const segPx = segments.map((s, si) => {
+      cursor += s.hours.length;
+      const leftPx  = (si === 0) ? cArea.left : bnd(cursor - s.hours.length);
+      const rightPx = (si === segments.length - 1) ? cArea.right : bnd(cursor);
+      return rightPx - leftPx;
+    });
+    if (segPx.some(w => !Number.isFinite(w) || w <= 0)) return;
+
+    const hourPx = merged.length > 1
+      ? (xScale.getPixelForValue(1) - xScale.getPixelForValue(0))
+      : (cArea.right - cArea.left);
+    if (!Number.isFinite(hourPx) || hourPx <= 0) return;
+
+    const innerW = inner.offsetWidth || (cArea.right + 10);
+    const rightMargin = Math.max(0, innerW - cArea.right);
+
+    typesBar.style.marginLeft  = cArea.left + 'px';
+    typesBar.style.marginRight = rightMargin + 'px';
+    daysBar.style.marginLeft   = cArea.left + 'px';
+    daysBar.style.marginRight  = rightMargin + 'px';
+
+    [...typesBar.children].forEach((el) => { el.style.width = hourPx + 'px'; });
+    [...daysBar.children].forEach((el, si) => { el.style.width = segPx[si] + 'px'; });
+  };
+
+  // Несколько попыток на разных таймингах — Chart.js может ещё не успеть
+  // выполнить layout к моменту синхронного вызова, особенно при первом
+  // рендере внутри только что открытой модалки.
+  alignBars();
+  requestAnimationFrame(alignBars);
+  setTimeout(alignBars, 50);
+  setTimeout(alignBars, 200);
+  setTimeout(alignBars, 600);
 }
 
 function renderAll() {
@@ -4882,7 +4980,7 @@ function ACTIVITY_PRESETS_FORECAST_SOURCE() {
 function renderStaticAstro() {
   const d = getActiveForecast()[0];
   const sunArcEl = document.getElementById('sunArc');
-  if (sunArcEl) sunArcEl.innerHTML = sunArc(d.sunrise, d.sunset, '23:10');
+  if (sunArcEl) sunArcEl.innerHTML = sunArc(d.sunrise, d.sunset, currentLocalHHMM());
   const moonIconEl = document.getElementById('moonIcon');
   if (moonIconEl) moonIconEl.innerHTML = moonPhaseIcon(d.moonIllum, d.moonWaxing);
   const uvGaugeEl = document.getElementById('uvGauge');
@@ -4926,6 +5024,14 @@ function updateClock() {
   el.textContent = t('footer.updated', { time: `${h}:${m}` });
 }
 setInterval(updateClock, 30_000);
+
+// Солнце на дуге двигается раз в минуту (без перерисовки остального).
+setInterval(() => {
+  const d = getActiveForecast()[0];
+  if (!d) return;
+  const sunArcEl = document.getElementById('sunArc');
+  if (sunArcEl) sunArcEl.innerHTML = sunArc(d.sunrise, d.sunset, currentLocalHHMM());
+}, 60_000);
 
 // Дата + время в шапке. Обновляется при applyAll() и каждую минуту.
 function updateDateLine() {
@@ -5498,6 +5604,29 @@ settingsModal.addEventListener('click', e => { if (e.target === settingsModal) c
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && settingsModal.classList.contains('open')) closeSettingsModal();
 });
+
+/* ============================================
+   SOURCE DATA MODAL — открывается кликом на индикатор источника в шапке.
+   Содержит карточки "Источник прогноза" + "Точность источников".
+   ============================================ */
+const sourceIndicatorEl   = document.getElementById('sourceIndicator');
+const sourceDataModal     = document.getElementById('sourceDataModal');
+const sourceDataModalClose = document.getElementById('sourceDataModalClose');
+
+function openSourceDataModal()  { sourceDataModal.classList.add('open');    document.body.style.overflow = 'hidden'; }
+function closeSourceDataModal() { sourceDataModal.classList.remove('open'); document.body.style.overflow = ''; }
+
+if (sourceIndicatorEl && sourceDataModal) {
+  sourceIndicatorEl.addEventListener('click', openSourceDataModal);
+  sourceIndicatorEl.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSourceDataModal(); }
+  });
+  sourceDataModalClose.addEventListener('click', closeSourceDataModal);
+  sourceDataModal.addEventListener('click', e => { if (e.target === sourceDataModal) closeSourceDataModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && sourceDataModal.classList.contains('open')) closeSourceDataModal();
+  });
+}
 
 function setActiveInGroup(groupId, val) {
   const group = document.getElementById(groupId);
@@ -6474,6 +6603,11 @@ async function refreshForecast(force = false) {
     updateAccuracyData(currentLocation.lat, currentLocation.lon, byModel);
     ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
     renderStaticAstro();
+    renderAstroPhoto();
+    renderActivityWindows();
+    renderClimateContext();
+    renderPollen();
+    renderStorm();
     renderAccuracy();
     renderSourceButtons();
     renderAll();
@@ -6615,6 +6749,8 @@ function setupSwipeToClose() {
   if (cityModalEl) enableSwipeToClose(cityModalEl.querySelector('.modal'), () => cityModalEl.classList.contains('open') && (typeof closeCityModal === 'function') && closeCityModal());
   if (settingsEl)  enableSwipeToClose(settingsEl.querySelector('.modal'), () => settingsEl.classList.contains('open') && (typeof closeSettingsModal === 'function') && closeSettingsModal());
   if (searchEl)    enableSwipeToClose(searchEl.querySelector('.modal'), () => searchEl.classList.contains('open') && (typeof closeSearchModal === 'function') && closeSearchModal());
+  const sourceDataEl = document.getElementById('sourceDataModal');
+  if (sourceDataEl) enableSwipeToClose(sourceDataEl.querySelector('.modal'), () => sourceDataEl.classList.contains('open') && (typeof closeSourceDataModal === 'function') && closeSourceDataModal());
 
   // Полноэкранные .hdm-backdrop модалки — внутренний скролл у .hdm-scroll / .pdm-scroll
   const hdmEl  = document.getElementById('hourlyDetailModal');

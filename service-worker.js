@@ -7,7 +7,7 @@
     При обновлении версии CACHE_VERSION старый кэш стирается на activate.
 */
 
-const CACHE_VERSION = 'meteo-star-v1.16.0';
+const CACHE_VERSION = 'meteo-star-v1.16.3';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
@@ -85,7 +85,9 @@ self.addEventListener('fetch', (event) => {
     const isFreshNeeded = req.mode === 'navigate' ||
                           url.pathname.endsWith('/') ||
                           url.pathname.endsWith('.html') ||
-                          url.pathname.endsWith('manifest.json');
+                          url.pathname.endsWith('manifest.json') ||
+                          url.pathname.endsWith('app.js') ||
+                          url.pathname.endsWith('style.css');
     if (isFreshNeeded) {
       event.respondWith(networkFirst(req, STATIC_CACHE));
     } else {
