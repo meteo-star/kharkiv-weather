@@ -148,6 +148,9 @@ const I18N = {
     'alert.cold.msg': 'Тепло одевайтесь, прикройте лицо и руки. Избегайте долгих прогулок',
     'alert.extremeCold.title': 'Экстремальный мороз ({t}°)',
     'alert.extremeCold.msg': 'Риск обморожения за 10–20 минут. Без необходимости — не выходите на улицу',
+    'pullRefresh.pull': 'Потяни вниз для обновления',
+    'pullRefresh.ready': 'Отпусти для обновления',
+    'pullRefresh.refreshing': 'Обновляем...',
     'compare.chip': 'Сравнить',
     'compare.chipAria': 'Сравнить погоду с другим городом',
     'compare.bannerLabel': 'Сравнение',
@@ -516,6 +519,9 @@ const I18N = {
     'alert.cold.msg': 'Тепло вдягайтеся, прикрийте обличчя й руки. Уникайте довгих прогулянок',
     'alert.extremeCold.title': 'Екстремальний мороз ({t}°)',
     'alert.extremeCold.msg': 'Ризик обмороження за 10–20 хвилин. Без потреби — не виходьте на вулицю',
+    'pullRefresh.pull': 'Потягни вниз для оновлення',
+    'pullRefresh.ready': 'Відпусти для оновлення',
+    'pullRefresh.refreshing': 'Оновлюємо...',
     'compare.chip': 'Порівняти',
     'compare.chipAria': 'Порівняти погоду з іншим містом',
     'compare.bannerLabel': 'Порівняння',
@@ -886,6 +892,9 @@ const I18N = {
     'alert.cold.msg': 'Dress warmly, cover your face and hands. Avoid long walks',
     'alert.extremeCold.title': 'Extreme frost ({t}°)',
     'alert.extremeCold.msg': 'Frostbite risk in 10–20 min. Stay indoors unless necessary',
+    'pullRefresh.pull': 'Pull down to refresh',
+    'pullRefresh.ready': 'Release to refresh',
+    'pullRefresh.refreshing': 'Refreshing...',
     'compare.chip': 'Compare',
     'compare.chipAria': 'Compare weather with another city',
     'compare.bannerLabel': 'Comparison',
@@ -7479,6 +7488,195 @@ function enableSwipeToClose(sheetEl, closeFn, opts = {}) {
   sheetEl.addEventListener('touchcancel', () => { panning = false; dragging = false; reset(); });
 }
 
+/* ============================================
+   HERO STICKY — когда юзер скроллит, карточка «Сейчас» фиксируется
+   на верху экрана и плавно сжимается в компактную полоску. Остальной
+   контент (метрики, прогнозы) проезжает под ней.
+   ============================================ */
+function setupHeroSticky() {
+  const hero = document.getElementById('heroBlock');
+  if (!hero) return;
+
+  // Узнаём фактический safe-area-inset-top (на iOS PWA это высота notch).
+  // Через временный fixed-элемент с top:env() — самый надёжный способ.
+  let safeTop = 0;
+  function measureSafeTop() {
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;top:env(safe-area-inset-top,0px);left:0;width:1px;height:1px;pointer-events:none;visibility:hidden';
+    document.body.appendChild(probe);
+    safeTop = probe.getBoundingClientRect().top || 0;
+    document.body.removeChild(probe);
+  }
+  measureSafeTop();
+
+  let lastStuck = false;
+  function check() {
+    // В compare-mode hero скрыт — sticky не нужен
+    if (document.body.classList.contains('compare-mode')) {
+      if (lastStuck) { hero.classList.remove('stuck'); lastStuck = false; }
+      return;
+    }
+    const rect = hero.getBoundingClientRect();
+    // Hero «прилип» когда его верхняя граница достигла sticky-точки
+    const isStuck = rect.top <= safeTop + 0.5;
+    if (isStuck !== lastStuck) {
+      hero.classList.toggle('stuck', isStuck);
+      lastStuck = isStuck;
+    }
+  }
+
+  // Throttle через rAF — не пересчитываем чаще одного кадра
+  let rafScheduled = false;
+  function onScroll() {
+    if (rafScheduled) return;
+    rafScheduled = true;
+    requestAnimationFrame(() => { rafScheduled = false; check(); });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => { measureSafeTop(); check(); });
+  check(); // initial
+}
+
+/* ============================================
+   PULL-TO-REFRESH — свайп вниз с верха для принудительного обновления PWA
+   ============================================ */
+function setupPullToRefresh() {
+  const ind = document.getElementById('pullRefreshIndicator');
+  const text = document.getElementById('prrText');
+  if (!ind || !text) return;
+
+  const THRESHOLD = 95;          // px реального движения пальца после рубер-бэнда (≈170px физического свайпа)
+  const RUBBER_RATIO = 0.55;     // палец тянет, индикатор движется с меньшей амплитудой — natural feel
+  const HIDDEN_OFFSET = -110;    // %, насколько прячем над экраном
+
+  let startY = 0;
+  let dist = 0;
+  let active = false;
+
+  // Игнорируем pull когда тач происходит внутри горизонтально-скроллящихся
+  // лент / модалок / списков — там свой жест ценнее.
+  function isInExcluded(target) {
+    return !!(target.closest && target.closest(
+      '.modal-backdrop.open, .hdm-backdrop.open, ' +
+      '.precip-scroll, .hours-scroll, .scroll-wrap, ' +
+      '.cd-table, .cd-cells, .city-list, .favorites-row, ' +
+      '.pdm-scroll, .hdm-scroll, .precip-y-axis'
+    ));
+  }
+  function inExcludedZone(target) {
+    if (!target) return false;
+    // Также exclude если над любой открытой модалкой
+    if (document.body.classList.contains('modal-bridge')) return true;
+    if (document.querySelector('.modal-backdrop.open, .hdm-backdrop.open')) return true;
+    return isInExcluded(target);
+  }
+
+  function setIndicator(translatePx, opacity) {
+    ind.classList.remove('transitioning');
+    ind.style.transform = `translateY(${translatePx}px)`;
+    ind.style.opacity = String(opacity);
+  }
+  function hideIndicator() {
+    ind.classList.add('transitioning');
+    ind.style.transform = `translateY(${HIDDEN_OFFSET}%)`;
+    ind.style.opacity = '0';
+    ind.classList.remove('ready');
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    if (window.scrollY > 4) return;
+    if (inExcludedZone(e.target)) return;
+    startY = e.touches[0].clientY;
+    dist = 0;
+    active = true;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (e) => {
+    if (!active) return;
+    if (window.scrollY > 4) { active = false; hideIndicator(); return; }
+    const dy = e.touches[0].clientY - startY;
+    if (dy <= 0) {
+      hideIndicator();
+      return;
+    }
+    dist = dy;
+    const pull = Math.min(dy * RUBBER_RATIO, 140);
+    setIndicator(Math.min(0, pull - 70), Math.min(pull / 60, 1));
+    if (pull >= THRESHOLD) {
+      ind.classList.add('ready');
+      text.textContent = t('pullRefresh.ready');
+    } else {
+      ind.classList.remove('ready');
+      text.textContent = t('pullRefresh.pull');
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (!active) return;
+    active = false;
+    const pull = dist * RUBBER_RATIO;
+    if (pull >= THRESHOLD) {
+      // Trigger refresh
+      ind.classList.remove('ready');
+      ind.classList.add('refreshing','transitioning');
+      ind.style.transform = 'translateY(0)';
+      ind.style.opacity = '1';
+      text.textContent = t('pullRefresh.refreshing');
+      forceFullRefresh();
+    } else {
+      hideIndicator();
+    }
+  });
+  document.addEventListener('touchcancel', () => {
+    if (!active) return;
+    active = false;
+    hideIndicator();
+  });
+}
+
+// Принудительное обновление PWA: убиваем кэш, обновляем SW, перезагружаем.
+// На iOS PWA без этого новые версии не подхватываются даже с network-first.
+async function forceFullRefresh() {
+  try {
+    // 1. Снести API/HTML кэш — но НЕ шрифты/иконки (быстрая повторная загрузка)
+    if ('caches' in window) {
+      try {
+        const keys = await caches.keys();
+        // Удаляем всё — на reload SW restaurнет нужное по своим стратегиям
+        await Promise.all(keys.map(k => caches.delete(k)));
+      } catch (_) {}
+    }
+    // 2. Принудительная проверка обновления SW
+    if ('serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          await reg.update();
+          if (reg.waiting) {
+            // Активируем ждущий SW
+            reg.waiting.postMessage('skipWaiting');
+            // controllerchange listener сам сделает reload
+            return;
+          }
+        }
+      } catch (_) {}
+    }
+  } catch (_) {}
+  // Fallback: жёсткий reload (если SW не сменился — просто перезагрузка)
+  setTimeout(() => { window.location.reload(); }, 250);
+}
+
+// Auto-reload при переключении на новый SW (после skipWaiting от pull-refresh
+// ИЛИ когда SW сам обновился в фоне). Без флага есть риск infinite loop.
+if ('serviceWorker' in navigator) {
+  let _swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (_swReloaded) return;
+    _swReloaded = true;
+    window.location.reload();
+  });
+}
+
 function setupSwipeToClose() {
   // Регулярные .modal-backdrop модалки (overflow-y у самого .modal)
   const modalDay      = document.getElementById('modal');
@@ -7517,6 +7715,8 @@ setupSearchModal();
 setupSpeakButton();
 setupCompareMode();
 setupSwipeToClose();
+setupPullToRefresh();
+setupHeroSticky();
 loadCompareState();
 applyAll();
 // Если был активен compare mode перед перезагрузкой — переактивируем

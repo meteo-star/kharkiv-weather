@@ -29,6 +29,13 @@
 </head>
 <body class="app-bootstrap">
 
+<!-- Pull-to-refresh indicator: появляется при свайпе вниз с верха страницы.
+     Долгий свайп → принудительное обновление PWA через SW update + reload. -->
+<div id="pullRefreshIndicator" class="pull-refresh" aria-hidden="true">
+  <div class="prr-spinner"></div>
+  <div class="prr-text" id="prrText" data-i18n="pullRefresh.pull">Потяни для обновления</div>
+</div>
+
 <h2 class="sr-only">Прогноз погоды для Харькова с переключателем источников</h2>
 
 <div class="particle" style="left:5%;animation:float-zigzag 21s linear 7s infinite;background:rgba(94,234,212,0.4);box-shadow:0 0 10px rgba(94,234,212,0.6)"></div>
