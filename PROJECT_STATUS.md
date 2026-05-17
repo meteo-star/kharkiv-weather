@@ -3,14 +3,18 @@
 > Документ для продолжения работы в новом чате с Claude Code.
 > Содержит актуальное состояние проекта, что уже сделано, что осталось.
 >
-> **Дата обновления:** 17 мая 2026
-> **Текущая версия:** v1.21.3
+> **Дата обновления:** 18 мая 2026
+> **Текущая версия:** v1.23.0
 > **Статус фаз А–Л:** ✅ закрыты (см. раздел 5)
 > **Статус фазы М (Модуляризация):** ✅ закрыта (v1.16, v1.17)
 > **Статус фазы Н (Perf + Compare Mode + alerts):** ✅ закрыта (v1.18, v1.19)
 > **Статус фазы О (PWA force-update + sticky hero):** ✅ закрыта (v1.20)
 > **Статус фазы П (Glass scrollbar + светлая тема + 8 hero-фото):** ✅ закрыта (v1.20.5, v1.21.0 → v1.21.3)
+> **Статус фазы Б (Telegram-бот + Cloudflare Worker):** ✅ закрыта (v1.22.0 → v1.23.0)
 > **Live URL:** https://meteo-star.github.io/kharkiv-weather/
+> **Admin URL:** https://meteo-star.github.io/kharkiv-weather/admin.html
+> **Bot:** [@MeteoStarBot](https://t.me/MeteoStarBot)
+> **Worker:** https://meteo-star-bot.stanislav-perec.workers.dev
 > **GitHub:** https://github.com/meteo-star/kharkiv-weather
 
 ---
@@ -311,13 +315,58 @@
 
 ---
 
+### Фаза Б: Telegram-бот на Cloudflare Worker (v1.22.0 → v1.23.0)
+
+✅ **Статус: закрыта полностью** (все 5 подфаз Б1–Б5).
+
+Архитектура — отдельный проект `bot/` в репо, деплоится в Cloudflare Workers (free tier):
+
+```
+Telegram ──webhook──▶ Cloudflare Worker (src/index.js)
+                       │
+                       ├─ KV: SUBSCRIPTIONS  (sub:<chat_id> → подписка)
+                       ├─ KV: PAIRING        (pair:<code> → chatId, TTL 10 мин)
+                       ├─ KV: STATS          (stats:<YYYY-MM-DD> → счётчики, TTL 90 дней)
+                       ├─ Secrets: TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, ADMIN_TOKEN
+                       └─ Cron: */30 * * * * → runCronCheck()
+
+Сайт meteo-star.github.io ──CORS──▶ Worker /api/* endpoints
+                                     - /api/pair-create
+                                     - /api/pair-poll
+                                     - /api/rules-get
+                                     - /api/rules-set
+                                     - /api/unpair
+                                     - /api/admin/* (защищены X-Admin-Token)
+```
+
+| Шаг | Tag | Что |
+|---|---|---|
+| Б1 | `v1.22.0` | **MVP бот.** Скелет в `bot/`: wrangler.toml (account_id, KV bindings, cron), package.json (wrangler dev), src/index.js (~400 строк MVP). 5 user-команд: `/start`, `/help`, `/status`, `/location <город>`, `/stop`. 6 admin-команд: `/admin_stats`, `/admin_list`, `/admin_broadcast`, `/admin_ban`/`unban`, `/admin_test`. Webhook верификация через `X-Telegram-Bot-Api-Secret-Token`. Подписка хранится в KV как `{ chatId, userId, lat, lon, name, lang, rules, lastFired, banned, pairToken, chatType, chatTitle }`. Геокодинг города через Open-Meteo. Все сообщения через `parse_mode: 'HTML'` (Markdown V1 ломался на `_` в `/admin_*` командах). |
+| Б2 | `v1.22.0` | **Cron-логика + 6 типов правил.** `runCronCheck()` каждые 30 мин: list всех `sub:*` ключей в KV, для каждой подписки 1 запрос к Open-Meteo (hourly + daily, 5 дней, `cape`, `lifted_index` для гроз), `evaluateRule()` для каждого правила, проверка cooldown'а из `sub.lastFired[ruleKey]`, отправка через `sendMessage()` если matched. Pause 40мс между сообщениями (Telegram лимит ~30 msg/sec). Типы правил: **temp_below** (12h cooldown), **temp_above** (12h), **rain_soon** (6h, условия: pmm≥0.3 + probability≥60%), **storm_alert** (12h, WMO 95/96/99 ИЛИ CAPE>1500+LI<-2 в 6ч), **dry_streak** (24h, осадки <0.5мм/сутки подряд N дней), **morning_summary** (раз в сутки в окне ±15 мин от заданного времени). Дополнительные admin-команды: `/admin_cron` (ручной запуск), `/admin_addrule`, `/admin_clearrules`, `/admin_cooldowns` (показывает когда сработает каждое правило). |
+| Б3 | `v1.22.0` | **HTTP API + UI на сайте.** Pairing flow: сайт генерит 6-значный код → POST `/api/pair-create` → юзер пишет `/pair 123456` в боте → Worker генерит 32-hex `pairToken` и обновляет KV PAIRING → сайт polling'ит `/api/pair-poll` каждую секунду первые 30 сек, потом 3 сек (ускорено от изначальных 3 сек после фидбэка) → получает `chatId+pairToken+chatTitle` → сохраняет в `localStorage 'kw:telegram:v1'`. Дальше POST `/api/rules-get` и `/api/rules-set` с auth `{ chatId, pairToken }`. На сайте новая секция «🔔 Уведомления» в Settings с 3 pane'ами (Unlinked / Code / Linked), редактор 6 правил с iOS-style toggle и инпутами параметров, кнопка «Отвязать» (POST `/api/unpair`). Стили — отдельный блок в style.css с light-темой через `:root[data-theme="light"]` overrides. CORS whitelist: `meteo-star.github.io`, `localhost:8000`, `localhost:8765`. CSP в index.html обновлён с добавлением `https://meteo-star-bot.stanislav-perec.workers.dev` в `connect-src`. |
+| Б4 | `v1.22.0` → `v1.23.0` | **Веб-админка.** Новые admin endpoints в Worker (`/api/admin/login`, `/list`, `/stats?days=7`, `/broadcast`, `/ban`, `/unban`, `/test`, `/cron`, `/delete-sub`) — все требуют header `X-Admin-Token: <ADMIN_TOKEN>` (загружен через `wrangler secret put`). CORS preflight расширен `x-admin-token` в `Allow-Headers`. Отдельная страница `admin.html` + `admin.js` (без зависимостей) на сайте, не в навигации, помечена `<meta robots="noindex">`. UI: login pane с маскированным input (`-webkit-text-security:disc`), `sessionStorage 'kw:admin-token:v1'` (очищается при закрытии вкладки), 4 stat cards (total/sent/cron/errors), 7-day stats таблица, subscriptions table с badges (BAN / сайт / group), per-row actions (тест/бан/удалить), broadcast form с подтверждением, manual cron trigger. UI dark-only (не наследует тему сайта). |
+| Б5 | `v1.23.0` | **Групповые чаты.** Обработка `new_chat_members` event: когда бота добавляют в группу, `getBotInfo()` (cached) определяет себя в массиве и шлёт приветствие с инструкцией про `/setup`. Новая команда `/setup` — доступна только админу/creator группы (проверка через `getChatMember` API), выдаёт инструкцию связки с сайтом. `/pair` в группе дополнительно проверяет admin-права. Подписка хранит `chatType` ('private' / 'group' / 'supergroup'), `chatTitle`, `initiator` для groups. Ленивая миграция `chatTitle` при любом сообщении в группе. Изменения в UI сайта: `refreshNotifPane()` для группового чата показывает `👥 <chatTitle>` вместо username. В admin.js: для группы показывается `👥 <chatTitle>` (или fallback на `👥 Группа <id>` если миграция ещё не сработала). |
+
+#### Уроки фазы Б
+
+1. **Telegram Markdown V1 vs HTML parse_mode.** В Markdown V1 underscore — это italic. `/admin_stats` ломал парсер из-за непарных `_`. Решение — `parse_mode: 'HTML'` и `<code>...</code>` для команд. HTML более предсказуемо, плюс позволяет `<a href>` для ссылок, не доступных в MD V1.
+2. **Bot privacy mode в группах.** По умолчанию ВКЛ. Бот видит только команды адресованные ему (`/cmd@username`) или с явным mention. Чтобы видеть все сообщения — `@BotFather /mybots → Bot Settings → Group Privacy → Turn off`, потом обязательно ПЕРЕДОБАВИТЬ бота в группу — иначе настройка не применится.
+3. **`from` ≠ `chat` в Telegram update.** В группе `msg.from` это user который написал, `msg.chat` это группа. Если сохранять только `from`, теряется название группы. Нужно хранить `msg.chat.title` отдельно (как `chatTitle`).
+4. **CSP в meta-теге блокирует fetch.** Сайт жёстко whitelistит `connect-src` URL'ы. При добавлении нового бэкенда (Worker) обязательно добавить его в CSP — иначе fetch не пройдёт, ошибка `Refused to connect because it violates the document's Content Security Policy`.
+5. **CORS preflight для custom headers.** Если запрос содержит non-standard header (`X-Admin-Token`), браузер делает preflight OPTIONS request. Сервер должен ответить `Access-Control-Allow-Headers: x-admin-token`. Иначе POST не пойдёт.
+6. **`crypto.getRandomValues()` в Cloudflare Workers** доступен из коробки. Используется для генерации pairToken (16 байт → 32 hex символа), безопаснее `Math.random()`.
+7. **KV cost модель.** Free tier: 100k reads / 1k writes / день. Cron `*/30` × N подписок = N×48 reads/день. На 1000 подписок — 48k reads, в пределах лимита. Writes — только при изменениях rules / lastFired. На запуске бота с 1-100 подписок запас огромный.
+8. **`workers.dev` subdomain** регистрируется ОДИН РАЗ на аккаунт через wrangler login flow. После — все Workers получают URL `<worker-name>.<subdomain>.workers.dev`.
+9. **Cron triggers UTC, не локальное время.** `*/30 * * * *` срабатывает на минутах :00 и :30 UTC. Для morning_summary правила с локальным `rule.hour:rule.minute` нужно вычесть `fc.utcOffsetSec / 60` при сравнении.
+10. **Ленивая миграция данных в KV.** При смене структуры подписки (добавление поля `chatTitle`) старые записи остаются без поля. Вместо batch-миграции — апдейтим лениво при следующем доступе. Стоит +1 write per request, но логика проще и нет блокирующего шага.
+
+---
+
 ## 6. ОСТАЛОСЬ СДЕЛАТЬ
 
-Все фазы А → П закрыты. **Следующее запланированное направление:**
+Все фазы А → Б закрыты. **Бот полностью на ходу.**
 
-1. **Telegram-бот для push-уведомлений** — пользователь = главный админ (детальный план в разделе 12)
-
-Остальной бэклог — раздел 7 (опционально).
+Опциональный бэклог — раздел 7.
 
 ---
 
@@ -391,6 +440,12 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 | `icons/` | PNG-иконки PWA: 192, 512, maskable 192/512, apple-touch 180, favicon 32 |
 | `assets/scenes/` | 8 фото-фонов hero для **dark-темы** (Unsplash CC0, WebP 1600×600, ~217 КБ): day/dawn/dusk/night × clear/cloudy |
 | `assets/scenes/light/` | 8 фото-фонов hero для **light-темы** (Unsplash CC0, WebP 1600×600, ~170 КБ): те же категории, но светлые тона (pastel sunrise / bright sky / golden sunset / blue hour) |
+| `admin.html` + `admin.js` | **Веб-админка** для управления Telegram-ботом. Открывается на `/admin.html`, защищена `ADMIN_TOKEN`. UI: статистика 7 дней, таблица подписок, broadcast, ban/test/delete |
+| `bot/` | **Cloudflare Worker** Telegram-бота. Отдельный проект внутри репо, деплоится в Cloudflare через `npx wrangler deploy` |
+| `bot/wrangler.toml` | Конфиг Worker'а — account_id, KV bindings (SUBSCRIPTIONS / PAIRING / STATS), cron trigger `*/30 * * * *`, ADMIN_USER_ID |
+| `bot/src/index.js` | Весь код Worker'а: webhook handler, 11+ команд, cron-проверка правил, HTTP API для сайта, admin API |
+| `bot/scripts/set-webhook.js` | Утилита регистрации webhook'а у Telegram (интерактивно спрашивает token и secret) |
+| `bot/README.md` | Пошаговая инструкция установки (wrangler login → KV create → secrets put → deploy → setWebhook) |
 | `scripts/gen-icons.py` | Генератор иконок через PIL/Pillow (запускается вручную при изменении дизайна иконки) |
 | `README.md` | Краткое описание проекта (видно на GitHub) |
 | `SECURITY.md` | Контракт безопасности и приватности – все внешние сервисы, что они видят |
@@ -410,7 +465,7 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 
 ---
 
-*Документ обновлён: 17 мая 2026 после серии релизов v1.16 → v1.21.3 (фазы М, Н, О, П закрыты). Главные достижения этой сессии: модуляризация (8500 → 700+1200+6700 строк по 3 файлам), Compare Mode полноценный с dual hero + 10-day sync-скролл, лень-загрузка Chart.js, yielding parsing, Visibility API timers, skeleton screen, алерты экстремальной температуры, sun arc real-time, фиксы inverse search, легенда confidence, pull-to-refresh для принудительного обновления iOS PWA, sticky floating hero card с glass-эффектом, **переключатель темы dark/light/system с тёплой персиково-коралловой палитрой и отдельной серией из 8 светлых hero-фото, переработанный glass-стиль скроллбара, гроза-индикатор с расширенными описаниями уровней риска**. **Следующий шаг: Telegram-бот с админом-собой** (см. раздел 12).*
+*Документ обновлён: 18 мая 2026 после серии релизов v1.16 → v1.23.0 (фазы М, Н, О, П, Б закрыты). Главные достижения этой сессии: модуляризация, Compare Mode, переключатель темы dark/light/system с тёплой персиково-коралловой палитрой и 8 светлыми hero-фото, glass-скроллбар, переработанный гроза-индикатор, **полноценный Telegram-бот на Cloudflare Worker с 6 типами правил и cron-проверкой каждые 30 мин, веб-админка с защитой через ADMIN_TOKEN, поддержка групповых чатов с автоматической миграцией chatTitle**. Бот деплоится в облако и работает 24/7 независимо от ПК.*
 
 ### Заметка по В6
 По итогам обсуждения от прямого WebSocket к Blitzortung отказались (закрытое API, нестабильный handshake, требует прокси). Вместо этого реализован **прогнозный** индикатор грозы на 48ч из Open-Meteo с использованием `weather_code` (95/96/99), `cape` и `lifted_index`. Real-time трекер молний может вернуться отдельной фичей В6.5 через Cloudflare Worker-прокси, если возникнет потребность.
@@ -467,7 +522,12 @@ python -m http.server 8000 --directory "C:\Users\User\projects\kharkiv-weather" 
 
 ---
 
-## 12. СЛЕДУЮЩИЙ ШАГ: Telegram-бот с push-уведомлениями (план разработки)
+## 12. ✅ ВЫПОЛНЕНО: Telegram-бот с push-уведомлениями (фаза Б, v1.22.0 → v1.23.0)
+
+> Реализовано полностью. Описание реализации — см. фазу Б в разделе 5.
+> План ниже сохранён для контекста.
+
+### План реализации (исторический)
 
 **Что хочет пользователь:** Telegram-бот рассылающий уведомления о настроенных погодных событиях. **Пользователь — главный админ** с полным контролем.
 
