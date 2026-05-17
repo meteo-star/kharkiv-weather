@@ -86,7 +86,7 @@
         <span class="sep">·</span>
         <span class="val" id="chipWind">м/с</span>
       </button>
-      <div class="source-indicator" id="sourceIndicator">
+      <div class="source-indicator" id="sourceIndicator" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="sourceDataModal" title="Открыть карточки источника и точности" data-i18n-title="sources.openHint">
         <span class="si-dot"></span>
         <div>
           <div class="si-label" data-i18n="header.sourceLabel">Источник данных</div>
@@ -323,70 +323,6 @@
     </div>
   </div>
 
-  <div class="glass accuracy-card" id="accuracyCard">
-    <h2><span class="ac-emoji">🎯</span><span data-i18n="accuracy.title">Точность источников</span></h2>
-    <div class="sub" id="accuracySub" data-i18n="accuracy.subEmpty">Накапливаем сравнение прогноза с фактом для вашей локации</div>
-    <div class="acc-empty" id="accuracyEmpty">
-      <div class="acc-empty-icon">📊</div>
-      <div class="acc-empty-text">
-        <div class="acc-empty-title" data-i18n="accuracy.emptyTitle">Накапливаем данные</div>
-        <div class="acc-empty-progress" id="accuracyProgress">0 / 7</div>
-        <div class="acc-empty-hint" data-i18n="accuracy.emptyHint">Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки</div>
-      </div>
-    </div>
-    <div class="acc-thead" id="accuracyHead" style="display:none">
-      <span></span>
-      <span data-i18n="accuracy.colModel">Модель</span>
-      <span data-i18n="accuracy.colScore">Композитная точность</span>
-      <span class="acth-r" data-i18n="accuracy.colTemp">°C</span>
-      <span class="acth-r" data-i18n="accuracy.colPrecip">%осад</span>
-    </div>
-    <div class="acc-table" id="accuracyTable" style="display:none"></div>
-    <div class="acc-legend" id="accuracyLegend" style="display:none">
-      <span class="al-item"><span class="al-sw q1"></span><span data-i18n="accuracy.legendQ1">отлично</span></span>
-      <span class="al-item"><span class="al-sw q2"></span><span data-i18n="accuracy.legendQ2">хорошо</span></span>
-      <span class="al-item"><span class="al-sw q3"></span><span data-i18n="accuracy.legendQ3">средне</span></span>
-      <span class="al-item"><span class="al-sw q4"></span><span data-i18n="accuracy.legendQ4">слабо</span></span>
-    </div>
-  </div>
-
-  <!-- SOURCES CARD with picker -->
-  <div class="glass sources-card">
-    <div class="card-title">
-      <div>
-        <h2 data-i18n="sources.title">Источник прогноза</h2>
-        <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 7 моделям</div>
-      </div>
-      <div class="confidence-chip" id="confidenceChip" style="display:none" title="">
-        <span class="cc-dot"></span>
-        <span class="cc-label" data-i18n="confidence.label">Согласие моделей</span>
-        <span class="cc-val" id="confidenceVal">—</span>
-        <span class="cc-status" id="confidenceStatus">—</span>
-      </div>
-    </div>
-
-    <button class="main-source-btn active" id="mainSrcBtn" data-source="avg">
-      <div class="msb-left">
-        <div class="msb-icon">
-          <svg width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="11" cy="13" r="7" fill="#00d4ff" opacity="0.55"/>
-            <circle cx="21" cy="13" r="7" fill="#a78bfa" opacity="0.55"/>
-            <circle cx="16" cy="20" r="7" fill="#5eead4" opacity="0.55"/>
-          </svg>
-        </div>
-        <div class="msb-text">
-          <div class="msb-title" data-i18n="sources.avgTitle">Среднее по всем сервисам</div>
-          <div class="msb-sub" data-i18n="sources.avgSub">Агрегация 7 моделей · ансамблевый прогноз</div>
-        </div>
-      </div>
-      <span class="msb-arrow">→</span>
-      <span class="msb-check">✓</span>
-    </button>
-
-    <div class="sources-divider" data-i18n="sources.dividerOr">или конкретный источник</div>
-    <div class="sources-grid" id="sourcesGrid"></div>
-  </div>
-
   <div class="glass footer-info">
     <div class="left" id="clockLine">обновлено: 23:10:42 UTC+3 · v0.4 prototype</div>
     <button class="btn-refresh" id="btnRefresh" type="button">
@@ -447,6 +383,83 @@
 
     <div class="city-list-header" id="cityListHeader" data-i18n="city.list.popular">Популярные города Украины</div>
     <div class="city-list" id="cityList" role="listbox" aria-label="Список городов" data-i18n-aria="city.list.aria"></div>
+  </div>
+</div>
+
+<!-- Source data modal: содержит карточки "Источник прогноза" и "Точность источников" -->
+<div class="modal-backdrop" id="sourceDataModal" role="dialog" aria-modal="true" aria-labelledby="sourceDataModalTitle">
+  <div class="modal source-data-modal">
+    <div class="swipe-handle" aria-hidden="true"></div>
+    <button class="modal-close" id="sourceDataModalClose" aria-label="Закрыть" data-i18n-aria="modal.closeAria">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-header">
+      <div class="modal-day-label" data-i18n="header.sourceLabel">Источник данных</div>
+      <h2 class="modal-day-title" id="sourceDataModalTitle" data-i18n="sources.title">Источник прогноза</h2>
+    </div>
+
+    <div class="glass sources-card">
+      <div class="card-title">
+        <div>
+          <h2 data-i18n="sources.title">Источник прогноза</h2>
+          <div class="sources-sub" data-i18n="sources.sub">Выбери источник или используй среднее по всем 7 моделям</div>
+        </div>
+        <div class="confidence-chip" id="confidenceChip" style="display:none" title="">
+          <span class="cc-dot"></span>
+          <span class="cc-label" data-i18n="confidence.label">Согласие моделей</span>
+          <span class="cc-val" id="confidenceVal">—</span>
+          <span class="cc-status" id="confidenceStatus">—</span>
+        </div>
+      </div>
+
+      <button class="main-source-btn active" id="mainSrcBtn" data-source="avg">
+        <div class="msb-left">
+          <div class="msb-icon">
+            <svg width="28" height="28" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="11" cy="13" r="7" fill="#00d4ff" opacity="0.55"/>
+              <circle cx="21" cy="13" r="7" fill="#a78bfa" opacity="0.55"/>
+              <circle cx="16" cy="20" r="7" fill="#5eead4" opacity="0.55"/>
+            </svg>
+          </div>
+          <div class="msb-text">
+            <div class="msb-title" data-i18n="sources.avgTitle">Среднее по всем сервисам</div>
+            <div class="msb-sub" data-i18n="sources.avgSub">Агрегация 7 моделей · ансамблевый прогноз</div>
+          </div>
+        </div>
+        <span class="msb-arrow">→</span>
+        <span class="msb-check">✓</span>
+      </button>
+
+      <div class="sources-divider" data-i18n="sources.dividerOr">или конкретный источник</div>
+      <div class="sources-grid" id="sourcesGrid"></div>
+    </div>
+
+    <div class="glass accuracy-card" id="accuracyCard">
+      <h2><span class="ac-emoji">🎯</span><span data-i18n="accuracy.title">Точность источников</span></h2>
+      <div class="sub" id="accuracySub" data-i18n="accuracy.subEmpty">Накапливаем сравнение прогноза с фактом для вашей локации</div>
+      <div class="acc-empty" id="accuracyEmpty">
+        <div class="acc-empty-icon">📊</div>
+        <div class="acc-empty-text">
+          <div class="acc-empty-title" data-i18n="accuracy.emptyTitle">Накапливаем данные</div>
+          <div class="acc-empty-progress" id="accuracyProgress">0 / 7</div>
+          <div class="acc-empty-hint" data-i18n="accuracy.emptyHint">Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки</div>
+        </div>
+      </div>
+      <div class="acc-thead" id="accuracyHead" style="display:none">
+        <span></span>
+        <span data-i18n="accuracy.colModel">Модель</span>
+        <span data-i18n="accuracy.colScore">Композитная точность</span>
+        <span class="acth-r" data-i18n="accuracy.colTemp">°C</span>
+        <span class="acth-r" data-i18n="accuracy.colPrecip">%осад</span>
+      </div>
+      <div class="acc-table" id="accuracyTable" style="display:none"></div>
+      <div class="acc-legend" id="accuracyLegend" style="display:none">
+        <span class="al-item"><span class="al-sw q1"></span><span data-i18n="accuracy.legendQ1">отлично</span></span>
+        <span class="al-item"><span class="al-sw q2"></span><span data-i18n="accuracy.legendQ2">хорошо</span></span>
+        <span class="al-item"><span class="al-sw q3"></span><span data-i18n="accuracy.legendQ3">средне</span></span>
+        <span class="al-item"><span class="al-sw q4"></span><span data-i18n="accuracy.legendQ4">слабо</span></span>
+      </div>
+    </div>
   </div>
 </div>
 
