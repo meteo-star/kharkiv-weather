@@ -723,6 +723,65 @@
         <button class="seg-btn" type="button" data-val="1.2"><span class="seg-main" data-i18n="settings.voice.rate.fast">быстро</span></button>
       </div>
     </div>
+
+    <!-- Секция Telegram-уведомлений (фаза Б3) -->
+    <div class="settings-section" id="notifSection">
+      <div class="settings-section-title">
+        <span class="sec-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </span>
+        <span data-i18n="settings.notif.title">Уведомления Telegram</span>
+      </div>
+
+      <!-- Состояние «не связан» — кнопка связать -->
+      <div class="notif-pane" id="notifPaneUnlinked">
+        <p class="notif-hint" data-i18n="settings.notif.intro">Бот @MeteoStarBot будет присылать вам уведомления о погоде по выбранным правилам.</p>
+        <button type="button" class="notif-link-btn" id="notifLinkBtn">
+          <span class="ntb-icon">🔗</span>
+          <span data-i18n="settings.notif.linkBtn">Связать с Telegram</span>
+        </button>
+      </div>
+
+      <!-- Состояние «получи код, введи в бот» -->
+      <div class="notif-pane" id="notifPaneCode" style="display:none">
+        <p class="notif-hint" data-i18n="settings.notif.codeIntro">Открой @MeteoStarBot в Telegram и пришли ему этот код:</p>
+        <div class="notif-code" id="notifCode">000000</div>
+        <p class="notif-hint-small">
+          <span data-i18n="settings.notif.codeCmd">Команда:</span>
+          <code id="notifCodeCmd">/pair 000000</code>
+        </p>
+        <p class="notif-hint-small notif-timer" id="notifTimer">
+          <span data-i18n="settings.notif.timer">Код действителен</span> <span id="notifTimerValue">10:00</span>
+        </p>
+        <div class="notif-actions">
+          <a class="notif-open-btn" id="notifOpenBot" href="https://t.me/MeteoStarBot" target="_blank" rel="noopener">
+            <span data-i18n="settings.notif.openBot">Открыть бота</span>
+          </a>
+          <button type="button" class="notif-cancel-btn" id="notifCancelBtn" data-i18n="settings.notif.cancel">Отменить</button>
+        </div>
+      </div>
+
+      <!-- Состояние «связан» — редактор правил -->
+      <div class="notif-pane" id="notifPaneLinked" style="display:none">
+        <div class="notif-status">
+          <span class="ns-icon">✅</span>
+          <div class="ns-info">
+            <div class="ns-title" data-i18n="settings.notif.linkedTitle">Связано с Telegram</div>
+            <div class="ns-sub" id="notifLinkedName">—</div>
+          </div>
+          <button type="button" class="notif-unlink-btn" id="notifUnlinkBtn" data-i18n="settings.notif.unlink">Отвязать</button>
+        </div>
+
+        <div class="rule-list" id="ruleList">
+          <!-- Сюда js рендерит правила -->
+        </div>
+
+        <button type="button" class="notif-save-btn" id="notifSaveBtn">
+          <span data-i18n="settings.notif.save">Сохранить правила</span>
+        </button>
+        <div class="notif-save-status" id="notifSaveStatus"></div>
+      </div>
+    </div>
   </div>
 </div>
 

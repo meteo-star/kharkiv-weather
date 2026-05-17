@@ -265,6 +265,17 @@ const I18N = {
     'settings.voice.rate.slow': 'медленно',
     'settings.voice.rate.normal': 'норма',
     'settings.voice.rate.fast': 'быстро',
+    'settings.notif.title': 'Уведомления Telegram',
+    'settings.notif.intro': 'Бот @MeteoStarBot будет присылать вам уведомления о погоде по выбранным правилам.',
+    'settings.notif.linkBtn': 'Связать с Telegram',
+    'settings.notif.codeIntro': 'Открой @MeteoStarBot в Telegram и пришли ему этот код:',
+    'settings.notif.codeCmd': 'Команда:',
+    'settings.notif.timer': 'Код действителен',
+    'settings.notif.openBot': 'Открыть бота',
+    'settings.notif.cancel': 'Отменить',
+    'settings.notif.linkedTitle': 'Связано с Telegram',
+    'settings.notif.unlink': 'Отвязать',
+    'settings.notif.save': 'Сохранить правила',
     'footer.updated': 'обновлено в {time}',
     'modal.closeAria': 'Закрыть',
     'modal.day.forecast': 'Прогноз',
@@ -7873,6 +7884,316 @@ function setupSwipeToClose() {
     { scrollableSelector: '.pdm-scroll' });
 }
 
+/* ============================================
+   TELEGRAM NOTIFICATIONS (фаза Б3)
+   Связка с ботом + редактор правил
+   ============================================ */
+const BOT_API_BASE = 'https://meteo-star-bot.stanislav-perec.workers.dev';
+const BOT_TG_LINK = 'https://t.me/MeteoStarBot';
+const NOTIF_STORAGE_KEY = 'kw:telegram:v1';
+
+const RULE_DEFS = [
+  { type: 'rain_soon',       icon: '🌧', defaults: { windowHours: 3 },
+    input: { field: 'windowHours', min: 1, max: 24, unit: 'ч' },
+    name: 'Дождь в ближайшие',
+    desc: 'Уведомить если ожидается осадки >0.3 мм/ч и вероятность >60%' },
+  { type: 'storm_alert',     icon: '⚡', defaults: {},
+    input: null,
+    name: 'Гроза в ближайшие 6 часов',
+    desc: 'Алерт при weather_code 95/96/99 или CAPE>1500 + LI<-2' },
+  { type: 'temp_below',      icon: '🥶', defaults: { threshold: 0 },
+    input: { field: 'threshold', min: -40, max: 40, unit: '°C' },
+    name: 'Температура ниже',
+    desc: 'Минимум по прогнозу на ближайшие 12 часов' },
+  { type: 'temp_above',      icon: '🥵', defaults: { threshold: 30 },
+    input: { field: 'threshold', min: 0, max: 50, unit: '°C' },
+    name: 'Температура выше',
+    desc: 'Максимум по прогнозу на ближайшие 12 часов' },
+  { type: 'dry_streak',      icon: '☀',  defaults: { days: 3 },
+    input: { field: 'days', min: 1, max: 14, unit: 'дн' },
+    name: 'Дней без дождя подряд',
+    desc: 'Алерт когда подряд N+ дней с осадками <0.5 мм/сутки' },
+  { type: 'morning_summary', icon: '🌅', defaults: { hour: 7, minute: 0 },
+    input: { field: 'time', isTime: true },
+    name: 'Утренняя сводка',
+    desc: 'Ежедневная сводка погоды в указанное время' }
+];
+
+function loadTelegramState() {
+  try {
+    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (s && typeof s.chatId !== 'undefined' && s.pairToken) return s;
+    return null;
+  } catch (e) { return null; }
+}
+function saveTelegramState(s) {
+  try { localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify(s)); } catch (e) {}
+}
+function clearTelegramState() {
+  try { localStorage.removeItem(NOTIF_STORAGE_KEY); } catch (e) {}
+}
+
+// Текущее состояние формы (правил), копия для редактирования
+let _notifEditing = { rules: [], dirty: false };
+let _notifPollTimer = null;
+let _notifTimerInterval = null;
+let _notifPollCode = null;
+
+function setupNotifSection() {
+  const linkBtn   = document.getElementById('notifLinkBtn');
+  const cancelBtn = document.getElementById('notifCancelBtn');
+  const unlinkBtn = document.getElementById('notifUnlinkBtn');
+  const saveBtn   = document.getElementById('notifSaveBtn');
+  if (!linkBtn) return;
+  linkBtn.addEventListener('click', startPairing);
+  cancelBtn.addEventListener('click', cancelPairing);
+  unlinkBtn.addEventListener('click', unlinkTelegram);
+  saveBtn.addEventListener('click', saveNotifRules);
+  refreshNotifPane();
+}
+
+function refreshNotifPane() {
+  const tg = loadTelegramState();
+  const paneU = document.getElementById('notifPaneUnlinked');
+  const paneC = document.getElementById('notifPaneCode');
+  const paneL = document.getElementById('notifPaneLinked');
+  if (tg) {
+    paneU.style.display = 'none';
+    paneC.style.display = 'none';
+    paneL.style.display = 'block';
+    document.getElementById('notifLinkedName').textContent = `${tg.firstName || tg.username || 'chat'} · ${tg.name || ''}`;
+    fetchAndRenderRules(tg);
+  } else {
+    paneU.style.display = 'block';
+    paneC.style.display = 'none';
+    paneL.style.display = 'none';
+  }
+}
+
+async function startPairing() {
+  // Генерим 6-значный код
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  _notifPollCode = code;
+  try {
+    const r = await fetch(`${BOT_API_BASE}/api/pair-create`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    if (!r.ok) throw new Error('pair-create failed');
+
+    document.getElementById('notifPaneUnlinked').style.display = 'none';
+    document.getElementById('notifPaneCode').style.display = 'block';
+    document.getElementById('notifCode').textContent = code;
+    document.getElementById('notifCodeCmd').textContent = `/pair ${code}`;
+    document.getElementById('notifOpenBot').href = BOT_TG_LINK;
+
+    // Таймер обратного отсчёта (10 минут)
+    let secondsLeft = 600;
+    const tEl = document.getElementById('notifTimerValue');
+    tEl.textContent = '10:00';
+    if (_notifTimerInterval) clearInterval(_notifTimerInterval);
+    _notifTimerInterval = setInterval(() => {
+      secondsLeft--;
+      if (secondsLeft <= 0) {
+        cancelPairing();
+        return;
+      }
+      const m = Math.floor(secondsLeft / 60);
+      const s = secondsLeft % 60;
+      tEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    }, 1000);
+
+    // Polling каждые 3 секунды
+    if (_notifPollTimer) clearInterval(_notifPollTimer);
+    _notifPollTimer = setInterval(() => pollPairing(code), 3000);
+  } catch (e) {
+    console.error('pair start err:', e);
+    alert('Не удалось связаться с ботом. Попробуй позже.');
+  }
+}
+
+function cancelPairing() {
+  if (_notifPollTimer) { clearInterval(_notifPollTimer); _notifPollTimer = null; }
+  if (_notifTimerInterval) { clearInterval(_notifTimerInterval); _notifTimerInterval = null; }
+  _notifPollCode = null;
+  refreshNotifPane();
+}
+
+async function pollPairing(code) {
+  try {
+    const r = await fetch(`${BOT_API_BASE}/api/pair-poll?code=${code}`);
+    if (!r.ok) {
+      if (r.status === 404) {
+        cancelPairing();
+        alert('Код истёк или не найден');
+      }
+      return;
+    }
+    const data = await r.json();
+    if (data.status === 'linked') {
+      // Готово!
+      clearInterval(_notifPollTimer); _notifPollTimer = null;
+      clearInterval(_notifTimerInterval); _notifTimerInterval = null;
+      _notifPollCode = null;
+      saveTelegramState({
+        chatId: data.chatId,
+        pairToken: data.pairToken,
+        name: data.name,
+        username: data.username,
+        firstName: data.firstName
+      });
+      refreshNotifPane();
+    }
+  } catch (e) {
+    console.error('poll err:', e);
+  }
+}
+
+async function fetchAndRenderRules(tg) {
+  try {
+    const r = await fetch(`${BOT_API_BASE}/api/rules-get`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chatId: tg.chatId, pairToken: tg.pairToken })
+    });
+    if (!r.ok) {
+      if (r.status === 401) {
+        // pairToken недействителен — отвязываем
+        clearTelegramState();
+        refreshNotifPane();
+        return;
+      }
+      return;
+    }
+    const data = await r.json();
+    _notifEditing.rules = Array.isArray(data.rules) ? data.rules : [];
+    _notifEditing.dirty = false;
+    renderRulesUI();
+  } catch (e) { console.error('rules-get err:', e); }
+}
+
+function renderRulesUI() {
+  const container = document.getElementById('ruleList');
+  if (!container) return;
+  container.innerHTML = '';
+  RULE_DEFS.forEach(def => {
+    const existing = _notifEditing.rules.find(r => r && r.type === def.type);
+    const enabled = !!existing;
+    const rule = existing ? { ...existing } : { type: def.type, ...def.defaults };
+
+    const row = document.createElement('div');
+    row.className = 'rule-row' + (enabled ? ' enabled' : '');
+    row.dataset.type = def.type;
+
+    let inputHtml = '';
+    if (def.input) {
+      if (def.input.isTime) {
+        const h = rule.hour ?? 7;
+        const m = rule.minute ?? 0;
+        inputHtml = `<div class="rule-time">
+          <input class="rule-input" type="number" min="0" max="23" data-field="hour" value="${h}"/>
+          <span>:</span>
+          <input class="rule-input" type="number" min="0" max="59" data-field="minute" value="${String(m).padStart(2,'0')}"/>
+        </div>`;
+      } else {
+        const val = rule[def.input.field];
+        inputHtml = `<div class="rule-time">
+          <input class="rule-input" type="number" min="${def.input.min}" max="${def.input.max}" data-field="${def.input.field}" value="${val}"/>
+          <span>${def.input.unit}</span>
+        </div>`;
+      }
+    }
+
+    row.innerHTML = `
+      <span class="rule-icon">${def.icon}</span>
+      <div class="rule-text">
+        <span class="rule-name">${def.name}</span>
+        <span class="rule-desc">${def.desc}</span>
+      </div>
+      ${inputHtml}
+      <button type="button" class="rule-toggle" aria-pressed="${enabled}"></button>
+    `;
+
+    // Обработчики
+    const toggle = row.querySelector('.rule-toggle');
+    toggle.addEventListener('click', () => {
+      const idx = _notifEditing.rules.findIndex(r => r.type === def.type);
+      if (idx >= 0) {
+        _notifEditing.rules.splice(idx, 1);
+      } else {
+        const newRule = { type: def.type, ...def.defaults };
+        // Применяем текущие значения input'ов если есть
+        row.querySelectorAll('.rule-input').forEach(inp => {
+          const v = parseInt(inp.value, 10);
+          if (Number.isFinite(v)) newRule[inp.dataset.field] = v;
+        });
+        _notifEditing.rules.push(newRule);
+      }
+      _notifEditing.dirty = true;
+      renderRulesUI();
+    });
+
+    row.querySelectorAll('.rule-input').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const r = _notifEditing.rules.find(x => x.type === def.type);
+        if (!r) return;
+        const v = parseInt(inp.value, 10);
+        if (Number.isFinite(v)) {
+          r[inp.dataset.field] = v;
+          _notifEditing.dirty = true;
+        }
+      });
+      // Клик по input не должен toggle'ить
+      inp.addEventListener('click', e => e.stopPropagation());
+    });
+
+    container.appendChild(row);
+  });
+}
+
+async function saveNotifRules() {
+  const tg = loadTelegramState();
+  if (!tg) return;
+  const statusEl = document.getElementById('notifSaveStatus');
+  statusEl.textContent = '⏳ Сохраняю...';
+  statusEl.classList.remove('error');
+  try {
+    const r = await fetch(`${BOT_API_BASE}/api/rules-set`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ chatId: tg.chatId, pairToken: tg.pairToken, rules: _notifEditing.rules })
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    if (!data.ok) throw new Error('save failed');
+    statusEl.textContent = `✅ Сохранено: ${data.count} правил`;
+    _notifEditing.dirty = false;
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+  } catch (e) {
+    statusEl.classList.add('error');
+    statusEl.textContent = `❌ Ошибка: ${e.message}`;
+  }
+}
+
+async function unlinkTelegram() {
+  if (!confirm('Отвязать сайт от бота? Подписка в Telegram останется.')) return;
+  const tg = loadTelegramState();
+  if (tg) {
+    try {
+      await fetch(`${BOT_API_BASE}/api/unpair`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ chatId: tg.chatId, pairToken: tg.pairToken })
+      });
+    } catch (e) {}
+  }
+  clearTelegramState();
+  refreshNotifPane();
+}
+
 // Read settings + location from localStorage, hook up segmented controls, paint everything
 loadSavedSettings();
 applyTheme();
@@ -7897,6 +8218,7 @@ setupCompareMode();
 setupSwipeToClose();
 setupPullToRefresh();
 setupHeroSticky();
+setupNotifSection();
 loadCompareState();
 applyAll();
 // Если был активен compare mode перед перезагрузкой — переактивируем
