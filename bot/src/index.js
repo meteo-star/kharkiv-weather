@@ -1720,7 +1720,7 @@ function buildWindBlock(hourly, s, e) {
   if (maxW < 0.5) return `🌬 Ветер: штиль`;
   const dir = windDirName(dArr[maxIdx]);
   let line = `🌬 Ветер: до <b>${Math.round(maxW)} м/с</b>`;
-  if (gust >= maxW + 2) line += `, порывы <b>${Math.round(gust)}</b>`;
+  if (gust >= maxW + 2) line += `, порывы <b>${Math.round(gust)} м/с</b>`;
   if (dir) line += `, ${dir}`;
   return line;
 }
