@@ -8042,10 +8042,16 @@ function setupHeroSticky() {
   }
   measureOrigin();
 
-  // Гистерезис ~20px — стик и unstuck происходят на разных порогах,
-  // что устраняет дрожание на границе.
-  const HYSTERESIS = 18;
+  // Гистерезис 60px — стик и unstuck происходят на разных порогах.
+  // На ПК (трекпад/мышь с инерцией) маленькие значения дают «дрожание»
+  // от того что пользователь случайно колеблется около границы, плюс
+  // CSS-transition размера hero может частично проигрываться туда-обратно.
+  const HYSTERESIS = 60;
+  // Cooldown — пока идёт CSS-transition (~0.42s) не позволяем повторно
+  // переключать stuck. Защита от агрессивного flicker'а на границе.
+  const SWITCH_COOLDOWN_MS = 380;
   let lastStuck = false;
+  let lastSwitchAt = 0;
 
   function check() {
     // В compare-mode hero скрыт — sticky не нужен
@@ -8067,8 +8073,12 @@ function setupHeroSticky() {
       isStuck = sy >= threshold;
     }
     if (isStuck !== lastStuck) {
+      // Cooldown: если только что переключили — не дёргаем туда-обратно
+      const now = performance.now();
+      if (now - lastSwitchAt < SWITCH_COOLDOWN_MS) return;
       hero.classList.toggle('stuck', isStuck);
       lastStuck = isStuck;
+      lastSwitchAt = now;
     }
   }
 
