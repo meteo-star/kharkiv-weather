@@ -8643,6 +8643,8 @@ async function pollPairing(code) {
 }
 
 async function fetchAndRenderRules(tg) {
+  // Сбрасываем плашку «токен устарел» (она могла быть от предыдущей попытки)
+  showNotifAuthWarning(false);
   try {
     const r = await fetch(`${BOT_API_BASE}/api/rules-get`, {
       method: 'POST',
@@ -8651,12 +8653,16 @@ async function fetchAndRenderRules(tg) {
     });
     if (!r.ok) {
       if (r.status === 401) {
-        // pairToken временно невалиден. НЕ удаляем локально автоматически —
-        // это может быть последствием /login на другом устройстве (там
-        // pairToken обновился, на этом устаревший). Юзер может сам нажать
-        // «Отвязать» в Settings, или повторно подключиться через /login.
-        console.warn('[notif] /api/rules-get вернул 401 — pairToken устарел. Если связка не вернётся — переподключи через /login в боте.');
+        // pairToken невалиден. НЕ удаляем локально, но показываем UI-плашку
+        // с подсказкой и всё равно рендерим редактор правил (юзер увидит
+        // переключатели, но сохранить не сможет, пока не переподключится).
+        showNotifAuthWarning(true);
+      } else {
+        console.warn(`[notif] /api/rules-get HTTP ${r.status}`);
       }
+      _notifEditing.rules = [];
+      _notifEditing.dirty = false;
+      renderRulesUI();
       return;
     }
     const data = await r.json();
@@ -8671,7 +8677,33 @@ async function fetchAndRenderRules(tg) {
     });
     _notifEditing.dirty = false;
     renderRulesUI();
-  } catch (e) { console.error('rules-get err:', e); }
+  } catch (e) {
+    console.error('rules-get err:', e);
+    // Сеть упала — рендерим хотя бы шаблон правил, чтоб UI не был пустым
+    _notifEditing.rules = [];
+    _notifEditing.dirty = false;
+    renderRulesUI();
+  }
+}
+
+// Показать/скрыть предупреждение что связка устарела (после /login на другом
+// устройстве). Создаёт элемент в .notif-pane-linked при первом включении.
+function showNotifAuthWarning(show) {
+  let el = document.getElementById('notifAuthWarning');
+  if (!show) { if (el) el.style.display = 'none'; return; }
+  const pane = document.getElementById('notifPaneLinked');
+  if (!pane) return;
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'notifAuthWarning';
+    el.className = 'notif-auth-warning';
+    el.innerHTML = `⚠ Связка устарела — отправь <code>/login</code> боту и кликни ссылку, чтобы переподключиться. Изменения правил не сохранятся пока связка не обновлена.`;
+    // Вставляем в начало linked-pane (после заголовка)
+    const firstChild = pane.firstElementChild;
+    if (firstChild) pane.insertBefore(el, firstChild.nextSibling);
+    else pane.appendChild(el);
+  }
+  el.style.display = '';
 }
 
 function renderRulesUI() {

@@ -3731,6 +3731,27 @@ body.compare-mode .astro-photo { display:none !important }
 .notif-hint{font-size:12px;color:rgba(232,240,255,0.65);line-height:1.45;margin-bottom:12px}
 .notif-hint-small{font-size:11px;color:rgba(232,240,255,0.55);margin-top:8px;line-height:1.4}
 .notif-hint-small code{font-family:'JetBrains Mono',monospace;background:rgba(0,212,255,0.12);color:#00d4ff;padding:2px 8px;border-radius:6px;border:1px solid rgba(0,212,255,0.25)}
+/* Плашка-предупреждение «связка устарела» (показывается когда /api/rules-get вернул 401) */
+.notif-auth-warning{
+  margin:10px 0 12px;padding:10px 12px;
+  background:rgba(251,191,36,0.10);
+  border:1px solid rgba(251,191,36,0.45);
+  border-radius:10px;
+  color:#fde68a;font-size:12px;line-height:1.4;
+}
+.notif-auth-warning code{
+  font-family:'JetBrains Mono',monospace;
+  background:rgba(0,0,0,0.25);
+  color:#fde68a;padding:1px 6px;border-radius:5px;
+}
+:root[data-theme="light"] .notif-auth-warning{
+  background:rgba(217,96,47,0.10) !important;
+  border-color:rgba(217,96,47,0.5) !important;
+  color:#7c2d12 !important;
+}
+:root[data-theme="light"] .notif-auth-warning code{
+  background:#fff7ed !important;color:#7c2d12 !important;
+}
 /* Кнопка-копирование команды /pair в буфер обмена */
 .notif-copy-btn{
   display:inline-flex;align-items:center;gap:8px;
