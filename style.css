@@ -3731,6 +3731,32 @@ body.compare-mode .astro-photo { display:none !important }
 .notif-hint{font-size:12px;color:rgba(232,240,255,0.65);line-height:1.45;margin-bottom:12px}
 .notif-hint-small{font-size:11px;color:rgba(232,240,255,0.55);margin-top:8px;line-height:1.4}
 .notif-hint-small code{font-family:'JetBrains Mono',monospace;background:rgba(0,212,255,0.12);color:#00d4ff;padding:2px 8px;border-radius:6px;border:1px solid rgba(0,212,255,0.25)}
+/* Кнопка-копирование команды /pair в буфер обмена */
+.notif-copy-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  position:relative;
+  margin-left:6px;padding:4px 10px 4px 10px;
+  background:rgba(0,212,255,0.12);
+  border:1px solid rgba(0,212,255,0.35);
+  border-radius:8px;
+  font-family:inherit;cursor:pointer;
+  transition:all 0.18s;
+  vertical-align:middle;
+}
+.notif-copy-btn:hover{background:rgba(0,212,255,0.2);border-color:rgba(0,212,255,0.55);transform:translateY(-1px)}
+.notif-copy-btn:active{transform:translateY(0)}
+.notif-copy-btn code{background:transparent !important;border:none !important;padding:0 !important;color:#00d4ff;font-size:12px}
+.notif-copy-btn .ncb-icon{font-size:13px;opacity:0.85;line-height:1}
+.notif-copy-btn .ncb-toast{
+  position:absolute;left:50%;top:-28px;transform:translateX(-50%);
+  background:#22c55e;color:#fff;
+  font-size:10.5px;font-weight:600;
+  padding:3px 8px;border-radius:6px;
+  white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.2s, transform 0.2s;
+}
+.notif-copy-btn .ncb-toast.show{opacity:1;transform:translateX(-50%) translateY(-2px)}
 .notif-timer{font-family:'JetBrains Mono',monospace;color:rgba(232,240,255,0.5);font-size:11px}
 
 .notif-link-btn{
@@ -3939,6 +3965,15 @@ body.compare-mode .astro-photo { display:none !important }
 :root[data-theme="light"] .notif-hint{color:rgba(45,26,16,0.7)}
 :root[data-theme="light"] .notif-hint-small{color:rgba(45,26,16,0.6)}
 :root[data-theme="light"] .notif-hint-small code{background:rgba(192,83,42,0.14);color:#c0532a;border-color:rgba(192,83,42,0.32)}
+:root[data-theme="light"] .notif-copy-btn{
+  background:rgba(217,96,47,0.14) !important;
+  border-color:rgba(217,96,47,0.45) !important;
+}
+:root[data-theme="light"] .notif-copy-btn:hover{
+  background:rgba(217,96,47,0.22) !important;
+  border-color:#d9602f !important;
+}
+:root[data-theme="light"] .notif-copy-btn code{color:#a8451c !important}
 :root[data-theme="light"] .notif-link-btn{
   background:linear-gradient(135deg, rgba(0,168,232,0.22) 0%, rgba(167,139,250,0.18) 100%) !important;
   border:1.5px solid rgba(0,168,232,0.55) !important;

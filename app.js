@@ -8531,6 +8531,38 @@ async function startPairing() {
     document.getElementById('notifPaneCode').style.display = 'block';
     document.getElementById('notifCode').textContent = code;
     document.getElementById('notifCodeCmd').textContent = `/pair ${code}`;
+    // Кнопка-копирование команды в буфер обмена
+    const copyBtn = document.getElementById('notifCopyCmdBtn');
+    const toast = document.getElementById('notifCopyToast');
+    if (copyBtn && !copyBtn._wired) {
+      copyBtn._wired = true;
+      copyBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const text = document.getElementById('notifCodeCmd').textContent || '';
+        let ok = false;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(text);
+            ok = true;
+          } else {
+            // Fallback для старых браузеров / небезопасного контекста (file://)
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
+        } catch (_) { ok = false; }
+        if (toast) {
+          toast.textContent = ok ? 'Скопировано ✓' : 'Не удалось скопировать';
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 1400);
+        }
+      });
+    }
     document.getElementById('notifOpenBot').href = BOT_TG_LINK;
 
     // Таймер обратного отсчёта (10 минут)
