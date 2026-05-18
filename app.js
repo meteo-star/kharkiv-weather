@@ -2257,7 +2257,11 @@ function renderHeroScene(today) {
   const auto = computeTimeOfDay(today).tod;
   const tod = window.__heroTodOverride || auto;
   if (heroEl.dataset.tod !== tod) heroEl.dataset.tod = tod;
-  const grp = window.__heroCondOverride || conditionGroup(today.condition);
+  // Фон, частицы и group берём по СОСТОЯНИЮ ТЕКУЩЕГО ЧАСА, а не по дневному агрегату.
+  // Иначе hero весь день показывает «дождь», если он ожидается в 13:00.
+  const _nowHForScene = (today.hourly && today.hourly[NOW_HOUR]) || null;
+  const _hourCondForScene = hourSurfaceCondition(_nowHForScene, today.condition);
+  const grp = window.__heroCondOverride || conditionGroup(_hourCondForScene);
   if (heroEl.dataset.cond !== grp) heroEl.dataset.cond = grp;
   // В light-теме используем светлую серию фото из assets/scenes/light/.
   // Названия файлов те же — отличается только префикс пути.
@@ -2276,8 +2280,8 @@ function renderHeroScene(today) {
   const mobileMult = isMobile ? 0.6 : 1.0;
   bgEl.dataset.wind = wind;
   bgEl.dataset.intensity = intensity;
-  // Тип частиц
-  const precip = window.__heroPrecipOverride || precipitationType(today.condition);
+  // Тип частиц — тоже от текущего часа: если сейчас сухо, не льём капли.
+  const precip = window.__heroPrecipOverride || precipitationType(_hourCondForScene);
   const mult = INTENSITY_MULT[intensity] * mobileMult;
   const speedMult = INTENSITY_SPEED[intensity];
   let particlesHtml = '';
@@ -2348,11 +2352,13 @@ function renderHeroAndMetrics(forecast) {
   const today = forecast[0];
   const nowH = today.hourly[NOW_HOUR];
   renderHeroScene(today);
-  document.getElementById('heroIcon').innerHTML = weatherIcon(today.condition, 170);
+  // Иконка и текст состояния — для ТЕКУЩЕГО часа, не для всех суток.
+  const hourCond = hourSurfaceCondition(nowH, today.condition);
+  document.getElementById('heroIcon').innerHTML = weatherIcon(hourCond, 170);
 
   document.getElementById('heroTempNum').textContent = fmtTempNum(nowH.t);
   document.getElementById('heroTempUnit').textContent = unitTemp();
-  document.getElementById('heroCondition').textContent = localizeCondLabel(today.condLabel);
+  document.getElementById('heroCondition').textContent = localizeCondLabel(hourCondToLabelRu(hourCond));
 
   // Feels-like: предпочитаем apparent_temperature из API, fallback на грубую формулу
   const feelsC = (nowH.feels != null) ? nowH.feels : (nowH.t - Math.max(0, nowH.w - 2) * 0.5);
@@ -6624,6 +6630,37 @@ function codeToCondition(code) {
   if (code >= 85 && code <= 86) return 'snow';
   if (code >= 95 && code <= 99) return 'thunderstorm';
   return 'cloudy';
+}
+
+// Condition «прямо сейчас» для hero-блока — берёт состояние из hourly[NOW_HOUR]
+// (а не дневной агрегат today.condition, который показывает worst-case за сутки).
+// Дополнительно: если weather_code указывает на осадки, но фактические pmm ~0 —
+// снижаем до cloudy/partly-cloudy (Open-Meteo иногда оставляет «мокрый» код в часах
+// с нулевой интенсивностью осадков — вероятность есть, реализации нет).
+function hourSurfaceCondition(nowH, fallback) {
+  if (!nowH) return fallback || 'cloudy';
+  let c = (nowH.wc != null) ? codeToCondition(nowH.wc) : (nowH.c || fallback || 'cloudy');
+  const isWet = (c === 'rain' || c === 'heavy-rain' || c === 'snow' || c === 'thunderstorm');
+  if (isWet && (nowH.pmm == null || nowH.pmm < 0.1)) {
+    return (nowH.cl != null && nowH.cl < 60) ? 'partly-cloudy' : 'cloudy';
+  }
+  return c;
+}
+
+// hour-based condition → русский condLabel (для hero, чтобы текст совпал с иконкой)
+function hourCondToLabelRu(cond) {
+  switch (cond) {
+    case 'clear':         return 'Ясно';
+    case 'partly-cloudy': return 'Переменная облачность';
+    case 'cloudy':        return 'Облачно';
+    case 'overcast':      return 'Пасмурно';
+    case 'fog':           return 'Туман';
+    case 'rain':          return 'Дождь';
+    case 'heavy-rain':    return 'Сильный дождь';
+    case 'snow':          return 'Снег';
+    case 'thunderstorm':  return 'Гроза';
+    default:              return 'Облачно';
+  }
 }
 
 // WMO weather_code → русский condLabel (совместим с COND_LABEL_TO_KEY локализатором)
