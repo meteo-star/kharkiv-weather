@@ -226,7 +226,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
    РєРѕРЅС‚РµРЅС‚ РёРґС‘С‚ РїРѕРґ РµС‘ РѕСЃРЅРѕРІРЅРѕРµ С‚РµР»Рѕ (СЃ blur С‡РµСЂРµР· .glass backdrop-filter)
    Рё РІРёРґРµРЅ С‡РµСЂРµР· СЃРєСЂСѓРіР»С‘РЅРЅС‹Рµ СѓРіРѕР»РєРё РєР°Рє РЅРѕСЂРјР°Р»СЊРЅР°СЏ С‡Р°СЃС‚СЊ СЃС‚СЂР°РЅРёС†С‹. */
 .hero.stuck{
-  padding:14px 22px;
+  padding:20px 24px;
   min-height:0;
   /* РЈСЃРёР»РµРЅРЅС‹Р№ glass вЂ” backdrop-filter СЃ Р±РѕР»СЊС€РёРј blur РґРµР»Р°РµС‚ В«СЃС‚РµРєР»СЏРЅРЅС‹Р№В»
      СЌС„С„РµРєС‚ СЃРёР»СЊРЅРµРµ, СЃРєСЂРѕР»Р»СЏС‰РёР№СЃСЏ РєРѕРЅС‚РµРЅС‚ РїРѕРґ РєР°СЂС‚РѕС‡РєРѕР№ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РјСЏРіС‡Рµ.
@@ -245,9 +245,9 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero.stuck .hero-feels,
 .hero.stuck .hero-source-note{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
 .hero.stuck .hero-temp{font-size:0;line-height:1;margin:0}
-.hero.stuck .hero-temp-num{font-size:38px}
-.hero.stuck .hero-temp-unit{font-size:18px}
-.hero.stuck .hero-condition{font-size:13px;margin-top:2px}
+.hero.stuck .hero-temp-num{font-size:50px;line-height:1.05}
+.hero.stuck .hero-temp-unit{font-size:24px}
+.hero.stuck .hero-condition{font-size:15px;margin-top:4px}
 .hero-scene,.hero-overlay,.hero-label,.hero-feels,.hero-source-note,.hero-temp-num,.hero-temp-unit,.hero-condition{transition:opacity 0.4s ease,max-height 0.42s cubic-bezier(0.4,0,0.2,1),margin 0.42s cubic-bezier(0.4,0,0.2,1),font-size 0.42s cubic-bezier(0.4,0,0.2,1),background 0.42s ease}
 .hero-scene{position:absolute;inset:0;z-index:0;border-radius:24px;overflow:hidden;background-color:#0a1838;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.6s ease-in-out}
 .hero-overlay{position:absolute;inset:0;z-index:1;border-radius:24px;background:linear-gradient(90deg,rgba(5,10,38,0.78) 0%,rgba(5,10,38,0.55) 35%,rgba(5,10,38,0.22) 70%,rgba(5,10,38,0.05) 100%);pointer-events:none;transition:background 0.6s ease}
@@ -845,7 +845,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   .header{flex-direction:column;align-items:flex-start;gap:10px}
   .hero{padding:22px;grid-template-columns:1fr auto}
   /* Р’ stuck вЂ” РєРѕРјРїР°РєС‚РЅС‹Р№ padding, С€РёСЂРёРЅР° Рё СЃРєСЂСѓРіР»С‘РЅРЅС‹Рµ СѓРіР»С‹ РѕСЃС‚Р°СЋС‚СЃСЏ РєР°Рє Сѓ РѕР±С‹С‡РЅРѕР№ РєР°СЂС‚РѕС‡РєРё */
-  .hero.stuck{padding:12px 18px}
+  .hero.stuck{padding:16px 20px}
   .weather-icon-3d{width:90px;height:90px;margin-top:0}
   .hero-temp-num{font-size:64px}
   .hero-temp-unit{font-size:22px}
