@@ -7200,44 +7200,26 @@ let ACCURACY_STATE = { stats: {}, sampleSize: 0 };
 // Публичная sync-сводка accuracy с сервера (Worker @meteo-star-bot).
 // Анонимный запрос — возвращает общие данные по координатам, накопленные
 // ботом для всех пользователей этой точки на 0.1° сетке.
-// Локальные records сливаются с серверными (приоритет — записям с actual,
-// при конфликте — серверные «выигрывают» как авторитетный источник).
-// Кэш в localStorage чтобы не блокировать UI при следующих refreshForecast.
-const ACCURACY_SERVER_TTL_MS = 30 * 60 * 1000; // 30 минут
-function accServerCacheKey(lat, lon) {
-  const [a, b] = accLatLon(lat, lon);
-  return `kw:accuracy-server:${a.toFixed(1)}_${b.toFixed(1)}:v1`;
-}
+// При успешном ответе ПОЛНОСТЬЮ заменяет локальные данные серверными —
+// все устройства в одной точке видят одинаковый рейтинг. Локальное
+// накопление через updateAccuracyData() остаётся как fallback на
+// случай недоступности бота (если ответ не пришёл — локальные не трогаем).
 async function fetchAccuracyFromServer(lat, lon) {
-  // Throttle: если недавно тянули — не дёргаем ещё раз
-  const cacheKey = accServerCacheKey(lat, lon);
-  try {
-    const raw = localStorage.getItem(cacheKey);
-    if (raw) {
-      const obj = JSON.parse(raw);
-      if (obj && obj.fetchedAt && (Date.now() - obj.fetchedAt < ACCURACY_SERVER_TTL_MS)) {
-        return;
-      }
-    }
-  } catch (e) {}
   try {
     const r = await fetch(`${BOT_API_BASE}/api/accuracy?lat=${lat.toFixed(2)}&lon=${lon.toFixed(2)}`);
     if (!r.ok) return;
     const data = await r.json();
     if (!data.ok || !Array.isArray(data.records)) return;
-    // Кэшируем ответ + метку «сервер ответил»
-    try { localStorage.setItem(cacheKey, JSON.stringify({ fetchedAt: Date.now(), serverRecords: data.records })); } catch (e) {}
-    // ПОЛНАЯ ЗАМЕНА локальных данных серверными — сервер авторитет.
-    // Каждое устройство в одной точке (на 0.1° сетке) видит одинаковый рейтинг.
-    // Локальное накопление осталось как fallback на случай недоступности бота.
+    // Replace ВСЕГДА (даже если records пустой) — сервер авторитет.
+    // Если у сервера нет данных, значит и UI должен показать «накапливаем»,
+    // а не локальный остаточный счётчик прошлых сессий.
     const converted = data.records.map(convertServerRecord).filter(Boolean);
     saveAccuracyData(lat, lon, { records: converted });
     ACCURACY_STATE = computeAccuracyStats(converted);
-    // Перерисовать UI элементы, где это видно
     if (typeof renderAccuracy === 'function') renderAccuracy();
     if (typeof renderHeroAccuracyHint === 'function') renderHeroAccuracyHint();
   } catch (e) {
-    // тихо: бот может быть недоступен — это OK, локальные данные всё равно работают
+    // тихо: бот недоступен — оставляем локальные как fallback
   }
 }
 
