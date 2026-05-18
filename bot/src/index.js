@@ -163,6 +163,7 @@ async function processUpdate(update, env) {
         case '/admin_unban':     return handleAdminUnban(env, chatId, args);
         case '/admin_test':      return handleAdminTest(env, chatId, args);
         case '/admin_cron':      return handleAdminCron(env, chatId);
+        case '/admin_summary_test': return handleAdminSummaryTest(env, chatId, args);
         case '/admin_addrule':   return handleAdminAddRule(env, chatId, args);
         case '/admin_clearrules':return handleAdminClearRules(env, chatId);
         case '/admin_cooldowns': return handleAdminCooldowns(env, chatId, args);
@@ -272,6 +273,7 @@ async function handleHelp(env, chatId, isAdmin) {
       `<code>/admin_unban &lt;chat_id&gt;</code> — разблокировать\n` +
       `<code>/admin_test &lt;chat_id&gt;</code> — отправить тестовое сообщение\n` +
       `<code>/admin_cron</code> — запустить cron-проверку вручную\n` +
+      `<code>/admin_summary_test [base|full|chat_id]</code> — прислать утреннюю сводку прямо сейчас\n` +
       `<code>/admin_addrule &lt;тип&gt; [параметры]</code> — добавить правило себе\n` +
       `<code>/admin_clearrules</code> — удалить все свои правила\n` +
       `<code>/admin_cooldowns [chat_id]</code> — показать когда сработают правила (по умолч. свой)`;
@@ -367,9 +369,29 @@ function formatRule(r) {
     case 'temp_below':       return `🥶 Температура ниже ${r.threshold}°C`;
     case 'temp_above':       return `🥵 Температура выше ${r.threshold}°C`;
     case 'rain_soon':        return `🌧 Дождь в ближайшие ${r.windowHours}ч`;
+    case 'precip_soon': {
+      const parts = [];
+      if (r.watchRain) parts.push('дождь');
+      if (r.watchSnow) parts.push('снег');
+      const what = parts.length ? parts.join(' / ') : 'осадки';
+      return `🌧 Осадки в ближайшие ${r.windowHours}ч (${what})`;
+    }
     case 'storm_alert':      return `⚡ Гроза в 48ч`;
     case 'dry_streak':       return `☀ ${r.days} дней подряд без осадков`;
-    case 'morning_summary':  return `🌅 Сводка утром в ${r.hour}:${String(r.minute || 0).padStart(2,'0')}`;
+    case 'morning_summary': {
+      const time = `${r.hour}:${String(r.minute || 0).padStart(2,'0')}`;
+      const sections = r.sections || {};
+      const flags = [];
+      if (sections.wind)     flags.push('ветер');
+      if (sections.precip)   flags.push('осадки');
+      if (sections.astro)    flags.push('восход/закат');
+      if (sections.storm)    flags.push('гроза');
+      if (sections.feels)    flags.push('ощущения');
+      if (sections.tomorrow) flags.push('завтра');
+      return flags.length
+        ? `🌅 Сводка утром в ${time} (+ ${flags.join(', ')})`
+        : `🌅 Сводка утром в ${time}`;
+    }
     default:                 return `? ${r.type}`;
   }
 }
@@ -661,6 +683,40 @@ async function handleAdminTest(env, chatId, args) {
 
 // Принудительный запуск cron-проверки (для отладки в реальном времени,
 // не дожидаясь следующего */30 минут).
+// /admin_summary_test [base|wind|precip|astro|storm|feels|tomorrow|full|chat_id]
+// Билдит и шлёт утреннюю сводку прямо сейчас, без проверки времени.
+// Без аргумента — full. Если аргумент — chat_id (число), отправляет тому чату с full секциями.
+async function handleAdminSummaryTest(env, chatId, args) {
+  const parts = (args || '').trim().split(/\s+/).filter(Boolean);
+  // Определяем targetChat и mode из аргументов
+  let targetChat = chatId;
+  let mode = 'full';
+  for (const p of parts) {
+    if (/^-?\d+$/.test(p)) targetChat = p;
+    else mode = p.toLowerCase();
+  }
+  const sub = await env.SUBSCRIPTIONS.get(`sub:${targetChat}`, { type: 'json' });
+  if (!sub) return sendMessage(env, chatId, `Подписка ${esc(String(targetChat))} не найдена.`);
+
+  const sections = (mode === 'base')
+    ? {}
+    : (mode === 'full')
+      ? { wind: true, precip: true, astro: true, storm: true, feels: true, tomorrow: true }
+      : { [mode]: true };
+
+  const fc = await fetchWeather(sub.lat, sub.lon);
+  if (!fc) return sendMessage(env, chatId, `Не удалось получить погоду.`);
+
+  const fakeRule = { type: 'morning_summary', hour: 7, minute: 0, sections };
+  const msg = buildMorningSummary(sub, fakeRule, fc);
+  if (!msg) return sendMessage(env, chatId, `Не удалось построить сводку.`);
+
+  await sendMessage(env, targetChat, msg, { parse_mode: 'HTML' });
+  if (String(targetChat) !== String(chatId)) {
+    await sendMessage(env, chatId, `✅ Тестовая сводка (${mode}) отправлена в ${esc(String(targetChat))}.`);
+  }
+}
+
 async function handleAdminCron(env, chatId) {
   await sendMessage(env, chatId, `⏰ Запускаю cron-проверку...`);
   try {
@@ -686,12 +742,13 @@ async function handleAdminAddRule(env, chatId, args) {
   if (parts.length === 0) {
     return sendMessage(env, chatId,
       `Использование:\n` +
-      `<code>/admin_addrule rain_soon 3</code> (часов)\n` +
+      `<code>/admin_addrule rain_soon 3</code> (часов, legacy)\n` +
+      `<code>/admin_addrule precip_soon 3 rain</code> (часов · rain|snow|both)\n` +
       `<code>/admin_addrule temp_below 0</code>\n` +
       `<code>/admin_addrule temp_above 30</code>\n` +
       `<code>/admin_addrule storm_alert</code>\n` +
       `<code>/admin_addrule dry_streak 5</code> (дней)\n` +
-      `<code>/admin_addrule morning_summary 7 30</code> (час минута)`,
+      `<code>/admin_addrule morning_summary 7 30 full</code> (час минута [base|full])`,
       { parse_mode: 'HTML' });
   }
   const [type, p1, p2] = parts;
@@ -704,9 +761,28 @@ async function handleAdminAddRule(env, chatId, args) {
     case 'temp_below':       rule = { type, threshold: Number(p1) }; break;
     case 'temp_above':       rule = { type, threshold: Number(p1) }; break;
     case 'rain_soon':        rule = { type, windowHours: Number(p1) || 3 }; break;
+    case 'precip_soon': {
+      const win = Number(p1) || 3;
+      const mode = (p2 || 'rain').toLowerCase();
+      rule = {
+        type,
+        windowHours: win,
+        watchRain: mode === 'rain' || mode === 'both',
+        watchSnow: mode === 'snow' || mode === 'both'
+      };
+      break;
+    }
     case 'storm_alert':      rule = { type }; break;
     case 'dry_streak':       rule = { type, days: Number(p1) || 3 }; break;
-    case 'morning_summary':  rule = { type, hour: Number(p1) || 7, minute: Number(p2) || 0 }; break;
+    case 'morning_summary': {
+      const mode = (parts[3] || 'base').toLowerCase();
+      const sections = mode === 'full'
+        ? { wind: true, precip: true, astro: true, storm: true, feels: true, tomorrow: true }
+        : undefined;
+      rule = { type, hour: Number(p1) || 7, minute: Number(p2) || 0 };
+      if (sections) rule.sections = sections;
+      break;
+    }
     default: return sendMessage(env, chatId, `Неизвестный тип: ${esc(type)}`);
   }
   sub.rules.push(rule);
@@ -1128,12 +1204,19 @@ function validateRule(r) {
     case 'temp_above':
       return Number.isFinite(Number(r.threshold));
     case 'rain_soon':
+      // legacy — оставляем для обратной совместимости (старые подписки)
       return Number.isFinite(Number(r.windowHours)) && r.windowHours > 0 && r.windowHours <= 48;
+    case 'precip_soon':
+      // Новый тип с подразделами "дождь"/"снег". Хотя бы один должен быть включён.
+      return Number.isFinite(Number(r.windowHours)) && r.windowHours > 0 && r.windowHours <= 48
+        && (r.watchRain === true || r.watchSnow === true);
     case 'storm_alert':
       return true;
     case 'dry_streak':
       return Number.isFinite(Number(r.days)) && r.days > 0 && r.days <= 14;
     case 'morning_summary':
+      // sections — опциональный объект булевых флагов; если не передан, используется базовая сводка.
+      if (r.sections != null && (typeof r.sections !== 'object' || Array.isArray(r.sections))) return false;
       return Number.isFinite(Number(r.hour)) && r.hour >= 0 && r.hour <= 23
         && Number.isFinite(Number(r.minute)) && r.minute >= 0 && r.minute <= 59;
     default: return false;
@@ -1150,6 +1233,7 @@ const COOLDOWNS_MS = {
   temp_below:      12 * 3600 * 1000,
   temp_above:      12 * 3600 * 1000,
   rain_soon:        6 * 3600 * 1000,
+  precip_soon:      6 * 3600 * 1000,
   storm_alert:     12 * 3600 * 1000,
   dry_streak:      24 * 3600 * 1000,
   // morning_summary — особый случай: проверяется по дате, не cooldown
@@ -1205,7 +1289,7 @@ async function runCronCheck(env) {
           const delta = Math.abs(nowMin - ruleMinNorm);
           if (delta > 15 && delta < 1425) continue;
           // Совпало — отправляем
-          const msg = buildMorningSummary(sub, fc);
+          const msg = buildMorningSummary(sub, rule, fc);
           if (msg) {
             try {
               await sendMessage(env, sub.chatId, msg, { parse_mode: 'HTML' });
@@ -1253,6 +1337,7 @@ function ruleKeyOf(rule) {
     case 'temp_below':       return `temp_below_${rule.threshold}`;
     case 'temp_above':       return `temp_above_${rule.threshold}`;
     case 'rain_soon':        return `rain_soon_${rule.windowHours}`;
+    case 'precip_soon':      return `precip_soon_${rule.windowHours}_${rule.watchRain?1:0}_${rule.watchSnow?1:0}`;
     case 'storm_alert':      return 'storm_alert';
     case 'dry_streak':       return `dry_streak_${rule.days}`;
     case 'morning_summary':  return `morning_summary_${rule.hour}_${rule.minute || 0}`;
@@ -1265,7 +1350,7 @@ async function fetchWeather(lat, lon) {
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),
-    hourly: 'temperature_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,cape,lifted_index',
+    hourly: 'temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cape,lifted_index',
     daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,weather_code',
     timezone: 'auto',
     wind_speed_unit: 'ms',
@@ -1359,6 +1444,35 @@ function evaluateRule(rule, fc, sub) {
       return { fired: false };
     }
 
+    case 'precip_soon': {
+      // Новое правило: «Осадки в ближайшие N часов» с подразделами Дождь/Снег.
+      // Различаем по weather_code: 51-67/80-82 — дождь, 71-77/85-86 — снег, 95-99 — гроза (трактуем как дождь).
+      const windowH = Number(rule.windowHours) || 3;
+      const watchRain = rule.watchRain !== false;
+      const watchSnow = rule.watchSnow === true;
+      for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
+        const prob = pp[i] || 0;
+        const mm = pm[i] || 0;
+        const code = wc[i];
+        if (mm < 0.3 || prob < 60) continue;
+        const isRain = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
+        const isSnow = (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
+        if (watchRain && isRain) {
+          return {
+            fired: true,
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч, ${prob}% ${whenStr(times[i], fc.utcOffsetSec)}`
+          };
+        }
+        if (watchSnow && isSnow) {
+          return {
+            fired: true,
+            message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч, ${prob}% ${whenStr(times[i], fc.utcOffsetSec)}`
+          };
+        }
+      }
+      return { fired: false };
+    }
+
     case 'storm_alert': {
       // Гроза в ближайшие 6 часов по WMO weather_code 95/96/99
       // или по CAPE > 1500 + lifted_index < -2 (классическая нестабильность)
@@ -1429,37 +1543,262 @@ function whenStr(isoTime, utcOffsetSec) {
   return `${dd}.${m} в ${hh}`;
 }
 
-// Сводка утра: текущие + макс/мин + осадки сегодня + что-нибудь интересное
-function buildMorningSummary(sub, fc) {
-  const hourly = fc.hourly;
-  const daily = fc.daily;
-  if (!hourly?.time?.length || !daily?.time?.length) return null;
+// Сводка утра. Базовая часть всегда есть. Дополнительные секции включаются через rule.sections:
+//   { wind, precip, astro, storm, feels, tomorrow } — булевые флаги.
+// Если sections не задан (legacy-правила) — поведение как раньше (только базовая инфа).
+function buildMorningSummary(sub, rule, fc) {
+  const hourly = fc.hourly || {};
+  const daily = fc.daily || {};
+  if (!hourly.time?.length || !daily.time?.length) return null;
 
-  // Текущий час
-  const nowMs = Date.now();
-  let nowIdx = 0;
-  for (let i = 0; i < hourly.time.length; i++) {
-    if (new Date(hourly.time[i]).getTime() > nowMs) { nowIdx = Math.max(0, i-1); break; }
-    nowIdx = i;
-  }
+  const sections = (rule && rule.sections) || {};
+  const todayDate = (daily.time[0] || '').slice(0, 10);
+  const [s, e] = computeTodayRange(hourly.time, todayDate);
+
+  // Базовая часть (всегда показывается)
+  const nowIdx = findNowIdx(hourly.time);
   const curT = hourly.temperature_2m?.[nowIdx];
   const tMin = daily.temperature_2m_min?.[0];
   const tMax = daily.temperature_2m_max?.[0];
-  const pSum = daily.precipitation_sum?.[0] || 0;
   const wc = daily.weather_code?.[0];
-
-  // Краткий лейбл погоды по WMO коду
   const condLabel = weatherCodeLabel(wc);
-  const rainPart = pSum > 0.5 ? `\n💧 Осадки сегодня: ${pSum.toFixed(1)} мм` : '';
 
-  return (
-    `🌅 <b>Доброе утро!</b>\n` +
-    `${esc(sub.name)}\n\n` +
-    `${condLabel}\n` +
-    `🌡 Сейчас: <b>${curT != null ? Math.round(curT) : '?'}°C</b>\n` +
-    `📊 Сегодня: <b>${tMin != null ? Math.round(tMin) : '?'}…${tMax != null ? Math.round(tMax) : '?'}°C</b>` +
-    rainPart
-  );
+  const lines = [
+    `🌅 <b>Доброе утро!</b>`,
+    esc(sub.name),
+    ``,
+    condLabel,
+    `🌡 Сейчас: <b>${fmtDeg(curT)}</b>`,
+    `📊 Сегодня: <b>${fmtNum(tMin)}…${fmtNum(tMax)}°C</b>`
+  ];
+
+  // Если детальная precip-секция выключена — старая короткая строка про сумму осадков (если есть)
+  if (!sections.precip) {
+    const pSum = daily.precipitation_sum?.[0] || 0;
+    if (pSum > 0.5) lines.push(`💧 Осадки сегодня: ${pSum.toFixed(1)} мм`);
+  }
+
+  // Дополнительные секции — порядок фиксированный, между блоками пустая строка
+  const lat = (sub && typeof sub.lat === 'number') ? sub.lat : 50;
+  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat));
+  if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, s, e));
+  if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, s, e));
+  if (sections.astro)    pushBlock(lines, buildAstroBlock(daily));
+  if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, s, e));
+  if (sections.tomorrow) pushBlock(lines, buildTomorrowBlock(daily));
+
+  return lines.join('\n');
+}
+
+function pushBlock(lines, block) {
+  if (block) { lines.push(''); lines.push(block); }
+}
+
+function fmtDeg(v) {
+  return v == null ? '?°C' : `${Math.round(v)}°C`;
+}
+
+function fmtNum(v) {
+  return v == null ? '?' : String(Math.round(v));
+}
+
+function findNowIdx(times) {
+  const nowMs = Date.now();
+  let nowIdx = 0;
+  for (let i = 0; i < times.length; i++) {
+    if (new Date(times[i]).getTime() > nowMs) { nowIdx = Math.max(0, i-1); break; }
+    nowIdx = i;
+  }
+  return nowIdx;
+}
+
+// Диапазон часов «сегодня» в hourly. Возвращает [startIdx, endIdx) — endIdx не включается.
+// Open-Meteo с timezone=auto возвращает hourly.time в локальном времени, поэтому
+// фильтр по префиксу YYYY-MM-DD совпадает с гражданским днём подписки.
+function computeTodayRange(hourlyTime, todayDate) {
+  if (!hourlyTime || !todayDate) return [-1, -1];
+  let start = -1, end = -1;
+  for (let i = 0; i < hourlyTime.length; i++) {
+    if (hourlyTime[i].startsWith(todayDate)) {
+      if (start < 0) start = i;
+      end = i + 1;
+    } else if (start >= 0) {
+      break;
+    }
+  }
+  return [start, end];
+}
+
+// Тип осадков по WMO weather_code + фактическая интенсивность.
+// pmm < 0.05 → null (формально код «дождевой», но капли почти нет).
+function precipKindAt(wc, mm) {
+  if (mm == null || mm < 0.05) return null;
+  if (wc == null) return null;
+  if ((wc >= 71 && wc <= 77) || (wc >= 85 && wc <= 86)) return 'snow';
+  if ((wc >= 51 && wc <= 67) || (wc >= 80 && wc <= 82) || (wc >= 95 && wc <= 99)) return 'rain';
+  return null;
+}
+
+// Ищет первое сплошное окно осадков заданного типа в диапазоне [start, end).
+function findPrecipWindow(hourlyTime, wcArr, pmArr, type, start, end) {
+  if (start < 0 || !hourlyTime) return null;
+  let winStart = -1, winEnd = -1, maxMm = 0;
+  for (let i = start; i < end; i++) {
+    const kind = precipKindAt(wcArr?.[i], pmArr?.[i]);
+    if (kind === type) {
+      if (winStart < 0) winStart = i;
+      winEnd = i;
+      if ((pmArr[i] || 0) > maxMm) maxMm = pmArr[i];
+    } else if (winStart >= 0) {
+      break;
+    }
+  }
+  if (winStart < 0) return null;
+  return {
+    from: hourlyTime[winStart].slice(11, 16),
+    to:   hourlyTime[winEnd + 1] ? hourlyTime[winEnd + 1].slice(11, 16) : (hourlyTime[winEnd].slice(11, 13) + ':59'),
+    maxMm
+  };
+}
+
+// «Сезон снега» по широте + календарному месяцу.
+// Северное полушарие (lat >= 0): октябрь–апрель.
+// Южное (lat < 0): инверсия — апрель–октябрь.
+// В межсезонье блок снега всё равно скрывается, чтобы не вводить в заблуждение летом «снега не ожидается».
+function inSnowSeason(lat, date) {
+  const m = (date || new Date()).getMonth() + 1;
+  if (lat >= 0) return m >= 10 || m <= 4;
+  return m >= 4 && m <= 10;
+}
+
+function buildPrecipBlock(hourly, s, e, lat) {
+  if (s < 0) return null;
+  const wcArr = hourly.weather_code || [];
+  const pmArr = hourly.precipitation || [];
+  const times = hourly.time || [];
+
+  const rainWin = findPrecipWindow(times, wcArr, pmArr, 'rain', s, e);
+  let block;
+  if (rainWin) {
+    let line = `🌧 Дождь: <b>${rainWin.from}–${rainWin.to}</b>`;
+    if (rainWin.maxMm >= 0.5) line += `, до ${(Math.round(rainWin.maxMm * 10) / 10).toFixed(1)} мм/ч`;
+    block = line;
+  } else {
+    block = `✓ Дождя не ожидается`;
+  }
+
+  if (inSnowSeason(lat, new Date())) {
+    const snowWin = findPrecipWindow(times, wcArr, pmArr, 'snow', s, e);
+    if (snowWin) {
+      let line = `❄ Снег: <b>${snowWin.from}–${snowWin.to}</b>`;
+      if (snowWin.maxMm >= 0.5) line += `, до ${(Math.round(snowWin.maxMm * 10) / 10).toFixed(1)} мм/ч`;
+      block += `\n${line}`;
+    } else {
+      block += `\n✓ Снега не ожидается`;
+    }
+  }
+  return block;
+}
+
+const WIND_DIRS_RU = ['северный','северо-восточный','восточный','юго-восточный','южный','юго-западный','западный','северо-западный'];
+function windDirName(deg) {
+  if (deg == null || !Number.isFinite(deg)) return '';
+  const idx = Math.round(((deg % 360) / 45)) % 8;
+  return WIND_DIRS_RU[(idx + 8) % 8];
+}
+
+function buildWindBlock(hourly, s, e) {
+  if (s < 0) return null;
+  const wArr = hourly.wind_speed_10m || [];
+  const gArr = hourly.wind_gusts_10m || [];
+  const dArr = hourly.wind_direction_10m || [];
+  let maxW = 0, gust = 0, maxIdx = s;
+  for (let i = s; i < e; i++) {
+    if (wArr[i] != null && wArr[i] > maxW) { maxW = wArr[i]; maxIdx = i; }
+    if (gArr[i] != null && gArr[i] > gust) gust = gArr[i];
+  }
+  if (maxW < 0.5) return `🌬 Ветер: штиль`;
+  const dir = windDirName(dArr[maxIdx]);
+  let line = `🌬 Ветер: до <b>${Math.round(maxW)} м/с</b>`;
+  if (gust >= maxW + 2) line += `, порывы <b>${Math.round(gust)} м/с</b>`;
+  if (dir) line += `, ${dir}`;
+  return line;
+}
+
+function buildFeelsBlock(hourly, s, e) {
+  if (s < 0) return null;
+  const ap = hourly.apparent_temperature || [];
+  const t  = hourly.temperature_2m || [];
+  let apMin = Infinity, apMax = -Infinity, maxDelta = 0;
+  for (let i = s; i < e; i++) {
+    if (ap[i] == null) continue;
+    if (ap[i] < apMin) apMin = ap[i];
+    if (ap[i] > apMax) apMax = ap[i];
+    if (t[i] != null) {
+      const d = Math.abs(ap[i] - t[i]);
+      if (d > maxDelta) maxDelta = d;
+    }
+  }
+  if (!Number.isFinite(apMin)) return null;
+  // Если ощущается почти как фактическая температура — короткая строка
+  if (maxDelta < 1.5) {
+    return `🌡 По ощущениям: близко к фактической`;
+  }
+  return `🌡 По ощущениям: <b>${Math.round(apMin)}…${Math.round(apMax)}°C</b>`;
+}
+
+function buildAstroBlock(daily) {
+  const sr = daily.sunrise?.[0];
+  const ss = daily.sunset?.[0];
+  if (!sr || !ss) return null;
+  const srTime = sr.slice(11, 16);
+  const ssTime = ss.slice(11, 16);
+  // Длина дня в минутах (sr/ss — оба в локальном времени, без TZ-offsetа)
+  const toMin = (iso) => {
+    const [hh, mm] = iso.slice(11, 16).split(':').map(Number);
+    return (hh|0) * 60 + (mm|0);
+  };
+  let lenMin = toMin(ss) - toMin(sr);
+  if (lenMin < 0) lenMin += 24 * 60;
+  const lenH = Math.floor(lenMin / 60);
+  const lenM = lenMin % 60;
+  return `🌅 <b>${srTime}</b>  🌇 <b>${ssTime}</b> · день ${lenH}ч ${lenM}м`;
+}
+
+function buildStormBlock(hourly, s, e) {
+  if (s < 0) return null;
+  const wcArr = hourly.weather_code || [];
+  const capeArr = hourly.cape || [];
+  const liArr = hourly.lifted_index || [];
+  const times = hourly.time || [];
+  let winStart = -1, winEnd = -1;
+  for (let i = s; i < e; i++) {
+    const code = wcArr[i];
+    const stormByCode = code === 95 || code === 96 || code === 99;
+    const stormByPhysics = (capeArr[i] || 0) >= 1500 && (liArr[i] || 0) <= -2;
+    if (stormByCode || stormByPhysics) {
+      if (winStart < 0) winStart = i;
+      winEnd = i;
+    } else if (winStart >= 0) {
+      break;
+    }
+  }
+  if (winStart < 0) return `✓ Грозы не ожидается`;
+  const from = times[winStart].slice(11, 16);
+  const to = times[winEnd + 1] ? times[winEnd + 1].slice(11, 16) : (times[winEnd].slice(11, 13) + ':59');
+  return `⛈ Возможна гроза: <b>${from}–${to}</b>`;
+}
+
+function buildTomorrowBlock(daily) {
+  if (!daily.time || daily.time.length < 2) return null;
+  const tMin = daily.temperature_2m_min?.[1];
+  const tMax = daily.temperature_2m_max?.[1];
+  const pSum = daily.precipitation_sum?.[1] || 0;
+  const wc = daily.weather_code?.[1];
+  const label = weatherCodeLabel(wc);
+  const tStr = `${tMin != null ? Math.round(tMin) : '?'}…${tMax != null ? Math.round(tMax) : '?'}°C`;
+  const precipStr = pSum > 0.5 ? `${pSum.toFixed(1)} мм осадков` : 'без осадков';
+  return `📊 Завтра: <b>${tStr}</b>, ${label}, ${precipStr}`;
 }
 
 function weatherCodeLabel(code) {

@@ -7934,10 +7934,15 @@ const NOTIF_ACCOUNTS_KEY = 'kw:telegram-accounts:v1';  // массив акка�
 const NOTIF_ACTIVE_KEY = 'kw:telegram-active:v1';      // chatId активного аккаунта
 
 const RULE_DEFS = [
-  { type: 'rain_soon',       icon: '🌧', defaults: { windowHours: 3 },
+  { type: 'precip_soon',     icon: '💧', defaults: { windowHours: 3, watchRain: true, watchSnow: false },
     input: { field: 'windowHours', min: 1, max: 24, unit: 'ч' },
-    name: 'Дождь в ближайшие',
-    desc: 'Уведомить если ожидается осадки >0.3 мм/ч и вероятность >60%' },
+    name: 'Осадки в ближайшие',
+    desc: 'Уведомить если ожидаются осадки >0.3 мм/ч и вероятность >60%',
+    subChoices: [
+      { field: 'watchRain', icon: '🌧', label: 'Дождь' },
+      { field: 'watchSnow', icon: '❄',  label: 'Снег' }
+    ]
+  },
   { type: 'storm_alert',     icon: '⚡', defaults: {},
     input: null,
     name: 'Гроза в ближайшие 6 часов',
@@ -7957,7 +7962,16 @@ const RULE_DEFS = [
   { type: 'morning_summary', icon: '🌅', defaults: { hour: 7, minute: 0 },
     input: { field: 'time', isTime: true },
     name: 'Утренняя сводка',
-    desc: 'Ежедневная сводка погоды в указанное время' }
+    desc: 'Ежедневная сводка погоды в указанное время',
+    sections: [
+      { key: 'wind',     icon: '🌬', label: 'Ветер' },
+      { key: 'precip',   icon: '💧', label: 'Осадки' },
+      { key: 'astro',    icon: '🌅', label: 'Восход/закат' },
+      { key: 'storm',    icon: '⛈', label: 'Гроза' },
+      { key: 'feels',    icon: '🌡', label: 'По ощущениям' },
+      { key: 'tomorrow', icon: '📊', label: 'Завтра' }
+    ]
+  }
 ];
 
 // === Multi-account storage ===
@@ -8287,7 +8301,15 @@ async function fetchAndRenderRules(tg) {
       return;
     }
     const data = await r.json();
-    _notifEditing.rules = Array.isArray(data.rules) ? data.rules : [];
+    const rawRules = Array.isArray(data.rules) ? data.rules : [];
+    // Миграция: старый rain_soon → новый precip_soon с watchRain=true.
+    // Сохранится на сервере при следующем нажатии «Сохранить».
+    _notifEditing.rules = rawRules.map(r => {
+      if (r && r.type === 'rain_soon') {
+        return { type: 'precip_soon', windowHours: r.windowHours, watchRain: true, watchSnow: false };
+      }
+      return r;
+    });
     _notifEditing.dirty = false;
     renderRulesUI();
   } catch (e) { console.error('rules-get err:', e); }
@@ -8325,6 +8347,30 @@ function renderRulesUI() {
       }
     }
 
+    // Подразделы (для precip_soon — Дождь/Снег; для morning_summary — 6 секций сводки).
+    // Видимы только если правило включено (enabled === true).
+    let subHtml = '';
+    if (enabled && def.subChoices) {
+      const chips = def.subChoices.map(c => {
+        const on = rule[c.field] === true;
+        return `<button type="button" class="rule-subchoice${on ? ' on' : ''}" data-field="${c.field}">
+          <span class="rsc-icon">${c.icon}</span><span>${c.label}</span>
+        </button>`;
+      }).join('');
+      subHtml = `<div class="rule-subopts" data-kind="choices">${chips}</div>`;
+    }
+    if (enabled && def.sections) {
+      const sec = rule.sections || {};
+      const chips = def.sections.map(s => {
+        const on = sec[s.key] === true;
+        return `<button type="button" class="rule-section-chip${on ? ' on' : ''}" data-key="${s.key}">
+          <span class="rsc-icon">${s.icon}</span><span>${s.label}</span>
+        </button>`;
+      }).join('');
+      const hint = '<div class="rule-subopts-hint">Доп. блоки в утреннем сообщении</div>';
+      subHtml = `${hint}<div class="rule-subopts" data-kind="sections">${chips}</div>`;
+    }
+
     row.innerHTML = `
       <span class="rule-icon">${def.icon}</span>
       <div class="rule-text">
@@ -8333,6 +8379,7 @@ function renderRulesUI() {
       </div>
       ${inputHtml}
       <button type="button" class="rule-toggle" aria-pressed="${enabled}"></button>
+      ${subHtml}
     `;
 
     // Обработчики
@@ -8366,6 +8413,41 @@ function renderRulesUI() {
       });
       // Клик по input не должен toggle'ить
       inp.addEventListener('click', e => e.stopPropagation());
+    });
+
+    // Чекбоксы Дождь/Снег для precip_soon
+    row.querySelectorAll('.rule-subchoice').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const r = _notifEditing.rules.find(x => x.type === def.type);
+        if (!r) return;
+        const field = btn.dataset.field;
+        const newVal = !(r[field] === true);
+        // Запрет: оба должны не быть выключены одновременно (хотя бы один)
+        if (!newVal) {
+          const others = (def.subChoices || []).filter(c => c.field !== field);
+          const anyOnElsewhere = others.some(c => r[c.field] === true);
+          if (!anyOnElsewhere) return; // блокируем выключение последнего
+        }
+        r[field] = newVal;
+        _notifEditing.dirty = true;
+        renderRulesUI();
+      });
+    });
+
+    // Чекбоксы секций для morning_summary
+    row.querySelectorAll('.rule-section-chip').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const r = _notifEditing.rules.find(x => x.type === def.type);
+        if (!r) return;
+        const key = btn.dataset.key;
+        const sec = r.sections || {};
+        sec[key] = !(sec[key] === true);
+        r.sections = sec;
+        _notifEditing.dirty = true;
+        renderRulesUI();
+      });
     });
 
     container.appendChild(row);
