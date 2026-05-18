@@ -2157,10 +2157,39 @@ function seededRand(seed) {
   return () => { s = (s + 0x6D2B79F5) | 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
 }
 
-// Группировка condition → фото-сцена. Сейчас два варианта: clear (ясно) и cloudy (всё остальное).
-function conditionGroup(cond) {
-  if (cond === 'clear' || cond === 'partly-cloudy') return 'clear';
-  return 'cloudy';
+// Группировка condition + cloud cover → фото-сцена.
+// 4 уровня: clear (cl<15) / partly (15-50) / cloudy (50-85) / overcast (≥85 ИЛИ активные осадки).
+// При активной погоде (дождь/снег/гроза/туман) — overcast как тяжёлый базовый фон, поверх него рисуем частицы.
+function conditionGroup(cond, cloudCoverPct) {
+  // Активные осадки/гроза/туман → overcast (тяжёлый базовый фон, частицы поверх)
+  if (cond === 'rain' || cond === 'heavy-rain' || cond === 'snow'
+      || cond === 'thunderstorm' || cond === 'fog' || cond === 'overcast') {
+    return 'overcast';
+  }
+  // Если есть точная облачность из API — используем её
+  if (cloudCoverPct != null && Number.isFinite(cloudCoverPct)) {
+    if (cloudCoverPct < 15) return 'clear';
+    if (cloudCoverPct < 50) return 'partly';
+    if (cloudCoverPct < 85) return 'cloudy';
+    return 'overcast';
+  }
+  // Fallback по строковому condition
+  switch (cond) {
+    case 'clear':         return 'clear';
+    case 'partly-cloudy': return 'partly';
+    case 'cloudy':        return 'cloudy';
+    default:              return 'cloudy';
+  }
+}
+
+// Реально присутствующие в `assets/scenes/` варианты condition-группы.
+// Если кода ожидает grp которого нет в наборе — мапим на ближайший существующий.
+// При появлении новых фото просто добавляй ключ в Set ниже.
+const EXISTING_SCENE_VARIANTS = new Set(['clear', 'partly', 'cloudy', 'overcast']);
+const SCENE_VARIANT_FALLBACK = { partly: 'clear', overcast: 'cloudy' };
+function pickSceneVariant(grp) {
+  if (EXISTING_SCENE_VARIANTS.has(grp)) return grp;
+  return SCENE_VARIANT_FALLBACK[grp] || 'cloudy';
 }
 
 // Тип погодных частиц поверх фото (Этап 2)
@@ -2261,13 +2290,18 @@ function renderHeroScene(today) {
   // Иначе hero весь день показывает «дождь», если он ожидается в 13:00.
   const _nowHForScene = (today.hourly && today.hourly[NOW_HOUR]) || null;
   const _hourCondForScene = hourSurfaceCondition(_nowHForScene, today.condition);
-  const grp = window.__heroCondOverride || conditionGroup(_hourCondForScene);
+  // Cloud cover из API (поле hourly.cloud_cover), если есть. Иначе fallback на condition.
+  const _cloudPct = (_nowHForScene && typeof _nowHForScene.cl === 'number') ? _nowHForScene.cl : null;
+  const grp = window.__heroCondOverride || conditionGroup(_hourCondForScene, _cloudPct);
   if (heroEl.dataset.cond !== grp) heroEl.dataset.cond = grp;
-  // В light-теме используем светлую серию фото из assets/scenes/light/.
-  // Названия файлов те же — отличается только префикс пути.
-  const scenePath = (state.theme && resolveTheme(state.theme) === 'light')
-    ? `assets/scenes/light/${tod}-${grp}.webp`
-    : `assets/scenes/${tod}-${grp}.webp`;
+  // Один набор фото для обеих тем; в light-теме осветление делается CSS-фильтром
+  // на dawn/day сценах (см. style.css).
+  // Если конкретного фото для группы ещё нет в наборе — fallback на ближайшую
+  // визуально похожую (partly→clear как «небо в основном открытое»,
+  // overcast→cloudy как «плотная облачность»). По мере пополнения фото
+  // расширяем EXISTING_SCENE_VARIANTS.
+  const fileGrp = pickSceneVariant(grp);
+  const scenePath = `assets/scenes/${tod}-${fileGrp}.webp`;
   sceneEl.style.backgroundImage = `url('${scenePath}')`;
   // Данные текущего часа для интенсивности и ветра
   const nowH = (today.hourly && today.hourly[NOW_HOUR]) || {};
@@ -2303,7 +2337,7 @@ function renderHeroScene(today) {
 
 // Debug helpers для DevTools.
 // previewHero('night'|'dawn'|'day'|'dusk'|'auto') — подмена time-of-day
-// previewCond('clear'|'cloudy'|'auto') — подмена condition-группы
+// previewCond('clear'|'partly'|'cloudy'|'overcast'|'auto') — подмена condition-группы
 window.previewHero = function(tod) {
   window.__heroTodOverride = (tod === 'auto' || !tod) ? null : tod;
   const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
