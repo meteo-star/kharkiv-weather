@@ -749,7 +749,11 @@
         <div class="notif-code" id="notifCode">000000</div>
         <p class="notif-hint-small">
           <span data-i18n="settings.notif.codeCmd">Команда:</span>
-          <code id="notifCodeCmd">/pair 000000</code>
+          <button type="button" class="notif-copy-btn" id="notifCopyCmdBtn" aria-label="Скопировать команду">
+            <code id="notifCodeCmd">/pair 000000</code>
+            <span class="ncb-icon" aria-hidden="true">📋</span>
+            <span class="ncb-toast" id="notifCopyToast">Скопировано ✓</span>
+          </button>
         </p>
         <p class="notif-hint-small notif-timer" id="notifTimer">
           <span data-i18n="settings.notif.timer">Код действителен</span> <span id="notifTimerValue">10:00</span>
