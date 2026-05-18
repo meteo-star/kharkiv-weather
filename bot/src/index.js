@@ -55,6 +55,12 @@ export default {
   // Cron — выполняется по расписанию из wrangler.toml ("*/30 * * * *")
   async scheduled(event, env, ctx) {
     ctx.waitUntil(runCronCheck(env));
+    // Раз в сутки (04:00 UTC) — обновляем публичный рейтинг точности моделей
+    // для всех зарегистрированных локаций. См. runAccuracyCron().
+    const d = new Date(event.scheduledTime || Date.now());
+    if (d.getUTCHours() === 4 && d.getUTCMinutes() < 30) {
+      ctx.waitUntil(runAccuracyCron(env));
+    }
   }
 };
 
@@ -163,6 +169,7 @@ async function processUpdate(update, env) {
         case '/admin_unban':     return handleAdminUnban(env, chatId, args);
         case '/admin_test':      return handleAdminTest(env, chatId, args);
         case '/admin_cron':      return handleAdminCron(env, chatId);
+        case '/admin_accuracy_cron': return handleAdminAccuracyCron(env, chatId);
         case '/admin_summary_test': return handleAdminSummaryTest(env, chatId, args);
         case '/admin_addrule':   return handleAdminAddRule(env, chatId, args);
         case '/admin_clearrules':return handleAdminClearRules(env, chatId);
@@ -683,6 +690,22 @@ async function handleAdminTest(env, chatId, args) {
 
 // Принудительный запуск cron-проверки (для отладки в реальном времени,
 // не дожидаясь следующего */30 минут).
+// /admin_accuracy_cron — принудительно обновить публичные accuracy-данные.
+async function handleAdminAccuracyCron(env, chatId) {
+  await sendMessage(env, chatId, `🌡 Обновляю публичную accuracy-сводку...`);
+  try {
+    const reg = await env.STATS.get('acc:registry', { type: 'json' });
+    const count = (reg && Array.isArray(reg.locations)) ? reg.locations.length : 0;
+    if (count === 0) {
+      return sendMessage(env, chatId, `📍 В registry нет локаций. Откройте сайт хотя бы раз — он зарегистрирует свои координаты через /api/accuracy.`);
+    }
+    await runAccuracyCron(env);
+    return sendMessage(env, chatId, `✅ Готово. Обработано ${count} локаций. Смотри логи через wrangler tail.`);
+  } catch (err) {
+    return sendMessage(env, chatId, `❌ Ошибка: ${esc(err.message)}`, { parse_mode: 'HTML' });
+  }
+}
+
 // /admin_summary_test [base|wind|precip|astro|storm|feels|tomorrow|full|chat_id]
 // Билдит и шлёт утреннюю сводку прямо сейчас, без проверки времени.
 // Без аргумента — full. Если аргумент — chat_id (число), отправляет тому чату с full секциями.
@@ -967,6 +990,32 @@ async function handleApi(url, request, env, ctx) {
     return withCors(jsonResp({ ok: true, count: rules.length }), origin);
   }
 
+  // GET /api/accuracy?lat=X&lon=Y → { records: [...], updated: ts }
+  // Публичный анонимный endpoint — возвращает накопленные accuracy-данные
+  // для точки на 0.1° сетке. Заодно регистрирует точку как «интересную»
+  // в acc:registry, чтобы cron обновлял её ежедневно.
+  if (path === '/api/accuracy' && request.method === 'GET') {
+    const lat = parseFloat(url.searchParams.get('lat'));
+    const lon = parseFloat(url.searchParams.get('lon'));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      return withCors(jsonResp({ error: 'invalid_coords' }, 400), origin);
+    }
+    const [lat1, lon1] = accGridCoords(lat, lon);
+    const key = `acc:loc:${lat1.toFixed(1)}_${lon1.toFixed(1)}`;
+    // Не блокируем основной ответ регистрацией — пишем в фоне
+    ctx.waitUntil(registerAccuracyLocation(env, lat1, lon1));
+    const stored = await env.STATS.get(key, { type: 'json' });
+    if (!stored) {
+      return withCors(jsonResp({ ok: true, records: [], updated: null, sampleSize: 0 }), origin);
+    }
+    return withCors(jsonResp({
+      ok: true,
+      records: stored.records || [],
+      updated: stored.updated || null,
+      sampleSize: (stored.records || []).filter(r => r.actual).length
+    }), origin);
+  }
+
   // POST /api/auth-claim  { token }  →  { chatId, pairToken, name, chatTitle, chatType }
   // Магическая ссылка из /login команды бота — обмен короткого auth-токена
   // на постоянный pairToken. Используется для входа с нового устройства.
@@ -1238,6 +1287,177 @@ const COOLDOWNS_MS = {
   dry_streak:      24 * 3600 * 1000,
   // morning_summary — особый случай: проверяется по дате, не cooldown
 };
+
+// ============================================================
+// ПУБЛИЧНАЯ ACCURACY-СВОДКА (вариант С из обсуждения)
+// Бот раз в сутки обходит все «интересные» координаты и обновляет
+// MAE-данные на 0.1° сетке. Сайт читает их через /api/accuracy.
+// ============================================================
+
+// Округление координат до 0.1° (та же сетка что в app.js)
+function accGridCoords(lat, lon) {
+  return [Math.round(lat * 10) / 10, Math.round(lon * 10) / 10];
+}
+
+const ACC_REGISTRY_KEY = 'acc:registry';
+const ACC_MAX_RECORDS = 30;
+const ACC_REGISTRY_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 дней без запросов → удаление
+
+// Добавляет/обновляет точку в registry «интересных» координат.
+// Вызывается при каждом GET /api/accuracy.
+async function registerAccuracyLocation(env, lat1, lon1) {
+  try {
+    const raw = await env.STATS.get(ACC_REGISTRY_KEY, { type: 'json' });
+    const reg = (raw && Array.isArray(raw.locations)) ? raw.locations : [];
+    const now = Date.now();
+    const idx = reg.findIndex(l => l.lat === lat1 && l.lon === lon1);
+    if (idx >= 0) {
+      reg[idx].lastReq = now;
+    } else {
+      reg.push({ lat: lat1, lon: lon1, lastReq: now });
+    }
+    await env.STATS.put(ACC_REGISTRY_KEY, JSON.stringify({ locations: reg }));
+  } catch (e) {
+    console.error('registerAccuracyLocation:', e);
+  }
+}
+
+// Раз в сутки обходит registry, тянет Open-Meteo с 7 моделями для каждой точки,
+// обновляет accuracy-records аналогично логике на сайте (но на стороне сервера —
+// данные общие для всех пользователей этой точки).
+async function runAccuracyCron(env) {
+  try {
+    const raw = await env.STATS.get(ACC_REGISTRY_KEY, { type: 'json' });
+    const reg = (raw && Array.isArray(raw.locations)) ? raw.locations : [];
+    const now = Date.now();
+    // Чистим старые точки (не запрашивались > 30 дней)
+    const active = reg.filter(l => (now - (l.lastReq || 0)) < ACC_REGISTRY_TTL_MS);
+    if (active.length !== reg.length) {
+      await env.STATS.put(ACC_REGISTRY_KEY, JSON.stringify({ locations: active }));
+    }
+    console.log(`[accuracy-cron] processing ${active.length} locations`);
+    let ok = 0, failed = 0;
+    for (const loc of active) {
+      try {
+        const byModel = await fetchModelsForecast(loc.lat, loc.lon);
+        if (!byModel) { failed++; continue; }
+        await updateAccuracyForLocation(env, loc.lat, loc.lon, byModel);
+        ok++;
+        await sleep(200); // не топим Open-Meteo
+      } catch (e) {
+        console.error(`[accuracy-cron] loc ${loc.lat},${loc.lon}:`, e);
+        failed++;
+      }
+    }
+    console.log(`[accuracy-cron] done: ok=${ok} failed=${failed}`);
+  } catch (e) {
+    console.error('runAccuracyCron:', e);
+  }
+}
+
+// Open-Meteo с 7 моделями. Возвращает { ecmwf: [...], gfs: [...], ..., avg: [...] }
+// где каждый массив — дни (только metrics нужные для accuracy: tempMax/Min/precipSum).
+async function fetchModelsForecast(lat, lon) {
+  const MODELS = ['ecmwf_ifs04', 'gfs_seamless', 'icon_seamless', 'gem_seamless',
+                  'jma_seamless', 'meteofrance_seamless', 'ukmo_seamless'];
+  const params = new URLSearchParams({
+    latitude: String(lat),
+    longitude: String(lon),
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum',
+    timezone: 'auto',
+    forecast_days: '5',
+    models: MODELS.join(',')
+  });
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const daily = data.daily || {};
+    const times = daily.time || [];
+    const byModel = {};
+    // Open-Meteo возвращает поля с суффиксом модели: temperature_2m_max_ecmwf_ifs04
+    const modelKeyMap = {
+      ecmwf_ifs04: 'ecmwf', gfs_seamless: 'gfs', icon_seamless: 'icon',
+      gem_seamless: 'gem', jma_seamless: 'jma',
+      meteofrance_seamless: 'mf', ukmo_seamless: 'ukmo'
+    };
+    for (const m of MODELS) {
+      const tmax = daily[`temperature_2m_max_${m}`] || [];
+      const tmin = daily[`temperature_2m_min_${m}`] || [];
+      const psum = daily[`precipitation_sum_${m}`] || [];
+      const days = times.map((t, i) => ({
+        date: t,
+        tempMax: tmax[i],
+        tempMin: tmin[i],
+        precipSum: psum[i]
+      }));
+      byModel[modelKeyMap[m]] = days;
+    }
+    // Вычисляем avg как среднее по всем моделям
+    const avg = times.map((t, i) => {
+      const tmaxes = [], tmins = [], psums = [];
+      for (const m of MODELS) {
+        const k = modelKeyMap[m];
+        const d = byModel[k][i];
+        if (d.tempMax != null) tmaxes.push(d.tempMax);
+        if (d.tempMin != null) tmins.push(d.tempMin);
+        if (d.precipSum != null) psums.push(d.precipSum);
+      }
+      const mean = arr => arr.length ? arr.reduce((s, x) => s + x, 0) / arr.length : null;
+      return { date: t, tempMax: mean(tmaxes), tempMin: mean(tmins), precipSum: mean(psums) };
+    });
+    byModel.avg = avg;
+    return byModel;
+  } catch (e) {
+    console.error('fetchModelsForecast:', e);
+    return null;
+  }
+}
+
+// Обновляет accuracy-records для точки: заполняет actual для записей с date=today
+// (из byModel.avg[0]) и добавляет новые predictions на +1 и +2 дня.
+async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
+  const key = `acc:loc:${lat1.toFixed(1)}_${lon1.toFixed(1)}`;
+  const stored = (await env.STATS.get(key, { type: 'json' })) || { records: [] };
+  const records = Array.isArray(stored.records) ? stored.records : [];
+  const today = byModel.avg[0]?.date;
+  if (!today) return;
+
+  // (a) Заполнить actual для записей где date === today
+  const todayActual = byModel.avg[0];
+  for (const rec of records) {
+    if (!rec.actual && rec.date === today) {
+      rec.actual = {
+        tempMax: todayActual.tempMax,
+        tempMin: todayActual.tempMin,
+        precipSum: todayActual.precipSum
+      };
+    }
+  }
+
+  // (b) Добавить predictions на +1 и +2 дня
+  for (let offset = 1; offset <= 2; offset++) {
+    const day = byModel.avg[offset];
+    if (!day || !day.date) continue;
+    const targetDate = day.date;
+    if (records.some(r => r.date === targetDate)) continue;
+    const predictions = {};
+    let hasAny = false;
+    for (const k of Object.keys(byModel)) {
+      const d = byModel[k][offset];
+      if (d && d.tempMax != null) {
+        predictions[k] = { tempMax: d.tempMax, tempMin: d.tempMin, precipSum: d.precipSum };
+        hasAny = true;
+      }
+    }
+    if (hasAny) records.push({ date: targetDate, predictions, actual: null });
+  }
+
+  records.sort((a, b) => a.date.localeCompare(b.date));
+  // Лимит — последние 30 записей
+  const trimmed = records.length > ACC_MAX_RECORDS ? records.slice(-ACC_MAX_RECORDS) : records;
+  await env.STATS.put(key, JSON.stringify({ records: trimmed, updated: new Date().toISOString() }));
+}
 
 async function runCronCheck(env) {
   await incrementStat(env, 'cron_runs');
