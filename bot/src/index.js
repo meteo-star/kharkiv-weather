@@ -163,6 +163,7 @@ async function processUpdate(update, env) {
         case '/admin_unban':     return handleAdminUnban(env, chatId, args);
         case '/admin_test':      return handleAdminTest(env, chatId, args);
         case '/admin_cron':      return handleAdminCron(env, chatId);
+        case '/admin_summary_test': return handleAdminSummaryTest(env, chatId, args);
         case '/admin_addrule':   return handleAdminAddRule(env, chatId, args);
         case '/admin_clearrules':return handleAdminClearRules(env, chatId);
         case '/admin_cooldowns': return handleAdminCooldowns(env, chatId, args);
@@ -272,6 +273,7 @@ async function handleHelp(env, chatId, isAdmin) {
       `<code>/admin_unban &lt;chat_id&gt;</code> — разблокировать\n` +
       `<code>/admin_test &lt;chat_id&gt;</code> — отправить тестовое сообщение\n` +
       `<code>/admin_cron</code> — запустить cron-проверку вручную\n` +
+      `<code>/admin_summary_test [base|full|chat_id]</code> — прислать утреннюю сводку прямо сейчас\n` +
       `<code>/admin_addrule &lt;тип&gt; [параметры]</code> — добавить правило себе\n` +
       `<code>/admin_clearrules</code> — удалить все свои правила\n` +
       `<code>/admin_cooldowns [chat_id]</code> — показать когда сработают правила (по умолч. свой)`;
@@ -681,6 +683,40 @@ async function handleAdminTest(env, chatId, args) {
 
 // Принудительный запуск cron-проверки (для отладки в реальном времени,
 // не дожидаясь следующего */30 минут).
+// /admin_summary_test [base|wind|precip|astro|storm|feels|tomorrow|full|chat_id]
+// Билдит и шлёт утреннюю сводку прямо сейчас, без проверки времени.
+// Без аргумента — full. Если аргумент — chat_id (число), отправляет тому чату с full секциями.
+async function handleAdminSummaryTest(env, chatId, args) {
+  const parts = (args || '').trim().split(/\s+/).filter(Boolean);
+  // Определяем targetChat и mode из аргументов
+  let targetChat = chatId;
+  let mode = 'full';
+  for (const p of parts) {
+    if (/^-?\d+$/.test(p)) targetChat = p;
+    else mode = p.toLowerCase();
+  }
+  const sub = await env.SUBSCRIPTIONS.get(`sub:${targetChat}`, { type: 'json' });
+  if (!sub) return sendMessage(env, chatId, `Подписка ${esc(String(targetChat))} не найдена.`);
+
+  const sections = (mode === 'base')
+    ? {}
+    : (mode === 'full')
+      ? { wind: true, precip: true, astro: true, storm: true, feels: true, tomorrow: true }
+      : { [mode]: true };
+
+  const fc = await fetchWeather(sub.lat, sub.lon);
+  if (!fc) return sendMessage(env, chatId, `Не удалось получить погоду.`);
+
+  const fakeRule = { type: 'morning_summary', hour: 7, minute: 0, sections };
+  const msg = buildMorningSummary(sub, fakeRule, fc);
+  if (!msg) return sendMessage(env, chatId, `Не удалось построить сводку.`);
+
+  await sendMessage(env, targetChat, msg, { parse_mode: 'HTML' });
+  if (String(targetChat) !== String(chatId)) {
+    await sendMessage(env, chatId, `✅ Тестовая сводка (${mode}) отправлена в ${esc(String(targetChat))}.`);
+  }
+}
+
 async function handleAdminCron(env, chatId) {
   await sendMessage(env, chatId, `⏰ Запускаю cron-проверку...`);
   try {
