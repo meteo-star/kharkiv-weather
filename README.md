@@ -1,8 +1,9 @@
 # Meteo Star · Метеоагрегатор
 
-Веб-приложение для агрегации прогноза погоды по **7 моделям одновременно**. Liquid Glass UI, тёмная тема, оптимизировано под мобильные. Устанавливается как PWA на главный экран iOS / Android.
+Веб-приложение для агрегации прогноза погоды по **7 моделям одновременно**. Liquid Glass UI, тёмная **и светлая** темы, оптимизировано под мобильные. Устанавливается как PWA на главный экран iOS / Android. Подключается к Telegram-боту [@MeteoStarBot](https://t.me/MeteoStarBot) для push-уведомлений по настраиваемым правилам.
 
 🌐 **Live:** https://meteo-star.github.io/kharkiv-weather/
+🤖 **Telegram-бот:** [@MeteoStarBot](https://t.me/MeteoStarBot)
 
 ---
 
@@ -61,7 +62,13 @@
 
 **TTS-озвучка** – Web Speech API проговаривает резюме погоды на 3 языках, выбор голоса в настройках
 
-**Реалистичная hero-сцена** – 8 фото-фонов неба в зависимости от времени суток × облачности, анимированные погодные частицы (дождь, снег, туман, молнии, ветровые стрики) реагирующие на интенсивность из API
+**Реалистичная hero-сцена** – 16 фото-фонов неба, выбираются по `time-of-day × cloud_cover %`: рассвет / день / закат / ночь, на каждый — clear / partly / cloudy / overcast. Поверх фото — анимированные погодные частицы (дождь, снег, туман, молнии, ветровые стрики), реагирующие на интенсивность из API. Hero показывает погоду **прямо сейчас** (по часу `NOW_HOUR`), а не дневной агрегат — если дождь ожидается с 13:00, утром в hero будет облачно без капель.
+
+**Sticky hero + pull-to-refresh** – карточка «Сейчас» при скролле сжимается и парит над контентом как floating glass. На мобильных — pull-to-refresh от верха главного экрана с принудительной чисткой PWA-кэша.
+
+**Telegram-бот @MeteoStarBot** – push-уведомления по 6 типам правил: похолодание, жара, осадки в ближайшие N часов (дождь / снег раздельно), гроза, серия дней без дождя, утренняя сводка с 6 опциональными подразделами (ветер, осадки с почасовым окном, восход/закат, гроза, по ощущениям, завтра). Связка с сайтом через 6-значный код или magic-link `/login` для cross-device входа. Поддержка групповых чатов с `/setup`. На одном устройстве можно держать **несколько связок** (личный чат + N групп) и переключаться селектором. Веб-админка `/admin.html` с brute-force защитой и удобным паролем для управления подписками.
+
+**Тёмная и светлая тема** – переключатель «🌙 Тёмная / ☀ Светлая / 🖥 Системная» в настройках. Светлая палитра — тёплый персик / слоновая кость с terracotta-акцентами. Light-фото подбираются автоматически из общего набора + CSS-фильтр осветления.
 
 ### Производительность
 
@@ -95,13 +102,18 @@ python -m http.server 8000 --bind 127.0.0.1
 
 ```
 .
-├── index.html              # HTML-разметка (~870 строк)
-├── style.css               # Glass UI + responsive (~1400 строк)
-├── app.js                  # Логика, ванильный JS (~7400 строк)
+├── index.html              # HTML-разметка
+├── style.css               # Glass UI + responsive, dark + light темы
+├── app.js                  # Логика, ванильный JS (~8500 строк)
 ├── manifest.json           # PWA-манифест
 ├── service-worker.js       # Cache strategies (network-first / cache-first / stale-while-revalidate)
 ├── icons/                  # PNG-иконки PWA (favicon, apple-touch, maskable)
-├── assets/scenes/          # 8 WebP фото-фонов hero (~217 КБ)
+├── assets/scenes/          # 16 WebP фото-фонов hero (~700 КБ): 4 tod × 4 уровня облачности
+├── admin.html + admin.js   # Веб-админка Telegram-бота (защищена паролем)
+├── bot/                    # Cloudflare Worker — Telegram-бот
+│   ├── src/index.js        # Webhook, команды, cron-проверка правил, HTTP API для сайта
+│   ├── wrangler.toml       # Конфиг Worker'а (KV bindings, cron */30, secrets)
+│   └── README.md           # Инструкция по деплою (wrangler login → secrets put → deploy)
 ├── README.md               # Этот файл
 ├── SECURITY.md             # Контракт безопасности и приватности
 ├── HANDOFF.md              # Исторический контекст (v0.4 из чата claude.ai)
@@ -142,6 +154,10 @@ python -m http.server 8000 --bind 127.0.0.1
 - **Фаза Л** – iPhone PWA fixes (safe-area, swipe-down, status bar)
 - **Фаза М** – модуляризация (вынос CSS/JS в отдельные файлы, sun arc real-time, source data modal)
 - **Фаза Н** – performance (lazy Chart.js, yielding parse, visibility timers, skeleton, cleanup), алерты экстремальной температуры, Compare Mode (полный), фиксы inverse search
+- **Фаза О** – PWA force-update (pull-to-refresh), Sticky hero (floating glass при скролле)
+- **Фаза П** – Glass-скроллбар, светлая тема (терракотовая палитра), 8 hero-фото для light, переработанный гроза-индикатор
+- **Фаза Б (бот)** – Telegram-бот на Cloudflare Worker, 6 типов правил, cron каждые 30 мин, веб-админка, magic-link `/login`, multi-account UI, групповые чаты, **подразделы утренней сводки**, правило `precip_soon` с подвыбором rain/snow
+- **Фаза Р** – 4-уровневая облачность для hero (`clear/partly/cloudy/overcast`), 16 фото вместо 8, единый набор для обеих тем + CSS-фильтр для light, hero привязан к текущему часу
 
 Подробнее в [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
