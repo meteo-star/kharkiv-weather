@@ -3727,7 +3727,39 @@ body.compare-mode .astro-photo { display:none !important }
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.08);
   border-radius:12px;transition:all 0.18s;
+  flex-wrap:wrap;
 }
+/* Подразделы (Дождь/Снег для precip_soon и 6 секций для morning_summary).
+   flex-basis:100% — занимают всю ширину строки и переносятся под основной ряд. */
+.rule-subopts{
+  flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;
+  margin-top:8px;padding-top:10px;
+  border-top:1px dashed rgba(255,255,255,0.10);
+}
+.rule-subopts-hint{
+  flex-basis:100%;margin-top:6px;
+  font-size:10.5px;color:rgba(232,240,255,0.45);
+  text-transform:uppercase;letter-spacing:0.05em;
+}
+.rule-subchoice, .rule-section-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:10px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.10);
+  color:rgba(232,240,255,0.75);
+  font-family:inherit;font-size:12px;font-weight:500;
+  cursor:pointer;transition:all 0.18s;user-select:none;
+}
+.rule-subchoice:hover, .rule-section-chip:hover{
+  background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.18);
+}
+.rule-subchoice.on, .rule-section-chip.on{
+  background:rgba(0,212,255,0.14);
+  border-color:rgba(0,212,255,0.45);
+  color:#67e8f9;
+  box-shadow:inset 0 0 0 1px rgba(0,212,255,0.25);
+}
+.rule-subchoice .rsc-icon, .rule-section-chip .rsc-icon{font-size:13px;line-height:1}
 .rule-row.enabled{background:rgba(0,212,255,0.08);border-color:rgba(0,212,255,0.32)}
 .rule-icon{font-size:18px;flex-shrink:0}
 .rule-text{flex:1;min-width:0;font-size:12px;color:rgba(232,240,255,0.85);line-height:1.35}
@@ -3876,6 +3908,30 @@ body.compare-mode .astro-photo { display:none !important }
   background:linear-gradient(135deg, #d9602f 0%, #b34a1f 100%) !important;
   color:#fff !important;
   box-shadow:0 4px 14px rgba(217,96,47,0.35) !important;
+}
+:root[data-theme="light"] .rule-subopts{
+  border-top:1px dashed rgba(192,83,42,0.35) !important;
+}
+:root[data-theme="light"] .rule-subopts-hint{
+  color:rgba(45,26,16,0.55) !important;
+}
+:root[data-theme="light"] .rule-subchoice,
+:root[data-theme="light"] .rule-section-chip{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.35) !important;
+  color:#5a3a25 !important;
+}
+:root[data-theme="light"] .rule-subchoice:hover,
+:root[data-theme="light"] .rule-section-chip:hover{
+  background:#ffefdc !important;
+  border-color:#d9602f !important;
+}
+:root[data-theme="light"] .rule-subchoice.on,
+:root[data-theme="light"] .rule-section-chip.on{
+  background:linear-gradient(135deg, #ffe5d0 0%, #ffd2a8 100%) !important;
+  border-color:#d9602f !important;
+  color:#2d1a10 !important;
+  box-shadow:inset 0 0 0 1px rgba(217,96,47,0.4) !important;
 }
 
 
