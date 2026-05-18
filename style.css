@@ -317,6 +317,27 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-feels{font-size:13px;color:rgba(232,240,255,0.5)}
 .hero-feels strong{color:#00d4ff;font-weight:500}
 .hero-source-note{font-size:11px;color:rgba(232,240,255,0.4);margin-top:6px;font-family:'JetBrains Mono',monospace}
+/* Подсказка точности на hero: лидер по MAE среди 7 моделей. Клик → Source Data Modal. */
+.hero-accuracy-hint{margin-top:8px;display:flex}
+.hero.stuck .hero-accuracy-hint{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
+.hero-acc-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px;border-radius:100px;
+  background:rgba(94,234,212,0.10);
+  border:1px solid rgba(94,234,212,0.35);
+  color:#5eead4;
+  font-family:inherit;font-size:11.5px;font-weight:600;letter-spacing:0.01em;
+  cursor:pointer;transition:all 0.2s;
+  text-shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+.hero-acc-pill:hover{background:rgba(94,234,212,0.18);border-color:rgba(94,234,212,0.55);transform:translateY(-1px)}
+/* AVG-лидер: подсветка зелёным «всё ок» вместо нейтрального бирюзового. */
+.hero-acc-pill.hap-best{
+  background:rgba(74,222,128,0.12);
+  border-color:rgba(74,222,128,0.45);
+  color:#86efac;
+}
+.hero-acc-pill.hap-best:hover{background:rgba(74,222,128,0.2);border-color:rgba(74,222,128,0.6)}
 .hero-source-note .src-name{color:var(--src-color,#00d4ff);font-weight:500}
 .weather-icon-3d{width:170px;height:170px;animation:floatIcon 4s ease-in-out infinite;position:relative;z-index:2}
 .hero .weather-icon-3d{display:none}
@@ -2124,6 +2145,23 @@ body.compare-mode .astro-photo { display:none !important }
 :root[data-theme="light"] .hero-condition{color:#fff;text-shadow:0 1px 6px rgba(60,20,5,0.6)}
 :root[data-theme="light"] .hero-feels{color:rgba(255,235,210,0.95);text-shadow:0 1px 4px rgba(60,20,5,0.6)}
 :root[data-theme="light"] .hero-source-note{color:rgba(255,235,210,0.9);text-shadow:0 1px 4px rgba(60,20,5,0.6)}
+/* Hero accuracy-pill — терракотовая палитра для light, чтобы вписаться в тёплую тему. */
+:root[data-theme="light"] .hero-acc-pill{
+  background:rgba(255,250,237,0.85) !important;
+  border:1.5px solid rgba(217,96,47,0.45) !important;
+  color:#a8451c !important;
+  text-shadow:0 1px 2px rgba(255,255,255,0.5) !important;
+}
+:root[data-theme="light"] .hero-acc-pill:hover{
+  background:#ffefdc !important;
+  border-color:#d9602f !important;
+}
+:root[data-theme="light"] .hero-acc-pill.hap-best{
+  background:linear-gradient(135deg, #d4f5d4 0%, #a7e9a7 100%) !important;
+  border-color:#22c55e !important;
+  color:#14532d !important;
+  text-shadow:0 1px 2px rgba(255,255,255,0.5) !important;
+}
 :root[data-theme="light"] .hero-label{color:rgba(255,235,210,0.85);text-shadow:0 1px 4px rgba(60,20,5,0.5)}
 :root[data-theme="light"] .hero-temp-unit{color:rgba(255,235,210,0.9);text-shadow:0 1px 4px rgba(60,20,5,0.5)}
 
