@@ -1569,7 +1569,7 @@ function buildMorningSummary(sub, rule, fc) {
     ``,
     condLabel,
     `🌡 Сейчас: <b>${fmtDeg(curT)}</b>`,
-    `📊 Сегодня: <b>${fmtDeg(tMin)}…${fmtDeg(tMax)}</b>`
+    `📊 Сегодня: <b>${fmtNum(tMin)}…${fmtNum(tMax)}°C</b>`
   ];
 
   // Если детальная precip-секция выключена — старая короткая строка про сумму осадков (если есть)
@@ -1596,6 +1596,10 @@ function pushBlock(lines, block) {
 
 function fmtDeg(v) {
   return v == null ? '?°C' : `${Math.round(v)}°C`;
+}
+
+function fmtNum(v) {
+  return v == null ? '?' : String(Math.round(v));
 }
 
 function findNowIdx(times) {
@@ -1680,7 +1684,7 @@ function buildPrecipBlock(hourly, s, e, lat) {
     if (rainWin.maxMm >= 0.5) line += `, до ${(Math.round(rainWin.maxMm * 10) / 10).toFixed(1)} мм/ч`;
     block = line;
   } else {
-    block = `☀ Дождя не ожидается`;
+    block = `✓ Дождя не ожидается`;
   }
 
   if (inSnowSeason(lat, new Date())) {
