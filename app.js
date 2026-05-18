@@ -6995,8 +6995,9 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v9: в hourly добавлены поля hum/dp/uvi/vis/sr (влажность, точка росы, УФ, видимость, солнечная радиация) для модалки "Почасовой".
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v9`;
+  // v10: в AVG-источнике поле `c` теперь согласовано с `wc` (codeToCondition(Math.max(wc))).
+  // Старый кэш v9 содержал рассогласованные c/wc → hero и hourly показывали разное.
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v10`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -7630,6 +7631,9 @@ function computeAverageForecast(forecasts) {
         const factor = Math.pow(10, decimals);
         return Math.round(m * factor) / factor;
       };
+      // wc для AVG — максимум среди моделей (грозовой/осадочный код побеждает над спокойным).
+      // c должен СООТВЕТСТВОВАТЬ wc, иначе hero (читает wc) и hourly (читает c) расходятся.
+      const avgWc = wcVals.length > 0 ? Math.max(...wcVals) : null;
       hourly.push({
         h: hours[0].h,
         t: Math.round(meanOf(hours, 't')),
@@ -7637,7 +7641,7 @@ function computeAverageForecast(forecasts) {
         pmm: Math.round(meanOf(hours, 'pmm') * 10) / 10,  // среднее количество осадков мм/ч по моделям
         pmmMax: Math.max(0, ...hours.map(o => typeof o.pmm === 'number' ? o.pmm : 0)),  // максимум среди моделей (для консервативной проверки)
         w: Math.round(meanOf(hours, 'w')),
-        c: hours[0].c,
+        c: avgWc != null ? codeToCondition(avgWc) : (hours[0].c || 'cloudy'),
         feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
         cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null,
         pr: meanRound(prVals, 0),
@@ -7648,7 +7652,7 @@ function computeAverageForecast(forecasts) {
         sr:  meanRound(srVals, 0),
         tMin: tVals.length > 0 ? Math.min(...tVals) : null,
         tMax: tVals.length > 0 ? Math.max(...tVals) : null,
-        wc: wcVals.length > 0 ? Math.max(...wcVals) : null,
+        wc: avgWc,
         cape: capeVals.length > 0 ? Math.round(capeVals.reduce((a,b) => a+b, 0) / capeVals.length) : null,
         li: liVals.length > 0 ? Math.round((liVals.reduce((a,b) => a+b, 0) / liVals.length) * 10) / 10 : null
       });
