@@ -2337,7 +2337,7 @@ function renderHeroScene(today) {
 
 // Debug helpers для DevTools.
 // previewHero('night'|'dawn'|'day'|'dusk'|'auto') — подмена time-of-day
-// previewCond('clear'|'cloudy'|'auto') — подмена condition-группы
+// previewCond('clear'|'partly'|'cloudy'|'overcast'|'auto') — подмена condition-группы
 window.previewHero = function(tod) {
   window.__heroTodOverride = (tod === 'auto' || !tod) ? null : tod;
   const af = ACTIVE_FORECAST_BY_MODEL && (ACTIVE_FORECAST_BY_MODEL.avg || ACTIVE_FORECAST_BY_MODEL[Object.keys(ACTIVE_FORECAST_BY_MODEL)[0]]);
