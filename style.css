@@ -101,7 +101,7 @@ body.app-bootstrap .hero-loader,
 body.app-bootstrap .hero-loader-text { display: none; }
 
 html{scroll-behavior:smooth;background-color:#02061a;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.22) transparent}
-body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;overflow-x:hidden;background-color:#02061a;
+body{font-family:'Onest',system-ui,sans-serif;color:#e8f0ff;min-height:100vh;overflow-x:hidden;overflow-anchor:none;background-color:#02061a;
   background:
     radial-gradient(ellipse at 20% 0%, #1a1f5c 0%, transparent 50%),
     radial-gradient(ellipse at 80% 100%, #003a8c 0%, transparent 50%),
