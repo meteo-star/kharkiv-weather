@@ -2425,6 +2425,9 @@ function renderHeroAndMetrics(forecast) {
   }
   document.getElementById('heroSourceNote').innerHTML = sourceNoteHtml;
 
+  // Подсказка точности — кликабельный chip с лидером (или подтверждением, что AVG лучший).
+  renderHeroAccuracyHint();
+
   document.getElementById('metricWind').innerHTML =
     `${fmtWind(today.wind, {withUnit:false})}<span>${unitWind()}</span>`;
   document.getElementById('metricWindSub').textContent =
@@ -2445,6 +2448,169 @@ function renderHeroAndMetrics(forecast) {
   document.getElementById('metricHumidity').innerHTML = `${today.humidity}<span>%</span>`;
   document.getElementById('metricHumiditySub').textContent =
     t('metric.humidity.dewPoint', { t: fmtTemp(today.dewPoint) });
+}
+
+// === DEBUG: dumpAccuracy() в DevTools console — показывает ВСЕ накопленные записи
+// по ВСЕМ локациям в localStorage. Полезно если непонятно, почему счётчик замеров
+// застрял на 1 — часто оказывается, что данные разбросаны по нескольким ключам
+// (разные координаты при переключении геолокации / городов).
+window.dumpAccuracy = function() {
+  console.group('📊 Accuracy storage dump');
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('kw:accuracy:')) keys.push(k);
+  }
+  if (keys.length === 0) {
+    console.log('Нет accuracy-ключей в localStorage.');
+    console.groupEnd();
+    return;
+  }
+  console.log(`Найдено ${keys.length} accuracy-ключей:`);
+  let totalRecords = 0;
+  let totalWithActual = 0;
+  for (const k of keys) {
+    try {
+      const data = JSON.parse(localStorage.getItem(k));
+      const records = (data && data.records) || [];
+      const withActual = records.filter(r => r.actual).length;
+      totalRecords += records.length;
+      totalWithActual += withActual;
+      console.log(`%c${k}`, 'color:#5eead4;font-weight:bold');
+      console.log(`  всего записей: ${records.length}, с actual (= замер): ${withActual}`);
+      if (records.length > 0) {
+        const firstDate = records[0].date;
+        const lastDate = records[records.length - 1].date;
+        console.log(`  даты: ${firstDate} … ${lastDate}`);
+        const noActualDates = records.filter(r => !r.actual).map(r => r.date);
+        if (noActualDates.length > 0) {
+          console.log(`  ⚠ записи БЕЗ actual: ${noActualDates.join(', ')}`);
+        }
+      }
+    } catch (e) {
+      console.error(`  ошибка парсинга ${k}: ${e.message}`);
+    }
+  }
+  console.log('');
+  console.log(`%cИТОГО: ${totalRecords} записей, ${totalWithActual} замеров`, 'color:#fbbf24;font-weight:bold');
+  if (keys.length > 1) {
+    console.log('%c⚠ Несколько ключей — данные разбросаны по разным локациям!', 'color:#fca5a5');
+    console.log('   Чтобы слить — см. mergeAccuracyKeys() ниже.');
+  }
+  console.groupEnd();
+};
+
+// Полная очистка всех accuracy-ключей. Использовать когда накопленные данные
+// размазаны / неверны и нужно начать с нуля.
+window.resetAccuracy = function() {
+  const toRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('kw:accuracy:')) toRemove.push(k);
+  }
+  for (const k of toRemove) localStorage.removeItem(k);
+  // Также сбросить in-memory кэш миграций — на случай повторного запуска без F5
+  if (typeof _accuracyMigratedKeys !== 'undefined') _accuracyMigratedKeys.clear();
+  console.log(`🗑 Удалено ${toRemove.length} accuracy-ключ(ей). Перезагрузи F5 — accuracy начнётся с нуля.`);
+};
+
+// Сливает все accuracy-ключи в один, привязанный к текущей локации.
+// Полезно если данные накопились в разных ключах из-за смены координат.
+window.mergeAccuracyKeys = function() {
+  if (!currentLocation || currentLocation.lat == null) {
+    console.warn('Текущая локация не определена.');
+    return;
+  }
+  const targetKey = `kw:accuracy:${currentLocation.lat.toFixed(2)}_${currentLocation.lon.toFixed(2)}:v1`;
+  const allRecords = new Map(); // date → record (приоритет: записи с actual)
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('kw:accuracy:')) keys.push(k);
+  }
+  for (const k of keys) {
+    try {
+      const data = JSON.parse(localStorage.getItem(k));
+      const records = (data && data.records) || [];
+      for (const r of records) {
+        const existing = allRecords.get(r.date);
+        // Сохраняем запись с actual если выбираем между двумя
+        if (!existing || (!existing.actual && r.actual)) {
+          allRecords.set(r.date, r);
+        }
+      }
+    } catch (e) {}
+  }
+  const merged = Array.from(allRecords.values()).sort((a, b) => a.date.localeCompare(b.date));
+  // Удаляем старые ключи
+  for (const k of keys) {
+    if (k !== targetKey) localStorage.removeItem(k);
+  }
+  localStorage.setItem(targetKey, JSON.stringify({ records: merged }));
+  console.log(`✅ Слито ${keys.length} ключей в ${targetKey}: ${merged.length} записей, ${merged.filter(r => r.actual).length} замеров.`);
+  console.log('Перезагрузи страницу (F5), чтобы UI подтянул объединённые данные.');
+};
+
+// Подсказка точности на hero — короткий chip с лидером (или подтверждением что AVG лучший).
+// Открывает Source Data Modal по клику. Скрывается если данных <3 пар замеров.
+function renderHeroAccuracyHint() {
+  const el = document.getElementById('heroAccuracyHint');
+  if (!el) return;
+  const accState = (typeof ACCURACY_STATE !== 'undefined') ? ACCURACY_STATE : null;
+  if (!accState || !accState.stats || typeof accuracyComposite !== 'function') { el.innerHTML = ''; return; }
+
+  // Собираем composite-score для каждой реальной модели
+  const rows = [];
+  for (const src of SOURCES) {
+    if (src.id === 'avg') continue;
+    const s = accState.stats[src.id];
+    if (!s) continue;
+    const score = accuracyComposite(s);
+    if (score == null) continue;
+    rows.push({ src, s, score });
+  }
+  // Меньше 3 моделей с данными — рейтинг шаткий, не показываем
+  if (rows.length < 3) { el.innerHTML = ''; return; }
+  rows.sort((a, b) => a.score - b.score);
+  const top = rows[0];
+  const topName = top.src.shortName || top.src.name;
+
+  const avgS = accState.stats.avg;
+  const avgScore = avgS ? accuracyComposite(avgS) : null;
+  const cur = (typeof currentSourceId === 'string') ? currentSourceId : 'avg';
+
+  let txt = '';
+  let cls = 'hap-leader';   // обычный (вы не лидер)
+  if (cur === 'avg') {
+    if (avgScore != null && avgScore <= top.score + 0.05) {
+      txt = `📊 Среднее — самый точный`;
+      cls = 'hap-best';
+    } else {
+      txt = `🏆 ${topName} точнее AVG`;
+    }
+  } else {
+    const curRow = rows.find(r => r.src.id === cur);
+    if (curRow) {
+      const rank = rows.indexOf(curRow) + 1;
+      if (rank === 1) {
+        txt = `🏆 Лидер по точности`;
+        cls = 'hap-best';
+      } else {
+        txt = `🏆 ${topName} точнее (вы #${rank} из ${rows.length})`;
+      }
+    } else {
+      txt = `🏆 Точнее всех: ${topName}`;
+    }
+  }
+
+  el.innerHTML = `<button type="button" class="hero-acc-pill ${cls}" aria-label="Открыть рейтинг точности">${txt}</button>`;
+  const btn = el.querySelector('button');
+  if (btn) {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof openSourceDataModal === 'function') openSourceDataModal();
+    });
+  }
 }
 
 // confidence (0..100) → класс из ['high','mid','low','veryLow']
@@ -6849,10 +7015,67 @@ function saveForecastCache(lat, lon, byModel) {
 // MAE считаем по накопленным парам (prediction, actual).
 const ACCURACY_MAX_RECORDS = 30;
 
+// Округление координат для ключа: 1 знак после точки ≈ 10 км.
+// Раньше было 2 знака (≈1 км) — но накопление за неделю с десятка визитов
+// размазывалось по разным ключам если геолокация чуть «дрожала» или юзер
+// переключался между близкими городами. На 10км погода практически одинакова.
+function accLatLon(lat, lon) { return [Number(lat.toFixed(1)), Number(lon.toFixed(1))]; }
+
 function accuracyKey(lat, lon) {
-  return `kw:accuracy:${lat.toFixed(2)}_${lon.toFixed(2)}:v1`;
+  // v2: точность ключа снижена до 0.1° (≈10 км) для меньшего размазывания
+  // данных при дрожании геолокации / переключении близких городов.
+  const [a, b] = accLatLon(lat, lon);
+  return `kw:accuracy:${a.toFixed(1)}_${b.toFixed(1)}:v2`;
 }
+
+// Мигрировать все старые v1-ключи (.toFixed(2)) и v2-кандидаты в близких координатах
+// в единый ключ текущей локации. Объединяет records по дате, приоритет — записям с actual.
+// Отрабатывает один раз для каждой уникальной точки `accLatLon` за сессию.
+const _accuracyMigratedKeys = new Set();
+function migrateAccuracyForLocation(lat, lon) {
+  const [tgtLat, tgtLon] = accLatLon(lat, lon);
+  const migrationKey = `${tgtLat.toFixed(1)}_${tgtLon.toFixed(1)}`;
+  if (_accuracyMigratedKeys.has(migrationKey)) return;
+  _accuracyMigratedKeys.add(migrationKey);
+  const tgtKey = accuracyKey(lat, lon);
+  const all = new Map(); // date → record
+  const toRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k || !k.startsWith('kw:accuracy:')) continue;
+    // Парсим координаты из ключа: kw:accuracy:LAT_LON:vN
+    const m = k.match(/^kw:accuracy:(-?\d+(?:\.\d+)?)_(-?\d+(?:\.\d+)?):/);
+    if (!m) continue;
+    const klat = Number(m[1]);
+    const klon = Number(m[2]);
+    // Сливаем только ключи в радиусе 0.1° (т.е. их округление до 0.1° совпадает с целевым).
+    if (Math.abs(klat - tgtLat) > 0.1 || Math.abs(klon - tgtLon) > 0.1) continue;
+    try {
+      const data = JSON.parse(localStorage.getItem(k));
+      const records = (data && data.records) || [];
+      for (const r of records) {
+        const existing = all.get(r.date);
+        // Приоритет — записям с actual; если оба без actual, оставляем существующую.
+        if (!existing || (!existing.actual && r.actual)) {
+          all.set(r.date, r);
+        }
+      }
+    } catch (e) {}
+    if (k !== tgtKey) toRemove.push(k);
+  }
+  if (all.size === 0) return; // нечего сливать
+  const merged = Array.from(all.values()).sort((a, b) => a.date.localeCompare(b.date));
+  try {
+    localStorage.setItem(tgtKey, JSON.stringify({ records: merged }));
+    for (const k of toRemove) localStorage.removeItem(k);
+    const withActual = merged.filter(r => r.actual).length;
+    console.info(`[accuracy] миграция: слито ${toRemove.length + 1} ключ(ей) → ${tgtKey}: ${merged.length} записей, ${withActual} замеров`);
+  } catch (e) { /* localStorage full / отключён */ }
+}
+
 function loadAccuracyData(lat, lon) {
+  // Авто-миграция при первом обращении — собираем близкие старые ключи в текущий.
+  migrateAccuracyForLocation(lat, lon);
   try {
     const raw = localStorage.getItem(accuracyKey(lat, lon));
     if (!raw) return { records: [] };
