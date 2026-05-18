@@ -8619,10 +8619,11 @@ async function fetchAndRenderRules(tg) {
     });
     if (!r.ok) {
       if (r.status === 401) {
-        // pairToken недействителен — отвязываем
-        clearTelegramState();
-        refreshNotifPane();
-        return;
+        // pairToken временно невалиден. НЕ удаляем локально автоматически —
+        // это может быть последствием /login на другом устройстве (там
+        // pairToken обновился, на этом устаревший). Юзер может сам нажать
+        // «Отвязать» в Settings, или повторно подключиться через /login.
+        console.warn('[notif] /api/rules-get вернул 401 — pairToken устарел. Если связка не вернётся — переподключи через /login в боте.');
       }
       return;
     }
