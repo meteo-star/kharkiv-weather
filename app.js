@@ -2085,7 +2085,15 @@ function colorForUV(v) {
    STATE & RENDER
    ============================================ */
 
-let currentSourceId = 'avg';
+// Восстанавливаем выбранный источник из localStorage, чтобы pull-to-refresh
+// (и любой reload) не сбрасывал выбор на 'avg'. Дефолт — 'avg'.
+const SOURCE_STORAGE_KEY = 'kw:source:v1';
+let currentSourceId = (function() {
+  try {
+    const v = localStorage.getItem(SOURCE_STORAGE_KEY);
+    return (v && typeof v === 'string') ? v : 'avg';
+  } catch (e) { return 'avg'; }
+})();
 let modalChartInstance = null;
 let precipChartInstance = null;
 // Активная метрика почасовой карточки: 'temp' | 'feels' | 'precip' | 'wind' | 'pressure'
@@ -4627,6 +4635,8 @@ function renderSourceButtons() {
 
 function selectSource(id) {
   currentSourceId = id;
+  // Сохраняем выбор — переживёт reload (включая pull-to-refresh).
+  try { localStorage.setItem(SOURCE_STORAGE_KEY, id); } catch (e) {}
   // Update buttons state
   document.getElementById('mainSrcBtn').classList.toggle('active', id === 'avg');
   document.querySelectorAll('.source-btn').forEach(b => {
