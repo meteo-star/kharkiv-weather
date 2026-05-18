@@ -7225,56 +7225,33 @@ async function fetchAccuracyFromServer(lat, lon) {
     if (!r.ok) return;
     const data = await r.json();
     if (!data.ok || !Array.isArray(data.records)) return;
-    // Кэшируем ответ
+    // Кэшируем ответ + метку «сервер ответил»
     try { localStorage.setItem(cacheKey, JSON.stringify({ fetchedAt: Date.now(), serverRecords: data.records })); } catch (e) {}
-    if (data.records.length === 0) return;
-    // Сливаем серверные records с локальными. Локальные хранятся в формате
-    // { date, predictions: {ecmwf:{tMax,tMin,precip},...}, actual: {tMax,tMin,precip} }.
-    // Серверные — в формате { date, predictions: {ecmwf:{tempMax,tempMin,precipSum},...}, actual: {tempMax,tempMin,precipSum} }.
-    // Нормализуем к локальному формату при слиянии.
-    const local = loadAccuracyData(lat, lon);
-    const byDate = new Map();
-    for (const rec of (local.records || [])) byDate.set(rec.date, rec);
-    let changed = false;
-    for (const sRec of data.records) {
-      const existing = byDate.get(sRec.date);
-      const converted = convertServerRecord(sRec);
-      if (!converted) continue;
-      if (!existing) {
-        byDate.set(sRec.date, converted);
-        changed = true;
-      } else if (!existing.actual && converted.actual) {
-        // Серверная запись имеет actual, локальная — нет: берём серверную
-        byDate.set(sRec.date, converted);
-        changed = true;
-      }
-    }
-    if (changed) {
-      const merged = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
-      saveAccuracyData(lat, lon, { records: merged });
-      ACCURACY_STATE = computeAccuracyStats(merged);
-      // Перерисовать UI элементы, где это видно
-      if (typeof renderAccuracy === 'function') renderAccuracy();
-      if (typeof renderHeroAccuracyHint === 'function') renderHeroAccuracyHint();
-    }
+    // ПОЛНАЯ ЗАМЕНА локальных данных серверными — сервер авторитет.
+    // Каждое устройство в одной точке (на 0.1° сетке) видит одинаковый рейтинг.
+    // Локальное накопление осталось как fallback на случай недоступности бота.
+    const converted = data.records.map(convertServerRecord).filter(Boolean);
+    saveAccuracyData(lat, lon, { records: converted });
+    ACCURACY_STATE = computeAccuracyStats(converted);
+    // Перерисовать UI элементы, где это видно
+    if (typeof renderAccuracy === 'function') renderAccuracy();
+    if (typeof renderHeroAccuracyHint === 'function') renderHeroAccuracyHint();
   } catch (e) {
     // тихо: бот может быть недоступен — это OK, локальные данные всё равно работают
   }
 }
 
-// Конверсия server-формата (tempMax/tempMin/precipSum) в локальный (tMax/tMin/precip).
+// Конверсия server-формата (tempMax/tempMin/precipSum/precipProb) в локальный.
+// Локальный формат: { tempMax, tempMin, precip } где precip — probability %.
 function convertServerRecord(sRec) {
   if (!sRec || !sRec.date) return null;
-  // Локальный формат записи: { tempMax, tempMin, precip }
-  // На сервере у нас уже tempMax / tempMin / precipSum.
-  // precipSum (мм/сутки) и precip (вероятность %) — разные метрики;
-  // не конвертируем precip из серверных данных, оставляем null.
   const convertMetrics = (m) => {
     if (!m) return null;
     return {
       tempMax: typeof m.tempMax === 'number' ? Math.round(m.tempMax * 10) / 10 : null,
       tempMin: typeof m.tempMin === 'number' ? Math.round(m.tempMin * 10) / 10 : null,
-      precip: null
+      // На сервере precipProb — probability_max (%) — совпадает с локальным precip
+      precip: typeof m.precipProb === 'number' ? Math.round(m.precipProb) : null
     };
   };
   const predictions = {};

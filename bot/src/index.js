@@ -1363,7 +1363,7 @@ async function fetchModelsForecast(lat, lon) {
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),
-    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum',
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max',
     timezone: 'auto',
     forecast_days: '5',
     models: MODELS.join(',')
@@ -1385,26 +1385,29 @@ async function fetchModelsForecast(lat, lon) {
       const tmax = daily[`temperature_2m_max_${m}`] || [];
       const tmin = daily[`temperature_2m_min_${m}`] || [];
       const psum = daily[`precipitation_sum_${m}`] || [];
+      const pprob = daily[`precipitation_probability_max_${m}`] || [];
       const days = times.map((t, i) => ({
         date: t,
         tempMax: tmax[i],
         tempMin: tmin[i],
-        precipSum: psum[i]
+        precipSum: psum[i],
+        precipProb: pprob[i]
       }));
       byModel[modelKeyMap[m]] = days;
     }
     // Вычисляем avg как среднее по всем моделям
     const avg = times.map((t, i) => {
-      const tmaxes = [], tmins = [], psums = [];
+      const tmaxes = [], tmins = [], psums = [], pprobs = [];
       for (const m of MODELS) {
         const k = modelKeyMap[m];
         const d = byModel[k][i];
         if (d.tempMax != null) tmaxes.push(d.tempMax);
         if (d.tempMin != null) tmins.push(d.tempMin);
         if (d.precipSum != null) psums.push(d.precipSum);
+        if (d.precipProb != null) pprobs.push(d.precipProb);
       }
       const mean = arr => arr.length ? arr.reduce((s, x) => s + x, 0) / arr.length : null;
-      return { date: t, tempMax: mean(tmaxes), tempMin: mean(tmins), precipSum: mean(psums) };
+      return { date: t, tempMax: mean(tmaxes), tempMin: mean(tmins), precipSum: mean(psums), precipProb: mean(pprobs) };
     });
     byModel.avg = avg;
     return byModel;
@@ -1430,7 +1433,8 @@ async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
       rec.actual = {
         tempMax: todayActual.tempMax,
         tempMin: todayActual.tempMin,
-        precipSum: todayActual.precipSum
+        precipSum: todayActual.precipSum,
+        precipProb: todayActual.precipProb
       };
     }
   }
@@ -1446,7 +1450,7 @@ async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
     for (const k of Object.keys(byModel)) {
       const d = byModel[k][offset];
       if (d && d.tempMax != null) {
-        predictions[k] = { tempMax: d.tempMax, tempMin: d.tempMin, precipSum: d.precipSum };
+        predictions[k] = { tempMax: d.tempMax, tempMin: d.tempMin, precipSum: d.precipSum, precipProb: d.precipProb };
         hasAny = true;
       }
     }
