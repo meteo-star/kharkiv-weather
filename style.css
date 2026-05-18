@@ -257,6 +257,15 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero[data-tod="dusk"]  .hero-overlay{background:linear-gradient(90deg,rgba(35,12,40,0.78) 0%,rgba(35,12,40,0.5) 35%,rgba(35,12,40,0.15) 75%,rgba(35,12,40,0.02) 100%)}
 .hero[data-tod="dawn"]  .hero-overlay{background:linear-gradient(90deg,rgba(40,20,55,0.72) 0%,rgba(40,20,55,0.45) 35%,rgba(40,20,55,0.12) 75%,rgba(40,20,55,0.02) 100%)}
 .hero[data-tod="day"]   .hero-overlay{background:linear-gradient(90deg,rgba(8,20,55,0.7) 0%,rgba(8,20,55,0.42) 35%,rgba(8,20,55,0.12) 75%,rgba(8,20,55,0) 100%)}
+/* Overcast — фото тяжёлых туч само по себе темнее: усиливаем overlay для гарантии читаемости текста. */
+.hero[data-cond="overcast"] .hero-overlay{background:linear-gradient(90deg,rgba(5,10,38,0.85) 0%,rgba(5,10,38,0.65) 35%,rgba(5,10,38,0.32) 70%,rgba(5,10,38,0.12) 100%)}
+.hero[data-tod="night"][data-cond="overcast"]  .hero-overlay{background:linear-gradient(90deg,rgba(2,4,15,0.92) 0%,rgba(2,4,15,0.72) 35%,rgba(2,4,15,0.32) 70%,rgba(2,4,15,0.1) 100%)}
+.hero[data-tod="dusk"][data-cond="overcast"]   .hero-overlay{background:linear-gradient(90deg,rgba(28,10,32,0.88) 0%,rgba(28,10,32,0.6) 35%,rgba(28,10,32,0.22) 75%,rgba(28,10,32,0.05) 100%)}
+.hero[data-tod="dawn"][data-cond="overcast"]   .hero-overlay{background:linear-gradient(90deg,rgba(32,16,44,0.82) 0%,rgba(32,16,44,0.55) 35%,rgba(32,16,44,0.18) 75%,rgba(32,16,44,0.05) 100%)}
+.hero[data-tod="day"][data-cond="overcast"]    .hero-overlay{background:linear-gradient(90deg,rgba(8,20,55,0.8) 0%,rgba(8,20,55,0.55) 35%,rgba(8,20,55,0.22) 75%,rgba(8,20,55,0.05) 100%)}
+/* Light-тема — небольшое осветление dawn/day фото (ночные не трогаем, они должны оставаться мрачными). */
+:root[data-theme="light"] .hero[data-tod="dawn"] .hero-scene,
+:root[data-theme="light"] .hero[data-tod="day"]  .hero-scene{filter:brightness(1.08) saturate(0.94)}
 /* РЎР»РѕРё РїРѕРіРѕРґРЅС‹С… С‡Р°СЃС‚РёС† (Р­С‚Р°Рї 2) */
 .hs-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;border-radius:24px}
 .hs-celestial{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:24px;overflow:hidden}
@@ -3631,6 +3640,33 @@ body.compare-mode .astro-photo { display:none !important }
 }
 :root[data-theme="light"] .hero[data-tod="dusk"] .hero-feels strong,
 :root[data-theme="light"] .hero[data-tod="night"] .hero-feels strong{
+  color:#ffb89c !important;
+}
+
+/* OVERCAST в light теме: фото тяжёлых туч само по себе тёмное, текст с белым гало
+   теряется. Переключаем на белый текст с тёмной тенью — как для dusk/night. */
+:root[data-theme="light"] .hero[data-tod="day"][data-cond="overcast"] *,
+:root[data-theme="light"] .hero[data-tod="dawn"][data-cond="overcast"] *{
+  color:#fff !important;
+  text-shadow:0 1px 4px rgba(0,0,0,0.7), 0 0 8px rgba(60,20,5,0.5) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"][data-cond="overcast"] .hero-temp-num,
+:root[data-theme="light"] .hero[data-tod="dawn"][data-cond="overcast"] .hero-temp-num{
+  color:#fff !important;
+  text-shadow:0 2px 12px rgba(0,0,0,0.7), 0 0 30px rgba(217,96,47,0.45) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"][data-cond="overcast"] .hero-temp-unit,
+:root[data-theme="light"] .hero[data-tod="dawn"][data-cond="overcast"] .hero-temp-unit{
+  color:rgba(255,235,210,0.95) !important;
+  text-shadow:none !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"][data-cond="overcast"] .hero-label,
+:root[data-theme="light"] .hero[data-tod="dawn"][data-cond="overcast"] .hero-label{
+  color:#ffb89c !important;
+  text-shadow:0 1px 3px rgba(0,0,0,0.6) !important;
+}
+:root[data-theme="light"] .hero[data-tod="day"][data-cond="overcast"] .hero-feels strong,
+:root[data-theme="light"] .hero[data-tod="dawn"][data-cond="overcast"] .hero-feels strong{
   color:#ffb89c !important;
 }
 
