@@ -2442,7 +2442,11 @@ function renderHeroAndMetrics(forecast) {
     t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust) });
 
   document.getElementById('metricRain').innerHTML = `${today.precip}<span>%</span>`;
-  const mm = Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
+  // Реальная сумма осадков мм/сутки из API (precipitation_sum). Раньше была
+  // аппроксимация `precip% * 0.07` — расходилась с почасовым графиком.
+  const mm = (typeof today.precipSum === 'number' && today.precipSum > 0)
+    ? today.precipSum
+    : Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);  // fallback для старого кэша
   document.getElementById('metricRainSub').textContent =
     t('metric.rainSub', { mm: mm, desc: t(precipDescKey(today.precip)) });
 
@@ -6995,9 +6999,10 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v10: в AVG-источнике поле `c` теперь согласовано с `wc` (codeToCondition(Math.max(wc))).
-  // Старый кэш v9 содержал рассогласованные c/wc → hero и hourly показывали разное.
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v10`;
+  // v11: добавлено поле precipSum (мм/сутки реальные) в day-объект — раньше
+  // в плитке «Осадки» считалось через precip% * 0.07 (аппроксимация),
+  // расходилось с почасовым графиком pmm.
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v11`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -7353,6 +7358,7 @@ async function fetchOpenMeteo(lat, lon, models = null) {
       'temperature_2m_max',
       'temperature_2m_min',
       'precipitation_probability_max',
+      'precipitation_sum',
       'weather_code',
       'sunrise',
       'sunset',
@@ -7431,6 +7437,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   const tMax  = dPick('temperature_2m_max');
   const tMin  = dPick('temperature_2m_min');
   const pMax  = dPick('precipitation_probability_max');
+  const pSum  = dPick('precipitation_sum');  // реальная сумма мм/сутки (раньше не запрашивалась — была аппроксимация в render'е)
   const wcDay = dPick('weather_code');
   const sunR  = dPick('sunrise');
   const sunS  = dPick('sunset');
@@ -7530,6 +7537,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
       max: tMax[i] != null ? Math.round(tMax[i]) : 0,
       min: tMin && tMin[i] != null ? Math.round(tMin[i]) : 0,
       precip: pMax && pMax[i] != null ? Math.round(pMax[i]) : 0,
+      precipSum: pSum && pSum[i] != null ? Math.round(pSum[i] * 10) / 10 : 0,  // мм/сутки реально
       wind: dayWind,
       windDir: wDir && wDir[i] != null ? degreesToCardinal(wDir[i]) : 'N',
       windGust: wGust && wGust[i] != null ? Math.round(wGust[i]) : 0,
@@ -7692,6 +7700,7 @@ function computeAverageForecast(forecasts) {
       max: Math.round(meanOf(days, 'max')),
       min: Math.round(meanOf(days, 'min')),
       precip: Math.round(meanOf(days, 'precip')),
+      precipSum: Math.round(meanOf(days, 'precipSum') * 10) / 10,
       wind: avgWind,
       windDir: first.windDir,
       windGust: Math.round(meanOf(days, 'windGust')),
