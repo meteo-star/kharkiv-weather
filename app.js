@@ -8985,10 +8985,31 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js')
       .then((reg) => {
         console.info('[PWA] Service Worker зарегистрирован, scope:', reg.scope);
+        // Сразу после регистрации — проверка обновлений (не ждём 24ч default'a)
+        try { reg.update(); } catch (_) {}
+
+        // Периодическая проверка раз в час (на случай долгого открытого PWA)
+        setInterval(() => {
+          try { reg.update(); } catch (_) {}
+        }, 60 * 60 * 1000);
       })
       .catch((err) => {
         console.warn('[PWA] Регистрация Service Worker не удалась:', err);
       });
+  });
+
+  // ВАЖНО для PWA: проверка обновлений при каждом возврате к приложению.
+  // Без этого PWA на iPhone могла «жить» со старым SW неделями, потому что
+  // browser HTTP cache держит service-worker.js и при обычном открытии PWA
+  // SW не пересматривается. visibilitychange срабатывает каждый раз, когда
+  // юзер сворачивает/возвращается к PWA — отличный триггер для check'а.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) return;
+    navigator.serviceWorker.getRegistration().then((reg) => {
+      if (reg) {
+        try { reg.update(); } catch (_) {}
+      }
+    });
   });
 }
 
