@@ -922,7 +922,18 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .location-block:hover .location-text h1{color:#00d4ff}
 .location-text h1{transition:color 0.2s}
 .location-edit-hint{font-size:9px;color:rgba(0,212,255,0.55);text-transform:uppercase;letter-spacing:0.1em;font-weight:600;margin-top:3px;display:flex;align-items:center;gap:4px}
-.geo-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(94,234,212,0.85);background:rgba(94,234,212,0.1);border:1px solid rgba(94,234,212,0.25);padding:2px 7px;border-radius:100px;font-weight:500;margin-left:6px;vertical-align:middle}
+.geo-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:rgba(94,234,212,0.85);background:rgba(94,234,212,0.1);border:1px solid rgba(94,234,212,0.25);padding:2px 7px;border-radius:100px;font-weight:500;margin-left:6px;vertical-align:middle;transition:all 0.3s}
+/* Пульсация когда переспрашиваем geolocation при старте/reload */
+.geo-tag.locating{
+  color:#fbbf24;
+  background:rgba(251,191,36,0.12);
+  border-color:rgba(251,191,36,0.5);
+  animation:geoTagPulse 1.2s ease-in-out infinite;
+}
+@keyframes geoTagPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.4)}
+  50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}
+}
 .geo-tag.manual{color:rgba(167,139,250,0.85);background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.25)}
 
 /* City modal вЂ” uses .modal-backdrop / .modal base styles, adds its own internal layout */

@@ -7911,6 +7911,52 @@ if (apiErrorRetry) apiErrorRetry.addEventListener('click', () => refreshForecast
 function loadInitialLocation() {
   const saved = loadSavedLocation();
   currentLocation = saved ? saved : { ...DEFAULT_LOCATION };
+  // Если последняя локация была определена через geolocation — перезапросить
+  // координаты в фоне при каждом старте/reload. Если пользователь переехал
+  // (даже на 200м+) — обновим точку, прогноз перезагрузится автоматически
+  // (через setCurrentLocation). Выбранный источник погоды сохраняется —
+  // он живёт в отдельном ключе `kw:source:v1`.
+  if (currentLocation.source === 'geo') {
+    // setTimeout — даём init завершиться (рендер, init forecasts) до запроса
+    // геолокации. На iOS PWA это особенно важно — браузер не любит запрос
+    // прямо в первом тике после старта.
+    setTimeout(refreshGeoLocationIfMoved, 50);
+  }
+}
+
+// Тихий рефреш геолокации. Если координаты ушли больше чем на ~200м (0.002°)
+// от закэшированных — обновляем currentLocation. setCurrentLocation сам
+// перезагрузит прогноз для новой точки.
+async function refreshGeoLocationIfMoved() {
+  if (!currentLocation || currentLocation.source !== 'geo') return;
+  // Визуальный индикатор «определяем местоположение» на location-чипе
+  const tagEl = document.getElementById('locationTag');
+  if (tagEl) tagEl.classList.add('locating');
+  try {
+    const pos = await requestGeolocation();
+    const oldLat = currentLocation.lat;
+    const oldLon = currentLocation.lon;
+    const moved = Math.abs(pos.lat - oldLat) > 0.002 || Math.abs(pos.lon - oldLon) > 0.002;
+    if (!moved) {
+      // То же место — ничего не делаем, только убираем индикатор
+      return;
+    }
+    // Переехали — reverse-geocode имени и обновление
+    const meta = await reverseGeocode(pos.lat, pos.lon);
+    setCurrentLocation({
+      name: meta.name,
+      region: meta.region,
+      lat: pos.lat,
+      lon: pos.lon,
+      source: 'geo'
+    });
+  } catch (e) {
+    // Permission denied / timeout — остаёмся на старых координатах,
+    // прогноз уже грузится из refreshForecast() в init.
+    console.info('[geo-refresh] не удалось обновить координаты:', e.message);
+  } finally {
+    if (tagEl) tagEl.classList.remove('locating');
+  }
 }
 
 /* ============================================
