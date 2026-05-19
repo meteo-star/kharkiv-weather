@@ -7927,36 +7927,65 @@ function loadInitialLocation() {
 // Тихий рефреш геолокации. Если координаты ушли больше чем на ~200м (0.002°)
 // от закэшированных — обновляем currentLocation. setCurrentLocation сам
 // перезагрузит прогноз для новой точки.
+// Минимум 1.2 сек пульсации (даже если geolocation вернула мгновенно из
+// своего внутреннего кэша) + видимый toast с результатом, чтобы юзер
+// точно понял что произошло.
 async function refreshGeoLocationIfMoved() {
   if (!currentLocation || currentLocation.source !== 'geo') return;
-  // Визуальный индикатор «определяем местоположение» на location-чипе
   const tagEl = document.getElementById('locationTag');
   if (tagEl) tagEl.classList.add('locating');
+  const startedAt = performance.now();
+  let resultKind = 'same'; // 'same' | 'moved' | 'error'
   try {
     const pos = await requestGeolocation();
     const oldLat = currentLocation.lat;
     const oldLon = currentLocation.lon;
     const moved = Math.abs(pos.lat - oldLat) > 0.002 || Math.abs(pos.lon - oldLon) > 0.002;
     if (!moved) {
-      // То же место — ничего не делаем, только убираем индикатор
-      return;
+      resultKind = 'same';
+    } else {
+      resultKind = 'moved';
+      const meta = await reverseGeocode(pos.lat, pos.lon);
+      setCurrentLocation({
+        name: meta.name,
+        region: meta.region,
+        lat: pos.lat,
+        lon: pos.lon,
+        source: 'geo'
+      });
     }
-    // Переехали — reverse-geocode имени и обновление
-    const meta = await reverseGeocode(pos.lat, pos.lon);
-    setCurrentLocation({
-      name: meta.name,
-      region: meta.region,
-      lat: pos.lat,
-      lon: pos.lon,
-      source: 'geo'
-    });
   } catch (e) {
-    // Permission denied / timeout — остаёмся на старых координатах,
-    // прогноз уже грузится из refreshForecast() в init.
+    resultKind = 'error';
     console.info('[geo-refresh] не удалось обновить координаты:', e.message);
   } finally {
-    if (tagEl) tagEl.classList.remove('locating');
+    // Гарантируем минимум 1.2 сек пульсации, чтобы юзер заметил
+    const elapsed = performance.now() - startedAt;
+    const remaining = Math.max(0, 1200 - elapsed);
+    setTimeout(() => {
+      if (tagEl) tagEl.classList.remove('locating');
+    }, remaining);
+    showGeoToast(resultKind);
   }
+}
+
+function showGeoToast(kind) {
+  let toast = document.getElementById('geoToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'geoToast';
+    toast.className = 'geo-toast';
+    document.body.appendChild(toast);
+  }
+  const texts = {
+    same:  '📍 Местоположение: без изменений',
+    moved: '📍 Местоположение обновлено',
+    error: '📍 Не удалось определить местоположение'
+  };
+  const kinds = { same: 'ok', moved: 'ok', error: 'err' };
+  toast.textContent = texts[kind] || texts.same;
+  toast.className = `geo-toast ${kinds[kind]} show`;
+  clearTimeout(toast._hide);
+  toast._hide = setTimeout(() => { toast.classList.remove('show'); }, 2400);
 }
 
 /* ============================================

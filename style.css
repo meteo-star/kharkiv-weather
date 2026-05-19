@@ -934,6 +934,34 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
   0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.4)}
   50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}
 }
+/* Toast результата обновления геолокации */
+.geo-toast{
+  position:fixed;left:50%;
+  top:calc(env(safe-area-inset-top, 0px) + 18px);
+  transform:translateX(-50%) translateY(-100px);
+  z-index:9999;
+  padding:10px 16px;
+  background:rgba(20,30,55,0.92);
+  border:1px solid rgba(94,234,212,0.4);
+  border-radius:100px;
+  color:#e8f0ff;font-size:13px;font-weight:600;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  opacity:0;pointer-events:none;
+  transition:opacity 0.28s ease, transform 0.32s cubic-bezier(0.16,1,0.3,1);
+}
+.geo-toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.geo-toast.err{border-color:rgba(248,113,113,0.5);color:#fecaca}
+:root[data-theme="light"] .geo-toast{
+  background:rgba(255,250,237,0.95) !important;
+  border-color:rgba(217,96,47,0.5) !important;
+  color:#2d1a10 !important;
+  box-shadow:0 10px 30px rgba(192,83,42,0.25) !important;
+}
+:root[data-theme="light"] .geo-toast.err{
+  border-color:rgba(220,38,38,0.55) !important;
+  color:#7c2d12 !important;
+}
 .geo-tag.manual{color:rgba(167,139,250,0.85);background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.25)}
 
 /* City modal вЂ” uses .modal-backdrop / .modal base styles, adds its own internal layout */
