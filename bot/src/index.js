@@ -994,6 +994,14 @@ async function handleApi(url, request, env, ctx) {
   // Публичный анонимный endpoint — возвращает накопленные accuracy-данные
   // для точки на 0.1° сетке. Заодно регистрирует точку как «интересную»
   // в acc:registry, чтобы cron обновлял её ежедневно.
+  //
+  // Тонкий момент: один и тот же физический город (например Высокий) может
+  // оказаться на разных 0.1°-ячейках в зависимости от способа задания
+  // координат (city-picker 49.91/36.21 → 49.9_36.2; geolocation 49.89/36.12
+  // → 49.9_36.1). Чтобы юзер не видел два разных счётчика для одного места,
+  // проверяем не только центральную ячейку, но и 8 соседних (радиус 10км).
+  // Возвращаем ячейку с максимальным числом замеров (центр имеет небольшой
+  // бонус — если данные есть и тут, и у соседа, центр в приоритете).
   if (path === '/api/accuracy' && request.method === 'GET') {
     const lat = parseFloat(url.searchParams.get('lat'));
     const lon = parseFloat(url.searchParams.get('lon'));
@@ -1001,18 +1009,41 @@ async function handleApi(url, request, env, ctx) {
       return withCors(jsonResp({ error: 'invalid_coords' }, 400), origin);
     }
     const [lat1, lon1] = accGridCoords(lat, lon);
-    const key = `acc:loc:${lat1.toFixed(1)}_${lon1.toFixed(1)}`;
-    // Не блокируем основной ответ регистрацией — пишем в фоне
+    // Регистрация — для центральной ячейки (cron будет копить именно тут)
     ctx.waitUntil(registerAccuracyLocation(env, lat1, lon1));
-    const stored = await env.STATS.get(key, { type: 'json' });
-    if (!stored) {
+
+    // Перебираем центр + 8 соседних с шагом 0.1°
+    const offsets = [
+      [0, 0], [-0.1, 0], [0.1, 0], [0, -0.1], [0, 0.1],
+      [-0.1, -0.1], [-0.1, 0.1], [0.1, -0.1], [0.1, 0.1]
+    ];
+    let best = null;
+    let bestScore = -1;
+    let bestKey = null;
+    for (const [dlat, dlon] of offsets) {
+      const cellLat = Math.round((lat1 + dlat) * 10) / 10;
+      const cellLon = Math.round((lon1 + dlon) * 10) / 10;
+      const k = `acc:loc:${cellLat.toFixed(1)}_${cellLon.toFixed(1)}`;
+      const stored = await env.STATS.get(k, { type: 'json' });
+      if (!stored || !Array.isArray(stored.records)) continue;
+      const withActual = stored.records.filter(r => r.actual).length;
+      // Центральная ячейка получает небольшой бонус — при равенстве выбираем её
+      const score = withActual + (dlat === 0 && dlon === 0 ? 0.5 : 0);
+      if (score > bestScore) {
+        bestScore = score;
+        best = stored;
+        bestKey = k;
+      }
+    }
+    if (!best) {
       return withCors(jsonResp({ ok: true, records: [], updated: null, sampleSize: 0 }), origin);
     }
     return withCors(jsonResp({
       ok: true,
-      records: stored.records || [],
-      updated: stored.updated || null,
-      sampleSize: (stored.records || []).filter(r => r.actual).length
+      records: best.records || [],
+      updated: best.updated || null,
+      sampleSize: (best.records || []).filter(r => r.actual).length,
+      cell: bestKey  // для отладки — какая ячейка реально вернулась
     }), origin);
   }
 
