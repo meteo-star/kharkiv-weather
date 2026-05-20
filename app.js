@@ -2640,15 +2640,16 @@ function renderHeroAccuracyHint() {
     if (score == null) continue;
     rows.push({ src, s, score });
   }
-  // Меньше 3 моделей с данными — рейтинг шаткий, не показываем
-  if (rows.length < 3) { el.innerHTML = ''; return; }
   rows.sort((a, b) => a.score - b.score);
-  const top = rows[0];
-  const topName = top.src.shortName || top.src.name;
+  const top = rows[0] || null;
+  const topName = top ? (top.src.shortName || top.src.name) : null;
 
   const avgS = accState.stats.avg;
   const avgScore = avgS ? accuracyComposite(avgS) : null;
   const cur = (typeof currentSourceId === 'string') ? currentSourceId : 'avg';
+
+  // Совсем нет данных (ни моделей, ни AVG) — скрываем
+  if (!top && avgScore == null) { el.innerHTML = ''; return; }
 
   // Общее число моделей (для красивого «№N из 7» с учётом моделей без данных)
   const totalModels = SOURCES.filter(s => s.id !== 'avg').length;
@@ -2669,25 +2670,30 @@ function renderHeroAccuracyHint() {
     // Конкретная модель выбрана
     const curRow = rows.find(r => r.src.id === cur);
     if (!curRow) {
-      // Нет данных для этой модели — не показываем hint вместо ложного «#N из M»
-      el.innerHTML = '';
-      return;
-    }
-    const rank = rows.indexOf(curRow) + 1;
-    // Сравнение с AVG — если AVG доступен, это самый понятный ориентир
-    // (AVG обычно точнее любой отдельной модели).
-    if (rank === 1 && (avgScore == null || curRow.score <= avgScore)) {
-      txt = `🏆 Лидер по точности`;
-      cls = 'hap-best';
-    } else if (avgScore != null && avgScore < curRow.score) {
-      const diff = curRow.score - avgScore;
-      const diffStr = diff < 0.1 ? '' : ` на ${diff.toFixed(1)}°`;
-      txt = `📊 Среднее точнее${diffStr}`;
-    } else if (rank === 1) {
-      txt = `🏆 Лидер среди моделей`;
-      cls = 'hap-best';
+      // Для этой модели данных пока нет. Но если AVG/другие модели набрали —
+      // даём общий ориентир: «📊 Среднее точнее» (или «🏆 X лидирует»).
+      if (avgScore != null) {
+        txt = `📊 Среднее обычно точнее · накапливаем данные для этой модели`;
+      } else if (top) {
+        txt = `🏆 Сейчас лидирует ${topName}`;
+      } else {
+        el.innerHTML = ''; return;
+      }
     } else {
-      txt = `🏆 ${topName} точнее · вы №${rank} из ${totalModels}`;
+      const rank = rows.indexOf(curRow) + 1;
+      if (rank === 1 && (avgScore == null || curRow.score <= avgScore)) {
+        txt = `🏆 Лидер по точности`;
+        cls = 'hap-best';
+      } else if (avgScore != null && avgScore < curRow.score) {
+        const diff = curRow.score - avgScore;
+        const diffStr = diff < 0.1 ? '' : ` на ${diff.toFixed(1)}°`;
+        txt = `📊 Среднее точнее${diffStr}`;
+      } else if (rank === 1) {
+        txt = `🏆 Лидер среди моделей`;
+        cls = 'hap-best';
+      } else {
+        txt = `🏆 ${topName} точнее · вы №${rank} из ${totalModels}`;
+      }
     }
   }
 
@@ -5205,7 +5211,8 @@ function renderStorm() {
    ============================================ */
 
 // Минимальное число пар (prediction, actual), при котором имеет смысл показать рейтинг.
-const ACCURACY_MIN_SAMPLES = 3;
+// После первого же замера уже даём ориентир (полоски частичные).
+const ACCURACY_MIN_SAMPLES = 1;
 // Цель прогресса в плейсхолдере (для бара «N / 7»).
 const ACCURACY_TARGET_SAMPLES = 7;
 
