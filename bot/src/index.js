@@ -727,7 +727,7 @@ async function handleAdminSummaryTest(env, chatId, args) {
       ? { wind: true, precip: true, astro: true, storm: true, feels: true, tomorrow: true }
       : { [mode]: true };
 
-  const fc = await fetchWeather(sub.lat, sub.lon);
+  const fc = await fetchWeather(sub.lat, sub.lon, sub);
   if (!fc) return sendMessage(env, chatId, `Не удалось получить погоду.`);
 
   const fakeRule = { type: 'morning_summary', hour: 7, minute: 0, sections };
@@ -973,7 +973,7 @@ async function handleApi(url, request, env, ctx) {
     const body = await request.json().catch(() => ({}));
     const sub = await authSub(env, body);
     if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
-    return withCors(jsonResp({ rules: sub.rules || [], name: sub.name, lang: sub.lang }), origin);
+    return withCors(jsonResp({ rules: sub.rules || [], name: sub.name, lang: sub.lang, source: sub.source || 'avg' }), origin);
   }
 
   // POST /api/rules-set  { chatId, pairToken, rules: [] }  →  { ok: true }
@@ -986,8 +986,14 @@ async function handleApi(url, request, env, ctx) {
     sub.rules = rules;
     // При смене правил сбрасываем cooldown'ы — иначе старые ключи висят
     sub.lastFired = {};
+    // Сохраняем выбранный пользователем источник погоды — fetchWeather будет
+    // использовать его при cron-проверках. Если 'avg' / null — все 7 моделей.
+    if (typeof body.source === 'string') {
+      const allowed = ['avg', 'ecmwf', 'gfs', 'icon', 'gem', 'jma', 'mf', 'ukmo'];
+      if (allowed.includes(body.source)) sub.source = body.source;
+    }
     await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
-    return withCors(jsonResp({ ok: true, count: rules.length }), origin);
+    return withCors(jsonResp({ ok: true, count: rules.length, source: sub.source || 'avg' }), origin);
   }
 
   // GET /api/accuracy?lat=X&lon=Y → { records: [...], updated: ts }
@@ -1509,7 +1515,7 @@ async function runCronCheck(env) {
       if (!Array.isArray(sub.rules) || sub.rules.length === 0) continue;
 
       // Тянем погоду один раз для всех правил этой подписки
-      const fc = await fetchWeather(sub.lat, sub.lon);
+      const fc = await fetchWeather(sub.lat, sub.lon, sub);
       if (!fc) continue;
 
       let changed = false;
@@ -1601,7 +1607,29 @@ function ruleKeyOf(rule) {
 }
 
 // Тянем прогноз для одной локации. Один запрос — все нужные поля.
-async function fetchWeather(lat, lon) {
+// 7 моделей Open-Meteo — те же что используются на сайте.
+// Default (без передачи sub) — используем AVG из всех моделей. Если в подписке
+// сохранён конкретный источник (sub.source) — используем только эту модель.
+const WEATHER_MODELS = ['ecmwf_ifs04', 'gfs_seamless', 'icon_seamless',
+                        'gem_seamless', 'jma_seamless', 'meteofrance_seamless', 'ukmo_seamless'];
+
+const SUB_SOURCE_TO_MODEL = {
+  ecmwf: 'ecmwf_ifs04',
+  gfs: 'gfs_seamless',
+  icon: 'icon_seamless',
+  gem: 'gem_seamless',
+  jma: 'jma_seamless',
+  mf: 'meteofrance_seamless',
+  ukmo: 'ukmo_seamless'
+};
+
+async function fetchWeather(lat, lon, sub = null) {
+  // Если подписка задала конкретный источник — используем только эту модель.
+  // Если 'avg' / null / неизвестный — используем все 7 и считаем AVG.
+  const wantedSource = (sub && sub.source) || 'avg';
+  const useAllModels = wantedSource === 'avg';
+  const singleModel = useAllModels ? null : SUB_SOURCE_TO_MODEL[wantedSource];
+
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),
@@ -1611,6 +1639,11 @@ async function fetchWeather(lat, lon) {
     wind_speed_unit: 'ms',
     forecast_days: '5'
   });
+  if (useAllModels) {
+    params.set('models', WEATHER_MODELS.join(','));
+  } else if (singleModel) {
+    params.set('models', singleModel);
+  }
   try {
     const r = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
     if (!r.ok) {
@@ -1618,9 +1651,26 @@ async function fetchWeather(lat, lon) {
       return null;
     }
     const data = await r.json();
+    // Если single model — нужно убрать суффикс модели из field-имён
+    // (например temperature_2m_ecmwf_ifs04 → temperature_2m)
+    if (singleModel) {
+      data.hourly = stripModelSuffix(data.hourly || {}, singleModel);
+      data.daily = stripModelSuffix(data.daily || {}, singleModel);
+      return {
+        hourly: data.hourly,
+        daily: data.daily,
+        utcOffsetSec: data.utc_offset_seconds || 0,
+        timezone: data.timezone || 'UTC'
+      };
+    }
+    // AVG из 7 моделей — усредняем все поля (precipitation — берём MAX
+    // как консервативный сигнал «хоть одна модель видит дождь», temperature
+    // и пр. — обычное среднее, weather_code — max).
+    const avgHourly = averageHourlyMultiModel(data.hourly || {}, WEATHER_MODELS);
+    const avgDaily = averageDailyMultiModel(data.daily || {}, WEATHER_MODELS);
     return {
-      hourly: data.hourly || {},   // { time: [], temperature_2m: [], precipitation: [], ... }
-      daily:  data.daily  || {},   // { time: [], temperature_2m_max: [], ... }
+      hourly: avgHourly,
+      daily: avgDaily,
       utcOffsetSec: data.utc_offset_seconds || 0,
       timezone: data.timezone || 'UTC'
     };
@@ -1628,6 +1678,98 @@ async function fetchWeather(lat, lon) {
     console.error('fetchWeather err:', e);
     return null;
   }
+}
+
+// Убирает _modelName из field-имён в hourly/daily, оставляя базовые имена
+// для совместимости со старым кодом (он читает temperature_2m, precipitation, ...)
+function stripModelSuffix(obj, model) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const suffix = `_${model}`;
+  const result = { time: obj.time };
+  for (const key of Object.keys(obj)) {
+    if (key === 'time') continue;
+    if (key.endsWith(suffix)) {
+      const base = key.slice(0, -suffix.length);
+      result[base] = obj[key];
+    } else if (!key.includes('_seamless') && !key.includes('_ifs')) {
+      // Некоторые поля без суффикса (если бы были) — пропускаем как есть
+      result[key] = obj[key];
+    }
+  }
+  return result;
+}
+
+// Усреднение hourly/daily когда запрошены несколько моделей. Возвращает поля
+// БЕЗ суффиксов моделей — для совместимости с evaluateRule/buildPrecipBlock.
+function averageHourlyMultiModel(hourly, models) {
+  const time = hourly.time || [];
+  const result = { time };
+  if (!time.length || !models.length) return result;
+  // Базовые поля которые ждёт rest of code
+  const FIELDS = [
+    { base: 'temperature_2m', aggregate: 'mean' },
+    { base: 'apparent_temperature', aggregate: 'mean' },
+    { base: 'precipitation', aggregate: 'max' },  // консервативный — если хоть одна модель видит дождь, видим и мы
+    { base: 'precipitation_probability', aggregate: 'mean' },
+    { base: 'weather_code', aggregate: 'max' },   // худший код побеждает
+    { base: 'wind_speed_10m', aggregate: 'mean' },
+    { base: 'wind_gusts_10m', aggregate: 'max' },
+    { base: 'wind_direction_10m', aggregate: 'first' },
+    { base: 'cape', aggregate: 'mean' },
+    { base: 'lifted_index', aggregate: 'mean' }
+  ];
+  for (const { base, aggregate } of FIELDS) {
+    const arr = new Array(time.length).fill(null);
+    for (let i = 0; i < time.length; i++) {
+      const vals = [];
+      for (const m of models) {
+        const v = hourly[`${base}_${m}`]?.[i];
+        if (v != null && Number.isFinite(v)) vals.push(v);
+      }
+      if (vals.length === 0) { arr[i] = null; continue; }
+      if (aggregate === 'mean') arr[i] = vals.reduce((s, x) => s + x, 0) / vals.length;
+      else if (aggregate === 'max') arr[i] = Math.max(...vals);
+      else if (aggregate === 'first') arr[i] = vals[0];
+    }
+    result[base] = arr;
+  }
+  return result;
+}
+
+function averageDailyMultiModel(daily, models) {
+  const time = daily.time || [];
+  const result = { time };
+  if (!time.length || !models.length) return result;
+  const FIELDS = [
+    { base: 'temperature_2m_max', aggregate: 'mean' },
+    { base: 'temperature_2m_min', aggregate: 'mean' },
+    { base: 'precipitation_sum', aggregate: 'max' },  // макс среди моделей — консервативно
+    { base: 'weather_code', aggregate: 'max' },
+    { base: 'sunrise', aggregate: 'first' },
+    { base: 'sunset', aggregate: 'first' }
+  ];
+  for (const { base, aggregate } of FIELDS) {
+    const arr = new Array(time.length).fill(null);
+    for (let i = 0; i < time.length; i++) {
+      const vals = [];
+      for (const m of models) {
+        const v = daily[`${base}_${m}`]?.[i];
+        if (v != null) vals.push(v);
+      }
+      if (vals.length === 0) continue;
+      if (aggregate === 'mean') {
+        const nums = vals.filter(v => Number.isFinite(v));
+        arr[i] = nums.length ? nums.reduce((s, x) => s + x, 0) / nums.length : null;
+      }
+      else if (aggregate === 'max') {
+        const nums = vals.filter(v => Number.isFinite(v));
+        arr[i] = nums.length ? Math.max(...nums) : null;
+      }
+      else if (aggregate === 'first') arr[i] = vals[0];
+    }
+    result[base] = arr;
+  }
+  return result;
 }
 
 // Оценка одного правила. Возвращает { fired: bool, message: string }.
@@ -1835,7 +1977,7 @@ function buildMorningSummary(sub, rule, fc) {
 
   // Дополнительные секции — порядок фиксированный, между блоками пустая строка
   const lat = (sub && typeof sub.lat === 'number') ? sub.lat : 50;
-  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat));
+  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat, daily));
   if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, s, e));
   if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, s, e));
   if (sections.astro)    pushBlock(lines, buildAstroBlock(daily));
@@ -1926,18 +2068,35 @@ function inSnowSeason(lat, date) {
   return m >= 4 && m <= 10;
 }
 
-function buildPrecipBlock(hourly, s, e, lat) {
+function buildPrecipBlock(hourly, s, e, lat, daily) {
   if (s < 0) return null;
   const wcArr = hourly.weather_code || [];
   const pmArr = hourly.precipitation || [];
   const times = hourly.time || [];
+
+  // Сумма осадков за сегодня по daily — fallback если continuous window не нашли
+  // (например, осадки прерывистые: 0.1 мм/ч в каждом из 5 часов — за день
+  // набегает 0.5 мм, но цельного «дождевого окна» нет). Без этого блок
+  // выдавал «дождя не ожидается» при сценарии где сайт показывал явный дождь.
+  const todayDailyPSum = (daily && Array.isArray(daily.precipitation_sum))
+    ? Number(daily.precipitation_sum[0]) || 0
+    : 0;
+  let todayHourlyPSum = 0;
+  for (let i = s; i < e; i++) {
+    if (typeof pmArr[i] === 'number' && pmArr[i] > 0) todayHourlyPSum += pmArr[i];
+  }
+  const totalSum = Math.max(todayDailyPSum, todayHourlyPSum);
 
   const rainWin = findPrecipWindow(times, wcArr, pmArr, 'rain', s, e);
   let block;
   if (rainWin) {
     let line = `🌧 Дождь: <b>${rainWin.from}–${rainWin.to}</b>`;
     if (rainWin.maxMm >= 0.5) line += `, до ${(Math.round(rainWin.maxMm * 10) / 10).toFixed(1)} мм/ч`;
+    if (totalSum >= 0.5) line += ` · за сутки ${(Math.round(totalSum * 10) / 10).toFixed(1)} мм`;
     block = line;
+  } else if (totalSum >= 0.5) {
+    // Continuous-окна нет (осадки разорванные), но за сутки набегает >0.5мм
+    block = `🌧 Возможны осадки (за сутки ${(Math.round(totalSum * 10) / 10).toFixed(1)} мм)`;
   } else {
     block = `✓ Дождя не ожидается`;
   }
