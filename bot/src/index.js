@@ -391,7 +391,9 @@ function formatRule(r) {
       const flags = [];
       if (sections.wind)     flags.push('ветер');
       if (sections.precip)   flags.push('осадки');
+      if (sections.fog)      flags.push('туман');
       if (sections.astro)    flags.push('восход/закат');
+      if (sections.moon)     flags.push('луна');
       if (sections.storm)    flags.push('гроза');
       if (sections.feels)    flags.push('ощущения');
       if (sections.tomorrow) flags.push('завтра');
@@ -724,7 +726,7 @@ async function handleAdminSummaryTest(env, chatId, args) {
   const sections = (mode === 'base')
     ? {}
     : (mode === 'full')
-      ? { wind: true, precip: true, astro: true, storm: true, feels: true, tomorrow: true }
+      ? { wind: true, precip: true, fog: true, astro: true, moon: true, storm: true, feels: true, tomorrow: true }
       : { [mode]: true };
 
   const fc = await fetchWeather(sub.lat, sub.lon, sub);
@@ -800,7 +802,7 @@ async function handleAdminAddRule(env, chatId, args) {
     case 'morning_summary': {
       const mode = (parts[3] || 'base').toLowerCase();
       const sections = mode === 'full'
-        ? { wind: true, precip: true, astro: true, storm: true, feels: true, tomorrow: true }
+        ? { wind: true, precip: true, fog: true, astro: true, moon: true, storm: true, feels: true, tomorrow: true }
         : undefined;
       rule = { type, hour: Number(p1) || 7, minute: Number(p2) || 0 };
       if (sections) rule.sections = sections;
@@ -1978,9 +1980,11 @@ function buildMorningSummary(sub, rule, fc) {
   // Дополнительные секции — порядок фиксированный, между блоками пустая строка
   const lat = (sub && typeof sub.lat === 'number') ? sub.lat : 50;
   if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat, daily));
+  if (sections.fog)      pushBlock(lines, buildFogBlock(hourly, s, e));
   if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, s, e));
   if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, s, e));
   if (sections.astro)    pushBlock(lines, buildAstroBlock(daily));
+  if (sections.moon)     pushBlock(lines, buildMoonBlock());
   if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, s, e));
   if (sections.tomorrow) pushBlock(lines, buildTomorrowBlock(daily));
 
@@ -2177,6 +2181,55 @@ function buildAstroBlock(daily) {
   const lenH = Math.floor(lenMin / 60);
   const lenM = lenMin % 60;
   return `🌅 <b>${srTime}</b>  🌇 <b>${ssTime}</b> · день ${lenH}ч ${lenM}м`;
+}
+
+// Блок «Туман» — ищет в hourly за сегодня weather_code 45 (туман) или 48
+// (изморозь). Если есть — возвращает окно появления. Иначе — «✓ Тумана нет».
+function buildFogBlock(hourly, s, e) {
+  if (s < 0) return null;
+  const wcArr = hourly.weather_code || [];
+  const times = hourly.time || [];
+  let winStart = -1, winEnd = -1;
+  for (let i = s; i < e; i++) {
+    const code = wcArr[i];
+    const isFog = (code === 45 || code === 48);
+    if (isFog) {
+      if (winStart < 0) winStart = i;
+      winEnd = i;
+    } else if (winStart >= 0) {
+      break; // первое окно тумана
+    }
+  }
+  if (winStart < 0) return `✓ Тумана не ожидается`;
+  const from = times[winStart].slice(11, 16);
+  const to = times[winEnd + 1] ? times[winEnd + 1].slice(11, 16) : (times[winEnd].slice(11, 13) + ':59');
+  return `🌫 Туман: <b>${from}–${to}</b>`;
+}
+
+// Блок «Фаза Луны» — текущая фаза + процент освещения + растущая/убывающая.
+// Считается математически (синодический цикл 29.53 дней от опорного новолуния).
+function buildMoonBlock() {
+  const REF = Date.UTC(2000, 0, 6, 18, 14); // опорное новолуние
+  const SYNODIC = 29.5305882;
+  const now = Date.now();
+  const days = (now - REF) / 86400000;
+  let phase = (days / SYNODIC) % 1;
+  if (phase < 0) phase += 1;
+  const illum = Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2 * 100);
+  const waxing = phase < 0.5;
+
+  let name, emoji;
+  if (phase < 0.03 || phase > 0.97)       { name = 'Новолуние';         emoji = '🌑'; }
+  else if (phase < 0.22)                  { name = 'Молодая луна';      emoji = '🌒'; }
+  else if (phase < 0.28)                  { name = 'Первая четверть';   emoji = '🌓'; }
+  else if (phase < 0.47)                  { name = 'Прибывающая луна';  emoji = '🌔'; }
+  else if (phase < 0.53)                  { name = 'Полнолуние';        emoji = '🌕'; }
+  else if (phase < 0.72)                  { name = 'Убывающая луна';    emoji = '🌖'; }
+  else if (phase < 0.78)                  { name = 'Последняя четверть'; emoji = '🌗'; }
+  else                                    { name = 'Старая луна';       emoji = '🌘'; }
+
+  const trend = waxing ? '↑ растёт' : '↓ убывает';
+  return `${emoji} ${name} · ${illum}% · ${trend}`;
 }
 
 function buildStormBlock(hourly, s, e) {
