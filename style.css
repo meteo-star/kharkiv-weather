@@ -338,6 +338,14 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   color:#86efac;
 }
 .hero-acc-pill.hap-best:hover{background:rgba(74,222,128,0.2);border-color:rgba(74,222,128,0.6)}
+.hero-acc-pill .hap-arrow{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:15px;height:15px;border-radius:50%;
+  background:rgba(255,255,255,0.14);
+  font-size:9px;font-weight:700;line-height:1;
+  margin-left:4px;transition:all 0.2s;
+}
+.hero-acc-pill:hover .hap-arrow{transform:translate(1px,-1px) scale(1.1);background:rgba(255,255,255,0.25)}
 .hero-source-note .src-name{color:var(--src-color,#00d4ff);font-weight:500}
 .weather-icon-3d{width:170px;height:170px;animation:floatIcon 4s ease-in-out infinite;position:relative;z-index:2}
 .hero .weather-icon-3d{display:none}
