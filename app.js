@@ -2474,7 +2474,7 @@ function renderHeroAndMetrics(forecast) {
   const desc = t(precipDescKey(today.precip));
   let subText;
   if (peak > 0) {
-    subText = `пик ${peak} мм/ч · ${mm} мм всего · ${desc}`;
+    subText = `пик ${peak} мм/ч · (${mm} мм всего) · ${desc}`;
   } else if (mm > 0) {
     subText = `${mm} мм · ${desc}`;
   } else {

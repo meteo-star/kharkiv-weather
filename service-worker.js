@@ -7,7 +7,7 @@
     При обновлении версии CACHE_VERSION старый кэш стирается на activate.
 */
 
-const CACHE_VERSION = 'meteo-star-v1.31.2-precip-peak-total';
+const CACHE_VERSION = 'meteo-star-v1.31.3-precip-parens';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
