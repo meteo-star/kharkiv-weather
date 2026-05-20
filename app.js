@@ -8481,7 +8481,9 @@ const RULE_DEFS = [
     sections: [
       { key: 'wind',     icon: '🌬', label: 'Ветер' },
       { key: 'precip',   icon: '💧', label: 'Осадки' },
+      { key: 'fog',      icon: '🌫', label: 'Туман' },
       { key: 'astro',    icon: '🌅', label: 'Восход/закат' },
+      { key: 'moon',     icon: '🌙', label: 'Фаза Луны' },
       { key: 'storm',    icon: '⛈', label: 'Гроза' },
       { key: 'feels',    icon: '🌡', label: 'По ощущениям' },
       { key: 'tomorrow', icon: '📊', label: 'Завтра' }
