@@ -2563,6 +2563,65 @@ window.mergeAccuracyKeys = function() {
   console.log('Перезагрузи страницу (F5), чтобы UI подтянул объединённые данные.');
 };
 
+// Toast «Выбранный источник не самый точный» — показывается один раз за сессию
+// после первого успешного fetch + accuracy update. Подсказывает пользователю
+// что есть более точная модель для его локации, и предлагает переключиться.
+let _accuracyAdvisedThisSession = false;
+function maybeAdviseBetterSource() {
+  if (_accuracyAdvisedThisSession) return;
+  const accState = (typeof ACCURACY_STATE !== 'undefined') ? ACCURACY_STATE : null;
+  if (!accState || !accState.stats || typeof accuracyComposite !== 'function') return;
+  const rows = [];
+  for (const src of SOURCES) {
+    if (src.id === 'avg') continue;
+    const s = accState.stats[src.id];
+    if (!s) continue;
+    const score = accuracyComposite(s);
+    if (score == null) continue;
+    rows.push({ src, score });
+  }
+  if (rows.length < 3) return; // данных мало
+  rows.sort((a, b) => a.score - b.score);
+  const top = rows[0];
+  const cur = (typeof currentSourceId === 'string') ? currentSourceId : 'avg';
+
+  // Если AVG выбран — проверяем что AVG лидер; если конкретная модель — что она #1
+  const avgScore = accState.stats.avg ? accuracyComposite(accState.stats.avg) : null;
+  if (cur === 'avg') {
+    if (avgScore != null && avgScore <= top.score + 0.05) return; // AVG ок
+  } else {
+    const curIdx = rows.findIndex(r => r.src.id === cur);
+    if (curIdx === 0) return; // выбранная модель уже #1
+  }
+  // Есть кто-то лучше — показываем toast
+  _accuracyAdvisedThisSession = true;
+  showAccuracyAdviceToast(top.src);
+}
+
+function showAccuracyAdviceToast(betterSrc) {
+  let toast = document.getElementById('accAdviceToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'accAdviceToast';
+    toast.className = 'acc-advice-toast';
+    document.body.appendChild(toast);
+  }
+  const name = betterSrc.shortName || betterSrc.name;
+  toast.innerHTML = `
+    <div class="aat-text">
+      <div class="aat-title">🏆 ${name} точнее для вашей локации</div>
+      <div class="aat-hint">Нажмите на индикатор источника в шапке, чтобы переключиться</div>
+    </div>
+    <button type="button" class="aat-close" aria-label="Закрыть">✕</button>
+  `;
+  toast.classList.add('show');
+  const closeBtn = toast.querySelector('.aat-close');
+  if (closeBtn) closeBtn.addEventListener('click', () => toast.classList.remove('show'));
+  // Автоскрытие через 8 сек
+  clearTimeout(toast._hide);
+  toast._hide = setTimeout(() => toast.classList.remove('show'), 8000);
+}
+
 // Подсказка точности на hero — короткий chip с лидером (или подтверждением что AVG лучший).
 // Открывает Source Data Modal по клику. Скрывается если данных <3 пар замеров.
 function renderHeroAccuracyHint() {
@@ -4648,6 +4707,8 @@ function selectSource(id) {
   });
   // Re-render with new data
   renderAll();
+  // Обновить плашку источника в notif-pane, если она открыта
+  if (typeof updateNotifSourceLabel === 'function') updateNotifSourceLabel();
   // Close modal if open (since data changed)
   if (modal.classList.contains('open')) closeModal();
 }
@@ -7780,6 +7841,9 @@ async function refreshForecast(force = false) {
       ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
       // Параллельно — публичная сводка с бота (sync между устройствами)
       fetchAccuracyFromServer(currentLocation.lat, currentLocation.lon);
+    // После первого успешного fetch и обновления ACCURACY_STATE — может,
+    // предложим юзеру более точный источник (одноразовый toast за сессию).
+    setTimeout(() => { try { maybeAdviseBetterSource(); } catch (_) {} }, 1500);
 
       // Climate-данные тоже из кэша; если нет — догружаем в фоне (не блокируем UI).
       const climateCached = loadClimateCache(currentLocation.lat, currentLocation.lon);
@@ -7877,6 +7941,9 @@ async function refreshForecast(force = false) {
     ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
     // Параллельно — публичная сводка с бота (sync между устройствами)
     fetchAccuracyFromServer(currentLocation.lat, currentLocation.lon);
+    // После первого успешного fetch и обновления ACCURACY_STATE — может,
+    // предложим юзеру более точный источник (одноразовый toast за сессию).
+    setTimeout(() => { try { maybeAdviseBetterSource(); } catch (_) {} }, 1500);
     renderStaticAstro();
     renderAstroPhoto();
     renderActivityWindows();
@@ -8610,7 +8677,23 @@ function refreshNotifPane() {
   if (!tg) return;
   document.getElementById('notifLinkedName').textContent =
     `${accountDisplayName(tg)} · ${tg.name || ''}`;
+  // Источник погоды для уведомлений: текущий currentSourceId.
+  // Реальный source сохранится при следующем «Сохранить» — пока показываем
+  // текущий выбранный на сайте, как ориентир для юзера.
+  updateNotifSourceLabel();
   fetchAndRenderRules(tg);
+}
+
+function updateNotifSourceLabel() {
+  const el = document.getElementById('notifSourceName');
+  if (!el) return;
+  const src = (typeof getCurrentSource === 'function') ? getCurrentSource() : null;
+  if (!src) { el.textContent = 'Среднее (7 моделей)'; return; }
+  if (src.id === 'avg') {
+    el.textContent = 'Среднее по 7 моделям';
+  } else {
+    el.textContent = src.shortName || src.name;
+  }
 }
 
 async function startPairing() {
@@ -8950,15 +9033,19 @@ async function saveNotifRules() {
   statusEl.textContent = '⏳ Сохраняю...';
   statusEl.classList.remove('error');
   try {
+    // Передаём текущий выбранный источник погоды — бот будет использовать его
+    // при cron-проверках. Если 'avg' (по умолчанию) — AVG из 7 моделей.
+    const source = (typeof currentSourceId === 'string') ? currentSourceId : 'avg';
     const r = await fetch(`${BOT_API_BASE}/api/rules-set`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chatId: tg.chatId, pairToken: tg.pairToken, rules: _notifEditing.rules })
+      body: JSON.stringify({ chatId: tg.chatId, pairToken: tg.pairToken, rules: _notifEditing.rules, source })
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     const data = await r.json();
     if (!data.ok) throw new Error('save failed');
-    statusEl.textContent = `✅ Сохранено: ${data.count} правил`;
+    const srcName = (typeof getCurrentSource === 'function') ? (getCurrentSource()?.shortName || source) : source;
+    statusEl.textContent = `✅ Сохранено: ${data.count} правил · источник: ${srcName}`;
     _notifEditing.dirty = false;
     setTimeout(() => { statusEl.textContent = ''; }, 3000);
   } catch (e) {
