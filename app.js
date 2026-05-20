@@ -2650,31 +2650,48 @@ function renderHeroAccuracyHint() {
   const avgScore = avgS ? accuracyComposite(avgS) : null;
   const cur = (typeof currentSourceId === 'string') ? currentSourceId : 'avg';
 
+  // Общее число моделей (для красивого «№N из 7» с учётом моделей без данных)
+  const totalModels = SOURCES.filter(s => s.id !== 'avg').length;
+
   let txt = '';
-  let cls = 'hap-leader';   // обычный (вы не лидер)
+  let cls = 'hap-leader';
   if (cur === 'avg') {
-    if (avgScore != null && avgScore <= top.score + 0.05) {
+    // AVG почти всегда математически точнее любой отдельной модели (закон
+    // больших чисел снижает дисперсию). Если у AVG composite-score ≤ топа
+    // моделей — он самый точный. Иначе кто-то его обогнал.
+    if (avgScore == null || avgScore <= top.score + 0.05) {
       txt = `📊 Среднее — самый точный`;
       cls = 'hap-best';
     } else {
-      txt = `🏆 ${topName} точнее AVG`;
+      txt = `🏆 ${topName} обходит среднее`;
     }
   } else {
+    // Конкретная модель выбрана
     const curRow = rows.find(r => r.src.id === cur);
-    if (curRow) {
-      const rank = rows.indexOf(curRow) + 1;
-      if (rank === 1) {
-        txt = `🏆 Лидер по точности`;
-        cls = 'hap-best';
-      } else {
-        txt = `🏆 ${topName} точнее (вы #${rank} из ${rows.length})`;
-      }
+    if (!curRow) {
+      // Нет данных для этой модели — не показываем hint вместо ложного «#N из M»
+      el.innerHTML = '';
+      return;
+    }
+    const rank = rows.indexOf(curRow) + 1;
+    // Сравнение с AVG — если AVG доступен, это самый понятный ориентир
+    // (AVG обычно точнее любой отдельной модели).
+    if (rank === 1 && (avgScore == null || curRow.score <= avgScore)) {
+      txt = `🏆 Лидер по точности`;
+      cls = 'hap-best';
+    } else if (avgScore != null && avgScore < curRow.score) {
+      const diff = curRow.score - avgScore;
+      const diffStr = diff < 0.1 ? '' : ` на ${diff.toFixed(1)}°`;
+      txt = `📊 Среднее точнее${diffStr}`;
+    } else if (rank === 1) {
+      txt = `🏆 Лидер среди моделей`;
+      cls = 'hap-best';
     } else {
-      txt = `🏆 Точнее всех: ${topName}`;
+      txt = `🏆 ${topName} точнее · вы №${rank} из ${totalModels}`;
     }
   }
 
-  el.innerHTML = `<button type="button" class="hero-acc-pill ${cls}" aria-label="Открыть рейтинг точности">${txt}</button>`;
+  el.innerHTML = `<button type="button" class="hero-acc-pill ${cls}" aria-label="Открыть рейтинг точности" title="Нажмите чтобы открыть полный рейтинг моделей">${txt}<span class="hap-arrow" aria-hidden="true">↗</span></button>`;
   const btn = el.querySelector('button');
   if (btn) {
     btn.addEventListener('click', (e) => {
