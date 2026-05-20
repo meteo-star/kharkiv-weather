@@ -2442,11 +2442,24 @@ function renderHeroAndMetrics(forecast) {
     t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust) });
 
   document.getElementById('metricRain').innerHTML = `${today.precip}<span>%</span>`;
-  // Реальная сумма осадков мм/сутки из API (precipitation_sum). Раньше была
-  // аппроксимация `precip% * 0.07` — расходилась с почасовым графиком.
-  const mm = (typeof today.precipSum === 'number' && today.precipSum > 0)
-    ? today.precipSum
-    : Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);  // fallback для старого кэша
+  // Считаем сумму осадков с ТЕКУЩЕГО часа до конца суток — это то, что юзер
+  // видит на почасовом графике «Детали осадков» (он показывает будущие часы).
+  // Так плитка визуально совпадает с графиком. Если будущих часов нет
+  // (например, сейчас 23:50) или сумма ~0 — fallback на daily.precipSum
+  // (полные сутки) или старую аппроксимацию.
+  let mm = 0;
+  if (today.hourly && Array.isArray(today.hourly)) {
+    for (let i = NOW_HOUR; i < today.hourly.length; i++) {
+      const v = today.hourly[i]?.pmm;
+      if (typeof v === 'number') mm += v;
+    }
+    mm = Math.round(mm * 10) / 10;
+  }
+  if (mm <= 0) {
+    mm = (typeof today.precipSum === 'number' && today.precipSum > 0)
+      ? today.precipSum
+      : Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
+  }
   document.getElementById('metricRainSub').textContent =
     t('metric.rainSub', { mm: mm, desc: t(precipDescKey(today.precip)) });
 
