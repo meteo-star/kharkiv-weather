@@ -2447,21 +2447,40 @@ function renderHeroAndMetrics(forecast) {
   // Так плитка визуально совпадает с графиком. Если будущих часов нет
   // (например, сейчас 23:50) или сумма ~0 — fallback на daily.precipSum
   // (полные сутки) или старую аппроксимацию.
+  // Считаем сумму осадков и пиковую интенсивность с ТЕКУЩЕГО часа до конца
+  // суток — обе метрики берутся из того же массива hourly, что использует
+  // почасовой график «Детали осадков». Сумма (мм) и пик (мм/ч) — разные
+  // метрики, юзер видит обе для контекста.
   let mm = 0;
+  let peak = 0;
   if (today.hourly && Array.isArray(today.hourly)) {
     for (let i = NOW_HOUR; i < today.hourly.length; i++) {
       const v = today.hourly[i]?.pmm;
-      if (typeof v === 'number') mm += v;
+      if (typeof v === 'number') {
+        mm += v;
+        if (v > peak) peak = v;
+      }
     }
     mm = Math.round(mm * 10) / 10;
+    peak = Math.round(peak * 10) / 10;
   }
   if (mm <= 0) {
     mm = (typeof today.precipSum === 'number' && today.precipSum > 0)
       ? today.precipSum
       : Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
   }
-  document.getElementById('metricRainSub').textContent =
-    t('metric.rainSub', { mm: mm, desc: t(precipDescKey(today.precip)) });
+  // Подпись: «пик 0.2 мм/ч · 0.7 мм всего · слабый дождь»
+  // (если pик 0 — показываем только описание; если сумма 0 — лаконичнее)
+  const desc = t(precipDescKey(today.precip));
+  let subText;
+  if (peak > 0) {
+    subText = `пик ${peak} мм/ч · ${mm} мм всего · ${desc}`;
+  } else if (mm > 0) {
+    subText = `${mm} мм · ${desc}`;
+  } else {
+    subText = desc;
+  }
+  document.getElementById('metricRainSub').textContent = subText;
 
   document.getElementById('metricPressure').innerHTML =
     `${fmtPressure(today.pressure, {withUnit:false})}<span>${unitPressure()}</span>`;
