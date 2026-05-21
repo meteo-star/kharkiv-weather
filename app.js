@@ -7116,10 +7116,10 @@ const API_STATE = {
 // Ключ зависит от координат — каждый город свой кэш.
 const FORECAST_CACHE_TTL_MS = 15 * 60 * 1000;
 function forecastCacheKey(lat, lon) {
-  // v11: добавлено поле precipSum (мм/сутки реальные) в day-объект — раньше
-  // в плитке «Осадки» считалось через precip% * 0.07 (аппроксимация),
-  // расходилось с почасовым графиком pmm.
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v11`;
+  // v12: day.max и day.min для AVG-источника теперь вычисляются по hourly[*].t
+  // (max/min) вместо meanOf(daily.tempMax/min) — устраняет расхождение между
+  // плиткой дня (9°/5°) и почасовой лентой (которая показывала 11° внутри).
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v12`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -7814,8 +7814,21 @@ function computeAverageForecast(forecasts) {
       condLabel: first.condLabel,
       condDescKey: codeToCondDescKey(null, avgWind) === 'condDesc.cloudy' ? first.condDescKey : first.condDescKey,
       condDesc: first.condDesc,
-      max: Math.round(meanOf(days, 'max')),
-      min: Math.round(meanOf(days, 'min')),
+      // max/min для AVG берём по почасовой ленте — это гарантирует
+      // согласованность с тем что юзер видит в модалке часа за часом.
+      // Раньше было `meanOf(days, 'max')` — усреднённые daily.tempMax
+      // моделей, которые могли расходиться с реальным максимумом hourly
+      // (например daily max=9, а в hourly за тот же день видно 11°).
+      max: (function() {
+        if (!hourly.length) return Math.round(meanOf(days, 'max'));
+        const ts = hourly.map(h => h.t).filter(v => typeof v === 'number');
+        return ts.length ? Math.max(...ts) : Math.round(meanOf(days, 'max'));
+      })(),
+      min: (function() {
+        if (!hourly.length) return Math.round(meanOf(days, 'min'));
+        const ts = hourly.map(h => h.t).filter(v => typeof v === 'number');
+        return ts.length ? Math.min(...ts) : Math.round(meanOf(days, 'min'));
+      })(),
       precip: Math.round(meanOf(days, 'precip')),
       precipSum: Math.round(meanOf(days, 'precipSum') * 10) / 10,
       wind: avgWind,
