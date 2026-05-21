@@ -473,9 +473,10 @@ async function handlePair(env, chatId, userId, fromObj, args, chatType = 'privat
     };
   }
 
-  // Генерим pairToken (32 hex символа)
+  // Генерим pairToken (32 hex символа) для ЭТОГО устройства.
+  // Добавляем в массив, не перетирая токены других устройств.
   const pairToken = generatePairToken();
-  sub.pairToken = pairToken;
+  addPairToken(sub, pairToken);
   await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
 
   // Обновляем pair-запись — теперь сайт сможет получить chatId+pairToken через poll
@@ -543,11 +544,14 @@ async function checkGroupAdmin(env, chatId, userId) {
 async function handleUnpair(env, chatId) {
   const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
   if (!sub) return sendMessage(env, chatId, `Ты не подписан.`);
-  if (!sub.pairToken) return sendMessage(env, chatId, `Сайт не связан с этим чатом.`);
-  sub.pairToken = null;
+  const tokens = getPairTokens(sub);
+  if (tokens.length === 0) return sendMessage(env, chatId, `Сайт не связан с этим чатом.`);
+  // /unpair от бота — отвязываем ВСЕ устройства разом
+  sub.pairTokens = [];
+  delete sub.pairToken;
   await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
   return sendMessage(env, chatId,
-    `🔓 Связь с сайтом разорвана.\nПодписка осталась, правила тоже. Чтобы менять правила — снова свяжи через сайт.`
+    `🔓 Связь с сайтом разорвана (отвязано ${tokens.length} устр.).\nПодписка осталась, правила тоже. Чтобы менять правила — снова свяжи через сайт.`
   );
 }
 
@@ -576,17 +580,17 @@ async function handleLogin(env, chatId, userId, chatType) {
   if (!sub) {
     return sendMessage(env, chatId, `Сначала /start (или /pair если уже создал код на сайте).`);
   }
-  // Если pairToken'а нет — генерим заодно (это случай когда пользователь
-  // никогда не связывался с сайтом, но хочет получить доступ через login).
-  if (!sub.pairToken) {
-    sub.pairToken = generatePairToken();
-    await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
-  }
+  // Генерим НОВЫЙ pairToken для устройства, которое кликнет magic-link.
+  // Добавляем в массив — старые токены других устройств не трогаем.
+  // Так iPhone и ПК могут оба быть подключены параллельно.
+  const newPairToken = generatePairToken();
+  addPairToken(sub, newPairToken);
+  await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
 
   // Короткий одноразовый auth-токен, истекает через 10 мин
   const authToken = generatePairToken();
   await env.PAIRING.put(`auth:${authToken}`,
-    JSON.stringify({ chatId, pairToken: sub.pairToken, createdAt: new Date().toISOString() }),
+    JSON.stringify({ chatId, pairToken: newPairToken, createdAt: new Date().toISOString() }),
     { expirationTtl: 600 }
   );
 
@@ -1089,12 +1093,13 @@ async function handleApi(url, request, env, ctx) {
   }
 
   // POST /api/unpair  { chatId, pairToken }  →  { ok: true }
-  // Сбрасывает pairToken (сайт теряет доступ, бот остаётся подписан).
+  // Отвязывает ТОЛЬКО это устройство (удаляет его pairToken из массива).
+  // Другие устройства остаются подключёнными. Подписка в боте сохраняется.
   if (path === '/api/unpair' && request.method === 'POST') {
     const body = await request.json().catch(() => ({}));
     const sub = await authSub(env, body);
     if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
-    sub.pairToken = null;
+    removePairToken(sub, body.pairToken);
     await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
     return withCors(jsonResp({ ok: true }), origin);
   }
@@ -1274,6 +1279,14 @@ async function handleAdminApi(path, request, env, origin) {
   return withCors(jsonResp({ error: 'not_found' }, 404), origin);
 }
 
+// Авторизация устройства: chat_id один (= один пользователь, общие
+// настройки уведомлений), но pairToken'ов может быть несколько (по одному
+// на каждое устройство). Когда юзер делает /login с нового устройства,
+// новый токен ДОБАВЛЯЕТСЯ в массив, а не перетирает старый — это значит
+// iPhone и ПК остаются «привязанными» одновременно.
+//
+// Backward-compat: если в KV ещё лежит старая структура с одним
+// sub.pairToken — обрабатываем её как массив из одного элемента.
 async function authSub(env, body) {
   const chatId = body.chatId;
   const pairToken = body.pairToken;
@@ -1281,8 +1294,44 @@ async function authSub(env, body) {
   const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
   if (!sub) return null;
   if (sub.banned) return null;
-  if (!sub.pairToken || sub.pairToken !== pairToken) return null;
+  const validTokens = getPairTokens(sub);
+  if (!validTokens.includes(pairToken)) return null;
   return sub;
+}
+
+// Возвращает массив активных pairToken'ов подписки (унифицированный API
+// над legacy `sub.pairToken` и новым `sub.pairTokens`).
+function getPairTokens(sub) {
+  if (!sub) return [];
+  if (Array.isArray(sub.pairTokens) && sub.pairTokens.length > 0) {
+    return sub.pairTokens.filter(t => typeof t === 'string' && t.length > 0);
+  }
+  if (typeof sub.pairToken === 'string' && sub.pairToken.length > 0) {
+    return [sub.pairToken];
+  }
+  return [];
+}
+
+// Добавляет новый pairToken в массив. Сохраняет до MAX_TOKENS_PER_SUB
+// последних — старые автоматически выпадают (юзер давно не пользовался).
+const MAX_TOKENS_PER_SUB = 8;
+function addPairToken(sub, newToken) {
+  if (!sub || !newToken) return;
+  const existing = getPairTokens(sub);
+  if (existing.includes(newToken)) return;
+  existing.push(newToken);
+  // Лимит — последние N токенов
+  sub.pairTokens = existing.slice(-MAX_TOKENS_PER_SUB);
+  // Чистим legacy поле, чтоб не было путаницы
+  delete sub.pairToken;
+}
+
+// Удаляет один pairToken (для /api/unpair с конкретного устройства).
+function removePairToken(sub, token) {
+  if (!sub || !token) return;
+  const existing = getPairTokens(sub);
+  sub.pairTokens = existing.filter(t => t !== token);
+  delete sub.pairToken;
 }
 
 function validateRule(r) {
