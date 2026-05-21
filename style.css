@@ -407,15 +407,31 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .legend .sw.p{background:linear-gradient(135deg,#a78bfa,#7c3aed);box-shadow:0 0 10px rgba(167,139,250,0.4)}
 .chart-wrap{position:relative;height:260px;width:100%}
 
-.days{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 48px) / 5);gap:12px;margin-bottom:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);padding-bottom:8px}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 48px) / 5);gap:12px;margin-bottom:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) rgba(255,255,255,0.04);padding-top:14px;padding-bottom:14px}
 .days::-webkit-scrollbar{height:6px}
 .days::-webkit-scrollbar-track{background:rgba(255,255,255,0.04);border-radius:3px}
 .days::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
 .days::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.5)}
 .day{padding:18px 12px;text-align:center;cursor:pointer;transition:all 0.3s;display:flex;flex-direction:column;align-items:center;gap:8px;user-select:none;scroll-snap-align:start;min-width:0}
-.day:hover{transform:translateY(-4px);border-color:rgba(0,212,255,0.4);box-shadow:0 8px 32px rgba(0,212,255,0.15),inset 0 1px 0 rgba(255,255,255,0.1)}
+/* hover — усиленная неоновая подсветка для контрастности (ярче, чем раньше). */
+.day:hover{
+  transform:translateY(-4px);
+  border-color:rgba(0,212,255,0.85);
+  background:linear-gradient(135deg,rgba(0,212,255,0.14) 0%,rgba(167,139,250,0.08) 100%);
+  box-shadow:
+    0 12px 40px rgba(0,212,255,0.40),
+    0 0 24px rgba(0,212,255,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+}
 .day:active{transform:translateY(-2px) scale(0.98)}
-.day.today{border-color:rgba(0,212,255,0.5);background:linear-gradient(135deg,rgba(0,212,255,0.1) 0%,rgba(167,139,250,0.05) 100%);box-shadow:0 8px 32px rgba(0,212,255,0.2),inset 0 1px 0 rgba(255,255,255,0.15)}
+.day.today{
+  border-color:rgba(0,212,255,0.7);
+  background:linear-gradient(135deg,rgba(0,212,255,0.16) 0%,rgba(167,139,250,0.08) 100%);
+  box-shadow:
+    0 10px 36px rgba(0,212,255,0.35),
+    0 0 20px rgba(0,212,255,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.18);
+}
 .day-name{font-size:12px;font-weight:600;color:rgba(232,240,255,0.8);text-transform:uppercase;letter-spacing:0.08em}
 .day-date{font-size:11px;color:rgba(232,240,255,0.45);font-feature-settings:'tnum'}
 .day-icon{width:56px;height:56px;margin:4px 0}
