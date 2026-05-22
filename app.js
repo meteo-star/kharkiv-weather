@@ -9214,6 +9214,169 @@ function clampToStep(v, min, max, step) {
   return x;
 }
 
+// Глобальный реестр для закрытия предыдущего popover'а при открытии нового
+let _activeWpPopover = null;
+function closeWpPopover() {
+  if (_activeWpPopover) {
+    _activeWpPopover.trigger.classList.remove('open');
+    _activeWpPopover.el.remove();
+    document.removeEventListener('mousedown', _activeWpPopover.outsideHandler, true);
+    document.removeEventListener('touchstart', _activeWpPopover.outsideHandler, true);
+    document.removeEventListener('keydown', _activeWpPopover.keyHandler);
+    _activeWpPopover = null;
+  }
+}
+
+// Позиционирование popover'а под триггер (или над, если не помещается снизу).
+function positionWpPopover(popover, trigger) {
+  const tr = trigger.getBoundingClientRect();
+  const pw = popover.offsetWidth;
+  const ph = popover.offsetHeight;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  let top = tr.bottom + window.scrollY + 6;
+  let left = tr.left + window.scrollX + tr.width / 2 - pw / 2;
+  // Если уходим вправо — придвинуть
+  if (left + pw > window.scrollX + vw - 8) left = window.scrollX + vw - pw - 8;
+  if (left < window.scrollX + 8) left = window.scrollX + 8;
+  // Если уходим вниз — открыть над триггером
+  if (top + ph > window.scrollY + vh - 8) {
+    top = tr.top + window.scrollY - ph - 6;
+  }
+  popover.style.left = `${left}px`;
+  popover.style.top = `${top}px`;
+}
+
+// Открывает popover для одного числового поля (windowHours / threshold / days).
+function openNumPopover(trigger, def, rule) {
+  if (_activeWpPopover && _activeWpPopover.trigger === trigger) {
+    closeWpPopover();
+    return;
+  }
+  closeWpPopover();
+  const fld = def.input.field;
+  const curVal = rule[fld];
+  const popover = document.createElement('div');
+  popover.className = 'wp-popover';
+  const body = document.createElement('div');
+  body.className = 'wp-popover-body';
+  const picker = createWheelPicker({
+    min: def.input.min, max: def.input.max,
+    value: (typeof curVal === 'number') ? curVal : def.input.min,
+    onChange: (v) => {
+      const r = _notifEditing.rules.find(x => x.type === def.type);
+      if (!r) return;
+      r[fld] = v;
+      _notifEditing.dirty = true;
+      // Обновить триггер
+      const valEl = trigger.querySelector('.wp-tr-val');
+      if (valEl) valEl.textContent = String(v);
+    }
+  });
+  body.appendChild(picker);
+  if (def.input.unit) {
+    const unit = document.createElement('span');
+    unit.className = 'wp-sep';
+    unit.textContent = def.input.unit;
+    body.appendChild(unit);
+  }
+  popover.appendChild(body);
+  const done = document.createElement('button');
+  done.type = 'button';
+  done.className = 'wp-popover-done';
+  done.textContent = 'Готово';
+  done.addEventListener('click', closeWpPopover);
+  popover.appendChild(done);
+  document.body.appendChild(popover);
+  positionWpPopover(popover, trigger);
+  trigger.classList.add('open');
+
+  const outsideHandler = (e) => {
+    if (popover.contains(e.target) || trigger.contains(e.target)) return;
+    closeWpPopover();
+  };
+  const keyHandler = (e) => {
+    if (e.key === 'Escape') closeWpPopover();
+  };
+  setTimeout(() => {
+    document.addEventListener('mousedown', outsideHandler, true);
+    document.addEventListener('touchstart', outsideHandler, true);
+    document.addEventListener('keydown', keyHandler);
+  }, 0);
+  _activeWpPopover = { el: popover, trigger, outsideHandler, keyHandler };
+}
+
+// Открывает popover для morning_summary — два picker'а (час + минута) рядом.
+function openTimePopover(trigger, def, rule) {
+  if (_activeWpPopover && _activeWpPopover.trigger === trigger) {
+    closeWpPopover();
+    return;
+  }
+  closeWpPopover();
+  const popover = document.createElement('div');
+  popover.className = 'wp-popover';
+  const body = document.createElement('div');
+  body.className = 'wp-popover-body';
+  const updateTrigger = () => {
+    const r = _notifEditing.rules.find(x => x.type === def.type);
+    if (!r) return;
+    const valEl = trigger.querySelector('.wp-tr-val');
+    if (valEl) {
+      const h = String(r.hour ?? 7).padStart(2, '0');
+      const m = String(r.minute ?? 0).padStart(2, '0');
+      valEl.textContent = `${h}:${m}`;
+    }
+  };
+  const hourPicker = createWheelPicker({
+    min: 0, max: 23, value: rule.hour ?? 7, pad: 2,
+    onChange: (v) => {
+      const r = _notifEditing.rules.find(x => x.type === def.type);
+      if (!r) return;
+      r.hour = v; _notifEditing.dirty = true;
+      updateTrigger();
+    }
+  });
+  const sep = document.createElement('span');
+  sep.className = 'wp-sep';
+  sep.textContent = ':';
+  const minutePicker = createWheelPicker({
+    min: 0, max: 55, step: 5, value: rule.minute ?? 0, pad: 2,
+    onChange: (v) => {
+      const r = _notifEditing.rules.find(x => x.type === def.type);
+      if (!r) return;
+      r.minute = v; _notifEditing.dirty = true;
+      updateTrigger();
+    }
+  });
+  body.appendChild(hourPicker);
+  body.appendChild(sep);
+  body.appendChild(minutePicker);
+  popover.appendChild(body);
+  const done = document.createElement('button');
+  done.type = 'button';
+  done.className = 'wp-popover-done';
+  done.textContent = 'Готово';
+  done.addEventListener('click', closeWpPopover);
+  popover.appendChild(done);
+  document.body.appendChild(popover);
+  positionWpPopover(popover, trigger);
+  trigger.classList.add('open');
+
+  const outsideHandler = (e) => {
+    if (popover.contains(e.target) || trigger.contains(e.target)) return;
+    closeWpPopover();
+  };
+  const keyHandler = (e) => {
+    if (e.key === 'Escape') closeWpPopover();
+  };
+  setTimeout(() => {
+    document.addEventListener('mousedown', outsideHandler, true);
+    document.addEventListener('touchstart', outsideHandler, true);
+    document.addEventListener('keydown', keyHandler);
+  }, 0);
+  _activeWpPopover = { el: popover, trigger, outsideHandler, keyHandler };
+}
+
 function renderRulesUI() {
   const container = document.getElementById('ruleList');
   if (!container) return;
@@ -9227,13 +9390,24 @@ function renderRulesUI() {
     row.className = 'rule-row' + (enabled ? ' enabled' : '');
     row.dataset.type = def.type;
 
-    // Placeholders для wheel-picker'ов — заполнятся ниже после row.innerHTML
+    // Триггеры: компактные пилюли с текущим значением. Клик → popover с wheel-picker'ом.
     let inputHtml = '';
     if (def.input) {
       if (def.input.isTime) {
-        inputHtml = `<div class="rule-time" data-wp-time="1"></div>`;
+        const h = String(rule.hour ?? 7).padStart(2, '0');
+        const m = String(rule.minute ?? 0).padStart(2, '0');
+        inputHtml = `<button type="button" class="wp-trigger" data-wp-time="1">
+          <span class="wp-tr-val">${h}:${m}</span>
+          <span class="wp-tr-arrow">▾</span>
+        </button>`;
       } else {
-        inputHtml = `<div class="rule-time" data-wp-num="${def.input.field}"><span class="wp-unit-pad"></span><span>${def.input.unit}</span></div>`;
+        const val = rule[def.input.field];
+        const display = (typeof val === 'number') ? val : def.input.min;
+        inputHtml = `<button type="button" class="wp-trigger" data-wp-num="${def.input.field}">
+          <span class="wp-tr-val">${display}</span>
+          <span class="wp-tr-unit">${def.input.unit}</span>
+          <span class="wp-tr-arrow">▾</span>
+        </button>`;
       }
     }
 
@@ -9304,53 +9478,21 @@ function renderRulesUI() {
       renderRulesUI();
     });
 
-    // Монтируем wheel-picker'ы вместо placeholder'ов
-    // Time-pick: hour + ':' + minute
-    const timeMount = row.querySelector('[data-wp-time]');
-    if (timeMount && def.input?.isTime) {
-      const hourPicker = createWheelPicker({
-        min: 0, max: 23, value: rule.hour ?? 7, pad: 2,
-        onChange: (v) => {
-          const r = _notifEditing.rules.find(x => x.type === def.type);
-          if (!r) return;
-          r.hour = v; _notifEditing.dirty = true;
-        }
+    // Триггеры с popover'ом. Клик → открывается выпадающий picker, snap при
+    // отпускании, апдейт триггера + правила. Закрытие — клик вне, Esc, или «Готово».
+    const timeTrigger = row.querySelector('[data-wp-time]');
+    if (timeTrigger && def.input?.isTime) {
+      timeTrigger.addEventListener('click', e => {
+        e.stopPropagation();
+        openTimePopover(timeTrigger, def, rule);
       });
-      const sep = document.createElement('span');
-      sep.className = 'wp-sep';
-      sep.textContent = ':';
-      const minutePicker = createWheelPicker({
-        min: 0, max: 55, step: 5, value: rule.minute ?? 0, pad: 2,
-        onChange: (v) => {
-          const r = _notifEditing.rules.find(x => x.type === def.type);
-          if (!r) return;
-          r.minute = v; _notifEditing.dirty = true;
-        }
-      });
-      timeMount.appendChild(hourPicker);
-      timeMount.appendChild(sep);
-      timeMount.appendChild(minutePicker);
-      // Клик по wheel-picker не должен toggle'ить правило
-      timeMount.addEventListener('click', e => e.stopPropagation());
     }
-    // Numeric-pick (windowHours / threshold / days)
-    const numMount = row.querySelector('[data-wp-num]');
-    if (numMount && def.input && !def.input.isTime) {
-      const fld = def.input.field;
-      const curVal = rule[fld];
-      const picker = createWheelPicker({
-        min: def.input.min, max: def.input.max,
-        value: (typeof curVal === 'number') ? curVal : def.input.min,
-        onChange: (v) => {
-          const r = _notifEditing.rules.find(x => x.type === def.type);
-          if (!r) return;
-          r[fld] = v; _notifEditing.dirty = true;
-        }
+    const numTrigger = row.querySelector('[data-wp-num]');
+    if (numTrigger && def.input && !def.input.isTime) {
+      numTrigger.addEventListener('click', e => {
+        e.stopPropagation();
+        openNumPopover(numTrigger, def, rule);
       });
-      const pad = numMount.querySelector('.wp-unit-pad');
-      if (pad) pad.replaceWith(picker);
-      else numMount.insertBefore(picker, numMount.firstChild);
-      numMount.addEventListener('click', e => e.stopPropagation());
     }
 
     // Чекбоксы Дождь/Снег для precip_soon
