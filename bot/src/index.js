@@ -1334,6 +1334,17 @@ function removePairToken(sub, token) {
   delete sub.pairToken;
 }
 
+// Пороги чувствительности для precip-уведомлений.
+// 'low' — только сильные осадки. 'med' — баланс (default). 'high' — даже моросящий дождь.
+function precipThresholds(sensitivity) {
+  switch (sensitivity) {
+    case 'low':  return [60, 0.3];
+    case 'high': return [25, 0.1];
+    case 'med':
+    default:     return [40, 0.2];
+  }
+}
+
 function validateRule(r) {
   if (!r || typeof r !== 'object') return false;
   switch (r.type) {
@@ -1345,6 +1356,8 @@ function validateRule(r) {
       return Number.isFinite(Number(r.windowHours)) && r.windowHours > 0 && r.windowHours <= 48;
     case 'precip_soon':
       // Новый тип с подразделами "дождь"/"снег". Хотя бы один должен быть включён.
+      // sensitivity — опциональный 'low' | 'med' | 'high', default 'med'.
+      if (r.sensitivity != null && !['low', 'med', 'high'].includes(r.sensitivity)) return false;
       return Number.isFinite(Number(r.windowHours)) && r.windowHours > 0 && r.windowHours <= 48
         && (r.watchRain === true || r.watchSnow === true);
     case 'storm_alert':
@@ -1649,7 +1662,7 @@ function ruleKeyOf(rule) {
     case 'temp_below':       return `temp_below_${rule.threshold}`;
     case 'temp_above':       return `temp_above_${rule.threshold}`;
     case 'rain_soon':        return `rain_soon_${rule.windowHours}`;
-    case 'precip_soon':      return `precip_soon_${rule.windowHours}_${rule.watchRain?1:0}_${rule.watchSnow?1:0}`;
+    case 'precip_soon':      return `precip_soon_${rule.windowHours}_${rule.watchRain?1:0}_${rule.watchSnow?1:0}_${rule.sensitivity||'med'}`;
     case 'storm_alert':      return 'storm_alert';
     case 'dry_streak':       return `dry_streak_${rule.days}`;
     case 'morning_summary':  return `morning_summary_${rule.hour}_${rule.minute || 0}`;
@@ -1878,11 +1891,11 @@ function evaluateRule(rule, fc, sub) {
 
     case 'rain_soon': {
       const windowH = Number(rule.windowHours) || 3;
-      // Ищем час в ближайшие N где prob > 60% И pmm > 0.3
+      const [minProb, minMm] = precipThresholds(rule.sensitivity);
       for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
-        if (prob >= 60 && mm >= 0.3) {
+        if (prob >= minProb && mm >= minMm) {
           return {
             fired: true,
             message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч, ${prob}% ${whenStr(times[i], fc.utcOffsetSec)}`
@@ -1895,14 +1908,16 @@ function evaluateRule(rule, fc, sub) {
     case 'precip_soon': {
       // Новое правило: «Осадки в ближайшие N часов» с подразделами Дождь/Снег.
       // Различаем по weather_code: 51-67/80-82 — дождь, 71-77/85-86 — снег, 95-99 — гроза (трактуем как дождь).
+      // Порог чувствительности задаёт пользователь: 'low' (строгий) / 'med' (default) / 'high' (чувствительный).
       const windowH = Number(rule.windowHours) || 3;
       const watchRain = rule.watchRain !== false;
       const watchSnow = rule.watchSnow === true;
+      const [minProb, minMm] = precipThresholds(rule.sensitivity);
       for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
         const code = wc[i];
-        if (mm < 0.3 || prob < 60) continue;
+        if (mm < minMm || prob < minProb) continue;
         const isRain = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
         const isSnow = (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
         if (watchRain && isRain) {
