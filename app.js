@@ -8494,13 +8494,18 @@ const NOTIF_ACCOUNTS_KEY = 'kw:telegram-accounts:v1';  // массив акка�
 const NOTIF_ACTIVE_KEY = 'kw:telegram-active:v1';      // chatId активного аккаунта
 
 const RULE_DEFS = [
-  { type: 'precip_soon',     icon: '💧', defaults: { windowHours: 3, watchRain: true, watchSnow: false },
+  { type: 'precip_soon',     icon: '💧', defaults: { windowHours: 3, watchRain: true, watchSnow: false, sensitivity: 'med' },
     input: { field: 'windowHours', min: 1, max: 24, unit: 'ч' },
     name: 'Осадки в ближайшие',
-    desc: 'Уведомить если ожидаются осадки >0.3 мм/ч и вероятность >60%',
+    desc: 'Уведомить когда ожидаются осадки в указанные часы',
     subChoices: [
       { field: 'watchRain', icon: '🌧', label: 'Дождь' },
       { field: 'watchSnow', icon: '❄',  label: 'Снег' }
+    ],
+    sensitivityOptions: [
+      { value: 'low',  label: 'Строгий', desc: '≥60% и ≥0.3 мм/ч — только сильные осадки' },
+      { value: 'med',  label: 'Средний', desc: '≥40% и ≥0.2 мм/ч — баланс (default)' },
+      { value: 'high', label: 'Чувств.', desc: '≥25% и ≥0.1 мм/ч — даже моросящий дождь' }
     ]
   },
   { type: 'storm_alert',     icon: '⚡', defaults: {},
@@ -9002,6 +9007,19 @@ function renderRulesUI() {
       }).join('');
       subHtml = `<div class="rule-subopts" data-kind="choices">${chips}</div>`;
     }
+    // Бар чувствительности (для precip_soon) — три кнопки в одном ряду.
+    // Показываем только когда правило включено.
+    if (enabled && def.sensitivityOptions) {
+      const curSens = rule.sensitivity || 'med';
+      const chips = def.sensitivityOptions.map(o => {
+        const on = o.value === curSens;
+        return `<button type="button" class="rule-sens-chip${on ? ' on' : ''}" data-sens="${o.value}" title="${o.desc}">
+          ${o.label}
+        </button>`;
+      }).join('');
+      const hint = '<div class="rule-subopts-hint">Чувствительность</div>';
+      subHtml += `${hint}<div class="rule-subopts" data-kind="sensitivity">${chips}</div>`;
+    }
     if (enabled && def.sections) {
       const sec = rule.sections || {};
       const chips = def.sections.map(s => {
@@ -9073,6 +9091,20 @@ function renderRulesUI() {
           if (!anyOnElsewhere) return; // блокируем выключение последнего
         }
         r[field] = newVal;
+        _notifEditing.dirty = true;
+        renderRulesUI();
+      });
+    });
+
+    // Чувствительность для precip_soon (3 уровня)
+    row.querySelectorAll('.rule-sens-chip').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const r = _notifEditing.rules.find(x => x.type === def.type);
+        if (!r) return;
+        const v = btn.dataset.sens;
+        if (!['low', 'med', 'high'].includes(v)) return;
+        r.sensitivity = v;
         _notifEditing.dirty = true;
         renderRulesUI();
       });
