@@ -1363,7 +1363,7 @@ function validateRule(r) {
     case 'storm_alert':
       return true;
     case 'dry_streak':
-      return Number.isFinite(Number(r.days)) && r.days > 0 && r.days <= 14;
+      return Number.isFinite(Number(r.days)) && r.days > 0 && r.days <= 10;
     case 'morning_summary':
       // sections — опциональный объект булевых флагов; если не передан, используется базовая сводка.
       if (r.sections != null && (typeof r.sections !== 'object' || Array.isArray(r.sections))) return false;

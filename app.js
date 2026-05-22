@@ -8521,7 +8521,7 @@ const RULE_DEFS = [
     name: 'Температура выше',
     desc: 'Максимум по прогнозу на ближайшие 12 часов' },
   { type: 'dry_streak',      icon: '☀',  defaults: { days: 3 },
-    input: { field: 'days', min: 1, max: 14, unit: 'дн' },
+    input: { field: 'days', min: 1, max: 10, unit: 'дн' },  // прогноз ограничен 10 днями
     name: 'Дней без дождя подряд',
     desc: 'Алерт когда подряд N+ дней с осадками <0.5 мм/сутки' },
   { type: 'morning_summary', icon: '🌅', defaults: { hour: 7, minute: 0 },
@@ -8963,6 +8963,257 @@ function showNotifAuthWarning(show) {
   el.style.display = '';
 }
 
+// iOS-style wheel picker. Создаёт DOM-элемент с вертикальным колесом чисел.
+// Поддерживает touch, mouse drag, wheel-event, кнопки клавиатуры (↑↓).
+// При завершении drag — snap к ближайшему значению, momentum-инерция.
+//
+// opts: {
+//   min, max, step (default 1),
+//   value (текущее),
+//   pad (default 0 — числа со ведущим нулём, например '07' для 7),
+//   onChange(newValue)
+// }
+// Возвращает DOM-элемент. Программный set value: el._setValue(v).
+function createWheelPicker(opts) {
+  const min = opts.min;
+  const max = opts.max;
+  const step = opts.step || 1;
+  const pad = opts.pad || 0;
+  let value = clampToStep(opts.value != null ? opts.value : min, min, max, step);
+
+  const ITEM_H = 28;
+  const TRACK_H = 88;
+  const CENTER_OFFSET = TRACK_H / 2 - ITEM_H / 2; // y-смещение чтобы центр трека = центр выбранного item
+
+  // Список всех допустимых значений
+  const values = [];
+  for (let v = min; v <= max; v += step) values.push(v);
+
+  const root = document.createElement('div');
+  root.className = 'wheel-picker';
+
+  const track = document.createElement('div');
+  track.className = 'wp-track';
+  track.tabIndex = 0;
+  track.setAttribute('role', 'spinbutton');
+  track.setAttribute('aria-valuemin', String(min));
+  track.setAttribute('aria-valuemax', String(max));
+  track.setAttribute('aria-valuenow', String(value));
+
+  const fadeTop = document.createElement('div');
+  fadeTop.className = 'wp-fade top';
+  const fadeBot = document.createElement('div');
+  fadeBot.className = 'wp-fade bottom';
+
+  const list = document.createElement('ul');
+  list.className = 'wp-list';
+  values.forEach(v => {
+    const li = document.createElement('li');
+    li.className = 'wp-item';
+    li.dataset.val = String(v);
+    li.textContent = pad ? String(v).padStart(pad, '0') : String(v);
+    list.appendChild(li);
+  });
+
+  track.appendChild(fadeTop);
+  track.appendChild(fadeBot);
+  track.appendChild(list);
+  root.appendChild(track);
+
+  function indexOfValue(v) {
+    const idx = values.indexOf(v);
+    return idx >= 0 ? idx : 0;
+  }
+
+  function applyTransform(translateY, animated = true) {
+    list.classList.toggle('dragging', !animated);
+    list.style.transform = `translateY(${translateY}px)`;
+    // Подсветка активного / соседних
+    const idx = Math.round((CENTER_OFFSET - translateY) / ITEM_H);
+    const items = list.children;
+    for (let i = 0; i < items.length; i++) {
+      items[i].classList.remove('active', 'near');
+      const d = Math.abs(i - idx);
+      if (d === 0) items[i].classList.add('active');
+      else if (d === 1) items[i].classList.add('near');
+    }
+  }
+
+  function setValue(v, opts = {}) {
+    const next = clampToStep(v, min, max, step);
+    if (next === value && !opts.force) return;
+    value = next;
+    const idx = indexOfValue(value);
+    const targetY = CENTER_OFFSET - idx * ITEM_H;
+    applyTransform(targetY, true);
+    track.setAttribute('aria-valuenow', String(value));
+    if (!opts.silent && typeof opts.fireChange !== 'undefined' ? opts.fireChange : true) {
+      if (typeof opts.onChange === 'function') opts.onChange(value);
+      else if (typeof opts._opts?.onChange === 'function') opts._opts.onChange(value);
+    }
+  }
+
+  // Инициализация — без onChange
+  const initIdx = indexOfValue(value);
+  list.style.transform = `translateY(${CENTER_OFFSET - initIdx * ITEM_H}px)`;
+  // Подсветка после рендера
+  requestAnimationFrame(() => applyTransform(CENTER_OFFSET - initIdx * ITEM_H, false));
+
+  // === Touch / Mouse drag ===
+  let dragging = false;
+  let startY = 0;
+  let startTranslateY = 0;
+  let lastY = 0;
+  let lastT = 0;
+  let velocity = 0; // px/ms
+
+  function pointerStart(clientY) {
+    dragging = true;
+    startY = clientY;
+    lastY = clientY;
+    lastT = performance.now();
+    velocity = 0;
+    // Текущий translateY
+    const m = list.style.transform.match(/translateY\((-?[\d.]+)px\)/);
+    startTranslateY = m ? parseFloat(m[1]) : CENTER_OFFSET;
+    list.classList.add('dragging');
+  }
+
+  function pointerMove(clientY) {
+    if (!dragging) return;
+    const dy = clientY - startY;
+    const ty = startTranslateY + dy;
+    list.style.transform = `translateY(${ty}px)`;
+    // Подсветка во время drag
+    const idx = Math.round((CENTER_OFFSET - ty) / ITEM_H);
+    const items = list.children;
+    for (let i = 0; i < items.length; i++) {
+      items[i].classList.remove('active', 'near');
+      const d = Math.abs(i - idx);
+      if (d === 0) items[i].classList.add('active');
+      else if (d === 1) items[i].classList.add('near');
+    }
+    // Скорость для инерции
+    const now = performance.now();
+    const dt = now - lastT;
+    if (dt > 0) velocity = (clientY - lastY) / dt;
+    lastY = clientY;
+    lastT = now;
+  }
+
+  function pointerEnd() {
+    if (!dragging) return;
+    dragging = false;
+    // Инерция: продолжаем скорость пока |velocity| > 0.05 с decay 0.95
+    const m = list.style.transform.match(/translateY\((-?[\d.]+)px\)/);
+    let ty = m ? parseFloat(m[1]) : CENTER_OFFSET;
+    const animFrame = () => {
+      if (Math.abs(velocity) < 0.05) {
+        snap(ty);
+        return;
+      }
+      ty += velocity * 16; // delta за 16ms
+      velocity *= 0.92;
+      list.style.transform = `translateY(${ty}px)`;
+      requestAnimationFrame(animFrame);
+    };
+    if (Math.abs(velocity) > 0.1) {
+      requestAnimationFrame(animFrame);
+    } else {
+      snap(ty);
+    }
+  }
+
+  function snap(ty) {
+    list.classList.remove('dragging');
+    let idx = Math.round((CENTER_OFFSET - ty) / ITEM_H);
+    idx = Math.max(0, Math.min(values.length - 1, idx));
+    const newValue = values[idx];
+    if (newValue !== value) {
+      value = newValue;
+      track.setAttribute('aria-valuenow', String(value));
+      if (typeof opts.onChange === 'function') opts.onChange(value);
+    }
+    applyTransform(CENTER_OFFSET - idx * ITEM_H, true);
+  }
+
+  // Touch
+  track.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) pointerStart(e.touches[0].clientY);
+  }, { passive: true });
+  track.addEventListener('touchmove', e => {
+    if (dragging && e.touches.length === 1) {
+      pointerMove(e.touches[0].clientY);
+      e.preventDefault();
+    }
+  }, { passive: false });
+  track.addEventListener('touchend', () => pointerEnd());
+  track.addEventListener('touchcancel', () => pointerEnd());
+
+  // Mouse
+  track.addEventListener('mousedown', e => {
+    pointerStart(e.clientY);
+    e.preventDefault();
+    const onMouseMove = e => pointerMove(e.clientY);
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      pointerEnd();
+    };
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+
+  // Wheel (колесо мыши)
+  track.addEventListener('wheel', e => {
+    e.preventDefault();
+    const dir = e.deltaY > 0 ? 1 : -1;
+    const curIdx = indexOfValue(value);
+    const newIdx = Math.max(0, Math.min(values.length - 1, curIdx + dir));
+    const newValue = values[newIdx];
+    if (newValue !== value) {
+      value = newValue;
+      track.setAttribute('aria-valuenow', String(value));
+      applyTransform(CENTER_OFFSET - newIdx * ITEM_H, true);
+      if (typeof opts.onChange === 'function') opts.onChange(value);
+    }
+  }, { passive: false });
+
+  // Keyboard (стрелки)
+  track.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const dir = e.key === 'ArrowUp' ? -1 : 1;
+      const curIdx = indexOfValue(value);
+      const newIdx = Math.max(0, Math.min(values.length - 1, curIdx + dir));
+      const newValue = values[newIdx];
+      if (newValue !== value) {
+        value = newValue;
+        track.setAttribute('aria-valuenow', String(value));
+        applyTransform(CENTER_OFFSET - newIdx * ITEM_H, true);
+        if (typeof opts.onChange === 'function') opts.onChange(value);
+      }
+    }
+  });
+
+  root._setValue = (v) => {
+    value = clampToStep(v, min, max, step);
+    const idx = indexOfValue(value);
+    applyTransform(CENTER_OFFSET - idx * ITEM_H, true);
+    track.setAttribute('aria-valuenow', String(value));
+  };
+  root._getValue = () => value;
+
+  return root;
+}
+
+function clampToStep(v, min, max, step) {
+  let x = Math.max(min, Math.min(max, v));
+  const rem = (x - min) % step;
+  if (rem !== 0) x = x - rem;
+  return x;
+}
+
 function renderRulesUI() {
   const container = document.getElementById('ruleList');
   if (!container) return;
@@ -8976,22 +9227,13 @@ function renderRulesUI() {
     row.className = 'rule-row' + (enabled ? ' enabled' : '');
     row.dataset.type = def.type;
 
+    // Placeholders для wheel-picker'ов — заполнятся ниже после row.innerHTML
     let inputHtml = '';
     if (def.input) {
       if (def.input.isTime) {
-        const h = rule.hour ?? 7;
-        const m = rule.minute ?? 0;
-        inputHtml = `<div class="rule-time">
-          <input class="rule-input" type="number" min="0" max="23" data-field="hour" value="${h}"/>
-          <span>:</span>
-          <input class="rule-input" type="number" min="0" max="59" data-field="minute" value="${String(m).padStart(2,'0')}"/>
-        </div>`;
+        inputHtml = `<div class="rule-time" data-wp-time="1"></div>`;
       } else {
-        const val = rule[def.input.field];
-        inputHtml = `<div class="rule-time">
-          <input class="rule-input" type="number" min="${def.input.min}" max="${def.input.max}" data-field="${def.input.field}" value="${val}"/>
-          <span>${def.input.unit}</span>
-        </div>`;
+        inputHtml = `<div class="rule-time" data-wp-num="${def.input.field}"><span class="wp-unit-pad"></span><span>${def.input.unit}</span></div>`;
       }
     }
 
@@ -9062,19 +9304,54 @@ function renderRulesUI() {
       renderRulesUI();
     });
 
-    row.querySelectorAll('.rule-input').forEach(inp => {
-      inp.addEventListener('input', () => {
-        const r = _notifEditing.rules.find(x => x.type === def.type);
-        if (!r) return;
-        const v = parseInt(inp.value, 10);
-        if (Number.isFinite(v)) {
-          r[inp.dataset.field] = v;
-          _notifEditing.dirty = true;
+    // Монтируем wheel-picker'ы вместо placeholder'ов
+    // Time-pick: hour + ':' + minute
+    const timeMount = row.querySelector('[data-wp-time]');
+    if (timeMount && def.input?.isTime) {
+      const hourPicker = createWheelPicker({
+        min: 0, max: 23, value: rule.hour ?? 7, pad: 2,
+        onChange: (v) => {
+          const r = _notifEditing.rules.find(x => x.type === def.type);
+          if (!r) return;
+          r.hour = v; _notifEditing.dirty = true;
         }
       });
-      // Клик по input не должен toggle'ить
-      inp.addEventListener('click', e => e.stopPropagation());
-    });
+      const sep = document.createElement('span');
+      sep.className = 'wp-sep';
+      sep.textContent = ':';
+      const minutePicker = createWheelPicker({
+        min: 0, max: 55, step: 5, value: rule.minute ?? 0, pad: 2,
+        onChange: (v) => {
+          const r = _notifEditing.rules.find(x => x.type === def.type);
+          if (!r) return;
+          r.minute = v; _notifEditing.dirty = true;
+        }
+      });
+      timeMount.appendChild(hourPicker);
+      timeMount.appendChild(sep);
+      timeMount.appendChild(minutePicker);
+      // Клик по wheel-picker не должен toggle'ить правило
+      timeMount.addEventListener('click', e => e.stopPropagation());
+    }
+    // Numeric-pick (windowHours / threshold / days)
+    const numMount = row.querySelector('[data-wp-num]');
+    if (numMount && def.input && !def.input.isTime) {
+      const fld = def.input.field;
+      const curVal = rule[fld];
+      const picker = createWheelPicker({
+        min: def.input.min, max: def.input.max,
+        value: (typeof curVal === 'number') ? curVal : def.input.min,
+        onChange: (v) => {
+          const r = _notifEditing.rules.find(x => x.type === def.type);
+          if (!r) return;
+          r[fld] = v; _notifEditing.dirty = true;
+        }
+      });
+      const pad = numMount.querySelector('.wp-unit-pad');
+      if (pad) pad.replaceWith(picker);
+      else numMount.insertBefore(picker, numMount.firstChild);
+      numMount.addEventListener('click', e => e.stopPropagation());
+    }
 
     // Чекбоксы Дождь/Снег для precip_soon
     row.querySelectorAll('.rule-subchoice').forEach(btn => {
