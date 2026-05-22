@@ -8497,7 +8497,7 @@ const RULE_DEFS = [
   { type: 'precip_soon',     icon: '💧', defaults: { windowHours: 3, watchRain: true, watchSnow: false, sensitivity: 'med' },
     input: { field: 'windowHours', min: 1, max: 24, unit: 'ч' },
     name: 'Осадки в ближайшие',
-    desc: 'Уведомить когда ожидаются осадки в указанные часы',
+    desc: 'Уведомить если осадки ожидаются в течение следующих часов',
     subChoices: [
       { field: 'watchRain', icon: '🌧', label: 'Дождь' },
       { field: 'watchSnow', icon: '❄',  label: 'Снег' }
