@@ -4017,6 +4017,68 @@ body.compare-mode .astro-photo { display:none !important }
    Используется в редакторе правил уведомлений для всех числовых полей
    (часы, минуты, температура, дни). Защищает от ввода невалидных значений.
    ============================================================ */
+/* Кнопка-триггер: компактная пилюля с текущим значением + стрелочка */
+.wp-trigger{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:6px 10px;
+  background:rgba(0,212,255,0.10);
+  border:1px solid rgba(0,212,255,0.35);
+  border-radius:10px;
+  color:#67e8f9;
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.18s;
+  min-width:56px;justify-content:center;
+  font-feature-settings:'tnum';
+}
+.wp-trigger:hover{background:rgba(0,212,255,0.18);border-color:rgba(0,212,255,0.55)}
+.wp-trigger.open{background:rgba(0,212,255,0.22);border-color:rgba(0,212,255,0.7);box-shadow:0 0 0 3px rgba(0,212,255,0.18)}
+.wp-trigger .wp-tr-unit{font-size:11px;font-weight:500;opacity:0.7;margin-left:1px}
+.wp-trigger .wp-tr-arrow{font-size:9px;margin-left:2px;opacity:0.75;transition:transform 0.2s}
+.wp-trigger.open .wp-tr-arrow{transform:rotate(180deg)}
+:root[data-theme="light"] .wp-trigger{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+  color:#a8451c !important;
+}
+:root[data-theme="light"] .wp-trigger:hover{background:#ffefdc !important;border-color:#d9602f !important}
+:root[data-theme="light"] .wp-trigger.open{background:#ffe5d0 !important;box-shadow:0 0 0 3px rgba(217,96,47,0.2) !important}
+
+/* Popover-обёртка с picker'ом внутри. Position absolute, рисуется
+   при клике по триггеру. Закрытие: click outside / Esc / кнопка «Готово». */
+.wp-popover{
+  position:absolute;z-index:1000;
+  padding:12px;
+  background:rgba(10,20,50,0.95);
+  border:1px solid rgba(0,212,255,0.4);
+  border-radius:14px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 12px 40px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.04);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  animation:wpFadeIn 0.18s ease-out;
+}
+@keyframes wpFadeIn{
+  from{opacity:0;transform:translateY(-4px) scale(0.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.wp-popover .wp-popover-body{display:inline-flex;align-items:center;gap:6px}
+.wp-popover-done{
+  width:100%;padding:8px 14px;
+  background:linear-gradient(135deg,#00d4ff 0%,#0099cc 100%);
+  border:none;border-radius:10px;
+  color:#02061a;font-family:inherit;font-size:12px;font-weight:700;
+  cursor:pointer;transition:all 0.18s;
+}
+.wp-popover-done:hover{background:linear-gradient(135deg,#1ce0ff 0%,#00b3e6 100%)}
+:root[data-theme="light"] .wp-popover{
+  background:rgba(255,250,237,0.97) !important;
+  border:1.5px solid rgba(217,96,47,0.45) !important;
+  box-shadow:0 12px 40px rgba(192,83,42,0.3) !important;
+}
+:root[data-theme="light"] .wp-popover-done{
+  background:linear-gradient(135deg,#d9602f 0%,#b34a1f 100%) !important;
+  color:#fff !important;
+}
+
 .wheel-picker{
   display:inline-flex;align-items:center;gap:6px;
   flex-shrink:0;
