@@ -4012,6 +4012,85 @@ body.compare-mode .astro-photo { display:none !important }
   box-shadow:inset 0 0 0 1px rgba(0,212,255,0.25);
 }
 .rule-subchoice .rsc-icon, .rule-section-chip .rsc-icon{font-size:13px;line-height:1}
+/* ============================================================
+   WHEEL PICKER — iOS-style колесо чисел с прокруткой и инерцией
+   Используется в редакторе правил уведомлений для всех числовых полей
+   (часы, минуты, температура, дни). Защищает от ввода невалидных значений.
+   ============================================================ */
+.wheel-picker{
+  display:inline-flex;align-items:center;gap:6px;
+  flex-shrink:0;
+  user-select:none;
+  -webkit-user-select:none;
+  touch-action:pan-y;
+}
+.wp-track{
+  position:relative;
+  width:48px;height:88px;
+  overflow:hidden;
+  background:rgba(0,0,0,0.28);
+  border:1px solid rgba(0,212,255,0.25);
+  border-radius:10px;
+  cursor:grab;
+}
+.wp-track:active{cursor:grabbing}
+/* Центральная подсветка выбранного значения */
+.wp-track::before, .wp-track::after{
+  content:'';position:absolute;left:6px;right:6px;
+  height:1px;background:rgba(0,212,255,0.45);
+  pointer-events:none;z-index:2;
+}
+.wp-track::before{top:calc(50% - 14px)}
+.wp-track::after{top:calc(50% + 14px)}
+/* Градиенты сверху и снизу — fade-эффект для нецентральных значений */
+.wp-fade{
+  position:absolute;left:0;right:0;height:30px;pointer-events:none;z-index:3;
+}
+.wp-fade.top{top:0;background:linear-gradient(to bottom,rgba(0,0,0,0.55) 0%,transparent 100%)}
+.wp-fade.bottom{bottom:0;background:linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 100%)}
+.wp-list{
+  list-style:none;margin:0;padding:0;
+  position:absolute;left:0;right:0;
+  transition:transform 0.28s cubic-bezier(0.22,1,0.36,1);
+  will-change:transform;
+}
+.wp-list.dragging{transition:none}
+.wp-item{
+  height:28px;line-height:28px;
+  text-align:center;
+  color:rgba(232,240,255,0.55);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:600;
+  transition:color 0.18s,transform 0.18s,opacity 0.18s;
+  font-feature-settings:'tnum';
+}
+.wp-item.active{
+  color:#67e8f9;
+  font-size:15px;
+  text-shadow:0 0 8px rgba(0,212,255,0.5);
+}
+.wp-item.near{color:rgba(232,240,255,0.75)}
+.wp-track:focus-visible{outline:2px solid rgba(0,212,255,0.6);outline-offset:2px}
+/* Light-тема: терракотовая палитра */
+:root[data-theme="light"] .wp-track{
+  background:#fffaf0 !important;
+  border:1.5px solid rgba(192,83,42,0.4) !important;
+}
+:root[data-theme="light"] .wp-track::before,
+:root[data-theme="light"] .wp-track::after{background:rgba(217,96,47,0.45) !important}
+:root[data-theme="light"] .wp-fade.top{background:linear-gradient(to bottom,rgba(255,250,237,0.85) 0%,transparent 100%) !important}
+:root[data-theme="light"] .wp-fade.bottom{background:linear-gradient(to top,rgba(255,250,237,0.85) 0%,transparent 100%) !important}
+:root[data-theme="light"] .wp-item{color:rgba(45,26,16,0.5) !important}
+:root[data-theme="light"] .wp-item.active{color:#a8451c !important;text-shadow:0 0 6px rgba(217,96,47,0.4) !important}
+:root[data-theme="light"] .wp-item.near{color:rgba(45,26,16,0.75) !important}
+/* Разделитель «:» между часами и минутами в morning_summary */
+.wheel-picker .wp-sep{
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;font-weight:700;
+  color:rgba(232,240,255,0.6);
+  padding:0 1px;
+}
+:root[data-theme="light"] .wheel-picker .wp-sep{color:rgba(45,26,16,0.7) !important}
 /* Бар чувствительности precip_soon — 3 кнопки в одну строку */
 .rule-sens-chip{
   flex:1;
