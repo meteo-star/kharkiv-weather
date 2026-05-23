@@ -2441,7 +2441,27 @@ function renderHeroAndMetrics(forecast) {
   document.getElementById('metricWindSub').textContent =
     t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust) });
 
-  document.getElementById('metricRain').innerHTML = `${today.precip}<span>%</span>`;
+  // Для конкретных моделей Open-Meteo НЕ возвращает precipitation_probability_max
+  // (это поле есть только в ensemble/best_match). Приходит 0. Если так —
+  // оценим % синтетически: из max hourly probability за сегодня, либо
+  // (если и hourly probability пуст) из доли часов с pmm > 0.1.
+  let dayPrecipPct = today.precip || 0;
+  if (dayPrecipPct === 0 && today.hourly && Array.isArray(today.hourly)) {
+    let wetHours = 0;
+    let maxHourlyProb = 0;
+    let totalHours = 0;
+    for (const h of today.hourly) {
+      totalHours++;
+      if ((h.pmm || 0) > 0.1) wetHours++;
+      if (typeof h.p === 'number' && h.p > maxHourlyProb) maxHourlyProb = h.p;
+    }
+    if (maxHourlyProb > 0) {
+      dayPrecipPct = maxHourlyProb;
+    } else if (wetHours > 0 && totalHours > 0) {
+      dayPrecipPct = Math.max(15, Math.round((wetHours / totalHours) * 100));
+    }
+  }
+  document.getElementById('metricRain').innerHTML = `${dayPrecipPct}<span>%</span>`;
   // Считаем сумму осадков с ТЕКУЩЕГО часа до конца суток — это то, что юзер
   // видит на почасовом графике «Детали осадков» (он показывает будущие часы).
   // Так плитка визуально совпадает с графиком. Если будущих часов нет
@@ -2471,7 +2491,7 @@ function renderHeroAndMetrics(forecast) {
   }
   // Подпись: «пик 0.2 мм/ч · 0.7 мм всего · слабый дождь»
   // (если pик 0 — показываем только описание; если сумма 0 — лаконичнее)
-  const desc = t(precipDescKey(today.precip));
+  const desc = t(precipDescKey(dayPrecipPct));
   let subText;
   if (peak > 0) {
     subText = `пик ${peak} мм/ч · (${mm} мм всего) · ${desc}`;
