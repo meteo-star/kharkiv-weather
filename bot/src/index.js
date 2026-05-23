@@ -1895,10 +1895,13 @@ function evaluateRule(rule, fc, sub) {
       for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
-        if (prob >= minProb && mm >= minMm) {
+        // Open-Meteo НЕ возвращает probability для конкретных моделей —
+        // если prob=0 но mm выше порога, считаем что дождь точно будет (proxy 100%).
+        const effProb = prob > 0 ? prob : (mm >= minMm ? 100 : 0);
+        if (effProb >= minProb && mm >= minMm) {
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч, ${prob}% ${whenStr(times[i], fc.utcOffsetSec)}`
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}`
           };
         }
       }
@@ -1909,6 +1912,8 @@ function evaluateRule(rule, fc, sub) {
       // Новое правило: «Осадки в ближайшие N часов» с подразделами Дождь/Снег.
       // Различаем по weather_code: 51-67/80-82 — дождь, 71-77/85-86 — снег, 95-99 — гроза (трактуем как дождь).
       // Порог чувствительности задаёт пользователь: 'low' (строгий) / 'med' (default) / 'high' (чувствительный).
+      // Open-Meteo НЕ возвращает probability для конкретных моделей — если prob=0,
+      // используем mm как proxy: при mm >= minMm считаем что дождь точно будет (effProb = 100).
       const windowH = Number(rule.windowHours) || 3;
       const watchRain = rule.watchRain !== false;
       const watchSnow = rule.watchSnow === true;
@@ -1917,19 +1922,20 @@ function evaluateRule(rule, fc, sub) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
         const code = wc[i];
-        if (mm < minMm || prob < minProb) continue;
+        const effProb = prob > 0 ? prob : (mm >= minMm ? 100 : 0);
+        if (mm < minMm || effProb < minProb) continue;
         const isRain = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
         const isSnow = (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
         if (watchRain && isRain) {
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч, ${prob}% ${whenStr(times[i], fc.utcOffsetSec)}`
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}`
           };
         }
         if (watchSnow && isSnow) {
           return {
             fired: true,
-            message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч, ${prob}% ${whenStr(times[i], fc.utcOffsetSec)}`
+            message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}`
           };
         }
       }
