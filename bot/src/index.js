@@ -1853,6 +1853,11 @@ async function fetchWeather(lat, lon, sub = null) {
     latitude: String(lat),
     longitude: String(lon),
     hourly: 'temperature_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m,wind_direction_10m,cape,lifted_index',
+    // v1.40.0: 15-минутный nowcast осадков на 2 часа вперёд (8 кадров).
+    // Используется в evaluateRule для precip_soon/rain_soon с короткими окнами
+    // (windowHours ≤ 2) — даёт минутную точность вместо часовой.
+    minutely_15: 'precipitation,precipitation_probability',
+    forecast_minutely_15: '8',
     daily: 'temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,weather_code',
     timezone: 'auto',
     wind_speed_unit: 'ms',
@@ -1875,9 +1880,11 @@ async function fetchWeather(lat, lon, sub = null) {
     if (singleModel) {
       data.hourly = stripModelSuffix(data.hourly || {}, singleModel);
       data.daily = stripModelSuffix(data.daily || {}, singleModel);
+      data.minutely_15 = stripModelSuffix(data.minutely_15 || {}, singleModel);
       return {
         hourly: data.hourly,
         daily: data.daily,
+        minutely15: data.minutely_15,
         utcOffsetSec: data.utc_offset_seconds || 0,
         timezone: data.timezone || 'UTC'
       };
@@ -1887,9 +1894,11 @@ async function fetchWeather(lat, lon, sub = null) {
     // и пр. — обычное среднее, weather_code — max).
     const avgHourly = averageHourlyMultiModel(data.hourly || {}, WEATHER_MODELS);
     const avgDaily = averageDailyMultiModel(data.daily || {}, WEATHER_MODELS);
+    const avgMinutely15 = averageMinutely15MultiModel(data.minutely_15 || {}, WEATHER_MODELS);
     return {
       hourly: avgHourly,
       daily: avgDaily,
+      minutely15: avgMinutely15,
       utcOffsetSec: data.utc_offset_seconds || 0,
       timezone: data.timezone || 'UTC'
     };
@@ -1991,6 +2000,62 @@ function averageDailyMultiModel(daily, models) {
   return result;
 }
 
+// v1.40.0: усреднение minutely_15 (8 кадров × 15 мин). Структура та же что
+// у averageHourlyMultiModel. precipitation — max (если хоть одна модель видит
+// дождь — считаем что дождь). precipitation_probability — mean.
+function averageMinutely15MultiModel(m15, models) {
+  const time = m15.time || [];
+  const result = { time };
+  if (!time.length || !models.length) return result;
+  const FIELDS = [
+    { base: 'precipitation', aggregate: 'max' },
+    { base: 'precipitation_probability', aggregate: 'mean' }
+  ];
+  for (const { base, aggregate } of FIELDS) {
+    const arr = new Array(time.length).fill(null);
+    for (let i = 0; i < time.length; i++) {
+      const vals = [];
+      for (const m of models) {
+        const v = m15[`${base}_${m}`]?.[i];
+        if (v != null && Number.isFinite(v)) vals.push(v);
+      }
+      if (vals.length === 0) { arr[i] = null; continue; }
+      if (aggregate === 'mean') arr[i] = vals.reduce((s, x) => s + x, 0) / vals.length;
+      else if (aggregate === 'max') arr[i] = Math.max(...vals);
+    }
+    result[base] = arr;
+  }
+  return result;
+}
+
+// v1.40.0: minutely_15-based precip check. Возвращает первый кадр в окне
+// windowMin минут (от текущего момента), где precipitation ≥ minMm и
+// effProb ≥ minProb. effProb = prob или 100 при prob=0 + mm ≥ minMm
+// (proxy для случая когда модель не отдаёт probability). null если не найден.
+// Используется в precip_soon и rain_soon при windowHours ≤ 2.
+function findFirstWetMinutely(m15, windowMin, minMm, minProb) {
+  if (!m15 || !Array.isArray(m15.time)) return null;
+  const t = m15.time;
+  const pm = m15.precipitation || [];
+  const pp = m15.precipitation_probability || [];
+  const now = Date.now();
+  const horizon = now + windowMin * 60 * 1000;
+  for (let i = 0; i < t.length; i++) {
+    const ts = new Date(t[i]).getTime();
+    if (Number.isNaN(ts)) continue;
+    // Толерантность ±5 мин: кадр «только что был» по-прежнему актуален.
+    if (ts < now - 5 * 60 * 1000) continue;
+    if (ts > horizon) break;
+    const mm = pm[i] || 0;
+    const prob = pp[i] || 0;
+    const effProb = prob > 0 ? prob : (mm >= minMm ? 100 : 0);
+    if (mm >= minMm && effProb >= minProb) {
+      return { ts, mm, prob, iso: t[i] };
+    }
+  }
+  return null;
+}
+
 // Оценка одного правила. Возвращает { fired: bool, message: string }.
 function evaluateRule(rule, fc, sub) {
   const hourly = fc.hourly;
@@ -2047,6 +2112,22 @@ function evaluateRule(rule, fc, sub) {
     case 'rain_soon': {
       const windowH = Number(rule.windowHours) || 3;
       const [minProb, minMm] = precipThresholds(rule.sensitivity);
+      // v1.40.0: для коротких окон (≤2ч) используем minutely_15 — даёт
+      // минутную точность вместо часовой. Для бóльших окон остаётся hourly.
+      if (windowH <= 2 && fc.minutely15) {
+        const hit = findFirstWetMinutely(fc.minutely15, windowH * 60, minMm, minProb);
+        if (hit) {
+          const minAhead = Math.max(0, Math.round((hit.ts - Date.now()) / 60000));
+          const whenLabel = minAhead < 5
+            ? 'прямо сейчас'
+            : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
+          return {
+            fired: true,
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}`
+          };
+        }
+        return { fired: false };
+      }
       for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
@@ -2073,6 +2154,48 @@ function evaluateRule(rule, fc, sub) {
       const watchRain = rule.watchRain !== false;
       const watchSnow = rule.watchSnow === true;
       const [minProb, minMm] = precipThresholds(rule.sensitivity);
+      // v1.40.0: для коротких окон (≤2ч) используем minutely_15. Тип осадков
+      // (дождь vs снег) минутки не дают — определяем по hourly[nowIdx]
+      // (текущий час) + температуре. <=0°C + осадки → снег, иначе дождь.
+      if (windowH <= 2 && fc.minutely15) {
+        const hit = findFirstWetMinutely(fc.minutely15, windowH * 60, minMm, minProb);
+        if (hit) {
+          // Определяем тип: смотрим weather_code следующего hourly + температуру
+          // ближайшего часа от hit.ts.
+          const hitHourIdx = (() => {
+            for (let i = nowIdx; i < t.length; i++) {
+              const hourTs = new Date(times[i]).getTime();
+              if (hourTs >= hit.ts) return i;
+            }
+            return nowIdx;
+          })();
+          const code = wc[hitHourIdx];
+          const temp = (hourly.temperature_2m || [])[hitHourIdx];
+          const codeSnow = (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
+          const codeRain = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
+          // Если код явно снежный — снег. Если явно дождевой — дождь.
+          // Иначе fallback на температуру: T ≤ 1°C → снег, иначе дождь.
+          const isSnow = codeSnow || (!codeRain && typeof temp === 'number' && temp <= 1);
+          const isRain = !isSnow;
+          const minAhead = Math.max(0, Math.round((hit.ts - Date.now()) / 60000));
+          const whenLabel = minAhead < 5
+            ? 'прямо сейчас'
+            : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
+          if (watchRain && isRain) {
+            return {
+              fired: true,
+              message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}`
+            };
+          }
+          if (watchSnow && isSnow) {
+            return {
+              fired: true,
+              message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}`
+            };
+          }
+        }
+        return { fired: false };
+      }
       for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
