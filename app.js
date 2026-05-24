@@ -245,13 +245,25 @@ const I18N = {
     'accuracy.leaderTempMax': 'по дневной T:',
     'accuracy.leaderTempMin': 'по ночной T:',
     'accuracy.leaderPrecip': 'по осадкам:',
-    'nowcast.now.until.rain':     'Дождь сейчас · до ~{time}',
-    'nowcast.now.until.snow':     'Снег сейчас · до ~{time}',
-    'nowcast.now.continues.rain': 'Дождь сейчас · продолжится ≥2ч',
-    'nowcast.now.continues.snow': 'Снег сейчас · продолжится ≥2ч',
-    'nowcast.soon.rain':          'Дождь через ~{min} мин',
-    'nowcast.soon.snow':          'Снег через ~{min} мин',
-    'nowcast.dry':                'Без осадков 2 часа',
+    'nowcast.now.until.rain':         'Дождь сейчас · до ~{time}',
+    'nowcast.now.until.drizzle':      'Морось сейчас · до ~{time}',
+    'nowcast.now.until.snow':         'Снег сейчас · до ~{time}',
+    'nowcast.now.until.sleet':        'Мокрый снег · до ~{time}',
+    'nowcast.now.until.freezing':     'Ледяной дождь · до ~{time}',
+    'nowcast.now.until.storm':        'Гроза сейчас · до ~{time}',
+    'nowcast.now.continues.rain':     'Дождь сейчас · продолжится ≥2ч',
+    'nowcast.now.continues.drizzle':  'Морось · продолжится ≥2ч',
+    'nowcast.now.continues.snow':     'Снег сейчас · продолжится ≥2ч',
+    'nowcast.now.continues.sleet':    'Мокрый снег · продолжится ≥2ч',
+    'nowcast.now.continues.freezing': 'Ледяной дождь · продолжится ≥2ч',
+    'nowcast.now.continues.storm':    'Гроза · продолжится ≥2ч',
+    'nowcast.soon.rain':              'Дождь через ~{min} мин',
+    'nowcast.soon.drizzle':           'Морось через ~{min} мин',
+    'nowcast.soon.snow':              'Снег через ~{min} мин',
+    'nowcast.soon.sleet':             'Мокрый снег через ~{min} мин',
+    'nowcast.soon.freezing':          'Ледяной дождь через ~{min} мин',
+    'nowcast.soon.storm':             'Гроза через ~{min} мин',
+    'nowcast.dry':                    'Без осадков 2 часа',
     'accuracy.emptyTitle': 'Накапливаем данные',
     'accuracy.emptyHint': 'Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки',
     'accuracy.samplesUnit': 'замеров',
@@ -655,13 +667,25 @@ const I18N = {
     'accuracy.leaderTempMax': 'денна T:',
     'accuracy.leaderTempMin': 'нічна T:',
     'accuracy.leaderPrecip': 'опади:',
-    'nowcast.now.until.rain':     'Дощ зараз · до ~{time}',
-    'nowcast.now.until.snow':     'Сніг зараз · до ~{time}',
-    'nowcast.now.continues.rain': 'Дощ зараз · триватиме ≥2год',
-    'nowcast.now.continues.snow': 'Сніг зараз · триватиме ≥2год',
-    'nowcast.soon.rain':          'Дощ через ~{min} хв',
-    'nowcast.soon.snow':          'Сніг через ~{min} хв',
-    'nowcast.dry':                'Без опадів 2 години',
+    'nowcast.now.until.rain':         'Дощ зараз · до ~{time}',
+    'nowcast.now.until.drizzle':      'Мряка зараз · до ~{time}',
+    'nowcast.now.until.snow':         'Сніг зараз · до ~{time}',
+    'nowcast.now.until.sleet':        'Мокрий сніг · до ~{time}',
+    'nowcast.now.until.freezing':     'Крижаний дощ · до ~{time}',
+    'nowcast.now.until.storm':        'Гроза зараз · до ~{time}',
+    'nowcast.now.continues.rain':     'Дощ зараз · триватиме ≥2год',
+    'nowcast.now.continues.drizzle':  'Мряка · триватиме ≥2год',
+    'nowcast.now.continues.snow':     'Сніг зараз · триватиме ≥2год',
+    'nowcast.now.continues.sleet':    'Мокрий сніг · триватиме ≥2год',
+    'nowcast.now.continues.freezing': 'Крижаний дощ · триватиме ≥2год',
+    'nowcast.now.continues.storm':    'Гроза · триватиме ≥2год',
+    'nowcast.soon.rain':              'Дощ через ~{min} хв',
+    'nowcast.soon.drizzle':           'Мряка через ~{min} хв',
+    'nowcast.soon.snow':              'Сніг через ~{min} хв',
+    'nowcast.soon.sleet':             'Мокрий сніг через ~{min} хв',
+    'nowcast.soon.freezing':          'Крижаний дощ через ~{min} хв',
+    'nowcast.soon.storm':             'Гроза через ~{min} хв',
+    'nowcast.dry':                    'Без опадів 2 години',
     'accuracy.emptyTitle': 'Накопичуємо дані',
     'accuracy.emptyHint': 'Відкривайте сайт раз на день — за ~тиждень з\'явиться рейтинг моделей з MAE за температурою та опадами саме для цієї точки',
     'accuracy.samplesUnit': 'замірів',
@@ -1052,13 +1076,25 @@ const I18N = {
     'accuracy.leaderTempMax': 'day T:',
     'accuracy.leaderTempMin': 'night T:',
     'accuracy.leaderPrecip': 'precip:',
-    'nowcast.now.until.rain':     'Rain now · until ~{time}',
-    'nowcast.now.until.snow':     'Snow now · until ~{time}',
-    'nowcast.now.continues.rain': 'Rain now · 2h+ continuous',
-    'nowcast.now.continues.snow': 'Snow now · 2h+ continuous',
-    'nowcast.soon.rain':          'Rain in ~{min} min',
-    'nowcast.soon.snow':          'Snow in ~{min} min',
-    'nowcast.dry':                'Dry next 2 hours',
+    'nowcast.now.until.rain':         'Rain now · until ~{time}',
+    'nowcast.now.until.drizzle':      'Drizzle now · until ~{time}',
+    'nowcast.now.until.snow':         'Snow now · until ~{time}',
+    'nowcast.now.until.sleet':        'Sleet now · until ~{time}',
+    'nowcast.now.until.freezing':     'Freezing rain · until ~{time}',
+    'nowcast.now.until.storm':        'Storm now · until ~{time}',
+    'nowcast.now.continues.rain':     'Rain now · 2h+ continuous',
+    'nowcast.now.continues.drizzle':  'Drizzle · 2h+ continuous',
+    'nowcast.now.continues.snow':     'Snow now · 2h+ continuous',
+    'nowcast.now.continues.sleet':    'Sleet · 2h+ continuous',
+    'nowcast.now.continues.freezing': 'Freezing rain · 2h+ continuous',
+    'nowcast.now.continues.storm':    'Storm · 2h+ continuous',
+    'nowcast.soon.rain':              'Rain in ~{min} min',
+    'nowcast.soon.drizzle':           'Drizzle in ~{min} min',
+    'nowcast.soon.snow':              'Snow in ~{min} min',
+    'nowcast.soon.sleet':             'Sleet in ~{min} min',
+    'nowcast.soon.freezing':          'Freezing rain in ~{min} min',
+    'nowcast.soon.storm':             'Storm in ~{min} min',
+    'nowcast.dry':                    'Dry next 2 hours',
     'accuracy.emptyTitle': 'Collecting data',
     'accuracy.emptyHint': 'Open the site once a day — after ~a week you\'ll see a model ranking with MAE for temperature and precipitation specific to this location',
     'accuracy.samplesUnit': 'samples',
@@ -2783,43 +2819,82 @@ function showAccuracyAdviceToast(betterSrc) {
   toast._hide = setTimeout(() => toast.classList.remove('show'), 8000);
 }
 
-// v1.39.0: nowcast-hint на hero — 15-минутный прогноз осадков на 2 часа вперёд.
-// Показывает: «Дождь/Снег сейчас, до ~XX:XX», «Дождь/Снег через ~30 мин».
-// Скрывается если данных нет или ситуация неоднозначная.
-// v1.40.2: тип осадков (дождь vs снег) определяется по температуре —
-// minutely_15 не отдаёт weather_code, поэтому смотрим hourly[NOW_HOUR].t.
-// T ≤ 1°C → снег, иначе дождь. Простой эвристический подход.
-function precipKindFromTemp() {
+// v1.41.0: расширенная классификация типа осадков. minutely_15 даёт только мм,
+// поэтому смотрим hourly[NOW_HOUR].wc (WMO weather_code) + .t (температура).
+// 6 категорий: storm / freezing / sleet / snow / drizzle / rain.
+// Sleet — отдельного кода в WMO нет, определяется по граничной температуре
+// (−1..+2°C). Эта зона критична — мокрый снег ≠ обычный снег по поведению на
+// дорогах и одежде. Эвристика «sleet zone» имеет приоритет над weather_code
+// (модель может писать «дождь» при 0.5°C — но физически это слякоть).
+function classifyPrecip(wc, temp) {
+  // Гроза — высший приоритет
+  if (wc >= 95 && wc <= 99) return 'storm';
+  // Ледяной дождь / freezing rain / freezing drizzle
+  if (wc === 56 || wc === 57 || wc === 66 || wc === 67) return 'freezing';
+  // Sleet zone — −1..+2°C физически мокрый снег независимо от того что говорит код
+  if (typeof temp === 'number' && temp >= -1 && temp <= 2) return 'sleet';
+  // Снег по коду или по морозу
+  if ((wc >= 71 && wc <= 77) || (wc >= 85 && wc <= 86)) return 'snow';
+  if (typeof temp === 'number' && temp < -1) return 'snow';
+  // Морось
+  if (wc >= 51 && wc <= 55) return 'drizzle';
+  // Дождь по коду или дефолт (тёплая температура)
+  if ((wc >= 61 && wc <= 65) || (wc >= 80 && wc <= 82)) return 'rain';
+  return 'rain';
+}
+
+// Берёт wc + температуру текущего часа из активного прогноза и возвращает
+// один из 6 типов осадков. Используется renderHeroNowcastHint().
+function precipKindNow() {
   try {
     const f = (typeof getActiveForecast === 'function') ? getActiveForecast() : null;
     const nowH = (typeof NOW_HOUR === 'number') ? NOW_HOUR : new Date().getHours();
     const todayH = f && f[0] && f[0].hourly && f[0].hourly[nowH];
-    if (!todayH || typeof todayH.t !== 'number') return 'rain';
-    return todayH.t <= 1 ? 'snow' : 'rain';
+    if (!todayH) return 'rain';
+    return classifyPrecip(todayH.wc, todayH.t);
   } catch (e) { return 'rain'; }
 }
+// v1.41.0: иконки и CSS-класс для каждого типа осадков. nc-class-* добавляется
+// к плашке для тонировки (буря/лёд — тревожные, морось/дождь — нейтральные).
+const PRECIP_ICONS = {
+  rain:     { now: '🌧', soon: '💧' },
+  drizzle:  { now: '🌦', soon: '🌦' },
+  snow:     { now: '❄',  soon: '🌨' },
+  sleet:    { now: '🌨', soon: '🌨' },
+  freezing: { now: '🧊', soon: '🧊' },
+  storm:    { now: '⛈',  soon: '⛈' }
+};
+const PRECIP_CSS_TONE = {
+  rain: 'tone-rain',
+  drizzle: 'tone-rain',
+  snow: 'tone-snow',
+  sleet: 'tone-sleet',
+  freezing: 'tone-danger',
+  storm: 'tone-danger'
+};
 function renderHeroNowcastHint() {
   const el = document.getElementById('heroNowcastHint');
   if (!el) return;
   const info = (typeof nowcastInfo === 'function') ? nowcastInfo() : null;
   if (!info) { el.innerHTML = ''; el.classList.remove('show'); return; }
-  const kind = precipKindFromTemp(); // 'rain' или 'snow'
+  const kind = precipKindNow(); // rain|drizzle|snow|sleet|freezing|storm
+  const tone = PRECIP_CSS_TONE[kind] || 'tone-rain';
   let icon = '', text = '', cls = '';
   if (info.kind === 'now') {
-    icon = kind === 'snow' ? '❄' : '🌧';
-    cls = 'nc-now';
+    icon = PRECIP_ICONS[kind].now;
+    cls = 'nc-now ' + tone;
     if (info.endsTs) {
       const endTime = new Date(info.endsTs);
       const hh = String(endTime.getHours()).padStart(2, '0');
       const mm = String(endTime.getMinutes()).padStart(2, '0');
-      text = t(kind === 'snow' ? 'nowcast.now.until.snow' : 'nowcast.now.until.rain', { time: `${hh}:${mm}` });
+      text = t(`nowcast.now.until.${kind}`, { time: `${hh}:${mm}` });
     } else {
-      text = t(kind === 'snow' ? 'nowcast.now.continues.snow' : 'nowcast.now.continues.rain');
+      text = t(`nowcast.now.continues.${kind}`);
     }
   } else if (info.kind === 'soon') {
-    icon = kind === 'snow' ? '🌨' : '💧';
-    cls = 'nc-soon';
-    text = t(kind === 'snow' ? 'nowcast.soon.snow' : 'nowcast.soon.rain', { min: info.startMin });
+    icon = PRECIP_ICONS[kind].soon;
+    cls = 'nc-soon ' + tone;
+    text = t(`nowcast.soon.${kind}`, { min: info.startMin });
   } else if (info.kind === 'dry') {
     // v1.40.1: ветка убрана. Раньше при противоречии «minutely сухо vs hourly
     // дождь» показывали «✓ Без осадков 2 часа» — но это путало (юзер видит
