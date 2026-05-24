@@ -55,11 +55,17 @@ export default {
   // Cron — выполняется по расписанию из wrangler.toml ("*/30 * * * *")
   async scheduled(event, env, ctx) {
     ctx.waitUntil(runCronCheck(env));
-    // Раз в сутки (04:00 UTC) — обновляем публичный рейтинг точности моделей
-    // для всех зарегистрированных локаций. См. runAccuracyCron().
     const d = new Date(event.scheduledTime || Date.now());
+    // 04:00 UTC — обновляем публичный рейтинг точности моделей
+    // (forecast'ы за +1/+2 дня на все локации в registry).
     if (d.getUTCHours() === 4 && d.getUTCMinutes() < 30) {
       ctx.waitUntil(runAccuracyCron(env));
+    }
+    // 05:00 UTC — переписываем actual реальными наблюдениями из archive-api
+    // для записей T-8..T-2 (v1.37.0). Час разнесён, чтобы не пересекаться
+    // с accuracy-cron и не перегрузить worker одновременно двумя обходами.
+    if (d.getUTCHours() === 5 && d.getUTCMinutes() < 30) {
+      ctx.waitUntil(runObservationsCron(env));
     }
   }
 };
@@ -170,6 +176,7 @@ async function processUpdate(update, env) {
         case '/admin_test':      return handleAdminTest(env, chatId, args);
         case '/admin_cron':      return handleAdminCron(env, chatId);
         case '/admin_accuracy_cron': return handleAdminAccuracyCron(env, chatId);
+        case '/admin_obs_cron': return handleAdminObsCron(env, chatId);
         case '/admin_summary_test': return handleAdminSummaryTest(env, chatId, args);
         case '/admin_addrule':   return handleAdminAddRule(env, chatId, args);
         case '/admin_clearrules':return handleAdminClearRules(env, chatId);
@@ -707,6 +714,24 @@ async function handleAdminAccuracyCron(env, chatId) {
     }
     await runAccuracyCron(env);
     return sendMessage(env, chatId, `✅ Готово. Обработано ${count} локаций. Смотри логи через wrangler tail.`);
+  } catch (err) {
+    return sendMessage(env, chatId, `❌ Ошибка: ${esc(err.message)}`, { parse_mode: 'HTML' });
+  }
+}
+
+// /admin_obs_cron — принудительно переписать actual реальными наблюдениями
+// из archive-api (v1.37.0). Полезно для теста сразу после деплоя без
+// ожидания 05:00 UTC.
+async function handleAdminObsCron(env, chatId) {
+  await sendMessage(env, chatId, `📡 Тяну реальные наблюдения из archive-api...`);
+  try {
+    const reg = await env.STATS.get('acc:registry', { type: 'json' });
+    const count = (reg && Array.isArray(reg.locations)) ? reg.locations.length : 0;
+    if (count === 0) {
+      return sendMessage(env, chatId, `📍 В registry нет локаций.`);
+    }
+    await runObservationsCron(env);
+    return sendMessage(env, chatId, `✅ Готово. Обработано ${count} локаций. Логи через wrangler tail.`);
   } catch (err) {
     return sendMessage(env, chatId, `❌ Ошибка: ${esc(err.message)}`, { parse_mode: 'HTML' });
   }
@@ -1564,6 +1589,130 @@ async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
   // Лимит — последние 30 записей
   const trimmed = records.length > ACC_MAX_RECORDS ? records.slice(-ACC_MAX_RECORDS) : records;
   await env.STATS.put(key, JSON.stringify({ records: trimmed, updated: new Date().toISOString() }));
+}
+
+// === v1.37.0: реальные наблюдения из Open-Meteo Archive API ===
+// Раньше actual в accuracy-records заполнялся через avg[0] (текущий прогноз
+// AVG на сегодня) — это proxy, который искусственно занижает MAE для моделей
+// близких к AVG (главным образом ECMWF). Теперь раз в сутки бот после
+// runAccuracyCron обходит все локации, тянет реальные max/min/precip из
+// Open-Meteo Archive (ERA5 + ERA5T, бесплатно, без ключа) для дат T-7..T-2
+// (archive публикует данные с задержкой ~5 дней) и переписывает actual.
+// Это даёт честное сравнение моделей vs ground truth, а не vs ансамбль.
+//
+// PrecipProb из archive не доступен (только precipSum мм/сутки) — оставляем
+// как было (proxy от avg). Это самая слабая метрика в нашем MAE-наборе.
+async function fetchObservations(lat, lon, startDate, endDate) {
+  const params = new URLSearchParams({
+    latitude: String(lat),
+    longitude: String(lon),
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum',
+    timezone: 'auto',
+    start_date: startDate,
+    end_date: endDate
+  });
+  try {
+    const r = await fetch(`https://archive-api.open-meteo.com/v1/archive?${params}`);
+    if (!r.ok) return null;
+    const data = await r.json();
+    const daily = data.daily || {};
+    const times = daily.time || [];
+    const tmax = daily.temperature_2m_max || [];
+    const tmin = daily.temperature_2m_min || [];
+    const psum = daily.precipitation_sum || [];
+    const result = {};
+    for (let i = 0; i < times.length; i++) {
+      if (tmax[i] == null && tmin[i] == null && psum[i] == null) continue;
+      result[times[i]] = {
+        tempMax: tmax[i],
+        tempMin: tmin[i],
+        precipSum: psum[i]
+      };
+    }
+    return result;
+  } catch (e) {
+    console.error('fetchObservations:', e);
+    return null;
+  }
+}
+
+// Обновляет accuracy-records реальными наблюдениями.
+// Возвращает кол-во обновлённых записей.
+async function updateObservationsForLocation(env, lat1, lon1) {
+  const key = `acc:loc:${lat1.toFixed(1)}_${lon1.toFixed(1)}`;
+  const stored = await env.STATS.get(key, { type: 'json' });
+  if (!stored || !Array.isArray(stored.records) || stored.records.length === 0) return 0;
+  const records = stored.records;
+
+  // Окно: T-8d (archive публикует с задержкой 3-7 дней, иногда дальше) до T-2d.
+  // Без T-1d / today чтобы не задеть свежие записи у которых archive пока null.
+  const today = new Date();
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  const start = new Date(today); start.setDate(start.getDate() - 8);
+  const end = new Date(today); end.setDate(end.getDate() - 2);
+  const startDate = fmt(start);
+  const endDate = fmt(end);
+
+  // Есть ли в принципе записи в этом окне которые имело бы смысл обновить?
+  const candidates = records.filter(r =>
+    r.date >= startDate && r.date <= endDate &&
+    (!r.actualSource || r.actualSource !== 'archive')
+  );
+  if (candidates.length === 0) return 0;
+
+  const obs = await fetchObservations(lat1, lon1, startDate, endDate);
+  if (!obs) return 0;
+
+  let updated = 0;
+  for (const rec of records) {
+    const o = obs[rec.date];
+    if (!o) continue;
+    // Перезаписываем actual реальными значениями; precipProb (если был
+    // proxy от avg) сохраняем для совместимости со старым composite MAE.
+    const prevPrecipProb = rec.actual && typeof rec.actual.precipProb === 'number'
+      ? rec.actual.precipProb : null;
+    rec.actual = {
+      tempMax: o.tempMax,
+      tempMin: o.tempMin,
+      precipSum: o.precipSum,
+      precipProb: prevPrecipProb
+    };
+    rec.actualSource = 'archive';
+    updated++;
+  }
+  if (updated > 0) {
+    await env.STATS.put(key, JSON.stringify({
+      records, updated: new Date().toISOString(), observationsUpdated: new Date().toISOString()
+    }));
+  }
+  return updated;
+}
+
+// Запускается ПОСЛЕ runAccuracyCron в том же daily-cron (04:00 UTC).
+// Обходит registry, тянет archive для T-8..T-2, переписывает actual.
+async function runObservationsCron(env) {
+  try {
+    const raw = await env.STATS.get(ACC_REGISTRY_KEY, { type: 'json' });
+    const reg = (raw && Array.isArray(raw.locations)) ? raw.locations : [];
+    const now = Date.now();
+    const active = reg.filter(l => (now - (l.lastReq || 0)) < ACC_REGISTRY_TTL_MS);
+    console.log(`[obs-cron] processing ${active.length} locations`);
+    let totalUpdated = 0, ok = 0, failed = 0;
+    for (const loc of active) {
+      try {
+        const n = await updateObservationsForLocation(env, loc.lat, loc.lon);
+        totalUpdated += n;
+        ok++;
+        await sleep(250); // archive-api тоже не топим
+      } catch (e) {
+        console.error(`[obs-cron] loc ${loc.lat},${loc.lon}:`, e);
+        failed++;
+      }
+    }
+    console.log(`[obs-cron] done: ok=${ok} failed=${failed} updated_records=${totalUpdated}`);
+  } catch (e) {
+    console.error('runObservationsCron:', e);
+  }
 }
 
 async function runCronCheck(env) {
