@@ -1687,17 +1687,37 @@ body.compare-mode .astro-photo { display:none !important }
    Звёздочка ☆ перед значением + золотой подсвет фона. Это _не_ rank-1 (#1 общий
    победитель уже маркируется через .acc-row.best), а лидер именно по этой метрике —
    их может быть три разных модели. */
-.acc-metric.best-col{background:rgba(250,204,21,0.10);border-radius:6px;padding:2px 4px;box-shadow:inset 0 0 0 1px rgba(250,204,21,0.25)}
-.acc-metric.best-col .acm-val{color:#fde047}
-.acc-metric .acm-best{display:inline-block;margin-right:3px;color:#facc15;font-size:9px;vertical-align:middle;filter:drop-shadow(0 0 2px rgba(250,204,21,0.6))}
-:root[data-theme="light"] .acc-metric.best-col{background:rgba(202,138,4,0.13);box-shadow:inset 0 0 0 1px rgba(202,138,4,0.35)}
-:root[data-theme="light"] .acc-metric.best-col .acm-val{color:#854d0e}
-:root[data-theme="light"] .acc-metric .acm-best{color:#854d0e;filter:drop-shadow(0 0 1px rgba(133,77,14,0.4))}
+/* v1.42.0: best-col — единый зелёный стиль для лидера в любой колонке,
+   независимо от типа источника (AVG или модель). Зелёная полоса
+   автоматически перейдёт к новому лидеру когда статистика поменяется. */
+.acc-metric.best-col{background:rgba(74,222,128,0.13);border-radius:6px;padding:2px 4px;box-shadow:inset 0 0 0 1.5px rgba(74,222,128,0.45);font-weight:700}
+.acc-metric.best-col .acm-val{color:#86efac;font-weight:700}
+.acc-metric .acm-best{display:inline-block;margin-right:3px;color:#4ade80;font-size:10px;font-weight:700;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(74,222,128,0.7))}
+:root[data-theme="light"] .acc-metric.best-col{background:rgba(22,163,74,0.15);box-shadow:inset 0 0 0 1.5px rgba(22,163,74,0.50)}
+:root[data-theme="light"] .acc-metric.best-col .acm-val{color:#14532d}
+:root[data-theme="light"] .acc-metric .acm-best{color:#16a34a;filter:drop-shadow(0 0 2px rgba(22,163,74,0.5))}
+/* winner — выделение всей строки overall-победителя (любого источника).
+   Раньше .best (бирюзовая обводка) → теперь .winner (зелёный glow + жирность). */
+.acc-row.winner{background:rgba(74,222,128,0.10) !important;border:1.5px solid rgba(74,222,128,0.50) !important;box-shadow:0 0 14px rgba(74,222,128,0.20);margin-top:8px !important}
+.acc-row.winner[data-src="avg"]{border-top:1.5px solid rgba(74,222,128,0.50) !important}
+.acc-row.winner .acc-rank{font-size:14px;filter:drop-shadow(0 0 5px rgba(74,222,128,0.6))}
+.acc-row.winner .acc-name .ac-text{color:#86efac;font-weight:700;letter-spacing:0.01em}
+:root[data-theme="light"] .acc-row.winner{background:rgba(22,163,74,0.12) !important;border-color:rgba(22,163,74,0.55) !important;box-shadow:0 0 14px rgba(22,163,74,0.22)}
+:root[data-theme="light"] .acc-row.winner .acc-name .ac-text{color:#14532d}
+/* зелёный «толстый» bar для overall-winner */
+.acc-bar.q-winner{background:linear-gradient(90deg,#4ade80,#22d3ee);height:10px;margin-top:-1px;box-shadow:0 0 8px rgba(74,222,128,0.4)}
+.acc-row.winner .acc-bar-wrap{height:10px;background:rgba(74,222,128,0.10)}
 /* Сжатый summary лидеров по переменным — над таблицей */
 .acc-leaders{font-size:11px;color:rgba(232,240,255,0.65);font-family:'JetBrains Mono',monospace;padding:8px 10px;margin-bottom:6px;background:rgba(250,204,21,0.05);border:1px solid rgba(250,204,21,0.15);border-radius:8px;letter-spacing:0.01em;line-height:1.6}
 .acc-leaders strong{color:#fde047;font-weight:600}
 :root[data-theme="light"] .acc-leaders{color:rgba(45,26,16,0.75);background:rgba(202,138,4,0.10);border-color:rgba(202,138,4,0.25)}
 :root[data-theme="light"] .acc-leaders strong{color:#854d0e}
+/* v1.42.0: leaders-плашка когда один источник (любой — AVG или модель)
+   точнее всех по всем трём метрикам */
+.acc-leaders.acc-leaders-winner{background:rgba(74,222,128,0.10);border-color:rgba(74,222,128,0.40);color:#86efac;font-weight:600;font-size:12px;box-shadow:0 0 12px rgba(74,222,128,0.15)}
+.acc-leaders.acc-leaders-winner strong{color:#86efac;font-weight:700}
+:root[data-theme="light"] .acc-leaders.acc-leaders-winner{background:rgba(22,163,74,0.13);border-color:rgba(22,163,74,0.45);color:#14532d}
+:root[data-theme="light"] .acc-leaders.acc-leaders-winner strong{color:#14532d}
 
 .acc-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;font-size:10px;color:rgba(232,240,255,0.55);font-family:'JetBrains Mono',monospace}
 .acc-legend .al-item{display:inline-flex;align-items:center;gap:5px}
@@ -1706,6 +1726,10 @@ body.compare-mode .astro-photo { display:none !important }
 .acc-legend .al-sw.q2{background:linear-gradient(90deg,#facc15,#fbbf24)}
 .acc-legend .al-sw.q3{background:linear-gradient(90deg,#fb923c,#f97316)}
 .acc-legend .al-sw.q4{background:linear-gradient(90deg,#ef4444,#dc2626)}
+/* v1.42.0: swatch для случая «ансамбль точнее любой отдельной модели».
+   Тот же зелёный градиент что у .acc-bar.q-avg-win, чтобы пользователь
+   связал плашку зелёного выделения AVG в таблице с этой строкой легенды. */
+.acc-legend .al-sw.q-winner{background:linear-gradient(90deg,#4ade80,#22d3ee);box-shadow:0 0 4px rgba(74,222,128,0.5)}
 
 .acc-thead{display:grid;grid-template-columns:24px 80px 1fr 52px 52px 52px;align-items:center;gap:8px;padding:0 10px 6px 10px;font-size:10px;color:rgba(232,240,255,0.4);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
 .acc-thead .acth-r{text-align:right}
