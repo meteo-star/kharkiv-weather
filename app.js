@@ -2048,8 +2048,8 @@ function getForecast(sourceId) {
   if (data && data.length > 0) {
     const avg = ACTIVE_FORECAST_BY_MODEL.avg;
     // Глубокая копия с подмешиванием UV из avg, если у этой модели его нет
-    // (только GFS из 7 бесплатных моделей выдаёт UV — для остальных он null)
-    return data.map((d, i) => {
+    // (только GFS из 8 бесплатных моделей выдаёт UV — для остальных он null)
+    const copy = data.map((d, i) => {
       const out = {...d, hourly: d.hourly.map(h => ({...h}))};
       if (out.uv == null && avg && avg[i] && avg[i].uv != null) {
         out.uv = avg[i].uv;
@@ -2057,10 +2057,19 @@ function getForecast(sourceId) {
       }
       return out;
     });
+    // v1.35.1: пост-калибровка по накопленному bias.
+    // Если у модели есть стабильное смещение vs actual — компенсируем.
+    return applyBiasCorrection(copy, sourceId);
   }
   // fallback: avg или BASELINE
   const fb = ACTIVE_FORECAST_BY_MODEL.avg || BASELINE;
-  return fb.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))}));
+  const copy = fb.map(d => ({...d, hourly: d.hourly.map(h => ({...h}))}));
+  // Bias применяется только если реальный fetch состоялся (fb === avg).
+  // BASELINE — статика, корректировать нечего.
+  if (ACTIVE_FORECAST_BY_MODEL.avg) {
+    return applyBiasCorrection(copy, 'avg');
+  }
+  return copy;
 }
 
 // Совместимость: некоторые места кода ссылаются на ACTIVE_FORECAST как на главный массив (демо или avg).
@@ -2618,6 +2627,32 @@ window.mergeAccuracyKeys = function() {
   localStorage.setItem(targetKey, JSON.stringify({ records: merged }));
   console.log(`✅ Слито ${keys.length} ключей в ${targetKey}: ${merged.length} записей, ${merged.filter(r => r.actual).length} замеров.`);
   console.log('Перезагрузи страницу (F5), чтобы UI подтянул объединённые данные.');
+};
+
+// === DEBUG: dumpBias() — показывает текущие bias-коррекции по моделям. ===
+// Полезно чтобы понять, какие модели систематически завышают/занижают,
+// и какая коррекция реально применяется к показанному прогнозу.
+window.dumpBias = function() {
+  const state = (typeof ACCURACY_STATE !== 'undefined') ? ACCURACY_STATE : null;
+  if (!state || !state.stats || Object.keys(state.stats).length === 0) {
+    console.log('Bias-данных пока нет. Накопи замеры (см. dumpAccuracy()).');
+    return;
+  }
+  console.log(`Bias по моделям (предсказание - факт, в °C для T и % для precip):`);
+  console.log(`Правила: n < ${BIAS_MIN_SAMPLES} → нет коррекции; n ≥ ${BIAS_FULL_SAMPLES} → полная коррекция.`);
+  console.log(`Cap: ±${BIAS_CAP_TEMP}° для T, ±${BIAS_CAP_PRECIP}% для precip.\n`);
+  const ids = Object.keys(state.stats);
+  for (const id of ids) {
+    const s = state.stats[id];
+    const eff = getEffectiveBiasForSource(id);
+    const rawMax = s.tempMaxBias != null ? `${s.tempMaxBias >= 0 ? '+' : ''}${s.tempMaxBias.toFixed(1)}°` : '—';
+    const rawMin = s.tempMinBias != null ? `${s.tempMinBias >= 0 ? '+' : ''}${s.tempMinBias.toFixed(1)}°` : '—';
+    const rawPrecip = s.precipBias != null ? `${s.precipBias >= 0 ? '+' : ''}${s.precipBias.toFixed(1)}%` : '—';
+    const effMax = eff ? `${eff.tempMax >= 0 ? '+' : ''}${eff.tempMax.toFixed(1)}°` : '0';
+    const effMin = eff ? `${eff.tempMin >= 0 ? '+' : ''}${eff.tempMin.toFixed(1)}°` : '0';
+    const effPrecip = eff ? `${eff.precip >= 0 ? '+' : ''}${eff.precip.toFixed(1)}%` : '0';
+    console.log(`${id.padEnd(10)} n=${(s.nTempMax || 0).toString().padStart(2)}  raw: max ${rawMax}/min ${rawMin}/p ${rawPrecip}   eff: max ${effMax}/min ${effMin}/p ${effPrecip}`);
+  }
 };
 
 // Toast «Выбранный источник не самый точный» — показывается один раз за сессию
@@ -5367,6 +5402,19 @@ function renderAccuracy() {
     return `<span class="acm-val">${v}</span><span class="acm-unit">${unit}</span>`;
   }
 
+  // Подсказка о применённой bias-коррекции (v1.35.1).
+  // Берёт средний эффективный bias по tempMax/tempMin и форматирует «±X.X°».
+  // Если бы исходный bias был ниже порога shrinkage (n < 5) — null, ничего не показываем.
+  function biasHint(srcId) {
+    const eff = getEffectiveBiasForSource(srcId);
+    if (!eff) return '';
+    const tempBias = (eff.tempMax + eff.tempMin) / 2;
+    if (Math.abs(tempBias) < 0.2) return ''; // меньше 0.2° — не значимо для UI
+    const sign = tempBias > 0 ? '−' : '+'; // мы вычитаем bias → показываем как корректировку
+    const v = Math.abs(tempBias).toFixed(1);
+    return `<span class="acc-bias" title="Калибровка по накопленным замерам">${sign}${v}°</span>`;
+  }
+
   function buildRow({ src, s, score }, rank) {
     const q = accuracyQuality(score, minScore, maxScore) || 0;
     const w = barWidth(score);
@@ -5378,7 +5426,7 @@ function renderAccuracy() {
     return `
       <div class="acc-row${bestCls}" data-src="${src.id}">
         <div class="acc-rank ${rankCls}">${rankBadge}</div>
-        <div class="acc-name"><span class="ac-dot" style="background:${src.color};color:${src.color}"></span><span class="ac-text">${src.shortName || src.name}</span></div>
+        <div class="acc-name"><span class="ac-dot" style="background:${src.color};color:${src.color}"></span><span class="ac-text">${src.shortName || src.name}</span>${biasHint(src.id)}</div>
         <div class="acc-bar-wrap"><div class="acc-bar q${q + 1}" style="width:${w}%"></div></div>
         <div class="acc-metric${tempCls}">${formatMetric(s.tempMaxMAE, '°', 1)}</div>
         <div class="acc-metric${precipCls}">${formatMetric(s.precipMAE, '%', 0)}</div>
@@ -7302,8 +7350,11 @@ function updateAccuracyData(lat, lon, byModel) {
   saveAccuracyData(lat, lon, data);
 }
 
-// MAE по моделям → { ecmwf: {tempMaxMAE, tempMinMAE, precipMAE, n}, ..., avg: {...} }
+// MAE + signed bias по моделям →
+//   { ecmwf: {tempMaxMAE, tempMinMAE, precipMAE, n, tempMaxBias, tempMinBias, precipBias}, ..., avg: {...} }
 // sampleSize = число записей с заполненным actual.
+// Bias = mean(predicted - actual). Положительный = модель завышает, отрицательный = занижает.
+// Bias используется для пост-калибровки прогноза (v1.35.1, bias-correction).
 function computeAccuracyStats(records) {
   const acc = {};
   let sampleSize = 0;
@@ -7315,16 +7366,25 @@ function computeAccuracyStats(records) {
     for (const srcId of Object.keys(rec.predictions)) {
       const pred = rec.predictions[srcId];
       if (!pred) continue;
-      if (!acc[srcId]) acc[srcId] = { tempMaxSum: 0, tempMinSum: 0, precipSum: 0, nTempMax: 0, nTempMin: 0, nPrecip: 0 };
+      if (!acc[srcId]) {
+        acc[srcId] = {
+          tempMaxSum: 0, tempMinSum: 0, precipSum: 0,
+          nTempMax: 0, nTempMin: 0, nPrecip: 0,
+          tempMaxBiasSum: 0, tempMinBiasSum: 0, precipBiasSum: 0
+        };
+      }
       const s = acc[srcId];
       if (typeof pred.tempMax === 'number' && typeof rec.actual.tempMax === 'number') {
-        s.tempMaxSum += Math.abs(pred.tempMax - rec.actual.tempMax); s.nTempMax++;
+        const diff = pred.tempMax - rec.actual.tempMax;
+        s.tempMaxSum += Math.abs(diff); s.tempMaxBiasSum += diff; s.nTempMax++;
       }
       if (typeof pred.tempMin === 'number' && typeof rec.actual.tempMin === 'number') {
-        s.tempMinSum += Math.abs(pred.tempMin - rec.actual.tempMin); s.nTempMin++;
+        const diff = pred.tempMin - rec.actual.tempMin;
+        s.tempMinSum += Math.abs(diff); s.tempMinBiasSum += diff; s.nTempMin++;
       }
       if (typeof pred.precip === 'number' && typeof rec.actual.precip === 'number') {
-        s.precipSum += Math.abs(pred.precip - rec.actual.precip); s.nPrecip++;
+        const diff = pred.precip - rec.actual.precip;
+        s.precipSum += Math.abs(diff); s.precipBiasSum += diff; s.nPrecip++;
       }
     }
   }
@@ -7336,10 +7396,87 @@ function computeAccuracyStats(records) {
       tempMaxMAE: s.nTempMax > 0 ? Math.round((s.tempMaxSum / s.nTempMax) * 10) / 10 : null,
       tempMinMAE: s.nTempMin > 0 ? Math.round((s.tempMinSum / s.nTempMin) * 10) / 10 : null,
       precipMAE:  s.nPrecip  > 0 ? Math.round((s.precipSum  / s.nPrecip)  * 10) / 10 : null,
-      n: Math.max(s.nTempMax, s.nTempMin, s.nPrecip)
+      tempMaxBias: s.nTempMax > 0 ? Math.round((s.tempMaxBiasSum / s.nTempMax) * 10) / 10 : null,
+      tempMinBias: s.nTempMin > 0 ? Math.round((s.tempMinBiasSum / s.nTempMin) * 10) / 10 : null,
+      precipBias:  s.nPrecip  > 0 ? Math.round((s.precipBiasSum  / s.nPrecip)  * 10) / 10 : null,
+      n: Math.max(s.nTempMax, s.nTempMin, s.nPrecip),
+      nTempMax: s.nTempMax, nTempMin: s.nTempMin, nPrecip: s.nPrecip
     };
   }
   return { stats: out, sampleSize };
+}
+
+// === Bias-correction (v1.35.1) ===
+// Возвращает скорректированный bias с учётом shrinkage (защита от шума на
+// малых выборках) и кэпа (защита от выбросов). Применяется к raw prediction
+// при отображении прогноза.
+//
+//   n < BIAS_MIN_SAMPLES        → коррекция не применяется (0)
+//   BIAS_MIN ≤ n < BIAS_FULL    → частичная: bias × (n - MIN) / (FULL - MIN)
+//   n ≥ BIAS_FULL_SAMPLES       → полная коррекция
+//
+// Кэп: ±BIAS_CAP_TEMP °C для температуры, ±BIAS_CAP_PRECIP % для осадков.
+// Это страховка — если за месяц modeling биас > 3°C, скорее всего у нас
+// слишком мало замеров и доверять им рискованно.
+const BIAS_MIN_SAMPLES = 5;
+const BIAS_FULL_SAMPLES = 15;
+const BIAS_CAP_TEMP = 3.0;
+const BIAS_CAP_PRECIP = 20;
+
+function effectiveBias(rawBias, nSamples, capValue) {
+  if (rawBias == null || typeof rawBias !== 'number' || !Number.isFinite(rawBias)) return 0;
+  if (nSamples < BIAS_MIN_SAMPLES) return 0;
+  const shrinkage = nSamples >= BIAS_FULL_SAMPLES
+    ? 1
+    : (nSamples - BIAS_MIN_SAMPLES) / (BIAS_FULL_SAMPLES - BIAS_MIN_SAMPLES);
+  const capped = Math.max(-capValue, Math.min(capValue, rawBias));
+  return capped * shrinkage;
+}
+
+// Возвращает эффективные смещения для модели — то что реально вычтется при показе.
+// `null` для каждого поля если данных недостаточно.
+function getEffectiveBiasForSource(srcId) {
+  const state = ACCURACY_STATE;
+  if (!state || !state.stats || !state.stats[srcId]) return null;
+  const s = state.stats[srcId];
+  const tempMaxBias = effectiveBias(s.tempMaxBias, s.nTempMax || 0, BIAS_CAP_TEMP);
+  const tempMinBias = effectiveBias(s.tempMinBias, s.nTempMin || 0, BIAS_CAP_TEMP);
+  const precipBias  = effectiveBias(s.precipBias,  s.nPrecip  || 0, BIAS_CAP_PRECIP);
+  if (tempMaxBias === 0 && tempMinBias === 0 && precipBias === 0) return null;
+  return { tempMax: tempMaxBias, tempMin: tempMinBias, precip: precipBias };
+}
+
+// Применяет bias-коррекцию к скопированному forecast'у.
+// day.max / day.min / day.precip — вычитается дневной bias.
+// hourly[*].t — вычитается интерполированный bias по позиции от min до max дневной температуры.
+// hourly[*].p — пропорциональная коррекция probability (precipBias масштабируется к доле).
+// hourly[*].pmm — НЕ трогаем (мм — это абсолютная величина другого порядка чем %).
+function applyBiasCorrection(forecast, srcId) {
+  const bias = getEffectiveBiasForSource(srcId);
+  if (!bias) return forecast;
+  for (const day of forecast) {
+    const origMax = day.max;
+    const origMin = day.min;
+    if (typeof day.max === 'number') day.max = Math.round(day.max - bias.tempMax);
+    if (typeof day.min === 'number') day.min = Math.round(day.min - bias.tempMin);
+    if (typeof day.precip === 'number') {
+      day.precip = Math.max(0, Math.min(100, Math.round(day.precip - bias.precip)));
+    }
+    // Hourly t: линейная интерполяция между tempMin-bias (низ дня) и tempMax-bias (пик).
+    if (Array.isArray(day.hourly) && typeof origMax === 'number' && typeof origMin === 'number') {
+      const range = origMax - origMin;
+      for (const h of day.hourly) {
+        if (typeof h.t !== 'number') continue;
+        // Доля от min до max в исходных данных: 0 = min, 1 = max
+        const ratio = range > 0 ? Math.max(0, Math.min(1, (h.t - origMin) / range)) : 0.5;
+        const hourBias = bias.tempMin + (bias.tempMax - bias.tempMin) * ratio;
+        h.t = Math.round(h.t - hourBias);
+        if (typeof h.feels === 'number') h.feels = Math.round(h.feels - hourBias);
+      }
+    }
+    day.biasApplied = true;
+  }
+  return forecast;
 }
 
 // Состояние accuracy — обновляется в refreshForecast, читается в renderAccuracy.
