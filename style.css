@@ -325,15 +325,21 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-nowcast-hint{margin-top:6px;display:none}
 .hero-nowcast-hint.show{display:flex}
 .hero.stuck .hero-nowcast-hint{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
-.nc-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:100px;font-family:inherit;font-size:11.5px;font-weight:600;letter-spacing:0.01em;text-shadow:0 1px 3px rgba(0,0,0,0.4);transition:all 0.2s}
+.nc-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:100px;font-family:inherit;font-size:11.5px;font-weight:600;letter-spacing:0.01em;text-shadow:0 1px 3px rgba(0,0,0,0.4);transition:all 0.2s;
+  /* Дефолтный цвет = rain. Перебивается tone-* классами ниже. */
+  background:rgba(96,165,250,0.18);border:1px solid rgba(96,165,250,0.45);color:#bfdbfe}
 .nc-pill .nc-icon{font-size:13px;line-height:1}
-.nc-pill.nc-now{background:rgba(96,165,250,0.18);border:1px solid rgba(96,165,250,0.45);color:#bfdbfe}
-.nc-pill.nc-soon{background:rgba(34,211,238,0.14);border:1px solid rgba(34,211,238,0.45);color:#a5f3fc}
-.nc-pill.nc-dry{background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.45);color:#86efac}
-:root[data-theme="light"] .nc-pill{text-shadow:none}
-:root[data-theme="light"] .nc-pill.nc-now{background:rgba(37,99,235,0.12);border-color:rgba(37,99,235,0.40);color:#1e3a8a}
-:root[data-theme="light"] .nc-pill.nc-soon{background:rgba(8,145,178,0.12);border-color:rgba(8,145,178,0.40);color:#155e75}
-:root[data-theme="light"] .nc-pill.nc-dry{background:rgba(22,163,74,0.14);border-color:rgba(22,163,74,0.40);color:#14532d}
+/* v1.41.0: тонировка по типу осадков. rain=синий, snow=голубой, sleet=серо-фиолет,
+   danger (буря/лёд)=янтарно-красный — тревожный сигнал. */
+.nc-pill.tone-rain{background:rgba(96,165,250,0.18);border-color:rgba(96,165,250,0.45);color:#bfdbfe}
+.nc-pill.tone-snow{background:rgba(165,243,252,0.18);border-color:rgba(165,243,252,0.55);color:#e0f7fa}
+.nc-pill.tone-sleet{background:rgba(167,139,250,0.18);border-color:rgba(167,139,250,0.45);color:#ddd6fe}
+.nc-pill.tone-danger{background:rgba(251,146,60,0.22);border-color:rgba(251,146,60,0.55);color:#fed7aa;box-shadow:0 0 12px rgba(251,146,60,0.15)}
+:root[data-theme="light"] .nc-pill{text-shadow:none;background:rgba(37,99,235,0.12);border-color:rgba(37,99,235,0.40);color:#1e3a8a}
+:root[data-theme="light"] .nc-pill.tone-rain{background:rgba(37,99,235,0.12);border-color:rgba(37,99,235,0.40);color:#1e3a8a}
+:root[data-theme="light"] .nc-pill.tone-snow{background:rgba(8,145,178,0.12);border-color:rgba(8,145,178,0.45);color:#0c4a6e}
+:root[data-theme="light"] .nc-pill.tone-sleet{background:rgba(124,58,237,0.10);border-color:rgba(124,58,237,0.40);color:#4c1d95}
+:root[data-theme="light"] .nc-pill.tone-danger{background:rgba(234,88,12,0.14);border-color:rgba(234,88,12,0.45);color:#7c2d12;box-shadow:0 0 12px rgba(234,88,12,0.15)}
 .hero-acc-pill{
   display:inline-flex;align-items:center;gap:6px;
   padding:5px 11px;border-radius:100px;
