@@ -317,7 +317,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-feels{font-size:13px;color:rgba(232,240,255,0.5)}
 .hero-feels strong{color:#00d4ff;font-weight:500}
 .hero-source-note{font-size:11px;color:rgba(232,240,255,0.4);margin-top:6px;font-family:'JetBrains Mono',monospace}
-/* Подсказка точности на hero: лидер по MAE среди 7 моделей. Клик → Source Data Modal. */
+/* Подсказка точности на hero: лидер по MAE среди 8 моделей. Клик → Source Data Modal. */
 .hero-accuracy-hint{margin-top:8px;display:flex}
 .hero.stuck .hero-accuracy-hint{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
 .hero-acc-pill{

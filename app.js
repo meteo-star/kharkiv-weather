@@ -23,7 +23,7 @@ const I18N = {
     'hero.feelsBeforeSunset':  'Ощущается как {feels} · Закат в {sunset}',
     'hero.feelsAfterSunset':   'Ощущается как {feels} · Закат был в {sunset}',
     'hero.sourceNote': 'По данным {name}',
-    'hero.sourceAvg': 'усреднения 7 моделей',
+    'hero.sourceAvg': 'усреднения 8 моделей',
     'metric.temp': 'Температура',
     'metric.feels': 'По ощущениям',
     'metric.wind': 'Ветер',
@@ -69,7 +69,7 @@ const I18N = {
     'astro.stars.veryPoor': 'Очень плохо',
     'astro.stars.hint': 'облачность {cl}% · луна {moon}%',
     'chart.title': 'Сегодня · почасовой прогноз',
-    'chart.sub.avg': 'Усреднено по 7 моделям',
+    'chart.sub.avg': 'Усреднено по 8 моделям',
     'chart.sub.named': 'Прогноз {name}',
     'precip.title': 'Осадки',
     'precip.sub': 'Прогноз мм/ч на ближайшие 48 часов',
@@ -130,12 +130,12 @@ const I18N = {
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Осадки',
     'sources.title': 'Источник прогноза',
-    'sources.sub': 'Выбери источник или используй среднее по всем 7 моделям',
+    'sources.sub': 'Выбери источник или используй среднее по всем 8 моделям',
     'sources.avgTitle': 'Среднее по всем сервисам',
-    'sources.avgSub': 'Агрегация 7 моделей · ансамблевый прогноз',
-    'sources.avgShort': 'Среднее по 7 моделям',
+    'sources.avgSub': 'Агрегация 8 моделей · ансамблевый прогноз',
+    'sources.avgShort': 'Среднее по 8 моделям',
     'sources.dividerOr': 'или конкретный источник',
-    'sources.confHint': 'Цветная полоска под карточкой дня — согласие 7 моделей:',
+    'sources.confHint': 'Цветная полоска под карточкой дня — согласие 8 моделей:',
     'sources.confLegend.high': 'надёжный',
     'sources.confLegend.mid': 'средний',
     'sources.confLegend.low': 'шаткий',
@@ -175,7 +175,7 @@ const I18N = {
     'confidence.low': 'низкое',
     'confidence.veryLow': 'плохое',
     'confidence.tooltip': '{n} моделей · разброс ±{range}°C по максимальной температуре сегодня',
-    'chart.spreadLabel': 'Разброс между 7 моделями',
+    'chart.spreadLabel': 'Разброс между 8 моделями',
     'windows.title': 'Окна возможностей',
     'windows.sub': 'Лучшее время для бытовых задач в ближайшие 5 дней',
     'windows.preset.jogging': 'Пробежка',
@@ -420,7 +420,7 @@ const I18N = {
     'hero.feelsBeforeSunset':  'Відчувається як {feels} · Захід о {sunset}',
     'hero.feelsAfterSunset':   'Відчувається як {feels} · Захід був о {sunset}',
     'hero.sourceNote': 'За даними {name}',
-    'hero.sourceAvg': 'усереднення 7 моделей',
+    'hero.sourceAvg': 'усереднення 8 моделей',
     'metric.temp': 'Температура',
     'metric.feels': 'Відчувається',
     'metric.wind': 'Вітер',
@@ -466,7 +466,7 @@ const I18N = {
     'astro.stars.veryPoor': 'Дуже погано',
     'astro.stars.hint': 'хмарність {cl}% · місяць {moon}%',
     'chart.title': 'Сьогодні · погодинний прогноз',
-    'chart.sub.avg': 'Усереднено по 7 моделях',
+    'chart.sub.avg': 'Усереднено по 8 моделях',
     'chart.sub.named': 'Прогноз {name}',
     'precip.title': 'Опади',
     'precip.sub': 'Прогноз мм/год на найближчі 48 годин',
@@ -527,10 +527,10 @@ const I18N = {
     'chart.legendTemp': 'Температура',
     'chart.legendPrecip': 'Опади',
     'sources.title': 'Джерело прогнозу',
-    'sources.sub': 'Обери джерело або використовуй середнє по 7 моделях',
+    'sources.sub': 'Обери джерело або використовуй середнє по 8 моделях',
     'sources.avgTitle': 'Середнє по всіх сервісах',
-    'sources.avgSub': 'Агрегація 7 моделей · ансамблевий прогноз',
-    'sources.confHint': 'Кольорова смужка під карткою дня — згода 7 моделей:',
+    'sources.avgSub': 'Агрегація 8 моделей · ансамблевий прогноз',
+    'sources.confHint': 'Кольорова смужка під карткою дня — згода 8 моделей:',
     'sources.confLegend.high': 'надійний',
     'sources.confLegend.mid': 'середній',
     'sources.confLegend.low': 'хиткий',
@@ -564,7 +564,7 @@ const I18N = {
     'compare.error': 'Не вдалось завантажити погоду для {city}',
     'compare.swapA': 'Змінити перше місто',
     'compare.swapB': 'Змінити друге місто',
-    'sources.avgShort': 'Середнє по 7 моделях',
+    'sources.avgShort': 'Середнє по 8 моделях',
     'sources.dividerOr': 'або конкретне джерело',
     'confidence.label': 'Згода моделей',
     'confidence.high': 'висока',
@@ -572,7 +572,7 @@ const I18N = {
     'confidence.low': 'низька',
     'confidence.veryLow': 'погана',
     'confidence.tooltip': '{n} моделей · розкид ±{range}°C по максимальній температурі сьогодні',
-    'chart.spreadLabel': 'Розкид між 7 моделями',
+    'chart.spreadLabel': 'Розкид між 8 моделями',
     'windows.title': 'Вікна можливостей',
     'windows.sub': 'Найкращий час для побутових справ у найближчі 5 днів',
     'windows.preset.jogging': 'Пробіжка',
@@ -804,7 +804,7 @@ const I18N = {
     'hero.feelsBeforeSunset':  'Feels like {feels} · Sunset at {sunset}',
     'hero.feelsAfterSunset':   'Feels like {feels} · Sunset was at {sunset}',
     'hero.sourceNote': 'Source: {name}',
-    'hero.sourceAvg': 'average of 7 models',
+    'hero.sourceAvg': 'average of 8 models',
     'metric.temp': 'Temperature',
     'metric.feels': 'Feels like',
     'metric.wind': 'Wind',
@@ -850,7 +850,7 @@ const I18N = {
     'astro.stars.veryPoor': 'Very poor',
     'astro.stars.hint': 'clouds {cl}% · moon {moon}%',
     'chart.title': 'Today · hourly forecast',
-    'chart.sub.avg': 'Averaged across 7 models',
+    'chart.sub.avg': 'Averaged across 8 models',
     'chart.sub.named': 'Forecast by {name}',
     'precip.title': 'Precipitation',
     'precip.sub': 'Forecast mm/h for next 48 hours',
@@ -911,10 +911,10 @@ const I18N = {
     'chart.legendTemp': 'Temperature',
     'chart.legendPrecip': 'Precipitation',
     'sources.title': 'Forecast source',
-    'sources.sub': 'Pick a source or use the average of all 7 models',
+    'sources.sub': 'Pick a source or use the average of all 8 models',
     'sources.avgTitle': 'Average of all services',
-    'sources.avgSub': 'Aggregation of 7 models · ensemble forecast',
-    'sources.confHint': 'Coloured bar under the day card — agreement of 7 models:',
+    'sources.avgSub': 'Aggregation of 8 models · ensemble forecast',
+    'sources.confHint': 'Coloured bar under the day card — agreement of 8 models:',
     'sources.confLegend.high': 'reliable',
     'sources.confLegend.mid': 'medium',
     'sources.confLegend.low': 'shaky',
@@ -948,7 +948,7 @@ const I18N = {
     'compare.error': 'Failed to load weather for {city}',
     'compare.swapA': 'Change first city',
     'compare.swapB': 'Change second city',
-    'sources.avgShort': 'Average of 7 models',
+    'sources.avgShort': 'Average of 8 models',
     'sources.dividerOr': 'or a specific source',
     'confidence.label': 'Model agreement',
     'confidence.high': 'high',
@@ -956,7 +956,7 @@ const I18N = {
     'confidence.low': 'low',
     'confidence.veryLow': 'poor',
     'confidence.tooltip': '{n} models · spread ±{range}°C on today\'s max temperature',
-    'chart.spreadLabel': 'Spread across 7 models',
+    'chart.spreadLabel': 'Spread across 8 models',
     'windows.title': 'Activity windows',
     'windows.sub': 'Best time for everyday tasks in the next 5 days',
     'windows.preset.jogging': 'Jogging',
@@ -1935,16 +1935,20 @@ function uvGauge(value) {
    SOURCES & BIAS
    ============================================ */
 
-// 7 бесплатных глобальных моделей Open-Meteo + ансамблевое среднее
+// 8 бесплатных моделей Open-Meteo (7 классических физических + ECMWF AIFS AI) + ансамблевое среднее.
+// AIFS — глубокое обучение на ERA5, принципиально иная природа ошибок чем
+// у физических моделей → снижает корреляцию ошибок в ансамбле, делая AVG точнее.
+// (Google GraphCast у Open-Meteo сейчас не публикует данные — добавим если/когда вернётся.)
 const SOURCES = [
-  { id: 'avg',   name: 'Среднее по всем моделям', shortName: 'Среднее по 7 моделям', tag: 'AVG',   color: '#00d4ff', model: null },
-  { id: 'ecmwf', name: 'ECMWF IFS 0.25°',          shortName: 'ECMWF',                tag: 'ECMWF', color: '#60a5fa', model: 'ecmwf_ifs025' },
-  { id: 'gfs',   name: 'NOAA GFS',                 shortName: 'GFS',                  tag: 'GFS',   color: '#a78bfa', model: 'gfs_seamless' },
-  { id: 'icon',  name: 'DWD ICON',                 shortName: 'ICON',                 tag: 'ICON',  color: '#5eead4', model: 'icon_seamless' },
-  { id: 'gem',   name: 'CMC GEM (Канада)',         shortName: 'GEM',                  tag: 'GEM',   color: '#fb923c', model: 'gem_seamless' },
-  { id: 'jma',   name: 'JMA (Япония)',             shortName: 'JMA',                  tag: 'JMA',   color: '#facc15', model: 'jma_seamless' },
-  { id: 'mf',    name: 'Météo-France',             shortName: 'Météo-France',         tag: 'MF',    color: '#f472b6', model: 'meteofrance_seamless' },
-  { id: 'ukmo',  name: 'UK Met Office',            shortName: 'UKMO',                 tag: 'UKMO',  color: '#4ade80', model: 'ukmo_seamless' }
+  { id: 'avg',       name: 'Среднее по всем моделям', shortName: 'Среднее по 8 моделям', tag: 'AVG',       color: '#00d4ff', model: null },
+  { id: 'ecmwf',     name: 'ECMWF IFS 0.25°',          shortName: 'ECMWF',                tag: 'ECMWF',     color: '#60a5fa', model: 'ecmwf_ifs025' },
+  { id: 'aifs',      name: 'ECMWF AIFS (AI)',          shortName: 'ECMWF AIFS',           tag: 'AIFS',      color: '#22d3ee', model: 'ecmwf_aifs025_single' },
+  { id: 'gfs',       name: 'NOAA GFS',                 shortName: 'GFS',                  tag: 'GFS',       color: '#a78bfa', model: 'gfs_seamless' },
+  { id: 'icon',      name: 'DWD ICON',                 shortName: 'ICON',                 tag: 'ICON',      color: '#5eead4', model: 'icon_seamless' },
+  { id: 'gem',       name: 'CMC GEM (Канада)',         shortName: 'GEM',                  tag: 'GEM',       color: '#fb923c', model: 'gem_seamless' },
+  { id: 'jma',       name: 'JMA (Япония)',             shortName: 'JMA',                  tag: 'JMA',       color: '#facc15', model: 'jma_seamless' },
+  { id: 'mf',        name: 'Météo-France',             shortName: 'Météo-France',         tag: 'MF',        color: '#f472b6', model: 'meteofrance_seamless' },
+  { id: 'ukmo',      name: 'UK Met Office',            shortName: 'UKMO',                 tag: 'UKMO',      color: '#4ade80', model: 'ukmo_seamless' }
 ];
 
 function getSrc(id) { return SOURCES.find(s => s.id === id) || SOURCES[0]; }
@@ -2107,14 +2111,15 @@ function getCurrentSource() { return getSrc(currentSourceId); }
 // сливаются с peach-фоном, поэтому в light режиме показываем насыщенные
 // тёплые/глубокие варианты тех же оттенков.
 const SOURCE_COLORS_LIGHT = {
-  avg:   '#c0532a',  // terracotta вместо cyan
-  ecmwf: '#2563eb',  // deep blue
-  gfs:   '#7c3aed',  // deep purple
-  icon:  '#0d9488',  // teal-dark
-  gem:   '#ea580c',  // orange-dark
-  jma:   '#ca8a04',  // gold-dark
-  mf:    '#db2777',  // pink-dark
-  ukmo:  '#16a34a'   // green-dark
+  avg:       '#c0532a',  // terracotta вместо cyan
+  ecmwf:     '#2563eb',  // deep blue
+  aifs:      '#0891b2',  // deep cyan
+  gfs:       '#7c3aed',  // deep purple
+  icon:      '#0d9488',  // teal-dark
+  gem:       '#ea580c',  // orange-dark
+  jma:       '#ca8a04',  // gold-dark
+  mf:        '#db2777',  // pink-dark
+  ukmo:      '#16a34a'   // green-dark
 };
 function effectiveSourceColor(s) {
   if (state.theme && resolveTheme(state.theme) === 'light') {
@@ -4620,7 +4625,7 @@ setTimeout(clearAppBootstrap, 8000);
 //
 // Текущие "живые" версии указаны в *_CURRENT_VERSION ниже. Всё что
 // меньше или с неизвестной версией под этим префиксом — удаляется.
-const FORECAST_CACHE_CURRENT = 9;
+const FORECAST_CACHE_CURRENT = 13;
 const CLIMATE_CACHE_CURRENT  = 1;
 function cleanupStaleLocalStorage() {
   if (typeof localStorage === 'undefined') return;
@@ -7139,7 +7144,7 @@ function forecastCacheKey(lat, lon) {
   // v12: day.max и day.min для AVG-источника теперь вычисляются по hourly[*].t
   // (max/min) вместо meanOf(daily.tempMax/min) — устраняет расхождение между
   // плиткой дня (9°/5°) и почасовой лентой (которая показывала 11° внутри).
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v12`;
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v13`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -7698,10 +7703,10 @@ function parseOpenMeteoToForecast(data, suffix = '') {
   return days;
 }
 
-// Парсит ответ Open-Meteo (который содержит данные по всем 7 моделям) в объект:
+// Парсит ответ Open-Meteo (который содержит данные по всем 8 моделям) в объект:
 //   { 'ecmwf': [10 days], 'gfs': [10 days], ..., 'avg': [10 days] }
 //
-// АСИНХРОННАЯ через yielding: парсинг 7 моделей суммарно ~50–150мс на телефоне.
+// АСИНХРОННАЯ через yielding: парсинг 8 моделей суммарно ~70–200мс на телефоне.
 // Чтобы не блокировать main thread одним куском, между моделями делаем
 // await setTimeout(0) — браузер успевает отрисовать промежуточные кадры,
 // принять пользовательский ввод и т.п. Каждый чанк (одна модель) занимает
@@ -8784,9 +8789,9 @@ function updateNotifSourceLabel() {
   const el = document.getElementById('notifSourceName');
   if (!el) return;
   const src = (typeof getCurrentSource === 'function') ? getCurrentSource() : null;
-  if (!src) { el.textContent = 'Среднее (7 моделей)'; return; }
+  if (!src) { el.textContent = 'Среднее (8 моделей)'; return; }
   if (src.id === 'avg') {
-    el.textContent = 'Среднее по 7 моделям';
+    el.textContent = 'Среднее по 8 моделям';
   } else {
     el.textContent = src.shortName || src.name;
   }
@@ -9576,7 +9581,7 @@ async function saveNotifRules() {
   statusEl.classList.remove('error');
   try {
     // Передаём текущий выбранный источник погоды — бот будет использовать его
-    // при cron-проверках. Если 'avg' (по умолчанию) — AVG из 7 моделей.
+    // при cron-проверках. Если 'avg' (по умолчанию) — AVG из 8 моделей.
     const source = (typeof currentSourceId === 'string') ? currentSourceId : 'avg';
     const r = await fetch(`${BOT_API_BASE}/api/rules-set`, {
       method: 'POST',
