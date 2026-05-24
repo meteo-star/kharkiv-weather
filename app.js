@@ -245,6 +245,8 @@ const I18N = {
     'accuracy.leaderTempMax': 'по дневной T:',
     'accuracy.leaderTempMin': 'по ночной T:',
     'accuracy.leaderPrecip': 'по осадкам:',
+    'accuracy.leaderAvgAll': 'Среднее точнее любой отдельной модели по всем метрикам',
+    'accuracy.leaderBestAll': 'точнее всех по всем метрикам',
     'nowcast.now.until.rain':         'Дождь сейчас · до ~{time}',
     'nowcast.now.until.drizzle':      'Морось сейчас · до ~{time}',
     'nowcast.now.until.snow':         'Снег сейчас · до ~{time}',
@@ -275,6 +277,7 @@ const I18N = {
     'accuracy.legendQ2': 'хорошо',
     'accuracy.legendQ3': 'средне',
     'accuracy.legendQ4': 'слабо',
+    'accuracy.legendAvgWin': 'точнее всех',
     'accuracy.bestBadge': 'Самая точная модель по последним замерам',
     'footer.refresh': 'Обновить',
     'footer.speak': 'Озвучить',
@@ -667,6 +670,8 @@ const I18N = {
     'accuracy.leaderTempMax': 'денна T:',
     'accuracy.leaderTempMin': 'нічна T:',
     'accuracy.leaderPrecip': 'опади:',
+    'accuracy.leaderAvgAll': 'Середнє точніше за будь-яку окрему модель за всіма метриками',
+    'accuracy.leaderBestAll': 'точніший за всі за всіма метриками',
     'nowcast.now.until.rain':         'Дощ зараз · до ~{time}',
     'nowcast.now.until.drizzle':      'Мряка зараз · до ~{time}',
     'nowcast.now.until.snow':         'Сніг зараз · до ~{time}',
@@ -697,6 +702,7 @@ const I18N = {
     'accuracy.legendQ2': 'добре',
     'accuracy.legendQ3': 'середньо',
     'accuracy.legendQ4': 'слабко',
+    'accuracy.legendAvgWin': 'точніше за всі',
     'accuracy.bestBadge': 'Найточніша модель за останніми замірами',
     'footer.refresh': 'Оновити',
     'footer.speak': 'Озвучити',
@@ -1076,6 +1082,8 @@ const I18N = {
     'accuracy.leaderTempMax': 'day T:',
     'accuracy.leaderTempMin': 'night T:',
     'accuracy.leaderPrecip': 'precip:',
+    'accuracy.leaderAvgAll': 'Average beats any single model on all metrics',
+    'accuracy.leaderBestAll': 'is the most accurate on all metrics',
     'nowcast.now.until.rain':         'Rain now · until ~{time}',
     'nowcast.now.until.drizzle':      'Drizzle now · until ~{time}',
     'nowcast.now.until.snow':         'Snow now · until ~{time}',
@@ -1106,6 +1114,7 @@ const I18N = {
     'accuracy.legendQ2': 'good',
     'accuracy.legendQ3': 'fair',
     'accuracy.legendQ4': 'poor',
+    'accuracy.legendAvgWin': 'best of all',
     'accuracy.bestBadge': 'Most accurate model by recent samples',
     'footer.refresh': 'Refresh',
     'footer.speak': 'Speak',
@@ -5586,8 +5595,11 @@ function renderAccuracy() {
 
   // v1.38.0: per-variable best — для каждой метрики (tempMax/tempMin/precip)
   // находим модель с минимальной MAE. Эта ячейка в таблице получит .best-col.
-  // avg в подсчёт лидеров НЕ включаем — он сравнительная база, не «модель» в смысле выбора.
-  function bestModelByField(field) {
+  // v1.42.0: AVG теперь УЧАСТВУЕТ в per-variable рейтинге. Если ансамбль реально
+  // точнее любой одиночной модели — это позитивный сигнал «AVG работает», и его
+  // надо выделять отдельно (зелёным best-col-avg, чтобы отличать от золотого
+  // best-col у моделей).
+  function bestByField(field) {
     let bestId = null, bestVal = Infinity;
     for (const r of rows) {
       const v = r.s[field];
@@ -5595,13 +5607,30 @@ function renderAccuracy() {
         bestVal = v; bestId = r.src.id;
       }
     }
+    // Проверяем AVG отдельно — он может побить модели.
+    if (avgS && typeof avgS[field] === 'number' && avgS[field] < bestVal) {
+      bestId = 'avg';
+    }
     return bestId;
   }
   const bestByVar = {
-    tempMax: bestModelByField('tempMaxMAE'),
-    tempMin: bestModelByField('tempMinMAE'),
-    precip:  bestModelByField('precipMAE')
+    tempMax: bestByField('tempMaxMAE'),
+    tempMin: bestByField('tempMinMAE'),
+    precip:  bestByField('precipMAE')
   };
+  // v1.42.0: общий «победитель композитного скора» — может быть avg, может быть модель.
+  // Зелёное выделение даём строке-победителю независимо от того AVG это или модель.
+  // Если AVG лидер — это сигнал «ансамбль работает». Если модель лидер — это сигнал
+  // «эта модель точнее AVG для твоей локации».
+  let overallWinnerId = null;
+  let minOverall = Infinity;
+  for (const r of rows) {
+    if (r.score < minOverall) { minOverall = r.score; overallWinnerId = r.src.id; }
+  }
+  if (avgScore != null && avgScore < minOverall) {
+    overallWinnerId = 'avg';
+    minOverall = avgScore;
+  }
 
   // Пороги для квартилей по реальным моделям
   const scores = rows.map(r => r.score);
@@ -5637,25 +5666,30 @@ function renderAccuracy() {
   }
 
   // metricCell: ячейка-метрика. Если src — лидер по этой переменной, добавляем
-  // .best-col (золотой glow + ☆) — даёт визуальное «лучший по этой колонке».
+  // .best-col (зелёное выделение + ✓). v1.42.0: единый цвет — не важно AVG это
+  // или модель, важен факт «лучший по этой метрике». Если зелёная полоска
+  // переедет с AVG на модель — это нормальный позитивный сигнал.
   function metricCell(srcId, val, unit, decimals, bestId) {
     const naCls = (val == null || typeof val !== 'number') ? ' na' : '';
-    const bestCls = (srcId === bestId && val != null) ? ' best-col' : '';
-    const badge = (srcId === bestId && val != null) ? '<span class="acm-best">☆</span>' : '';
+    const isBest = (srcId === bestId && val != null);
+    const bestCls = isBest ? ' best-col' : '';
+    const badge = isBest ? '<span class="acm-best">✓</span>' : '';
     return `<div class="acc-metric${naCls}${bestCls}">${badge}${formatMetric(val, unit, decimals)}</div>`;
   }
 
   function buildRow({ src, s, score }, rank) {
     const q = accuracyQuality(score, minScore, maxScore) || 0;
     const w = barWidth(score);
-    const rankBadge = rank === 1 ? '🏆' : String(rank);
-    const rankCls = rank === 1 ? 'r1' : '';
-    const bestCls = rank === 1 ? ' best' : '';
+    const isWinner = src.id === overallWinnerId;
+    const rankBadge = isWinner ? '🏆' : String(rank);
+    const rankCls = isWinner ? 'r1' : '';
+    const rowCls = isWinner ? ' winner' : '';
+    const barCls = isWinner ? ' q-winner' : ` q${q + 1}`;
     return `
-      <div class="acc-row${bestCls}" data-src="${src.id}">
+      <div class="acc-row${rowCls}" data-src="${src.id}">
         <div class="acc-rank ${rankCls}">${rankBadge}</div>
         <div class="acc-name"><span class="ac-dot" style="background:${src.color};color:${src.color}"></span><span class="ac-text">${src.shortName || src.name}</span>${biasHint(src.id)}</div>
-        <div class="acc-bar-wrap"><div class="acc-bar q${q + 1}" style="width:${w}%"></div></div>
+        <div class="acc-bar-wrap"><div class="acc-bar${barCls}" style="width:${w}%"></div></div>
         ${metricCell(src.id, s.tempMaxMAE, '°', 1, bestByVar.tempMax)}
         ${metricCell(src.id, s.tempMinMAE, '°', 1, bestByVar.tempMin)}
         ${metricCell(src.id, s.precipMAE, '%', 0, bestByVar.precip)}
@@ -5674,24 +5708,38 @@ function renderAccuracy() {
     leaderBits.push(`${t('accuracy.leaderTempMin')} <strong>${leaderName(bestByVar.tempMin)}</strong>`);
   }
   if (bestByVar.precip)  leaderBits.push(`${t('accuracy.leaderPrecip')} <strong>${leaderName(bestByVar.precip)}</strong>`);
-  const leadersHtml = leaderBits.length > 0
-    ? `<div class="acc-leaders">☆ ${leaderBits.join(' · ')}</div>`
-    : '';
+  // v1.42.0: если ОДИН источник (AVG или модель) лидер по всем трём метрикам —
+  // показываем зелёную плашку «🏆 X точнее всех». Иначе обычная плашка лидеров.
+  const oneWinsAll = bestByVar.tempMax && bestByVar.tempMin === bestByVar.tempMax && bestByVar.precip === bestByVar.tempMax;
+  let leadersHtml = '';
+  if (oneWinsAll) {
+    leadersHtml = `<div class="acc-leaders acc-leaders-winner">🏆 <strong>${leaderName(bestByVar.tempMax)}</strong> ${t('accuracy.leaderBestAll')}</div>`;
+  } else if (leaderBits.length > 0) {
+    leadersHtml = `<div class="acc-leaders">☆ ${leaderBits.join(' · ')}</div>`;
+  }
 
   let html = leadersHtml + rows.map((r, i) => buildRow(r, i + 1)).join('');
 
-  // Добавляем avg как контрольную строку (без ранга, без per-var-победителя)
+  // Добавляем avg-строку. Если AVG — overall-winner, ему присваивается тот же
+  // .winner класс что и моделям-победителям (зелёная обводка, glow, толстый bar).
+  // Visual treatment одинаковый — это упрощает «победитель = зелёный» без оглядки
+  // на тип источника.
   if (avgSrc && avgScore != null) {
     const q = accuracyQuality(avgScore, minScore, maxScore);
     const w = barWidth(avgScore);
+    const isWinner = overallWinnerId === 'avg';
+    const rowCls = isWinner ? ' winner' : '';
+    const barCls = isWinner ? ' q-winner' : ` q${(q || 0) + 1}`;
+    const rankSym = isWinner ? '🏆' : '∑';
+    const rankColor = isWinner ? '#4ade80' : '#5eead4';
     html += `
-      <div class="acc-row" data-src="avg" style="margin-top:6px;border-top:1px dashed rgba(255,255,255,0.08);border-radius:0 0 10px 10px">
-        <div class="acc-rank" style="color:#5eead4">∑</div>
+      <div class="acc-row${rowCls}" data-src="avg" style="margin-top:6px;border-top:1px dashed rgba(255,255,255,0.08);border-radius:0 0 10px 10px">
+        <div class="acc-rank" style="color:${rankColor}">${rankSym}</div>
         <div class="acc-name"><span class="ac-dot" style="background:${avgSrc.color};color:${avgSrc.color}"></span><span class="ac-text">${avgSrc.shortName || avgSrc.name}</span></div>
-        <div class="acc-bar-wrap"><div class="acc-bar q${(q || 0) + 1}" style="width:${w}%"></div></div>
-        ${metricCell('avg', avgS.tempMaxMAE, '°', 1, null)}
-        ${metricCell('avg', avgS.tempMinMAE, '°', 1, null)}
-        ${metricCell('avg', avgS.precipMAE, '%', 0, null)}
+        <div class="acc-bar-wrap"><div class="acc-bar${barCls}" style="width:${w}%"></div></div>
+        ${metricCell('avg', avgS.tempMaxMAE, '°', 1, bestByVar.tempMax)}
+        ${metricCell('avg', avgS.tempMinMAE, '°', 1, bestByVar.tempMin)}
+        ${metricCell('avg', avgS.precipMAE, '%', 0, bestByVar.precip)}
       </div>`;
   }
 
