@@ -2629,6 +2629,34 @@ window.mergeAccuracyKeys = function() {
   console.log('Перезагрузи страницу (F5), чтобы UI подтянул объединённые данные.');
 };
 
+// === DEBUG: dumpWeights() — показывает текущие AVG-веса по моделям. ===
+// Веса считаются из ACCURACY_STATE (composite MAE по последним замерам).
+// При недостаточных данных — uniform.
+window.dumpWeights = function() {
+  const modelIds = SOURCES.filter(s => s.model).map(s => s.id);
+  const weights = computeEnsembleWeights(modelIds);
+  const state = ACCURACY_STATE || { stats: {} };
+  console.log(`AVG-веса (доля в ансамбле, %):`);
+  console.log(`Правила: n < ${WEIGHT_MIN_SAMPLES} — uniform; иначе w = 1/(composite_MAE + ${WEIGHT_EPSILON}).\n`);
+  const rows = modelIds.map(id => {
+    const s = state.stats[id];
+    const composite = s ? (typeof accuracyComposite === 'function' ? accuracyComposite(s) : null) : null;
+    const w = weights.get(id);
+    return {
+      id,
+      n: s ? (s.n || 0) : 0,
+      compositeMAE: composite != null ? composite.toFixed(2) : '—',
+      pct: (w * 100).toFixed(1) + '%'
+    };
+  });
+  rows.sort((a, b) => parseFloat(b.pct) - parseFloat(a.pct));
+  for (const r of rows) {
+    console.log(`${r.id.padEnd(10)} n=${r.n.toString().padStart(2)}  composite=${r.compositeMAE.padStart(6)}  weight=${r.pct.padStart(6)}`);
+  }
+  const total = rows.reduce((s, r) => s + parseFloat(r.pct), 0);
+  console.log(`sum: ${total.toFixed(1)}%`);
+};
+
 // === DEBUG: dumpBias() — показывает текущие bias-коррекции по моделям. ===
 // Полезно чтобы понять, какие модели систематически завышают/занижают,
 // и какая коррекция реально применяется к показанному прогнозу.
@@ -7446,6 +7474,65 @@ function getEffectiveBiasForSource(srcId) {
   return { tempMax: tempMaxBias, tempMin: tempMinBias, precip: precipBias };
 }
 
+// === Weighted ensemble (v1.36.0) ===
+// Веса для AVG: модели с меньшей композитной MAE получают больший вес.
+// Формула w_i = 1 / (composite_i + epsilon), потом нормализация к sum=1.
+//
+// Защиты:
+// – Модели с < WEIGHT_MIN_SAMPLES замеров вообще не учитываются как «надёжные»
+//   — им присваивается медиана весов других моделей (нейтральная позиция).
+// – Если у >= половины моделей нет данных — fallback на uniform (как раньше).
+// – Эпсилон 0.5° предотвращает деление на ноль и экстремальные веса
+//   для модели с MAE=0 (это всё равно скорее везение чем закономерность).
+const WEIGHT_MIN_SAMPLES = 3;
+const WEIGHT_EPSILON = 0.5;
+
+// Возвращает Map<modelId, weight> со суммой == 1.
+// Если данных мало — возвращает равные веса (1/N).
+function computeEnsembleWeights(modelIds) {
+  const state = ACCURACY_STATE;
+  const n = modelIds.length;
+  if (n === 0) return new Map();
+  const uniformWeight = 1 / n;
+  if (!state || !state.stats) {
+    return new Map(modelIds.map(id => [id, uniformWeight]));
+  }
+
+  const raw = {};
+  let useful = 0;
+  for (const id of modelIds) {
+    const s = state.stats[id];
+    if (!s || s.n == null || s.n < WEIGHT_MIN_SAMPLES) {
+      raw[id] = null;
+      continue;
+    }
+    const composite = (typeof accuracyComposite === 'function') ? accuracyComposite(s) : null;
+    if (composite == null) { raw[id] = null; continue; }
+    raw[id] = 1 / (composite + WEIGHT_EPSILON);
+    useful++;
+  }
+
+  // Если меньше половины моделей имеет данные — не доверяем весам, идём uniform.
+  if (useful < Math.max(2, Math.ceil(n / 2))) {
+    return new Map(modelIds.map(id => [id, uniformWeight]));
+  }
+
+  // Модели без данных получают медиану весов «надёжных» (нейтральная позиция).
+  const validW = Object.values(raw).filter(v => v != null).sort((a, b) => a - b);
+  const median = validW[Math.floor(validW.length / 2)];
+  for (const id of modelIds) {
+    if (raw[id] == null) raw[id] = median;
+  }
+
+  // Нормализация.
+  const sum = Object.values(raw).reduce((a, b) => a + b, 0);
+  const result = new Map();
+  for (const id of modelIds) {
+    result.set(id, raw[id] / sum);
+  }
+  return result;
+}
+
 // Применяет bias-коррекцию к скопированному forecast'у.
 // day.max / day.min / day.precip — вычитается дневной bias.
 // hourly[*].t — вычитается интерполированный bias по позиции от min до max дневной температуры.
@@ -7851,6 +7938,7 @@ function parseOpenMeteoToForecast(data, suffix = '') {
 async function parseAllModels(data, sources) {
   const result = {};
   const validForecasts = [];
+  const validIds = [];
   const yieldToBrowser = () => new Promise(resolve => setTimeout(resolve, 0));
 
   for (const src of sources) {
@@ -7860,6 +7948,7 @@ async function parseAllModels(data, sources) {
       if (forecast && forecast.length > 0) {
         result[src.id] = forecast;
         validForecasts.push(forecast);
+        validIds.push(src.id);
       }
     } catch (e) {
       console.warn('Не удалось распарсить модель', src.model, e);
@@ -7869,86 +7958,114 @@ async function parseAllModels(data, sources) {
   }
 
   if (validForecasts.length > 0) {
-    result.avg = computeAverageForecast(validForecasts);
+    // v1.36.0: веса по обратной MAE. Если ACCURACY_STATE ещё пуст
+    // (первая сессия) — внутри функции вернётся uniform и AVG будет как
+    // прежнее простое среднее. Bias-correction (v1.35.1) применяется
+    // отдельно при getForecast(), не зависит от AVG.
+    const weightsMap = computeEnsembleWeights(validIds);
+    const weights = validIds.map(id => weightsMap.get(id));
+    result.avg = computeAverageForecast(validForecasts, weights);
   }
   return result;
 }
 
-// Среднее по N моделям — для каждого дня и каждого часа берём арифметическое среднее.
+// Среднее по N моделям — для каждого дня и каждого часа берём ВЗВЕШЕННОЕ среднее.
+// weights — массив той же длины что forecasts, веса нормализованы (сумма == 1).
+// Если weights не передан или содержит null'ы — используется равномерное среднее.
 // Категориальные поля (направление ветра, иконка, фаза луны) берём из первой модели.
-function computeAverageForecast(forecasts) {
+function computeAverageForecast(forecasts, weights = null) {
   if (!forecasts || forecasts.length === 0) return [];
   const numDays = Math.min(...forecasts.map(f => f.length));
   const result = [];
+  const useWeights = Array.isArray(weights) && weights.length === forecasts.length
+    && weights.every(w => typeof w === 'number' && Number.isFinite(w));
 
-  const meanOf = (arr, field) => {
-    const vals = arr.map(o => o[field]).filter(v => typeof v === 'number' && !Number.isNaN(v));
-    if (vals.length === 0) return 0;
-    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  // weightedMeanOf: parallel arrays — values vs ws. Игнорирует null/NaN values
+  // (соответствующий вес тоже исключается, чтобы остальные нормально нормализовались).
+  const wMeanOf = (arr, field, ws) => {
+    let sumVW = 0, sumW = 0;
+    for (let i = 0; i < arr.length; i++) {
+      const v = arr[i][field];
+      if (typeof v !== 'number' || Number.isNaN(v)) continue;
+      const w = ws ? ws[i] : 1;
+      sumVW += v * w; sumW += w;
+    }
+    return sumW > 0 ? sumVW / sumW : 0;
   };
+  // (внутри дневного цикла используется dMeanOf, использующий dayWeights —
+  // он подменяет старый бесвесовой meanOf, который раньше был тут.)
 
   for (let i = 0; i < numDays; i++) {
-    const days = forecasts.map(f => f[i]).filter(Boolean);
-    if (days.length === 0) continue;
+    // Парные [day, weight] чтобы фильтр пропадающих дней не сбил порядок.
+    const pairs = forecasts.map((f, idx) => ({
+      day: f[i],
+      w: useWeights ? weights[idx] : 1
+    })).filter(p => p.day);
+    if (pairs.length === 0) continue;
+    const days = pairs.map(p => p.day);
+    const dayWeights = pairs.map(p => p.w);
     const first = days[0];
+    // dMeanOf: взвешенное среднее по дням текущей итерации с учётом dayWeights.
+    const dMeanOf = (field) => wMeanOf(days, field, dayWeights);
 
-    // Усреднение часовых (включая feels-like, cloud_cover, а также min/max температуры среди моделей — для полосы разброса на графике)
+    // Усреднение часовых: тоже взвешенное. Парим [hour, weight] чтобы пропадающие
+    // часы у отдельной модели не сбили весовой порядок.
     const hourly = [];
     const numHours = Math.min(...days.map(d => d.hourly.length));
     for (let k = 0; k < numHours; k++) {
-      const hours = days.map(d => d.hourly[k]).filter(Boolean);
-      if (hours.length === 0) continue;
-      const feelsVals = hours.map(o => o.feels).filter(v => typeof v === 'number');
-      const clVals = hours.map(o => o.cl).filter(v => typeof v === 'number');
-      const tVals = hours.map(o => o.t).filter(v => typeof v === 'number');
-      // В6: cape/li усредняем; wc берём максимум по моделям — если хоть одна предсказала
-      // грозовой код (95/96/99), он «выиграет» у спокойных кодов.
-      const capeVals = hours.map(o => o.cape).filter(v => typeof v === 'number');
-      const liVals   = hours.map(o => o.li).filter(v => typeof v === 'number');
-      const wcVals   = hours.map(o => o.wc).filter(v => typeof v === 'number');
-      const prVals   = hours.map(o => o.pr).filter(v => typeof v === 'number');
-      const humVals  = hours.map(o => o.hum).filter(v => typeof v === 'number');
-      const dpVals   = hours.map(o => o.dp).filter(v => typeof v === 'number');
-      const uviVals  = hours.map(o => o.uvi).filter(v => typeof v === 'number');
-      const visVals  = hours.map(o => o.vis).filter(v => typeof v === 'number');
-      const srVals   = hours.map(o => o.sr).filter(v => typeof v === 'number');
-      const meanRound = (arr, decimals = 0) => {
-        if (arr.length === 0) return null;
-        const m = arr.reduce((a,b) => a+b, 0) / arr.length;
+      const hourPairs = days.map((d, idx) => ({
+        hour: d.hourly[k],
+        w: dayWeights[idx]
+      })).filter(p => p.hour);
+      if (hourPairs.length === 0) continue;
+      const hours = hourPairs.map(p => p.hour);
+      const hourWeights = hourPairs.map(p => p.w);
+      // wMeanRound: взвешенное среднее по полю field, с округлением до decimals знаков.
+      // Возвращает null если ни у одной модели нет значения для этого поля.
+      const wMR = (field, decimals = 0) => {
+        let sumVW = 0, sumW = 0;
+        for (let i = 0; i < hours.length; i++) {
+          const v = hours[i][field];
+          if (typeof v !== 'number' || Number.isNaN(v)) continue;
+          sumVW += v * hourWeights[i]; sumW += hourWeights[i];
+        }
+        if (sumW === 0) return null;
         const factor = Math.pow(10, decimals);
-        return Math.round(m * factor) / factor;
+        return Math.round((sumVW / sumW) * factor) / factor;
       };
+      const tVals = hours.map(o => o.t).filter(v => typeof v === 'number');
+      const wcVals = hours.map(o => o.wc).filter(v => typeof v === 'number');
       // wc для AVG — максимум среди моделей (грозовой/осадочный код побеждает над спокойным).
       // c должен СООТВЕТСТВОВАТЬ wc, иначе hero (читает wc) и hourly (читает c) расходятся.
       const avgWc = wcVals.length > 0 ? Math.max(...wcVals) : null;
       hourly.push({
         h: hours[0].h,
-        t: Math.round(meanOf(hours, 't')),
-        p: Math.round(meanOf(hours, 'p')),
-        pmm: Math.round(meanOf(hours, 'pmm') * 10) / 10,  // среднее количество осадков мм/ч по моделям
-        pmmMax: Math.max(0, ...hours.map(o => typeof o.pmm === 'number' ? o.pmm : 0)),  // максимум среди моделей (для консервативной проверки)
-        w: Math.round(meanOf(hours, 'w')),
+        t: wMR('t', 0) ?? 0,
+        p: wMR('p', 0) ?? 0,
+        pmm: wMR('pmm', 1) ?? 0,
+        pmmMax: Math.max(0, ...hours.map(o => typeof o.pmm === 'number' ? o.pmm : 0)),
+        w: wMR('w', 0) ?? 0,
         c: avgWc != null ? codeToCondition(avgWc) : (hours[0].c || 'cloudy'),
-        feels: feelsVals.length > 0 ? Math.round(feelsVals.reduce((a,b) => a+b, 0) / feelsVals.length) : null,
-        cl: clVals.length > 0 ? Math.round(clVals.reduce((a,b) => a+b, 0) / clVals.length) : null,
-        pr: meanRound(prVals, 0),
-        hum: meanRound(humVals, 0),
-        dp:  meanRound(dpVals, 0),
-        uvi: meanRound(uviVals, 1),
-        vis: meanRound(visVals, 1),
-        sr:  meanRound(srVals, 0),
+        feels: wMR('feels', 0),
+        cl: wMR('cl', 0),
+        pr: wMR('pr', 0),
+        hum: wMR('hum', 0),
+        dp:  wMR('dp', 0),
+        uvi: wMR('uvi', 1),
+        vis: wMR('vis', 1),
+        sr:  wMR('sr', 0),
         tMin: tVals.length > 0 ? Math.min(...tVals) : null,
         tMax: tVals.length > 0 ? Math.max(...tVals) : null,
         wc: avgWc,
-        cape: capeVals.length > 0 ? Math.round(capeVals.reduce((a,b) => a+b, 0) / capeVals.length) : null,
-        li: liVals.length > 0 ? Math.round((liVals.reduce((a,b) => a+b, 0) / liVals.length) * 10) / 10 : null
+        cape: wMR('cape', 0),
+        li:   wMR('li', 1)
       });
     }
 
     // UV: считаем mean только из моделей, реально вернувших значение (null игнорируется в meanOf автоматически).
     const uvVals = days.map(o => o.uv).filter(v => typeof v === 'number' && !Number.isNaN(v));
     const avgUv = uvVals.length > 0 ? Math.round(uvVals.reduce((a,b) => a+b, 0) / uvVals.length) : null;
-    const avgWind = Math.round(meanOf(days, 'wind'));
+    const avgWind = Math.round(dMeanOf('wind'));
     // Тренд давления — берём наиболее частый из моделей (mode)
     const trendCounts = {};
     days.forEach(d => { if (d.pressureTrend) trendCounts[d.pressureTrend] = (trendCounts[d.pressureTrend]||0) + 1; });
@@ -7978,28 +8095,28 @@ function computeAverageForecast(forecasts) {
       condDesc: first.condDesc,
       // max/min для AVG берём по почасовой ленте — это гарантирует
       // согласованность с тем что юзер видит в модалке часа за часом.
-      // Раньше было `meanOf(days, 'max')` — усреднённые daily.tempMax
+      // Раньше было `dMeanOf('max')` — усреднённые daily.tempMax
       // моделей, которые могли расходиться с реальным максимумом hourly
       // (например daily max=9, а в hourly за тот же день видно 11°).
       max: (function() {
-        if (!hourly.length) return Math.round(meanOf(days, 'max'));
+        if (!hourly.length) return Math.round(dMeanOf('max'));
         const ts = hourly.map(h => h.t).filter(v => typeof v === 'number');
-        return ts.length ? Math.max(...ts) : Math.round(meanOf(days, 'max'));
+        return ts.length ? Math.max(...ts) : Math.round(dMeanOf('max'));
       })(),
       min: (function() {
-        if (!hourly.length) return Math.round(meanOf(days, 'min'));
+        if (!hourly.length) return Math.round(dMeanOf('min'));
         const ts = hourly.map(h => h.t).filter(v => typeof v === 'number');
-        return ts.length ? Math.min(...ts) : Math.round(meanOf(days, 'min'));
+        return ts.length ? Math.min(...ts) : Math.round(dMeanOf('min'));
       })(),
-      precip: Math.round(meanOf(days, 'precip')),
-      precipSum: Math.round(meanOf(days, 'precipSum') * 10) / 10,
+      precip: Math.round(dMeanOf('precip')),
+      precipSum: Math.round(dMeanOf('precipSum') * 10) / 10,
       wind: avgWind,
       windDir: first.windDir,
-      windGust: Math.round(meanOf(days, 'windGust')),
-      humidity: Math.round(meanOf(days, 'humidity')),
-      pressure: Math.round(meanOf(days, 'pressure')),
+      windGust: Math.round(dMeanOf('windGust')),
+      humidity: Math.round(dMeanOf('humidity')),
+      pressure: Math.round(dMeanOf('pressure')),
       pressureTrend: avgTrend,
-      dewPoint: Math.round(meanOf(days, 'dewPoint')),
+      dewPoint: Math.round(dMeanOf('dewPoint')),
       sunrise: first.sunrise,
       sunset: first.sunset,
       dayLen: first.dayLen,
@@ -8141,6 +8258,12 @@ async function refreshForecast(force = false) {
     const aqiData    = results[1].status === 'fulfilled' ? results[1].value : null;
     const climateData = results[2].status === 'fulfilled' ? results[2].value : null;
     CLIMATE_DATA = climateData;
+    // v1.36.0: подгружаем accuracy ДО parseAllModels, чтобы computeAverageForecast
+    // мог использовать накопленные веса (1/MAE) с самого первого fetch'а.
+    // Если данных мало — внутри computeEnsembleWeights вернётся uniform.
+    try {
+      ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
+    } catch (e) { /* без accuracy parseAllModels всё равно работает с uniform */ }
     const byModel = await parseAllModels(data, SOURCES);
     if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
