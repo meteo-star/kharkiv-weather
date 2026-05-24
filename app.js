@@ -245,6 +245,10 @@ const I18N = {
     'accuracy.leaderTempMax': 'по дневной T:',
     'accuracy.leaderTempMin': 'по ночной T:',
     'accuracy.leaderPrecip': 'по осадкам:',
+    'nowcast.now.until':  'Дождь сейчас · до ~{time}',
+    'nowcast.now.continues': 'Дождь сейчас · продолжится ≥2ч',
+    'nowcast.soon':       'Дождь через ~{min} мин',
+    'nowcast.dry':        'Без осадков 2 часа',
     'accuracy.emptyTitle': 'Накапливаем данные',
     'accuracy.emptyHint': 'Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки',
     'accuracy.samplesUnit': 'замеров',
@@ -648,6 +652,10 @@ const I18N = {
     'accuracy.leaderTempMax': 'денна T:',
     'accuracy.leaderTempMin': 'нічна T:',
     'accuracy.leaderPrecip': 'опади:',
+    'nowcast.now.until':  'Дощ зараз · до ~{time}',
+    'nowcast.now.continues': 'Дощ зараз · триватиме ≥2год',
+    'nowcast.soon':       'Дощ через ~{min} хв',
+    'nowcast.dry':        'Без опадів 2 години',
     'accuracy.emptyTitle': 'Накопичуємо дані',
     'accuracy.emptyHint': 'Відкривайте сайт раз на день — за ~тиждень з\'явиться рейтинг моделей з MAE за температурою та опадами саме для цієї точки',
     'accuracy.samplesUnit': 'замірів',
@@ -1038,6 +1046,10 @@ const I18N = {
     'accuracy.leaderTempMax': 'day T:',
     'accuracy.leaderTempMin': 'night T:',
     'accuracy.leaderPrecip': 'precip:',
+    'nowcast.now.until':  'Rain now · until ~{time}',
+    'nowcast.now.continues': 'Rain now · 2h+ continuous',
+    'nowcast.soon':       'Rain in ~{min} min',
+    'nowcast.dry':        'Dry next 2 hours',
     'accuracy.emptyTitle': 'Collecting data',
     'accuracy.emptyHint': 'Open the site once a day — after ~a week you\'ll see a model ranking with MAE for temperature and precipitation specific to this location',
     'accuracy.samplesUnit': 'samples',
@@ -2467,6 +2479,8 @@ function renderHeroAndMetrics(forecast) {
 
   // Подсказка точности — кликабельный chip с лидером (или подтверждением, что AVG лучший).
   renderHeroAccuracyHint();
+  // v1.39.0: 15-минутный nowcast осадков (когда начнётся / закончится дождь).
+  renderHeroNowcastHint();
 
   document.getElementById('metricWind').innerHTML =
     `${fmtWind(today.wind, {withUnit:false})}<span>${unitWind()}</span>`;
@@ -2758,6 +2772,49 @@ function showAccuracyAdviceToast(betterSrc) {
   // Автоскрытие через 8 сек
   clearTimeout(toast._hide);
   toast._hide = setTimeout(() => toast.classList.remove('show'), 8000);
+}
+
+// v1.39.0: nowcast-hint на hero — 15-минутный прогноз осадков на 2 часа вперёд.
+// Показывает: «Дождь сейчас, до ~XX:XX», «Дождь через ~30 мин», или
+// «Без осадков 2 часа». Скрывается если данных нет или ситуация
+// неоднозначная (модель говорит сухо, но завтра дождь — молчим).
+function renderHeroNowcastHint() {
+  const el = document.getElementById('heroNowcastHint');
+  if (!el) return;
+  const info = (typeof nowcastInfo === 'function') ? nowcastInfo() : null;
+  if (!info) { el.innerHTML = ''; el.classList.remove('show'); return; }
+  let icon = '', text = '', cls = '';
+  if (info.kind === 'now') {
+    icon = '🌧';
+    cls = 'nc-now';
+    if (info.endsTs) {
+      const endTime = new Date(info.endsTs);
+      const hh = String(endTime.getHours()).padStart(2, '0');
+      const mm = String(endTime.getMinutes()).padStart(2, '0');
+      text = t('nowcast.now.until', { time: `${hh}:${mm}` });
+    } else {
+      text = t('nowcast.now.continues');
+    }
+  } else if (info.kind === 'soon') {
+    icon = '💧';
+    cls = 'nc-soon';
+    text = t('nowcast.soon', { min: info.startMin });
+  } else if (info.kind === 'dry') {
+    // «Без осадков 2 часа» — показываем только если: (a) сейчас не идёт дождь
+    // в hourly (т.е. это подтверждение «продолжит быть сухо»). Без этого
+    // плашка дублирует обычное состояние «сухо».
+    const f = (typeof getActiveForecast === 'function') ? getActiveForecast() : null;
+    const nowH = (typeof NOW_HOUR === 'number') ? NOW_HOUR : new Date().getHours();
+    const todayH = f && f[0] && f[0].hourly && f[0].hourly[nowH];
+    const isWetNow = todayH && (todayH.pmm >= 0.1 || todayH.p >= 50);
+    if (!isWetNow) { el.innerHTML = ''; el.classList.remove('show'); return; }
+    icon = '✓';
+    cls = 'nc-dry';
+    text = t('nowcast.dry');
+  }
+  if (!text) { el.innerHTML = ''; el.classList.remove('show'); return; }
+  el.innerHTML = `<span class="nc-pill ${cls}"><span class="nc-icon">${icon}</span><span class="nc-text">${text}</span></span>`;
+  el.classList.add('show');
 }
 
 // Подсказка точности на hero — короткий chip с лидером (или подтверждением что AVG лучший).
@@ -4706,7 +4763,7 @@ setTimeout(clearAppBootstrap, 8000);
 //
 // Текущие "живые" версии указаны в *_CURRENT_VERSION ниже. Всё что
 // меньше или с неизвестной версией под этим префиксом — удаляется.
-const FORECAST_CACHE_CURRENT = 13;
+const FORECAST_CACHE_CURRENT = 14;
 const CLIMATE_CACHE_CURRENT  = 1;
 function cleanupStaleLocalStorage() {
   if (typeof localStorage === 'undefined') return;
@@ -7288,7 +7345,7 @@ function forecastCacheKey(lat, lon) {
   // v12: day.max и day.min для AVG-источника теперь вычисляются по hourly[*].t
   // (max/min) вместо meanOf(daily.tempMax/min) — устраняет расхождение между
   // плиткой дня (9°/5°) и почасовой лентой (которая показывала 11° внутри).
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v13`;
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v14`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -7660,6 +7717,7 @@ async function fetchAccuracyFromServer(lat, lon) {
     ACCURACY_STATE = computeAccuracyStats(converted);
     if (typeof renderAccuracy === 'function') renderAccuracy();
     if (typeof renderHeroAccuracyHint === 'function') renderHeroAccuracyHint();
+    if (typeof renderHeroNowcastHint === 'function') renderHeroNowcastHint();
   } catch (e) {
     // тихо: бот недоступен — оставляем локальные как fallback
   }
@@ -7775,6 +7833,11 @@ async function fetchOpenMeteo(lat, lon, models = null) {
   const params = new URLSearchParams({
     latitude: lat.toFixed(4),
     longitude: lon.toFixed(4),
+    // v1.39.0: 15-минутный nowcast осадков на 2 часа вперёд (8 кадров).
+    // Open-Meteo выдаёт его из gfs_seamless. Используется для precip-hint
+    // на hero (когда начнётся/закончится дождь в ближайший час-два).
+    minutely_15: ['precipitation', 'precipitation_probability'].join(','),
+    forecast_minutely_15: '8',
     hourly: [
       'temperature_2m',
       'precipitation_probability',
@@ -8040,7 +8103,76 @@ async function parseAllModels(data, sources) {
     const weights = validIds.map(id => weightsMap.get(id));
     result.avg = computeAverageForecast(validForecasts, weights);
   }
+  // v1.39.0: 15-минутный nowcast осадков. Не привязан к моделям — у Open-Meteo
+  // это глобальный набор (на основе gfs_seamless + ассимиляции). Кладём в
+  // спец-ключ __minutely15__, чтобы попал в кэш вместе с остальным byModel.
+  const m15 = parseMinutely15(data);
+  if (m15 && m15.length > 0) result.__minutely15__ = m15;
   return result;
+}
+
+// v1.39.0: парсер minutely_15 — возвращает массив { time, mm, prob } за
+// ближайшие 8 × 15 мин (= 2 часа). Возвращает [] если в ответе нет блока.
+function parseMinutely15(data) {
+  if (!data || !data.minutely_15) return [];
+  const m = data.minutely_15;
+  const times = m.time || [];
+  const pp    = m.precipitation || [];
+  const ppp   = m.precipitation_probability || [];
+  const out = [];
+  for (let i = 0; i < times.length; i++) {
+    const t = new Date(times[i]);
+    if (Number.isNaN(t.getTime())) continue;
+    out.push({
+      time: times[i],
+      ts: t.getTime(),
+      mm:  typeof pp[i]  === 'number' ? Math.round(pp[i]  * 100) / 100 : 0,
+      prob: typeof ppp[i] === 'number' ? Math.round(ppp[i]) : 0
+    });
+  }
+  return out;
+}
+
+// v1.39.0: достаём minutely_15 из активного byModel (или пустой массив).
+function getMinutely15() {
+  const m = ACTIVE_FORECAST_BY_MODEL && ACTIVE_FORECAST_BY_MODEL.__minutely15__;
+  return Array.isArray(m) ? m : [];
+}
+
+// v1.39.0: nowcast-hint — анализирует 2 часа 15-минутных прогнозов и
+// возвращает строку для UI: «дождь начнётся через ~30 мин», «дождь идёт сейчас»,
+// «без осадков 2ч». Null если нет данных или нет уверенности.
+// Порог mm: >= 0.1 мм/15мин (≈ слабая морось — заметно глазу).
+// Порог prob: >= 50% — достаточная уверенность чтобы предупреждать.
+function nowcastInfo() {
+  const m = getMinutely15();
+  if (m.length < 2) return null;
+  const now = Date.now();
+  // Фильтруем кадры начиная с текущего времени (отбрасываем устаревшие из кэша).
+  const future = m.filter(f => f.ts >= now - 5 * 60 * 1000); // ±5 мин толерантность
+  if (future.length < 2) return null;
+  const WET_MM = 0.1, WET_PROB = 50;
+  const isWet = (f) => f.mm >= WET_MM || f.prob >= WET_PROB;
+  const firstWet = future.findIndex(isWet);
+  const firstDry = future.findIndex(f => !isWet(f));
+  if (firstWet === -1) {
+    // Все 8 кадров сухие — уверенно «без осадков 2 часа»
+    return { kind: 'dry' };
+  }
+  if (firstWet === 0) {
+    // Идёт прямо сейчас. Когда закончится?
+    const restAfterNow = future.slice(0);
+    const dryIdx = restAfterNow.findIndex(f => !isWet(f));
+    if (dryIdx === -1) {
+      // Дождь весь горизонт. Без конкретного «конца».
+      return { kind: 'now', endsTs: null, peakMm: Math.max(...future.map(f => f.mm)) };
+    }
+    return { kind: 'now', endsTs: restAfterNow[dryIdx].ts, peakMm: Math.max(...future.slice(0, dryIdx).map(f => f.mm)) };
+  }
+  // Начнётся через firstWet × 15 мин (от первого кадра).
+  // Точнее — от текущего времени до future[firstWet].ts.
+  const startMin = Math.max(0, Math.round((future[firstWet].ts - now) / 60000));
+  return { kind: 'soon', startMin, peakMm: future[firstWet].mm, prob: future[firstWet].prob };
 }
 
 // Среднее по N моделям — для каждого дня и каждого часа берём ВЗВЕШЕННОЕ среднее.
