@@ -240,6 +240,11 @@ const I18N = {
     'accuracy.subEmpty': 'Накапливаем сравнение прогноза с фактом для вашей локации',
     'accuracy.subData': 'Среднее отклонение прогноза по последним {n} замерам',
     'accuracy.groundTruth': 'по реальным наблюдениям',
+    'accuracy.colTempMax': 'Tmax',
+    'accuracy.colTempMin': 'Tmin',
+    'accuracy.leaderTempMax': 'по дневной T:',
+    'accuracy.leaderTempMin': 'по ночной T:',
+    'accuracy.leaderPrecip': 'по осадкам:',
     'accuracy.emptyTitle': 'Накапливаем данные',
     'accuracy.emptyHint': 'Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки',
     'accuracy.samplesUnit': 'замеров',
@@ -638,6 +643,11 @@ const I18N = {
     'accuracy.subEmpty': 'Накопичуємо порівняння прогнозу з фактом для вашої локації',
     'accuracy.subData': 'Середнє відхилення прогнозу за останніми {n} замірами',
     'accuracy.groundTruth': 'за реальними спостереженнями',
+    'accuracy.colTempMax': 'Tmax',
+    'accuracy.colTempMin': 'Tmin',
+    'accuracy.leaderTempMax': 'денна T:',
+    'accuracy.leaderTempMin': 'нічна T:',
+    'accuracy.leaderPrecip': 'опади:',
     'accuracy.emptyTitle': 'Накопичуємо дані',
     'accuracy.emptyHint': 'Відкривайте сайт раз на день — за ~тиждень з\'явиться рейтинг моделей з MAE за температурою та опадами саме для цієї точки',
     'accuracy.samplesUnit': 'замірів',
@@ -1023,6 +1033,11 @@ const I18N = {
     'accuracy.subEmpty': 'Collecting forecast-vs-actual data for your location',
     'accuracy.subData': 'Mean absolute error across last {n} comparisons',
     'accuracy.groundTruth': 'with real observations',
+    'accuracy.colTempMax': 'Tmax',
+    'accuracy.colTempMin': 'Tmin',
+    'accuracy.leaderTempMax': 'day T:',
+    'accuracy.leaderTempMin': 'night T:',
+    'accuracy.leaderPrecip': 'precip:',
     'accuracy.emptyTitle': 'Collecting data',
     'accuracy.emptyHint': 'Open the site once a day — after ~a week you\'ll see a model ranking with MAE for temperature and precipitation specific to this location',
     'accuracy.samplesUnit': 'samples',
@@ -5395,6 +5410,7 @@ function renderAccuracy() {
   if (legendEl) legendEl.style.display = '';
   // v1.37: показываем сколько замеров уже подтверждены реальными наблюдениями
   // из archive-api (а не proxy от avg[0]). Аудит честности рейтинга.
+  // v1.38: к subtitle добавляем сжатый список per-variable лидеров.
   if (subEl) {
     let sub = t('accuracy.subData', { n });
     const gt = state.groundTruthSamples || 0;
@@ -5419,6 +5435,25 @@ function renderAccuracy() {
 
   // Сортировка по композитному скору (меньше — точнее)
   rows.sort((a, b) => a.score - b.score);
+
+  // v1.38.0: per-variable best — для каждой метрики (tempMax/tempMin/precip)
+  // находим модель с минимальной MAE. Эта ячейка в таблице получит .best-col.
+  // avg в подсчёт лидеров НЕ включаем — он сравнительная база, не «модель» в смысле выбора.
+  function bestModelByField(field) {
+    let bestId = null, bestVal = Infinity;
+    for (const r of rows) {
+      const v = r.s[field];
+      if (typeof v === 'number' && v < bestVal) {
+        bestVal = v; bestId = r.src.id;
+      }
+    }
+    return bestId;
+  }
+  const bestByVar = {
+    tempMax: bestModelByField('tempMaxMAE'),
+    tempMin: bestModelByField('tempMinMAE'),
+    precip:  bestModelByField('precipMAE')
+  };
 
   // Пороги для квартилей по реальным моделям
   const scores = rows.map(r => r.score);
@@ -5453,39 +5488,62 @@ function renderAccuracy() {
     return `<span class="acc-bias" title="Калибровка по накопленным замерам">${sign}${v}°</span>`;
   }
 
+  // metricCell: ячейка-метрика. Если src — лидер по этой переменной, добавляем
+  // .best-col (золотой glow + ☆) — даёт визуальное «лучший по этой колонке».
+  function metricCell(srcId, val, unit, decimals, bestId) {
+    const naCls = (val == null || typeof val !== 'number') ? ' na' : '';
+    const bestCls = (srcId === bestId && val != null) ? ' best-col' : '';
+    const badge = (srcId === bestId && val != null) ? '<span class="acm-best">☆</span>' : '';
+    return `<div class="acc-metric${naCls}${bestCls}">${badge}${formatMetric(val, unit, decimals)}</div>`;
+  }
+
   function buildRow({ src, s, score }, rank) {
     const q = accuracyQuality(score, minScore, maxScore) || 0;
     const w = barWidth(score);
     const rankBadge = rank === 1 ? '🏆' : String(rank);
     const rankCls = rank === 1 ? 'r1' : '';
     const bestCls = rank === 1 ? ' best' : '';
-    const tempCls = s.tempMaxMAE == null ? ' na' : '';
-    const precipCls = s.precipMAE == null ? ' na' : '';
     return `
       <div class="acc-row${bestCls}" data-src="${src.id}">
         <div class="acc-rank ${rankCls}">${rankBadge}</div>
         <div class="acc-name"><span class="ac-dot" style="background:${src.color};color:${src.color}"></span><span class="ac-text">${src.shortName || src.name}</span>${biasHint(src.id)}</div>
         <div class="acc-bar-wrap"><div class="acc-bar q${q + 1}" style="width:${w}%"></div></div>
-        <div class="acc-metric${tempCls}">${formatMetric(s.tempMaxMAE, '°', 1)}</div>
-        <div class="acc-metric${precipCls}">${formatMetric(s.precipMAE, '%', 0)}</div>
+        ${metricCell(src.id, s.tempMaxMAE, '°', 1, bestByVar.tempMax)}
+        ${metricCell(src.id, s.tempMinMAE, '°', 1, bestByVar.tempMin)}
+        ${metricCell(src.id, s.precipMAE, '%', 0, bestByVar.precip)}
       </div>`;
   }
 
-  let html = rows.map((r, i) => buildRow(r, i + 1)).join('');
+  // v1.38: сжатый summary per-variable лидеров перед таблицей.
+  // Только показываем переменные у которых лидер реально определился.
+  function leaderName(srcId) {
+    const s = SOURCES.find(x => x.id === srcId);
+    return s ? (s.shortName || s.name) : srcId;
+  }
+  const leaderBits = [];
+  if (bestByVar.tempMax) leaderBits.push(`${t('accuracy.leaderTempMax')} <strong>${leaderName(bestByVar.tempMax)}</strong>`);
+  if (bestByVar.tempMin && bestByVar.tempMin !== bestByVar.tempMax) {
+    leaderBits.push(`${t('accuracy.leaderTempMin')} <strong>${leaderName(bestByVar.tempMin)}</strong>`);
+  }
+  if (bestByVar.precip)  leaderBits.push(`${t('accuracy.leaderPrecip')} <strong>${leaderName(bestByVar.precip)}</strong>`);
+  const leadersHtml = leaderBits.length > 0
+    ? `<div class="acc-leaders">☆ ${leaderBits.join(' · ')}</div>`
+    : '';
 
-  // Добавляем avg как контрольную строку (без ранга)
+  let html = leadersHtml + rows.map((r, i) => buildRow(r, i + 1)).join('');
+
+  // Добавляем avg как контрольную строку (без ранга, без per-var-победителя)
   if (avgSrc && avgScore != null) {
     const q = accuracyQuality(avgScore, minScore, maxScore);
     const w = barWidth(avgScore);
-    const tempCls = avgS.tempMaxMAE == null ? ' na' : '';
-    const precipCls = avgS.precipMAE == null ? ' na' : '';
     html += `
       <div class="acc-row" data-src="avg" style="margin-top:6px;border-top:1px dashed rgba(255,255,255,0.08);border-radius:0 0 10px 10px">
         <div class="acc-rank" style="color:#5eead4">∑</div>
         <div class="acc-name"><span class="ac-dot" style="background:${avgSrc.color};color:${avgSrc.color}"></span><span class="ac-text">${avgSrc.shortName || avgSrc.name}</span></div>
         <div class="acc-bar-wrap"><div class="acc-bar q${(q || 0) + 1}" style="width:${w}%"></div></div>
-        <div class="acc-metric${tempCls}">${formatMetric(avgS.tempMaxMAE, '°', 1)}</div>
-        <div class="acc-metric${precipCls}">${formatMetric(avgS.precipMAE, '%', 0)}</div>
+        ${metricCell('avg', avgS.tempMaxMAE, '°', 1, null)}
+        ${metricCell('avg', avgS.tempMinMAE, '°', 1, null)}
+        ${metricCell('avg', avgS.precipMAE, '%', 0, null)}
       </div>`;
   }
 
