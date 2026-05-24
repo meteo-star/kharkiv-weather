@@ -317,7 +317,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-feels{font-size:13px;color:rgba(232,240,255,0.5)}
 .hero-feels strong{color:#00d4ff;font-weight:500}
 .hero-source-note{font-size:11px;color:rgba(232,240,255,0.4);margin-top:6px;font-family:'JetBrains Mono',monospace}
-/* Подсказка точности на hero: лидер по MAE среди 7 моделей. Клик → Source Data Modal. */
+/* Подсказка точности на hero: лидер по MAE среди 8 моделей. Клик → Source Data Modal. */
 .hero-accuracy-hint{margin-top:8px;display:flex}
 .hero.stuck .hero-accuracy-hint{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
 .hero-acc-pill{
@@ -1649,6 +1649,10 @@ body.compare-mode .astro-photo { display:none !important }
 .acc-name{font-size:12px;font-weight:600;color:#fff;display:flex;align-items:center;gap:6px;min-width:0}
 .acc-name .ac-dot{width:8px;height:8px;border-radius:100px;flex-shrink:0;box-shadow:0 0 4px currentColor}
 .acc-name .ac-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* v1.35.1: подсказка о применённой bias-коррекции. Показывает реальный сдвиг
+   которым корректируется raw-прогноз модели по накопленным замерам. */
+.acc-bias{font-size:10px;font-weight:500;color:rgba(94,234,212,0.7);font-family:'JetBrains Mono',monospace;padding:1px 5px;border-radius:6px;background:rgba(94,234,212,0.08);border:1px solid rgba(94,234,212,0.18);letter-spacing:0.02em;flex-shrink:0}
+:root[data-theme="light"] .acc-bias{color:#0d9488;background:rgba(13,148,136,0.08);border-color:rgba(13,148,136,0.25)}
 .acc-bar-wrap{position:relative;height:8px;background:rgba(255,255,255,0.05);border-radius:100px;overflow:hidden}
 .acc-bar{position:absolute;top:0;left:0;height:100%;border-radius:100px;transition:width 0.4s ease}
 .acc-bar.q1{background:linear-gradient(90deg,#5eead4,#22d3ee)}

@@ -993,9 +993,9 @@ async function handleApi(url, request, env, ctx) {
     // При смене правил сбрасываем cooldown'ы — иначе старые ключи висят
     sub.lastFired = {};
     // Сохраняем выбранный пользователем источник погоды — fetchWeather будет
-    // использовать его при cron-проверках. Если 'avg' / null — все 7 моделей.
+    // использовать его при cron-проверках. Если 'avg' / null — все 8 моделей.
     if (typeof body.source === 'string') {
-      const allowed = ['avg', 'ecmwf', 'gfs', 'icon', 'gem', 'jma', 'mf', 'ukmo'];
+      const allowed = ['avg', 'ecmwf', 'aifs', 'gfs', 'icon', 'gem', 'jma', 'mf', 'ukmo'];
       if (allowed.includes(body.source)) sub.source = body.source;
     }
     await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
@@ -1423,7 +1423,7 @@ async function registerAccuracyLocation(env, lat1, lon1) {
   }
 }
 
-// Раз в сутки обходит registry, тянет Open-Meteo с 7 моделями для каждой точки,
+// Раз в сутки обходит registry, тянет Open-Meteo с 8 моделями для каждой точки,
 // обновляет accuracy-records аналогично логике на сайте (но на стороне сервера —
 // данные общие для всех пользователей этой точки).
 async function runAccuracyCron(env) {
@@ -1456,10 +1456,11 @@ async function runAccuracyCron(env) {
   }
 }
 
-// Open-Meteo с 7 моделями. Возвращает { ecmwf: [...], gfs: [...], ..., avg: [...] }
+// Open-Meteo с 8 моделями. Возвращает { ecmwf: [...], gfs: [...], ..., avg: [...] }
 // где каждый массив — дни (только metrics нужные для accuracy: tempMax/Min/precipSum).
 async function fetchModelsForecast(lat, lon) {
-  const MODELS = ['ecmwf_ifs04', 'gfs_seamless', 'icon_seamless', 'gem_seamless',
+  const MODELS = ['ecmwf_ifs025', 'ecmwf_aifs025_single',
+                  'gfs_seamless', 'icon_seamless', 'gem_seamless',
                   'jma_seamless', 'meteofrance_seamless', 'ukmo_seamless'];
   const params = new URLSearchParams({
     latitude: String(lat),
@@ -1478,7 +1479,8 @@ async function fetchModelsForecast(lat, lon) {
     const byModel = {};
     // Open-Meteo возвращает поля с суффиксом модели: temperature_2m_max_ecmwf_ifs04
     const modelKeyMap = {
-      ecmwf_ifs04: 'ecmwf', gfs_seamless: 'gfs', icon_seamless: 'icon',
+      ecmwf_ifs025: 'ecmwf', ecmwf_aifs025_single: 'aifs',
+      gfs_seamless: 'gfs', icon_seamless: 'icon',
       gem_seamless: 'gem', jma_seamless: 'jma',
       meteofrance_seamless: 'mf', ukmo_seamless: 'ukmo'
     };
@@ -1671,25 +1673,29 @@ function ruleKeyOf(rule) {
 }
 
 // Тянем прогноз для одной локации. Один запрос — все нужные поля.
-// 7 моделей Open-Meteo — те же что используются на сайте.
+// 8 моделей Open-Meteo (7 физических + ECMWF AIFS AI) — те же что на сайте.
 // Default (без передачи sub) — используем AVG из всех моделей. Если в подписке
 // сохранён конкретный источник (sub.source) — используем только эту модель.
-const WEATHER_MODELS = ['ecmwf_ifs04', 'gfs_seamless', 'icon_seamless',
-                        'gem_seamless', 'jma_seamless', 'meteofrance_seamless', 'ukmo_seamless'];
+// ECMWF: 0.25° HRES (было 0.4° — заменили на согласованную с сайтом версию).
+// AIFS — AI-модель, даёт независимый «голос» в ансамбле.
+const WEATHER_MODELS = ['ecmwf_ifs025', 'ecmwf_aifs025_single',
+                        'gfs_seamless', 'icon_seamless', 'gem_seamless',
+                        'jma_seamless', 'meteofrance_seamless', 'ukmo_seamless'];
 
 const SUB_SOURCE_TO_MODEL = {
-  ecmwf: 'ecmwf_ifs04',
-  gfs: 'gfs_seamless',
-  icon: 'icon_seamless',
-  gem: 'gem_seamless',
-  jma: 'jma_seamless',
-  mf: 'meteofrance_seamless',
-  ukmo: 'ukmo_seamless'
+  ecmwf:     'ecmwf_ifs025',
+  aifs:      'ecmwf_aifs025_single',
+  gfs:       'gfs_seamless',
+  icon:      'icon_seamless',
+  gem:       'gem_seamless',
+  jma:       'jma_seamless',
+  mf:        'meteofrance_seamless',
+  ukmo:      'ukmo_seamless'
 };
 
 async function fetchWeather(lat, lon, sub = null) {
   // Если подписка задала конкретный источник — используем только эту модель.
-  // Если 'avg' / null / неизвестный — используем все 7 и считаем AVG.
+  // Если 'avg' / null / неизвестный — используем все 8 и считаем AVG.
   const wantedSource = (sub && sub.source) || 'avg';
   const useAllModels = wantedSource === 'avg';
   const singleModel = useAllModels ? null : SUB_SOURCE_TO_MODEL[wantedSource];
@@ -1727,7 +1733,7 @@ async function fetchWeather(lat, lon, sub = null) {
         timezone: data.timezone || 'UTC'
       };
     }
-    // AVG из 7 моделей — усредняем все поля (precipitation — берём MAX
+    // AVG из 8 моделей — усредняем все поля (precipitation — берём MAX
     // как консервативный сигнал «хоть одна модель видит дождь», temperature
     // и пр. — обычное среднее, weather_code — max).
     const avgHourly = averageHourlyMultiModel(data.hourly || {}, WEATHER_MODELS);
