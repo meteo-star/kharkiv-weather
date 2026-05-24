@@ -239,6 +239,7 @@ const I18N = {
     'accuracy.title': 'Точность источников',
     'accuracy.subEmpty': 'Накапливаем сравнение прогноза с фактом для вашей локации',
     'accuracy.subData': 'Среднее отклонение прогноза по последним {n} замерам',
+    'accuracy.groundTruth': 'по реальным наблюдениям',
     'accuracy.emptyTitle': 'Накапливаем данные',
     'accuracy.emptyHint': 'Открывайте сайт раз в день — через ~неделю появится рейтинг моделей с MAE по температуре и осадкам именно для этой точки',
     'accuracy.samplesUnit': 'замеров',
@@ -636,6 +637,7 @@ const I18N = {
     'accuracy.title': 'Точність джерел',
     'accuracy.subEmpty': 'Накопичуємо порівняння прогнозу з фактом для вашої локації',
     'accuracy.subData': 'Середнє відхилення прогнозу за останніми {n} замірами',
+    'accuracy.groundTruth': 'за реальними спостереженнями',
     'accuracy.emptyTitle': 'Накопичуємо дані',
     'accuracy.emptyHint': 'Відкривайте сайт раз на день — за ~тиждень з\'явиться рейтинг моделей з MAE за температурою та опадами саме для цієї точки',
     'accuracy.samplesUnit': 'замірів',
@@ -1020,6 +1022,7 @@ const I18N = {
     'accuracy.title': 'Source accuracy',
     'accuracy.subEmpty': 'Collecting forecast-vs-actual data for your location',
     'accuracy.subData': 'Mean absolute error across last {n} comparisons',
+    'accuracy.groundTruth': 'with real observations',
     'accuracy.emptyTitle': 'Collecting data',
     'accuracy.emptyHint': 'Open the site once a day — after ~a week you\'ll see a model ranking with MAE for temperature and precipitation specific to this location',
     'accuracy.samplesUnit': 'samples',
@@ -5390,7 +5393,14 @@ function renderAccuracy() {
   if (headEl) headEl.style.display = '';
   if (tableEl) tableEl.style.display = '';
   if (legendEl) legendEl.style.display = '';
-  if (subEl) subEl.textContent = t('accuracy.subData', { n });
+  // v1.37: показываем сколько замеров уже подтверждены реальными наблюдениями
+  // из archive-api (а не proxy от avg[0]). Аудит честности рейтинга.
+  if (subEl) {
+    let sub = t('accuracy.subData', { n });
+    const gt = state.groundTruthSamples || 0;
+    if (gt > 0) sub += ` · ${gt} ${t('accuracy.groundTruth')}`;
+    subEl.textContent = sub;
+  }
 
   // Собираем массив строк (только для реальных моделей, avg отдельно)
   const rows = [];
@@ -7386,11 +7396,13 @@ function updateAccuracyData(lat, lon, byModel) {
 function computeAccuracyStats(records) {
   const acc = {};
   let sampleSize = 0;
-  if (!Array.isArray(records)) return { stats: acc, sampleSize: 0 };
+  let groundTruthSamples = 0; // v1.37: сколько записей с реальным actual из archive
+  if (!Array.isArray(records)) return { stats: acc, sampleSize: 0, groundTruthSamples: 0 };
 
   for (const rec of records) {
     if (!rec.actual || !rec.predictions) continue;
     sampleSize++;
+    if (rec.actualSource === 'archive') groundTruthSamples++;
     for (const srcId of Object.keys(rec.predictions)) {
       const pred = rec.predictions[srcId];
       if (!pred) continue;
@@ -7431,7 +7443,7 @@ function computeAccuracyStats(records) {
       nTempMax: s.nTempMax, nTempMin: s.nTempMin, nPrecip: s.nPrecip
     };
   }
-  return { stats: out, sampleSize };
+  return { stats: out, sampleSize, groundTruthSamples };
 }
 
 // === Bias-correction (v1.35.1) ===
@@ -7621,7 +7633,11 @@ function convertServerRecord(sRec) {
   }
   if (!hasPred) return null;
   const actual = convertMetrics(sRec.actual);
-  return { date: sRec.date, predictions, actual: (actual && (actual.tempMax != null || actual.tempMin != null)) ? actual : null };
+  // v1.37.0: сохраняем actualSource для UI-аудита («archive» = реальные
+  // наблюдения из Open-Meteo Archive; иначе legacy proxy от avg).
+  const out = { date: sRec.date, predictions, actual: (actual && (actual.tempMax != null || actual.tempMin != null)) ? actual : null };
+  if (sRec.actualSource) out.actualSource = sRec.actualSource;
+  return out;
 }
 
 // Запрос к Air Quality API (отдельный домен, тот же провайдер Open-Meteo).
