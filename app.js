@@ -2800,17 +2800,12 @@ function renderHeroNowcastHint() {
     cls = 'nc-soon';
     text = t('nowcast.soon', { min: info.startMin });
   } else if (info.kind === 'dry') {
-    // «Без осадков 2 часа» — показываем только если: (a) сейчас не идёт дождь
-    // в hourly (т.е. это подтверждение «продолжит быть сухо»). Без этого
-    // плашка дублирует обычное состояние «сухо».
-    const f = (typeof getActiveForecast === 'function') ? getActiveForecast() : null;
-    const nowH = (typeof NOW_HOUR === 'number') ? NOW_HOUR : new Date().getHours();
-    const todayH = f && f[0] && f[0].hourly && f[0].hourly[nowH];
-    const isWetNow = todayH && (todayH.pmm >= 0.1 || todayH.p >= 50);
-    if (!isWetNow) { el.innerHTML = ''; el.classList.remove('show'); return; }
-    icon = '✓';
-    cls = 'nc-dry';
-    text = t('nowcast.dry');
+    // v1.40.1: ветка убрана. Раньше при противоречии «minutely сухо vs hourly
+    // дождь» показывали «✓ Без осадков 2 часа» — но это путало (юзер видит
+    // дождь за окном, а плашка говорит «сухо»). Случай «дождь идёт, скоро
+    // закончится» корректно покрывается веткой kind='now' с endsTs.
+    // Если minutely уверенно говорит сухо — плашка молчит, это норма.
+    el.innerHTML = ''; el.classList.remove('show'); return;
   }
   if (!text) { el.innerHTML = ''; el.classList.remove('show'); return; }
   el.innerHTML = `<span class="nc-pill ${cls}"><span class="nc-icon">${icon}</span><span class="nc-text">${text}</span></span>`;
