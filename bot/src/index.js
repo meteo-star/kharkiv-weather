@@ -2033,12 +2033,15 @@ function averageMinutely15MultiModel(m15, models) {
 // effProb ≥ minProb. effProb = prob или 100 при prob=0 + mm ≥ minMm
 // (proxy для случая когда модель не отдаёт probability). null если не найден.
 // Используется в precip_soon и rain_soon при windowHours ≤ 2.
-function findFirstWetMinutely(m15, windowMin, minMm, minProb) {
+function findFirstWetMinutely(m15, windowMin, minMm, minProb, utcOffsetSec = 0) {
   if (!m15 || !Array.isArray(m15.time)) return null;
   const t = m15.time;
   const pm = m15.precipitation || [];
   const pp = m15.precipitation_probability || [];
-  const now = Date.now();
+  // v1.42.3 TZ-fix: minutely_15 timestamps без 'Z' — парсятся в Worker (UTC)
+  // как UTC, но фактически это локальное время. Сдвигаем now на utcOffsetSec
+  // чтобы сравнение было корректным.
+  const now = Date.now() + utcOffsetSec * 1000;
   const horizon = now + windowMin * 60 * 1000;
   for (let i = 0; i < t.length; i++) {
     const ts = new Date(t[i]).getTime();
@@ -2050,7 +2053,10 @@ function findFirstWetMinutely(m15, windowMin, minMm, minProb) {
     const prob = pp[i] || 0;
     const effProb = prob > 0 ? prob : (mm >= minMm ? 100 : 0);
     if (mm >= minMm && effProb >= minProb) {
-      return { ts, mm, prob, iso: t[i] };
+      // v1.42.3: minAhead тоже считается тут — `now` уже сдвинут на offset,
+      // вычитание `ts - now` даёт корректные минуты до события (а не +offset).
+      const minAhead = Math.max(0, Math.round((ts - now) / 60000));
+      return { ts, mm, prob, iso: t[i], minAhead };
     }
   }
   return null;
@@ -2062,8 +2068,15 @@ function evaluateRule(rule, fc, sub) {
   const times = hourly.time || [];
   if (times.length === 0) return null;
 
-  // Находим индекс «сейчас» в hourly (ближайший прошедший час)
-  const nowMs = Date.now();
+  // CRITICAL TZ-FIX (v1.42.3): Open-Meteo с timezone=auto отдаёт строки времени
+  // БЕЗ суффикса Z или offset (например '2026-05-25T11:00' = 11:00 локального TZ).
+  // `new Date(...)` в Cloudflare Worker (UTC-окружение) парсит такую строку как
+  // 11:00 UTC. Если сравнивать с `Date.now()` (тоже UTC), получаем сдвиг на
+  // fc.utcOffsetSec → бот ищет «сейчас» на N часов раньше реальности и
+  // проверяет окно осадков в прошлом, где данных ещё нет.
+  // Решение: добавляем offset к now, чтобы он соответствовал local-парсингу.
+  const offsetMs = (fc.utcOffsetSec || 0) * 1000;
+  const nowMs = Date.now() + offsetMs;
   let nowIdx = 0;
   for (let i = 0; i < times.length; i++) {
     if (new Date(times[i]).getTime() > nowMs) { nowIdx = Math.max(0, i - 1); break; }
@@ -2115,9 +2128,9 @@ function evaluateRule(rule, fc, sub) {
       // v1.40.0: для коротких окон (≤2ч) используем minutely_15 — даёт
       // минутную точность вместо часовой. Для бóльших окон остаётся hourly.
       if (windowH <= 2 && fc.minutely15) {
-        const hit = findFirstWetMinutely(fc.minutely15, windowH * 60, minMm, minProb);
+        const hit = findFirstWetMinutely(fc.minutely15, windowH * 60, minMm, minProb, fc.utcOffsetSec);
         if (hit) {
-          const minAhead = Math.max(0, Math.round((hit.ts - Date.now()) / 60000));
+          const minAhead = hit.minAhead;
           const whenLabel = minAhead < 5
             ? 'прямо сейчас'
             : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
@@ -2158,7 +2171,7 @@ function evaluateRule(rule, fc, sub) {
       // (дождь vs снег) минутки не дают — определяем по hourly[nowIdx]
       // (текущий час) + температуре. <=0°C + осадки → снег, иначе дождь.
       if (windowH <= 2 && fc.minutely15) {
-        const hit = findFirstWetMinutely(fc.minutely15, windowH * 60, minMm, minProb);
+        const hit = findFirstWetMinutely(fc.minutely15, windowH * 60, minMm, minProb, fc.utcOffsetSec);
         if (hit) {
           // Определяем тип: смотрим weather_code следующего hourly + температуру
           // ближайшего часа от hit.ts.
@@ -2177,7 +2190,7 @@ function evaluateRule(rule, fc, sub) {
           // Иначе fallback на температуру: T ≤ 1°C → снег, иначе дождь.
           const isSnow = codeSnow || (!codeRain && typeof temp === 'number' && temp <= 1);
           const isRain = !isSnow;
-          const minAhead = Math.max(0, Math.round((hit.ts - Date.now()) / 60000));
+          const minAhead = hit.minAhead;
           const whenLabel = minAhead < 5
             ? 'прямо сейчас'
             : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
@@ -2303,7 +2316,7 @@ function buildMorningSummary(sub, rule, fc) {
   const [s, e] = computeTodayRange(hourly.time, todayDate);
 
   // Базовая часть (всегда показывается)
-  const nowIdx = findNowIdx(hourly.time);
+  const nowIdx = findNowIdx(hourly.time, fc.utcOffsetSec);
   const curT = hourly.temperature_2m?.[nowIdx];
   const tMin = daily.temperature_2m_min?.[0];
   const tMax = daily.temperature_2m_max?.[0];
@@ -2351,8 +2364,10 @@ function fmtNum(v) {
   return v == null ? '?' : String(Math.round(v));
 }
 
-function findNowIdx(times) {
-  const nowMs = Date.now();
+function findNowIdx(times, utcOffsetSec = 0) {
+  // v1.42.3 TZ-fix: см. evaluateRule. times без 'Z' → парсятся как UTC,
+  // фактически локальное время. Сдвигаем now на offset чтобы сравнение корректно.
+  const nowMs = Date.now() + utcOffsetSec * 1000;
   let nowIdx = 0;
   for (let i = 0; i < times.length; i++) {
     if (new Date(times[i]).getTime() > nowMs) { nowIdx = Math.max(0, i-1); break; }
