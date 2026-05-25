@@ -4863,7 +4863,7 @@ setTimeout(clearAppBootstrap, 8000);
 //
 // Текущие "живые" версии указаны в *_CURRENT_VERSION ниже. Всё что
 // меньше или с неизвестной версией под этим префиксом — удаляется.
-const FORECAST_CACHE_CURRENT = 15;
+const FORECAST_CACHE_CURRENT = 16;
 const CLIMATE_CACHE_CURRENT  = 1;
 function cleanupStaleLocalStorage() {
   if (typeof localStorage === 'undefined') return;
@@ -7500,7 +7500,7 @@ function forecastCacheKey(lat, lon) {
   // v12: day.max и day.min для AVG-источника теперь вычисляются по hourly[*].t
   // (max/min) вместо meanOf(daily.tempMax/min) — устраняет расхождение между
   // плиткой дня (9°/5°) и почасовой лентой (которая показывала 11° внутри).
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v15`;
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v16`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -8271,21 +8271,69 @@ async function parseAllModels(data, sources) {
 
 // v1.39.0: парсер minutely_15 — возвращает массив { time, mm, prob } за
 // ближайшие 8 × 15 мин (= 2 часа). Возвращает [] если в ответе нет блока.
+//
+// v1.42.2 КРИТИЧНЫЙ ФИКС: когда forecast запрашивается с `models=A,B,C,...`,
+// Open-Meteo НЕ отдаёт поле `precipitation` — только `precipitation_A`,
+// `precipitation_B` и т.д. Раньше код искал голое `m.precipitation` →
+// получал undefined → плашка nowcast никогда не появлялась для AVG-юзеров
+// (большинство пользователей). Теперь: если найдены поля с суффиксами
+// моделей — усредняем по моделям (precipitation→max, probability→mean,
+// как в боте). Если есть голое поле — используем его (best_match-режим).
 function parseMinutely15(data) {
   if (!data || !data.minutely_15) return [];
   const m = data.minutely_15;
   const times = m.time || [];
-  const pp    = m.precipitation || [];
-  const ppp   = m.precipitation_probability || [];
+  if (times.length === 0) return [];
+
+  // Детектируем формат: голые поля vs с суффиксами моделей.
+  const plainPp = m.precipitation;
+  const plainPpp = m.precipitation_probability;
+  const usePlain = Array.isArray(plainPp);
+
+  // Собираем именa-ключи моделей если формат с суффиксами.
+  let precipFields = [], probFields = [];
+  if (!usePlain) {
+    for (const key of Object.keys(m)) {
+      if (key === 'time') continue;
+      if (key.startsWith('precipitation_probability_')) probFields.push(key);
+      else if (key.startsWith('precipitation_')) precipFields.push(key);
+    }
+  }
+
   const out = [];
   for (let i = 0; i < times.length; i++) {
     const t = new Date(times[i]);
     if (Number.isNaN(t.getTime())) continue;
+    let mm, prob;
+    if (usePlain) {
+      mm = typeof plainPp[i] === 'number' ? plainPp[i] : 0;
+      prob = typeof plainPpp?.[i] === 'number' ? plainPpp[i] : 0;
+    } else {
+      // precipitation — MAX по моделям (консервативно: «хоть одна видит дождь»)
+      // probability — MEAN по моделям (среднее ожидание)
+      let maxMm = 0, anyMm = false;
+      for (const f of precipFields) {
+        const v = m[f]?.[i];
+        if (typeof v === 'number' && Number.isFinite(v)) {
+          if (v > maxMm) maxMm = v;
+          anyMm = true;
+        }
+      }
+      mm = anyMm ? maxMm : 0;
+      let sumProb = 0, nProb = 0;
+      for (const f of probFields) {
+        const v = m[f]?.[i];
+        if (typeof v === 'number' && Number.isFinite(v)) {
+          sumProb += v; nProb++;
+        }
+      }
+      prob = nProb > 0 ? sumProb / nProb : 0;
+    }
     out.push({
       time: times[i],
       ts: t.getTime(),
-      mm:  typeof pp[i]  === 'number' ? Math.round(pp[i]  * 100) / 100 : 0,
-      prob: typeof ppp[i] === 'number' ? Math.round(ppp[i]) : 0
+      mm:  Math.round(mm * 100) / 100,
+      prob: Math.round(prob)
     });
   }
   return out;
