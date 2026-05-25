@@ -4863,7 +4863,7 @@ setTimeout(clearAppBootstrap, 8000);
 //
 // Текущие "живые" версии указаны в *_CURRENT_VERSION ниже. Всё что
 // меньше или с неизвестной версией под этим префиксом — удаляется.
-const FORECAST_CACHE_CURRENT = 14;
+const FORECAST_CACHE_CURRENT = 15;
 const CLIMATE_CACHE_CURRENT  = 1;
 function cleanupStaleLocalStorage() {
   if (typeof localStorage === 'undefined') return;
@@ -7343,6 +7343,22 @@ function hourSurfaceCondition(nowH, fallback) {
   return c;
 }
 
+// v1.42.1: применяет тот же downgrade ко ВСЕМ часам массива hourly[] на месте.
+// Решает рассогласование «иконка дождя, но 0 мм/ч» в почасовых плитках и модалках.
+// Особенно критично для AVG, где wc = max по моделям (одна предсказала дождь →
+// код дождевой) а pmm = mean (большинство видят 0 → реальный pmm ~ 0).
+// Применяется в parseOpenMeteoToForecast и computeAverageForecast.
+function downgradeWetHourlyConditions(hourly) {
+  if (!Array.isArray(hourly)) return;
+  for (const h of hourly) {
+    if (!h) continue;
+    const isWet = (h.c === 'rain' || h.c === 'heavy-rain' || h.c === 'snow' || h.c === 'thunderstorm');
+    if (isWet && (h.pmm == null || h.pmm < 0.1)) {
+      h.c = (h.cl != null && h.cl < 60) ? 'partly-cloudy' : 'cloudy';
+    }
+  }
+}
+
 // hour-based condition → русский condLabel (для hero, чтобы текст совпал с иконкой)
 function hourCondToLabelRu(cond) {
   switch (cond) {
@@ -7484,7 +7500,7 @@ function forecastCacheKey(lat, lon) {
   // v12: day.max и day.min для AVG-источника теперь вычисляются по hourly[*].t
   // (max/min) вместо meanOf(daily.tempMax/min) — устраняет расхождение между
   // плиткой дня (9°/5°) и почасовой лентой (которая показывала 11° внутри).
-  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v14`;
+  return `kw:forecast-cache:${lat.toFixed(2)}_${lon.toFixed(2)}:v15`;
 }
 function loadForecastCache(lat, lon) {
   try {
@@ -8143,6 +8159,9 @@ function parseOpenMeteoToForecast(data, suffix = '') {
         li: hLi && hLi[idx] != null ? Math.round(hLi[idx] * 10) / 10 : null
       });
     }
+    // v1.42.1: синхронизация иконки часа с реальным pmm.
+    // Open-Meteo для single-model тоже иногда оставляет «мокрый» wc при pmm=0.
+    downgradeWetHourlyConditions(hourly);
 
     const noonIdx = i * 24 + 12;
     const noonHum  = hHum && hHum[noonIdx] != null ? Math.round(hHum[noonIdx]) : 60;
@@ -8406,6 +8425,11 @@ function computeAverageForecast(forecasts, weights = null) {
         li:   wMR('li', 1)
       });
     }
+    // v1.42.1: согласование иконки часа с реальным pmm. Главный кейс — AVG,
+    // где avgWc = max по моделям (одна предсказала дождь → wc дождевой),
+    // а pmm = weighted mean (большинство видят 0 → pmm ~ 0). Иконка
+    // показывала дождь, график 0 мм/ч — пользователь видел противоречие.
+    downgradeWetHourlyConditions(hourly);
 
     // UV: считаем mean только из моделей, реально вернувших значение (null игнорируется в meanOf автоматически).
     const uvVals = days.map(o => o.uv).filter(v => typeof v === 'number' && !Number.isNaN(v));
