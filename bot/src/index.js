@@ -1933,13 +1933,19 @@ function averageHourlyMultiModel(hourly, models) {
   const time = hourly.time || [];
   const result = { time };
   if (!time.length || !models.length) return result;
-  // Базовые поля которые ждёт rest of code
+  // v1.42.4: precipitation сменили `max` → `mean` для согласия с сайтом.
+  // Раньше max генерировал ложные «дождь» уведомления когда 1 из 8 моделей
+  // видела каплю а 7 — нет (юзер видел расхождение: сайт «облачно», бот
+  // «дождь весь день»). Mean делает бот таким же точным как и сайт.
+  // weather_code оставлен max — консерватизм по типу события (если хоть
+  // одна модель видит грозу 95-99, обозначаем). Но storm-alert теперь
+  // дополнительно требует cape ≥ 500 (см. evaluateRule).
   const FIELDS = [
     { base: 'temperature_2m', aggregate: 'mean' },
     { base: 'apparent_temperature', aggregate: 'mean' },
-    { base: 'precipitation', aggregate: 'max' },  // консервативный — если хоть одна модель видит дождь, видим и мы
+    { base: 'precipitation', aggregate: 'mean' },
     { base: 'precipitation_probability', aggregate: 'mean' },
-    { base: 'weather_code', aggregate: 'max' },   // худший код побеждает
+    { base: 'weather_code', aggregate: 'max' },
     { base: 'wind_speed_10m', aggregate: 'mean' },
     { base: 'wind_gusts_10m', aggregate: 'max' },
     { base: 'wind_direction_10m', aggregate: 'first' },
@@ -2007,8 +2013,10 @@ function averageMinutely15MultiModel(m15, models) {
   const time = m15.time || [];
   const result = { time };
   if (!time.length || !models.length) return result;
+  // v1.42.4: тоже mean (был max) — синхронизация с сайтом для consistency
+  // в плашке nowcast и в precip_soon с windowHours ≤ 2.
   const FIELDS = [
-    { base: 'precipitation', aggregate: 'max' },
+    { base: 'precipitation', aggregate: 'mean' },
     { base: 'precipitation_probability', aggregate: 'mean' }
   ];
   for (const { base, aggregate } of FIELDS) {
@@ -2234,14 +2242,20 @@ function evaluateRule(rule, fc, sub) {
     }
 
     case 'storm_alert': {
-      // Гроза в ближайшие 6 часов по WMO weather_code 95/96/99
-      // или по CAPE > 1500 + lifted_index < -2 (классическая нестабильность)
+      // Гроза в ближайшие 6 часов:
+      //   – по WMO weather_code 95/96/99 + cape ≥ 500 (требует physical corroboration)
+      //   – ИЛИ по CAPE ≥ 1500 + lifted_index ≤ -2 (классическая нестабильность)
+      // v1.42.4: добавлено требование cape ≥ 500 для code-based триггера.
+      // Без этого max wc по 8 моделям ловил «грозу 95» от одной outlier-модели
+      // даже без реальной конвективной нестабильности — ложные алёрты.
       const cape = hourly.cape || [];
       const li = hourly.lifted_index || [];
       for (let i = nowIdx; i < Math.min(nowIdx + 6, t.length); i++) {
         const code = wc[i];
-        const stormByCode = code === 95 || code === 96 || code === 99;
-        const stormByPhysics = (cape[i] || 0) >= 1500 && (li[i] || 0) <= -2;
+        const capeNow = cape[i] || 0;
+        const liNow = li[i] || 0;
+        const stormByCode = (code === 95 || code === 96 || code === 99) && capeNow >= 500;
+        const stormByPhysics = capeNow >= 1500 && liNow <= -2;
         if (stormByCode || stormByPhysics) {
           return {
             fired: true,
@@ -2288,12 +2302,16 @@ function pluralDays(n) {
 // "2026-05-17T22:00" + utcOffsetSec → "сегодня в 22:00" / "завтра в 03:00"
 function whenStr(isoTime, utcOffsetSec) {
   if (!isoTime) return '';
-  const d = new Date(isoTime);
-  const now = new Date();
-  // Открытое время уже в local-зоне (Open-Meteo с timezone=auto), поэтому
-  // не применяем utcOffsetSec вторично. Сравниваем как ISO-строки дат.
-  const today = now.toISOString().slice(0,10);
-  const tomorrow = new Date(now.getTime() + 86400000).toISOString().slice(0,10);
+  // v1.42.4 CRITICAL TZ-fix: isoTime — это **локальное** время (Open-Meteo с
+  // timezone=auto), а `new Date().toISOString().slice(0,10)` возвращает
+  // **UTC**-дату. В часы когда локаль и UTC на разных календарных днях (например,
+  // 02:00 Kiev = 23:00 UTC ВЧЕРАШНЕГО дня), today давало вчерашнюю дату, и
+  // 04:00 сегодня (по локали) определялось как "завтра". Бот в 02:00 ночи
+  // присылал «дождь завтра в 04:00» хотя это через 2 часа в тот же день.
+  // Фикс: сдвигаем now на utcOffsetSec и используем UTC-getter'ы.
+  const nowLocal = new Date(Date.now() + (utcOffsetSec || 0) * 1000);
+  const today    = nowLocal.toISOString().slice(0,10);
+  const tomorrow = new Date(nowLocal.getTime() + 86400000).toISOString().slice(0,10);
   const dateStr = isoTime.slice(0,10);
   const hh = isoTime.slice(11,16);
   if (dateStr === today) return `сегодня в ${hh}`;
