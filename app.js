@@ -5125,7 +5125,11 @@ function openModal(dayId) {
         <button class="ht-tab" data-metric="wind" role="tab"><span data-i18n="metric.wind">Ветер</span></button>
         <button class="ht-tab" data-metric="pressure" role="tab"><span data-i18n="metric.pressure">Давление</span></button>
       </div>
-      <div class="hours-scroll" id="modalHourlyRow"></div>
+      <div class="scroll-wrap">
+        <button class="scroll-arrow left" data-scroll-target="modalHourlyRow" aria-label="Прокрутить влево">‹</button>
+        <div class="hours-scroll" id="modalHourlyRow"></div>
+        <button class="scroll-arrow right" data-scroll-target="modalHourlyRow" aria-label="Прокрутить вправо">›</button>
+      </div>
     </div>
   `;
 
@@ -5136,6 +5140,32 @@ function openModal(dayId) {
   currentModalMetric = 'temp';
   renderModalHourlyRow(d);
   setupModalHourlyTabs(d);
+  // v1.43.0: модалка создаётся динамически, поэтому setupScrollArrows() из init
+  // не покрывает её стрелки. Навешиваем обработчики вручную для конкретного row.
+  attachModalHourlyArrows();
+}
+
+// v1.43.0: подключение кнопок ‹ › для почасовой ленты в модалке дня.
+// Каждый раз при открытии модалки — стрелки новые (модалка пересоздана),
+// поэтому навешиваем обработчики заново. Старые не остаются в памяти —
+// modal.innerHTML = ... выкидывает их.
+function attachModalHourlyArrows() {
+  const row = document.getElementById('modalHourlyRow');
+  if (!row) return;
+  const modal = document.getElementById('modal');
+  if (!modal) return;
+  const arrows = modal.querySelectorAll('.scroll-arrow[data-scroll-target="modalHourlyRow"]');
+  arrows.forEach(btn => {
+    const isRight = btn.classList.contains('right');
+    btn.onclick = () => {
+      const delta = row.clientWidth * 0.8 * (isRight ? 1 : -1);
+      row.scrollBy({ left: delta, behavior: 'smooth' });
+    };
+  });
+  const update = () => updateScrollArrows(row);
+  row.addEventListener('scroll', update, { passive: true });
+  // Первичный update после рендера (rAF чтобы дождаться layout).
+  requestAnimationFrame(() => requestAnimationFrame(update));
 }
 
 function renderModalHourlyRow(d) {

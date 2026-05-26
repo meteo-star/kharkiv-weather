@@ -634,7 +634,7 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 
 .modal-hours-list{padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:18px}
 .modal-hours-list h3{font-size:13px;font-weight:600;color:#fff;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em}
-.hours-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) transparent}
+.hours-scroll{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) transparent;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain}
 .hours-scroll::-webkit-scrollbar{height:6px}
 .hours-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);border-radius:3px}
 .hours-scroll::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
