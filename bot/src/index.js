@@ -1842,6 +1842,23 @@ const SUB_SOURCE_TO_MODEL = {
   ukmo:      'ukmo_seamless'
 };
 
+// v1.43.1: человекочитаемое название источника для footer уведомлений.
+// Используется в evaluateRule (все push-сообщения) и buildMorningSummary.
+const SOURCE_LABEL_RU = {
+  avg:       'усреднения 8 моделей',
+  ecmwf:     'ECMWF',
+  aifs:      'ECMWF AIFS (AI)',
+  gfs:       'GFS',
+  icon:      'ICON',
+  gem:       'GEM',
+  jma:       'JMA',
+  mf:        'Météo-France',
+  ukmo:      'UKMO'
+};
+function sourceLabel(sourceId) {
+  return SOURCE_LABEL_RU[sourceId] || SOURCE_LABEL_RU.avg;
+}
+
 async function fetchWeather(lat, lon, sub = null) {
   // Если подписка задала конкретный источник — используем только эту модель.
   // Если 'avg' / null / неизвестный — используем все 8 и считаем AVG.
@@ -2096,6 +2113,14 @@ function evaluateRule(rule, fc, sub) {
   const pm = hourly.precipitation || [];
   const wc = hourly.weather_code || [];
 
+  // v1.43.1: подпись «по данным X» в каждом fired-сообщении. Помогает
+  // пользователю понять, на каких данных основан push: если он выбрал
+  // ECMWF — увидит «по данным ECMWF», если AVG — «по данным усреднения
+  // 8 моделей». Особенно важно если push отличается от того что юзер
+  // видит на сайте (он мог не заметить что переключил источник).
+  const src = (sub && sub.source) || 'avg';
+  const srcFooter = `\n<i>по данным ${sourceLabel(src)}</i>`;
+
   switch (rule.type) {
     case 'temp_below': {
       const threshold = Number(rule.threshold);
@@ -2108,7 +2133,7 @@ function evaluateRule(rule, fc, sub) {
       if (minT < threshold) {
         return {
           fired: true,
-          message: `❄️ <b>Похолодание!</b>\n${esc(sub.name)}: до <b>${Math.round(minT)}°C</b> ${whenStr(times[minIdx], fc.utcOffsetSec)}`
+          message: `❄️ <b>Похолодание!</b>\n${esc(sub.name)}: до <b>${Math.round(minT)}°C</b> ${whenStr(times[minIdx], fc.utcOffsetSec)}${srcFooter}`
         };
       }
       return { fired: false };
@@ -2124,7 +2149,7 @@ function evaluateRule(rule, fc, sub) {
       if (maxT > threshold) {
         return {
           fired: true,
-          message: `🥵 <b>Жара!</b>\n${esc(sub.name)}: до <b>${Math.round(maxT)}°C</b> ${whenStr(times[maxIdx], fc.utcOffsetSec)}`
+          message: `🥵 <b>Жара!</b>\n${esc(sub.name)}: до <b>${Math.round(maxT)}°C</b> ${whenStr(times[maxIdx], fc.utcOffsetSec)}${srcFooter}`
         };
       }
       return { fired: false };
@@ -2144,7 +2169,7 @@ function evaluateRule(rule, fc, sub) {
             : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}`
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}${srcFooter}`
           };
         }
         return { fired: false };
@@ -2158,7 +2183,7 @@ function evaluateRule(rule, fc, sub) {
         if (effProb >= minProb && mm >= minMm) {
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}`
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}${srcFooter}`
           };
         }
       }
@@ -2205,13 +2230,13 @@ function evaluateRule(rule, fc, sub) {
           if (watchRain && isRain) {
             return {
               fired: true,
-              message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}`
+              message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}${srcFooter}`
             };
           }
           if (watchSnow && isSnow) {
             return {
               fired: true,
-              message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}`
+              message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}${srcFooter}`
             };
           }
         }
@@ -2228,13 +2253,13 @@ function evaluateRule(rule, fc, sub) {
         if (watchRain && isRain) {
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}`
+            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}${srcFooter}`
           };
         }
         if (watchSnow && isSnow) {
           return {
             fired: true,
-            message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}`
+            message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}${srcFooter}`
           };
         }
       }
@@ -2259,7 +2284,7 @@ function evaluateRule(rule, fc, sub) {
         if (stormByCode || stormByPhysics) {
           return {
             fired: true,
-            message: `⚡ <b>Гроза прогнозируется!</b>\n${esc(sub.name)}: ${whenStr(times[i], fc.utcOffsetSec)}\nСледи за прогнозом и подготовься.`
+            message: `⚡ <b>Гроза прогнозируется!</b>\n${esc(sub.name)}: ${whenStr(times[i], fc.utcOffsetSec)}\nСледи за прогнозом и подготовься.${srcFooter}`
           };
         }
       }
@@ -2280,7 +2305,7 @@ function evaluateRule(rule, fc, sub) {
       if (streak >= need) {
         return {
           fired: true,
-          message: `☀ <b>${streak} ${pluralDays(streak)} без дождя!</b>\n${esc(sub.name)}: с завтра по ${dailyTimes[streak] ? esc(dailyTimes[streak]) : '?'} — отличное окно для дачи / выезда.`
+          message: `☀ <b>${streak} ${pluralDays(streak)} без дождя!</b>\n${esc(sub.name)}: с завтра по ${dailyTimes[streak] ? esc(dailyTimes[streak]) : '?'} — отличное окно для дачи / выезда.${srcFooter}`
         };
       }
       return { fired: false };
@@ -2366,6 +2391,11 @@ function buildMorningSummary(sub, rule, fc) {
   if (sections.moon)     pushBlock(lines, buildMoonBlock());
   if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, s, e));
   if (sections.tomorrow) pushBlock(lines, buildTomorrowBlock(daily));
+
+  // v1.43.1: footer с источником данных — для прозрачности «на основе чего сводка»
+  const src = (sub && sub.source) || 'avg';
+  lines.push('');
+  lines.push(`<i>по данным ${sourceLabel(src)}</i>`);
 
   return lines.join('\n');
 }

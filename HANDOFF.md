@@ -4,7 +4,7 @@
 > **Полная история проекта** — [PROJECT_STATUS.md](PROJECT_STATUS.md).
 >
 > **Дата обновления:** 26 мая 2026
-> **Текущая версия:** v1.43.0
+> **Текущая версия:** v1.43.1
 
 ---
 
@@ -98,6 +98,7 @@
 | v1.42.3 | **CRITICAL fix**: бот в Worker UTC парсил Open-Meteo local-times как UTC → все precip правила работали с окном в прошлое |
 | v1.42.4 | Fix: whenStr UTC-дата + бот max→mean precipitation (как сайт) + storm требует cape ≥ 500 |
 | v1.43.0 | Стрелки ‹ › и touch-swipe в почасовой ленте модалки дня |
+| v1.43.1 | Footer «по данным X» в каждом уведомлении бота (avg / ECMWF / AIFS / GFS / ICON / GEM / JMA / Météo-France / UKMO) |
 
 ---
 
