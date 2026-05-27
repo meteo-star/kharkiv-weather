@@ -22,6 +22,12 @@
  *   STATS          — ключ "stats:<YYYY-MM-DD>" → JSON счётчики
  */
 
+import {
+  t, tPluralDays, tWhenStr, tInMinutes, tWindDir,
+  tSourceLabel, tSourceFooter, tWeatherCodeLabel,
+  tMoonName, tMoonTrend, detectLang
+} from './i18n.js';
+
 const TG_API = 'https://api.telegram.org';
 
 // ============================================================
@@ -184,8 +190,10 @@ async function processUpdate(update, env) {
       }
     }
 
-    // Неизвестная команда
-    return sendMessage(env, chatId, '🤖 Не знаю такую команду. Напиши /help — покажу что умею.');
+    // Неизвестная команда — локализуем по sub.lang (если подписка есть).
+    const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+    const lang = sub?.lang || 'ru';
+    return sendMessage(env, chatId, t('cmd.unknown', lang));
   } catch (err) {
     console.error('processUpdate error:', err);
   }
@@ -211,25 +219,22 @@ function esc(s) {
 }
 
 async function handleStart(env, chatId, userId, fromObj, chatType = 'private') {
+  const lang = detectLang(fromObj?.language_code);
   // В групповом чате /start не создаёт подписку — нужен /setup от админа
   if (chatType !== 'private') {
-    return sendMessage(env, chatId,
-      `👋 Привет! В групповом чате используй <code>/setup</code> (от админа группы) чтобы привязать бота.`,
-      { parse_mode: 'HTML' }
-    );
+    return sendMessage(env, chatId, t('cmd.start.groupHint', lang), { parse_mode: 'HTML' });
   }
   // Создаём или обновляем подписку с дефолтами
   const key = `sub:${chatId}`;
   const existing = await env.SUBSCRIPTIONS.get(key, { type: 'json' });
 
   if (existing) {
-    return sendMessage(env, chatId,
-      `👋 С возвращением! Ты уже подписан${existing.banned ? ', но твоя подписка ЗАБЛОКИРОВАНА' : ''}.\n\n` +
-      `📍 Локация: ${esc(existing.name || 'не задана')}\n` +
-      `🔔 Правил: ${(existing.rules || []).length}\n\n` +
-      `Напиши /help чтобы посмотреть команды.`,
-      { parse_mode: 'HTML' }
-    );
+    const lng = existing.lang || lang;
+    return sendMessage(env, chatId, t('cmd.start.welcomeBack', lng, {
+      bannedNote: existing.banned ? t('cmd.start.bannedNote', lng) : '',
+      loc: esc(existing.name || t('cmd.start.locUnset', lng)),
+      rules: (existing.rules || []).length
+    }), { parse_mode: 'HTML' });
   }
 
   // Новая подписка
@@ -242,7 +247,7 @@ async function handleStart(env, chatId, userId, fromObj, chatType = 'private') {
     lat: 49.9,         // Высокий по умолчанию
     lon: 36.21,
     name: 'Высокий',
-    lang: fromObj?.language_code === 'uk' ? 'uk' : (fromObj?.language_code === 'en' ? 'en' : 'ru'),
+    lang,
     rules: [],
     createdAt: new Date().toISOString(),
     banned: false,
@@ -253,29 +258,15 @@ async function handleStart(env, chatId, userId, fromObj, chatType = 'private') {
   // Инкремент счётчика новых подписок за сегодня
   await incrementStat(env, 'subscribed');
 
-  return sendMessage(env, chatId,
-    `🌤 Привет! Я бот <b>Meteo Star</b> — буду присылать тебе уведомления о погоде.\n\n` +
-    `📍 Локация по умолчанию: <b>Высокий</b> (Харьковская обл.).\n` +
-    `   Сменить: <code>/location &lt;город&gt;</code>\n` +
-    `   Например: <code>/location Київ</code>\n\n` +
-    `🔔 Правила уведомлений настраиваются через веб-интерфейс приложения.\n` +
-    `   <i>(скоро добавим)</i>\n\n` +
-    `📋 Все команды: /help`,
-    { parse_mode: 'HTML' }
-  );
+  return sendMessage(env, chatId, t('cmd.start.new', lang), { parse_mode: 'HTML' });
 }
 
 async function handleHelp(env, chatId, isAdmin) {
-  let text =
-    `📋 <b>Команды Meteo Star Bot:</b>\n\n` +
-    `<code>/start</code> — подписаться\n` +
-    `<code>/status</code> — твоя подписка и активные правила\n` +
-    `<code>/location &lt;город&gt;</code> — сменить локацию\n` +
-    `<code>/pair &lt;код&gt;</code> — связать с сайтом (код берётся в Settings)\n` +
-    `<code>/login</code> — ссылка для входа на сайт с любого устройства\n` +
-    `<code>/unpair</code> — разорвать связь с сайтом\n` +
-    `<code>/stop</code> — отписаться от всех уведомлений\n` +
-    `<code>/help</code> — эта подсказка`;
+  // Юзерская часть — берём из словаря по sub.lang. Админский блок — только
+  // на русском (это для одного человека-админа, перевод избыточен).
+  const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  const lang = sub?.lang || 'ru';
+  let text = t('cmd.help.user', lang);
 
   if (isAdmin) {
     text +=
@@ -299,47 +290,68 @@ async function handleHelp(env, chatId, isAdmin) {
 async function handleStatus(env, chatId) {
   const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
   if (!sub) {
-    return sendMessage(env, chatId, `Ты ещё не подписан. Напиши /start чтобы начать.`);
+    return sendMessage(env, chatId, t('cmd.status.notSubscribed', 'ru'));
   }
+  const lang = sub.lang || 'ru';
   if (sub.banned) {
-    return sendMessage(env, chatId, `🚫 Твоя подписка заблокирована администратором.`);
+    return sendMessage(env, chatId, t('cmd.status.banned', lang));
   }
 
   const rulesText = (sub.rules || []).length === 0
-    ? '   <i>(нет правил, добавь через веб-интерфейс)</i>'
-    : sub.rules.map(r => `   • ${esc(formatRule(r))}`).join('\n');
+    ? t('cmd.status.noRules', lang)
+    : sub.rules.map(r => `   • ${esc(formatRule(r, lang))}`).join('\n');
 
-  return sendMessage(env, chatId,
-    `📊 <b>Твоя подписка:</b>\n\n` +
-    `📍 Локация: <b>${esc(sub.name)}</b> (${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)})\n` +
-    `🌐 Язык: ${sub.lang.toUpperCase()}\n` +
-    `📅 Подписан: ${new Date(sub.createdAt).toLocaleDateString('ru-RU')}\n\n` +
-    `🔔 <b>Правила уведомлений:</b>\n${rulesText}`,
-    { parse_mode: 'HTML' }
-  );
+  return sendMessage(env, chatId, t('cmd.status.main', lang, {
+    name: esc(sub.name),
+    lat: sub.lat.toFixed(2),
+    lon: sub.lon.toFixed(2),
+    lang: lang.toUpperCase(),
+    date: new Date(sub.createdAt).toLocaleDateString(_bcp47(lang)),
+    rules: rulesText
+  }), { parse_mode: 'HTML' });
 }
 
 async function handleStop(env, chatId) {
   const key = `sub:${chatId}`;
-  const existing = await env.SUBSCRIPTIONS.get(key);
-  if (!existing) {
-    return sendMessage(env, chatId, `Ты и так не подписан.`);
+  const sub = await env.SUBSCRIPTIONS.get(key, { type: 'json' });
+  if (!sub) {
+    return sendMessage(env, chatId, t('cmd.stop.notSubscribed', 'ru'));
   }
+  const lang = sub.lang || 'ru';
   await env.SUBSCRIPTIONS.delete(key);
   await incrementStat(env, 'unsubscribed');
-  return sendMessage(env, chatId, `✅ Отписал тебя. Все уведомления больше не приходят.\n\nЕсли захочешь вернуться — /start.`);
+  return sendMessage(env, chatId, t('cmd.stop.done', lang));
+}
+
+// BCP-47 для toLocaleDateString. Маппинг lang → локаль.
+function _bcp47(lang) {
+  switch (lang) {
+    case 'uk': return 'uk-UA';
+    case 'en': return 'en-US';
+    case 'de': return 'de-DE';
+    case 'pl': return 'pl-PL';
+    case 'cs': return 'cs-CZ';
+    case 'fr': return 'fr-FR';
+    case 'it': return 'it-IT';
+    case 'es': return 'es-ES';
+    case 'ro': return 'ro-RO';
+    case 'hu': return 'hu-HU';
+    case 'sk': return 'sk-SK';
+    case 'pt': return 'pt-PT';
+    case 'nl': return 'nl-NL';
+    case 'tr': return 'tr-TR';
+    case 'el': return 'el-GR';
+    default:   return 'ru-RU';
+  }
 }
 
 async function handleLocation(env, chatId, args) {
-  if (!args) {
-    return sendMessage(env, chatId,
-      `📍 Сейчас укажи город:\n<code>/location Київ</code>\n\nИли пришли свои координаты в формате:\n<code>/location 49.9 36.21</code>`,
-      { parse_mode: 'HTML' }
-    );
-  }
-
   const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
-  if (!sub) return sendMessage(env, chatId, `Сначала подпишись — /start.`);
+  const lang = sub?.lang || 'ru';
+  if (!args) {
+    return sendMessage(env, chatId, t('cmd.location.usage', lang), { parse_mode: 'HTML' });
+  }
+  if (!sub) return sendMessage(env, chatId, t('cmd.location.subscribeFirst', lang));
 
   // Прямой формат: "49.9 36.21"
   const coords = args.match(/^(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)$/);
@@ -348,65 +360,64 @@ async function handleLocation(env, chatId, args) {
     sub.lon = parseFloat(coords[2]);
     sub.name = `${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)}`;
     await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
-    return sendMessage(env, chatId, `📍 Установил координаты: <b>${esc(sub.name)}</b>`, { parse_mode: 'HTML' });
+    return sendMessage(env, chatId, t('cmd.location.setCoords', lang, { name: esc(sub.name) }), { parse_mode: 'HTML' });
   }
 
-  // Имя города → Open-Meteo geocoding
+  // Имя города → Open-Meteo geocoding. OM поддерживает en/de/fr/it/es/pt/ru/ja/zh/hi.
+  // Для uk/pl/cs передаём lang как есть (uk OM понимает, pl/cs — фолбэк на en).
+  const OM_GEO_LANGS = ['en','de','fr','it','es','pt','ru','ja','zh','hi','uk'];
+  const apiLang = OM_GEO_LANGS.includes(lang) ? lang : 'en';
   try {
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(args)}&count=1&language=${sub.lang}`;
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(args)}&count=1&language=${apiLang}`;
     const r = await fetch(geoUrl);
     if (!r.ok) throw new Error(`geocode HTTP ${r.status}`);
     const data = await r.json();
     const place = data.results?.[0];
     if (!place) {
-      return sendMessage(env, chatId,
-        `🤷 Не нашёл город <b>${esc(args)}</b>. Попробуй полное название или координаты: <code>/location 49.9 36.21</code>`,
-        { parse_mode: 'HTML' }
-      );
+      return sendMessage(env, chatId, t('cmd.location.notFound', lang, { q: esc(args) }), { parse_mode: 'HTML' });
     }
     sub.lat = place.latitude;
     sub.lon = place.longitude;
     sub.name = place.name + (place.admin1 ? `, ${place.admin1}` : '');
     await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
-    return sendMessage(env, chatId,
-      `📍 Локация обновлена: <b>${esc(sub.name)}</b>\n   (${sub.lat.toFixed(2)}, ${sub.lon.toFixed(2)})`,
-      { parse_mode: 'HTML' }
-    );
+    return sendMessage(env, chatId, t('cmd.location.set', lang, {
+      name: esc(sub.name), lat: sub.lat.toFixed(2), lon: sub.lon.toFixed(2)
+    }), { parse_mode: 'HTML' });
   } catch (err) {
     console.error('geocode err:', err);
-    return sendMessage(env, chatId, `⚠ Ошибка геокодирования. Попробуй позже или укажи координаты вручную.`);
+    return sendMessage(env, chatId, t('cmd.location.geocodeErr', lang));
   }
 }
 
-function formatRule(r) {
+function formatRule(r, lang = 'ru') {
   switch (r.type) {
-    case 'temp_below':       return `🥶 Температура ниже ${r.threshold}°C`;
-    case 'temp_above':       return `🥵 Температура выше ${r.threshold}°C`;
-    case 'rain_soon':        return `🌧 Дождь в ближайшие ${r.windowHours}ч`;
+    case 'temp_below':       return t('rule.tempBelow', lang, { t: r.threshold });
+    case 'temp_above':       return t('rule.tempAbove', lang, { t: r.threshold });
+    case 'rain_soon':        return t('rule.rainSoon', lang, { h: r.windowHours });
     case 'precip_soon': {
       const parts = [];
-      if (r.watchRain) parts.push('дождь');
-      if (r.watchSnow) parts.push('снег');
-      const what = parts.length ? parts.join(' / ') : 'осадки';
-      return `🌧 Осадки в ближайшие ${r.windowHours}ч (${what})`;
+      if (r.watchRain) parts.push(t('rule.precipWhat.rain', lang));
+      if (r.watchSnow) parts.push(t('rule.precipWhat.snow', lang));
+      const what = parts.length ? parts.join(' / ') : t('rule.precipWhat.any', lang);
+      return t('rule.precipSoon', lang, { h: r.windowHours, what });
     }
-    case 'storm_alert':      return `⚡ Гроза в 48ч`;
-    case 'dry_streak':       return `☀ ${r.days} дней подряд без осадков`;
+    case 'storm_alert':      return t('rule.storm', lang);
+    case 'dry_streak':       return t('rule.dryStreak', lang, { n: r.days, days: tPluralDays(r.days, lang) });
     case 'morning_summary': {
       const time = `${r.hour}:${String(r.minute || 0).padStart(2,'0')}`;
       const sections = r.sections || {};
       const flags = [];
-      if (sections.wind)     flags.push('ветер');
-      if (sections.precip)   flags.push('осадки');
-      if (sections.fog)      flags.push('туман');
-      if (sections.astro)    flags.push('восход/закат');
-      if (sections.moon)     flags.push('луна');
-      if (sections.storm)    flags.push('гроза');
-      if (sections.feels)    flags.push('ощущения');
-      if (sections.tomorrow) flags.push('завтра');
+      if (sections.wind)     flags.push(t('rule.flag.wind',     lang));
+      if (sections.precip)   flags.push(t('rule.flag.precip',   lang));
+      if (sections.fog)      flags.push(t('rule.flag.fog',      lang));
+      if (sections.astro)    flags.push(t('rule.flag.astro',    lang));
+      if (sections.moon)     flags.push(t('rule.flag.moon',     lang));
+      if (sections.storm)    flags.push(t('rule.flag.storm',    lang));
+      if (sections.feels)    flags.push(t('rule.flag.feels',    lang));
+      if (sections.tomorrow) flags.push(t('rule.flag.tomorrow', lang));
       return flags.length
-        ? `🌅 Сводка утром в ${time} (+ ${flags.join(', ')})`
-        : `🌅 Сводка утром в ${time}`;
+        ? t('rule.morningSummary.withFlags', lang, { time, flags: flags.join(', ') })
+        : t('rule.morningSummary', lang, { time });
     }
     default:                 return `? ${r.type}`;
   }
@@ -414,30 +425,27 @@ function formatRule(r) {
 
 // /pair <code>  — связать чат с сайтом по коду из сайта
 async function handlePair(env, chatId, userId, fromObj, args, chatType = 'private', chatObj = null) {
+  // Если подписка уже есть — используем её lang. Иначе — детектим из TG.
+  const existingSub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  const lang = existingSub?.lang || detectLang(fromObj?.language_code);
   const code = (args || '').trim();
   if (!/^\d{6}$/.test(code)) {
-    return sendMessage(env, chatId,
-      `🔗 Использование: <code>/pair 123456</code>\n\nКод из 6 цифр нужно сначала получить на сайте: Настройки → 🔔 Уведомления → «Связать с Telegram».`,
-      { parse_mode: 'HTML' }
-    );
+    return sendMessage(env, chatId, t('cmd.pair.usage', lang), { parse_mode: 'HTML' });
   }
   // В группе /pair доступен только админу группы
   if (chatType !== 'private') {
     const isGroupAdmin = await checkGroupAdmin(env, chatId, userId);
     if (!isGroupAdmin) {
-      return sendMessage(env, chatId, `🚫 В группе связку с сайтом может сделать только админ группы.`);
+      return sendMessage(env, chatId, t('cmd.pair.groupOnlyAdmin', lang));
     }
   }
   const raw = await env.PAIRING.get(`pair:${code}`);
   if (!raw) {
-    return sendMessage(env, chatId,
-      `❌ Код <code>${esc(code)}</code> не найден или истёк (срок 10 минут).\nЗапроси новый на сайте.`,
-      { parse_mode: 'HTML' }
-    );
+    return sendMessage(env, chatId, t('cmd.pair.codeNotFound', lang, { code: esc(code) }), { parse_mode: 'HTML' });
   }
   const data = JSON.parse(raw);
   if (data.chatId) {
-    return sendMessage(env, chatId, `⚠ Этот код уже использован другим чатом.`);
+    return sendMessage(env, chatId, t('cmd.pair.alreadyUsed', lang));
   }
 
   const isGroup = chatType !== 'private';
@@ -459,7 +467,7 @@ async function handlePair(env, chatId, userId, fromObj, args, chatType = 'privat
         firstName: fromObj?.first_name || null
       } : null,
       lat: 49.9, lon: 36.21, name: 'Высокий',
-      lang: fromObj?.language_code === 'uk' ? 'uk' : (fromObj?.language_code === 'en' ? 'en' : 'ru'),
+      lang: detectLang(fromObj?.language_code),
       rules: [],
       createdAt: new Date().toISOString(),
       banned: false,
@@ -492,33 +500,25 @@ async function handlePair(env, chatId, userId, fromObj, args, chatType = 'privat
   await env.PAIRING.put(`pair:${code}`, JSON.stringify(data), { expirationTtl: 600 });
 
   return sendMessage(env, chatId,
-    `✅ <b>Связано с сайтом!</b>\n\nВозвращайся в браузер — теперь можешь настроить уведомления.\n\nЛокация: <b>${esc(sub.name)}</b>\nЕсли хочешь сменить — <code>/location &lt;город&gt;</code>`,
+    t('cmd.pair.linked', sub.lang || lang, { name: esc(sub.name) }),
     { parse_mode: 'HTML' }
   );
 }
 
 // /setup — для группы: запросить связку с сайтом. Доступно только админу группы.
 async function handleSetup(env, chatId, userId, chatType, msg) {
+  // В группе sub.lang ещё нет (подписку создаст /pair) — детектим из инициатора
+  const existingSub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  const lang = existingSub?.lang || detectLang(msg?.from?.language_code);
   if (chatType === 'private') {
-    return sendMessage(env, chatId,
-      `💡 Команда <code>/setup</code> для группового чата.\nВ личном чате используй <code>/start</code>.`,
-      { parse_mode: 'HTML' }
-    );
+    return sendMessage(env, chatId, t('cmd.setup.privateHint', lang), { parse_mode: 'HTML' });
   }
   const isGroupAdmin = await checkGroupAdmin(env, chatId, userId);
   if (!isGroupAdmin) {
-    return sendMessage(env, chatId, `🚫 Только админ группы может запустить /setup.`);
+    return sendMessage(env, chatId, t('cmd.setup.onlyAdmin', lang));
   }
-  const groupTitle = msg.chat?.title || `Группа ${chatId}`;
-  return sendMessage(env, chatId,
-    `📡 <b>Настройка группы:</b> ${esc(groupTitle)}\n\n` +
-    `1. Открой сайт <a href="https://meteo-star.github.io/kharkiv-weather/">Meteo Star</a>\n` +
-    `2. Настройки → 🔔 Уведомления → «Связать с Telegram»\n` +
-    `3. Получи 6-значный код\n` +
-    `4. Возвращайся сюда и напиши: <code>/pair &lt;код&gt;</code>\n\n` +
-    `После связки настраивай правила через сайт — уведомления приходят в этот чат.`,
-    { parse_mode: 'HTML' }
-  );
+  const groupTitle = msg.chat?.title || `Group ${chatId}`;
+  return sendMessage(env, chatId, t('cmd.setup.howTo', lang, { title: esc(groupTitle) }), { parse_mode: 'HTML' });
 }
 
 // Кэш для getMe — токен бота не меняется, можно кэшировать в памяти Worker'а
@@ -550,16 +550,15 @@ async function checkGroupAdmin(env, chatId, userId) {
 
 async function handleUnpair(env, chatId) {
   const sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
-  if (!sub) return sendMessage(env, chatId, `Ты не подписан.`);
+  if (!sub) return sendMessage(env, chatId, t('cmd.unpair.notSubscribed', 'ru'));
+  const lang = sub.lang || 'ru';
   const tokens = getPairTokens(sub);
-  if (tokens.length === 0) return sendMessage(env, chatId, `Сайт не связан с этим чатом.`);
+  if (tokens.length === 0) return sendMessage(env, chatId, t('cmd.unpair.noLink', lang));
   // /unpair от бота — отвязываем ВСЕ устройства разом
   sub.pairTokens = [];
   delete sub.pairToken;
   await env.SUBSCRIPTIONS.put(`sub:${chatId}`, JSON.stringify(sub));
-  return sendMessage(env, chatId,
-    `🔓 Связь с сайтом разорвана (отвязано ${tokens.length} устр.).\nПодписка осталась, правила тоже. Чтобы менять правила — снова свяжи через сайт.`
-  );
+  return sendMessage(env, chatId, t('cmd.unpair.done', lang, { n: tokens.length }));
 }
 
 function generatePairToken() {
@@ -576,16 +575,17 @@ function generatePairToken() {
 // В группе: /login генерит ссылку именно для ГРУППЫ (chatId группы).
 // Доступ к группе с любого устройства = просто открыть свежую ссылку.
 async function handleLogin(env, chatId, userId, chatType) {
+  let sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
+  const lang = sub?.lang || 'ru';
   // В группе только admin/creator может генерить login-ссылку
   if (chatType !== 'private') {
     const isGroupAdmin = await checkGroupAdmin(env, chatId, userId);
     if (!isGroupAdmin) {
-      return sendMessage(env, chatId, `🚫 Только админ группы может получить ссылку для входа на сайт.`);
+      return sendMessage(env, chatId, t('cmd.login.onlyAdmin', lang));
     }
   }
-  let sub = await env.SUBSCRIPTIONS.get(`sub:${chatId}`, { type: 'json' });
   if (!sub) {
-    return sendMessage(env, chatId, `Сначала /start (или /pair если уже создал код на сайте).`);
+    return sendMessage(env, chatId, t('cmd.login.notSubscribed', lang));
   }
   // Генерим НОВЫЙ pairToken для устройства, которое кликнет magic-link.
   // Добавляем в массив — старые токены других устройств не трогаем.
@@ -602,13 +602,7 @@ async function handleLogin(env, chatId, userId, chatType) {
   );
 
   const url = `https://meteo-star.github.io/kharkiv-weather/?auth=${authToken}`;
-  return sendMessage(env, chatId,
-    `🔗 <b>Ссылка для входа на сайт:</b>\n\n` +
-    `${url}\n\n` +
-    `<i>Открой её на любом устройстве (iPhone, ПК, ноут) — сайт сам войдёт с твоим аккаунтом.\n` +
-    `Действительна 10 минут, используется один раз.</i>`,
-    { parse_mode: 'HTML' }
-  );
+  return sendMessage(env, chatId, t('cmd.login.link', lang, { url }), { parse_mode: 'HTML' });
 }
 
 // ============================================================
@@ -1013,18 +1007,27 @@ async function handleApi(url, request, env, ctx) {
     const sub = await authSub(env, body);
     if (!sub) return withCors(jsonResp({ error: 'unauthorized' }, 401), origin);
 
-    const rules = Array.isArray(body.rules) ? body.rules.filter(validateRule).slice(0, 20) : [];
-    sub.rules = rules;
-    // При смене правил сбрасываем cooldown'ы — иначе старые ключи висят
-    sub.lastFired = {};
+    // rules опционально: если поле передано — обновляем правила и сбрасываем
+    // cooldown'ы. Если не передано — сайт хочет обновить только lang/source,
+    // правила оставляем как есть. См. syncLangToBot в app.js.
+    if (Array.isArray(body.rules)) {
+      sub.rules = body.rules.filter(validateRule).slice(0, 20);
+      sub.lastFired = {};
+    }
     // Сохраняем выбранный пользователем источник погоды — fetchWeather будет
     // использовать его при cron-проверках. Если 'avg' / null — все 8 моделей.
     if (typeof body.source === 'string') {
       const allowed = ['avg', 'ecmwf', 'aifs', 'gfs', 'icon', 'gem', 'jma', 'mf', 'ukmo'];
       if (allowed.includes(body.source)) sub.source = body.source;
     }
+    // Фаза 3 i18n: сайт может прислать lang при смене языка в Settings —
+    // следующее push-уведомление приходит уже на новом языке.
+    if (typeof body.lang === 'string') {
+      const allowedLangs = ['ru','uk','en','de','pl','cs','fr','it','es','ro','hu','sk','pt','nl','tr','el'];
+      if (allowedLangs.includes(body.lang)) sub.lang = body.lang;
+    }
     await env.SUBSCRIPTIONS.put(`sub:${body.chatId}`, JSON.stringify(sub));
-    return withCors(jsonResp({ ok: true, count: rules.length, source: sub.source || 'avg' }), origin);
+    return withCors(jsonResp({ ok: true, count: (sub.rules || []).length, source: sub.source || 'avg', lang: sub.lang }), origin);
   }
 
   // GET /api/accuracy?lat=X&lon=Y → { records: [...], updated: ts }
@@ -1842,22 +1845,9 @@ const SUB_SOURCE_TO_MODEL = {
   ukmo:      'ukmo_seamless'
 };
 
-// v1.43.1: человекочитаемое название источника для footer уведомлений.
-// Используется в evaluateRule (все push-сообщения) и buildMorningSummary.
-const SOURCE_LABEL_RU = {
-  avg:       'усреднения 8 моделей',
-  ecmwf:     'ECMWF',
-  aifs:      'ECMWF AIFS (AI)',
-  gfs:       'GFS',
-  icon:      'ICON',
-  gem:       'GEM',
-  jma:       'JMA',
-  mf:        'Météo-France',
-  ukmo:      'UKMO'
-};
-function sourceLabel(sourceId) {
-  return SOURCE_LABEL_RU[sourceId] || SOURCE_LABEL_RU.avg;
-}
+// v1.43.1 + i18n: человекочитаемое название источника + локализованный footer.
+// Используется в evaluateRule (fired-сообщения) и buildMorningSummary.
+// Переехало в bot/src/i18n.js → tSourceLabel(sourceId, lang) / tSourceFooter(sourceId, lang).
 
 async function fetchWeather(lat, lon, sub = null) {
   // Если подписка задала конкретный источник — используем только эту модель.
@@ -2108,18 +2098,29 @@ function evaluateRule(rule, fc, sub) {
     nowIdx = i;
   }
 
-  const t = hourly.temperature_2m || [];
+  const temps = hourly.temperature_2m || [];
   const pp = hourly.precipitation_probability || [];
   const pm = hourly.precipitation || [];
   const wc = hourly.weather_code || [];
 
-  // v1.43.1: подпись «по данным X» в каждом fired-сообщении. Помогает
-  // пользователю понять, на каких данных основан push: если он выбрал
-  // ECMWF — увидит «по данным ECMWF», если AVG — «по данным усреднения
-  // 8 моделей». Особенно важно если push отличается от того что юзер
-  // видит на сайте (он мог не заметить что переключил источник).
+  // v1.43.1: footer «по данным X» в каждом fired-сообщении. Локализован по sub.lang.
+  const lang = sub?.lang || 'ru';
   const src = (sub && sub.source) || 'avg';
-  const srcFooter = `\n<i>по данным ${sourceLabel(src)}</i>`;
+  const srcFooter = `\n<i>${tSourceFooter(src, lang)}</i>`;
+  const when = (iso) => tWhenStr(iso, fc.utcOffsetSec, lang);
+  const nowText = () => {
+    switch (lang) {
+      case 'uk': return 'просто зараз';
+      case 'en': return 'right now';
+      case 'de': return 'gerade jetzt';
+      case 'pl': return 'właśnie teraz';
+      case 'cs': return 'právě teď';
+      case 'fr': return 'tout de suite';
+      case 'it': return 'proprio ora';
+      case 'es': return 'ahora mismo';
+      default:   return 'прямо сейчас';
+    }
+  };
 
   switch (rule.type) {
     case 'temp_below': {
@@ -2127,13 +2128,13 @@ function evaluateRule(rule, fc, sub) {
       if (!Number.isFinite(threshold)) return null;
       // Проверяем ближайшие 12 часов
       let minT = Infinity, minIdx = -1;
-      for (let i = nowIdx; i < Math.min(nowIdx + 12, t.length); i++) {
-        if (t[i] != null && t[i] < minT) { minT = t[i]; minIdx = i; }
+      for (let i = nowIdx; i < Math.min(nowIdx + 12, temps.length); i++) {
+        if (temps[i] != null && temps[i] < minT) { minT = temps[i]; minIdx = i; }
       }
       if (minT < threshold) {
         return {
           fired: true,
-          message: `❄️ <b>Похолодание!</b>\n${esc(sub.name)}: до <b>${Math.round(minT)}°C</b> ${whenStr(times[minIdx], fc.utcOffsetSec)}${srcFooter}`
+          message: t('fired.cold', lang, { name: esc(sub.name), temp: Math.round(minT), when: when(times[minIdx]) }) + srcFooter
         };
       }
       return { fired: false };
@@ -2143,13 +2144,13 @@ function evaluateRule(rule, fc, sub) {
       const threshold = Number(rule.threshold);
       if (!Number.isFinite(threshold)) return null;
       let maxT = -Infinity, maxIdx = -1;
-      for (let i = nowIdx; i < Math.min(nowIdx + 12, t.length); i++) {
-        if (t[i] != null && t[i] > maxT) { maxT = t[i]; maxIdx = i; }
+      for (let i = nowIdx; i < Math.min(nowIdx + 12, temps.length); i++) {
+        if (temps[i] != null && temps[i] > maxT) { maxT = temps[i]; maxIdx = i; }
       }
       if (maxT > threshold) {
         return {
           fired: true,
-          message: `🥵 <b>Жара!</b>\n${esc(sub.name)}: до <b>${Math.round(maxT)}°C</b> ${whenStr(times[maxIdx], fc.utcOffsetSec)}${srcFooter}`
+          message: t('fired.heat', lang, { name: esc(sub.name), temp: Math.round(maxT), when: when(times[maxIdx]) }) + srcFooter
         };
       }
       return { fired: false };
@@ -2158,6 +2159,8 @@ function evaluateRule(rule, fc, sub) {
     case 'rain_soon': {
       const windowH = Number(rule.windowHours) || 3;
       const [minProb, minMm] = precipThresholds(rule.sensitivity);
+      const unitM15 = t('unit.mm15', lang);
+      const unitH   = t('unit.mmh', lang);
       // v1.40.0: для коротких окон (≤2ч) используем minutely_15 — даёт
       // минутную точность вместо часовой. Для бóльших окон остаётся hourly.
       if (windowH <= 2 && fc.minutely15) {
@@ -2165,16 +2168,22 @@ function evaluateRule(rule, fc, sub) {
         if (hit) {
           const minAhead = hit.minAhead;
           const whenLabel = minAhead < 5
-            ? 'прямо сейчас'
-            : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
+            ? nowText()
+            : minAhead < 60 ? tInMinutes(minAhead, lang) : when(hit.iso);
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}${srcFooter}`
+            message: t('fired.rainSoon', lang, {
+              name: esc(sub.name),
+              mm: Math.round(hit.mm * 10) / 10,
+              unit: unitM15,
+              probPart: hit.prob > 0 ? t('prob.part', lang, { prob: hit.prob }) : '',
+              when: whenLabel
+            }) + srcFooter
           };
         }
         return { fired: false };
       }
-      for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
+      for (let i = nowIdx; i < Math.min(nowIdx + windowH, temps.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
         // Open-Meteo НЕ возвращает probability для конкретных моделей —
@@ -2183,7 +2192,13 @@ function evaluateRule(rule, fc, sub) {
         if (effProb >= minProb && mm >= minMm) {
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}${srcFooter}`
+            message: t('fired.rainSoon', lang, {
+              name: esc(sub.name),
+              mm: Math.round(mm * 10) / 10,
+              unit: unitH,
+              probPart: prob > 0 ? t('prob.part', lang, { prob }) : '',
+              when: when(times[i])
+            }) + srcFooter
           };
         }
       }
@@ -2200,6 +2215,8 @@ function evaluateRule(rule, fc, sub) {
       const watchRain = rule.watchRain !== false;
       const watchSnow = rule.watchSnow === true;
       const [minProb, minMm] = precipThresholds(rule.sensitivity);
+      const unitM15 = t('unit.mm15', lang);
+      const unitH   = t('unit.mmh', lang);
       // v1.40.0: для коротких окон (≤2ч) используем minutely_15. Тип осадков
       // (дождь vs снег) минутки не дают — определяем по hourly[nowIdx]
       // (текущий час) + температуре. <=0°C + осадки → снег, иначе дождь.
@@ -2209,7 +2226,7 @@ function evaluateRule(rule, fc, sub) {
           // Определяем тип: смотрим weather_code следующего hourly + температуру
           // ближайшего часа от hit.ts.
           const hitHourIdx = (() => {
-            for (let i = nowIdx; i < t.length; i++) {
+            for (let i = nowIdx; i < temps.length; i++) {
               const hourTs = new Date(times[i]).getTime();
               if (hourTs >= hit.ts) return i;
             }
@@ -2225,24 +2242,35 @@ function evaluateRule(rule, fc, sub) {
           const isRain = !isSnow;
           const minAhead = hit.minAhead;
           const whenLabel = minAhead < 5
-            ? 'прямо сейчас'
-            : minAhead < 60 ? `через ~${minAhead} мин` : whenStr(hit.iso, fc.utcOffsetSec);
+            ? nowText()
+            : minAhead < 60 ? tInMinutes(minAhead, lang) : when(hit.iso);
           if (watchRain && isRain) {
             return {
               fired: true,
-              message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}${srcFooter}`
+              message: t('fired.rainSoon', lang, {
+                name: esc(sub.name),
+                mm: Math.round(hit.mm * 10) / 10,
+                unit: unitM15,
+                probPart: hit.prob > 0 ? t('prob.part', lang, { prob: hit.prob }) : '',
+                when: whenLabel
+              }) + srcFooter
             };
           }
           if (watchSnow && isSnow) {
             return {
               fired: true,
-              message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(hit.mm * 10) / 10} мм/15мин${hit.prob > 0 ? ', ' + hit.prob + '%' : ''} ${whenLabel}${srcFooter}`
+              message: t('fired.snowSoon', lang, {
+                name: esc(sub.name),
+                mm: Math.round(hit.mm * 10) / 10,
+                probPart: hit.prob > 0 ? t('prob.part', lang, { prob: hit.prob }) : '',
+                when: whenLabel
+              }) + srcFooter
             };
           }
         }
         return { fired: false };
       }
-      for (let i = nowIdx; i < Math.min(nowIdx + windowH, t.length); i++) {
+      for (let i = nowIdx; i < Math.min(nowIdx + windowH, temps.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
         const code = wc[i];
@@ -2253,13 +2281,24 @@ function evaluateRule(rule, fc, sub) {
         if (watchRain && isRain) {
           return {
             fired: true,
-            message: `🌧 <b>Скоро дождь!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}${srcFooter}`
+            message: t('fired.rainSoon', lang, {
+              name: esc(sub.name),
+              mm: Math.round(mm * 10) / 10,
+              unit: unitH,
+              probPart: prob > 0 ? t('prob.part', lang, { prob }) : '',
+              when: when(times[i])
+            }) + srcFooter
           };
         }
         if (watchSnow && isSnow) {
           return {
             fired: true,
-            message: `🌨 <b>Скоро снег!</b>\n${esc(sub.name)}: ${Math.round(mm * 10) / 10} мм/ч${prob > 0 ? ', ' + prob + '%' : ''} ${whenStr(times[i], fc.utcOffsetSec)}${srcFooter}`
+            message: t('fired.snowSoon', lang, {
+              name: esc(sub.name),
+              mm: Math.round(mm * 10) / 10,
+              probPart: prob > 0 ? t('prob.part', lang, { prob }) : '',
+              when: when(times[i])
+            }) + srcFooter
           };
         }
       }
@@ -2275,7 +2314,7 @@ function evaluateRule(rule, fc, sub) {
       // даже без реальной конвективной нестабильности — ложные алёрты.
       const cape = hourly.cape || [];
       const li = hourly.lifted_index || [];
-      for (let i = nowIdx; i < Math.min(nowIdx + 6, t.length); i++) {
+      for (let i = nowIdx; i < Math.min(nowIdx + 6, temps.length); i++) {
         const code = wc[i];
         const capeNow = cape[i] || 0;
         const liNow = li[i] || 0;
@@ -2284,7 +2323,7 @@ function evaluateRule(rule, fc, sub) {
         if (stormByCode || stormByPhysics) {
           return {
             fired: true,
-            message: `⚡ <b>Гроза прогнозируется!</b>\n${esc(sub.name)}: ${whenStr(times[i], fc.utcOffsetSec)}\nСледи за прогнозом и подготовься.${srcFooter}`
+            message: t('fired.storm', lang, { name: esc(sub.name), when: when(times[i]) }) + srcFooter
           };
         }
       }
@@ -2305,7 +2344,12 @@ function evaluateRule(rule, fc, sub) {
       if (streak >= need) {
         return {
           fired: true,
-          message: `☀ <b>${streak} ${pluralDays(streak)} без дождя!</b>\n${esc(sub.name)}: с завтра по ${dailyTimes[streak] ? esc(dailyTimes[streak]) : '?'} — отличное окно для дачи / выезда.${srcFooter}`
+          message: t('fired.dryStreak', lang, {
+            n: streak,
+            days: tPluralDays(streak, lang),
+            name: esc(sub.name),
+            end: dailyTimes[streak] ? esc(dailyTimes[streak]) : '?'
+          }) + srcFooter
         };
       }
       return { fired: false };
@@ -2316,35 +2360,8 @@ function evaluateRule(rule, fc, sub) {
   }
 }
 
-function pluralDays(n) {
-  const mod10 = n % 10, mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 14) return 'дней';
-  if (mod10 === 1) return 'день';
-  if (mod10 >= 2 && mod10 <= 4) return 'дня';
-  return 'дней';
-}
-
-// "2026-05-17T22:00" + utcOffsetSec → "сегодня в 22:00" / "завтра в 03:00"
-function whenStr(isoTime, utcOffsetSec) {
-  if (!isoTime) return '';
-  // v1.42.4 CRITICAL TZ-fix: isoTime — это **локальное** время (Open-Meteo с
-  // timezone=auto), а `new Date().toISOString().slice(0,10)` возвращает
-  // **UTC**-дату. В часы когда локаль и UTC на разных календарных днях (например,
-  // 02:00 Kiev = 23:00 UTC ВЧЕРАШНЕГО дня), today давало вчерашнюю дату, и
-  // 04:00 сегодня (по локали) определялось как "завтра". Бот в 02:00 ночи
-  // присылал «дождь завтра в 04:00» хотя это через 2 часа в тот же день.
-  // Фикс: сдвигаем now на utcOffsetSec и используем UTC-getter'ы.
-  const nowLocal = new Date(Date.now() + (utcOffsetSec || 0) * 1000);
-  const today    = nowLocal.toISOString().slice(0,10);
-  const tomorrow = new Date(nowLocal.getTime() + 86400000).toISOString().slice(0,10);
-  const dateStr = isoTime.slice(0,10);
-  const hh = isoTime.slice(11,16);
-  if (dateStr === today) return `сегодня в ${hh}`;
-  if (dateStr === tomorrow) return `завтра в ${hh}`;
-  // Иначе — "DD.MM в HH:MM"
-  const [, m, dd] = dateStr.split('-');
-  return `${dd}.${m} в ${hh}`;
-}
+// whenStr перенесён в bot/src/i18n.js → tWhenStr(isoTime, utcOffsetSec, lang).
+// TZ-fix v1.42.4 учтён там же.
 
 // Сводка утра. Базовая часть всегда есть. Дополнительные секции включаются через rule.sections:
 //   { wind, precip, astro, storm, feels, tomorrow } — булевые флаги.
@@ -2354,6 +2371,7 @@ function buildMorningSummary(sub, rule, fc) {
   const daily = fc.daily || {};
   if (!hourly.time?.length || !daily.time?.length) return null;
 
+  const lang = sub?.lang || 'ru';
   const sections = (rule && rule.sections) || {};
   const todayDate = (daily.time[0] || '').slice(0, 10);
   const [s, e] = computeTodayRange(hourly.time, todayDate);
@@ -2364,38 +2382,38 @@ function buildMorningSummary(sub, rule, fc) {
   const tMin = daily.temperature_2m_min?.[0];
   const tMax = daily.temperature_2m_max?.[0];
   const wc = daily.weather_code?.[0];
-  const condLabel = weatherCodeLabel(wc);
+  const condLabel = tWeatherCodeLabel(wc, lang);
 
   const lines = [
-    `🌅 <b>Доброе утро!</b>`,
+    t('summary.greeting', lang),
     esc(sub.name),
     ``,
     condLabel,
-    `🌡 Сейчас: <b>${fmtDeg(curT)}</b>`,
-    `📊 Сегодня: <b>${fmtNum(tMin)}…${fmtNum(tMax)}°C</b>`
+    t('summary.nowTemp', lang, { t: fmtDeg(curT) }),
+    t('summary.todayRange', lang, { min: fmtNum(tMin), max: fmtNum(tMax) })
   ];
 
   // Если детальная precip-секция выключена — старая короткая строка про сумму осадков (если есть)
   if (!sections.precip) {
     const pSum = daily.precipitation_sum?.[0] || 0;
-    if (pSum > 0.5) lines.push(`💧 Осадки сегодня: ${pSum.toFixed(1)} мм`);
+    if (pSum > 0.5) lines.push(t('summary.precipShort', lang, { mm: pSum.toFixed(1) }));
   }
 
   // Дополнительные секции — порядок фиксированный, между блоками пустая строка
   const lat = (sub && typeof sub.lat === 'number') ? sub.lat : 50;
-  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat, daily));
-  if (sections.fog)      pushBlock(lines, buildFogBlock(hourly, s, e));
-  if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, s, e));
-  if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, s, e));
-  if (sections.astro)    pushBlock(lines, buildAstroBlock(daily));
-  if (sections.moon)     pushBlock(lines, buildMoonBlock());
-  if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, s, e));
-  if (sections.tomorrow) pushBlock(lines, buildTomorrowBlock(daily));
+  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat, daily, lang));
+  if (sections.fog)      pushBlock(lines, buildFogBlock(hourly, s, e, lang));
+  if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, s, e, lang));
+  if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, s, e, lang));
+  if (sections.astro)    pushBlock(lines, buildAstroBlock(daily, lang));
+  if (sections.moon)     pushBlock(lines, buildMoonBlock(lang));
+  if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, s, e, lang));
+  if (sections.tomorrow) pushBlock(lines, buildTomorrowBlock(daily, lang));
 
   // v1.43.1: footer с источником данных — для прозрачности «на основе чего сводка»
   const src = (sub && sub.source) || 'avg';
   lines.push('');
-  lines.push(`<i>по данным ${sourceLabel(src)}</i>`);
+  lines.push(`<i>${tSourceFooter(src, lang)}</i>`);
 
   return lines.join('\n');
 }
@@ -2483,7 +2501,7 @@ function inSnowSeason(lat, date) {
   return m >= 4 && m <= 10;
 }
 
-function buildPrecipBlock(hourly, s, e, lat, daily) {
+function buildPrecipBlock(hourly, s, e, lat, daily, lang = 'ru') {
   if (s < 0) return null;
   const wcArr = hourly.weather_code || [];
   const pmArr = hourly.precipitation || [];
@@ -2501,42 +2519,35 @@ function buildPrecipBlock(hourly, s, e, lat, daily) {
     if (typeof pmArr[i] === 'number' && pmArr[i] > 0) todayHourlyPSum += pmArr[i];
   }
   const totalSum = Math.max(todayDailyPSum, todayHourlyPSum);
+  const fmtMm = (v) => (Math.round(v * 10) / 10).toFixed(1);
 
   const rainWin = findPrecipWindow(times, wcArr, pmArr, 'rain', s, e);
   let block;
   if (rainWin) {
-    let line = `🌧 Дождь: <b>${rainWin.from}–${rainWin.to}</b>`;
-    if (rainWin.maxMm >= 0.5) line += `, до ${(Math.round(rainWin.maxMm * 10) / 10).toFixed(1)} мм/ч`;
-    if (totalSum >= 0.5) line += ` · за сутки ${(Math.round(totalSum * 10) / 10).toFixed(1)} мм`;
+    let line = t('block.precip.rain', lang, { from: rainWin.from, to: rainWin.to });
+    if (rainWin.maxMm >= 0.5) line += t('block.precip.rainMax', lang, { mm: fmtMm(rainWin.maxMm) });
+    if (totalSum >= 0.5)      line += t('block.precip.daySum',  lang, { mm: fmtMm(totalSum) });
     block = line;
   } else if (totalSum >= 0.5) {
-    // Continuous-окна нет (осадки разорванные), но за сутки набегает >0.5мм
-    block = `🌧 Возможны осадки (за сутки ${(Math.round(totalSum * 10) / 10).toFixed(1)} мм)`;
+    block = t('block.precip.possible', lang, { mm: fmtMm(totalSum) });
   } else {
-    block = `✓ Дождя не ожидается`;
+    block = t('block.precip.noRain', lang);
   }
 
   if (inSnowSeason(lat, new Date())) {
     const snowWin = findPrecipWindow(times, wcArr, pmArr, 'snow', s, e);
     if (snowWin) {
-      let line = `❄ Снег: <b>${snowWin.from}–${snowWin.to}</b>`;
-      if (snowWin.maxMm >= 0.5) line += `, до ${(Math.round(snowWin.maxMm * 10) / 10).toFixed(1)} мм/ч`;
+      let line = t('block.precip.snow', lang, { from: snowWin.from, to: snowWin.to });
+      if (snowWin.maxMm >= 0.5) line += t('block.precip.rainMax', lang, { mm: fmtMm(snowWin.maxMm) });
       block += `\n${line}`;
     } else {
-      block += `\n✓ Снега не ожидается`;
+      block += `\n${t('block.precip.noSnow', lang)}`;
     }
   }
   return block;
 }
 
-const WIND_DIRS_RU = ['северный','северо-восточный','восточный','юго-восточный','южный','юго-западный','западный','северо-западный'];
-function windDirName(deg) {
-  if (deg == null || !Number.isFinite(deg)) return '';
-  const idx = Math.round(((deg % 360) / 45)) % 8;
-  return WIND_DIRS_RU[(idx + 8) % 8];
-}
-
-function buildWindBlock(hourly, s, e) {
+function buildWindBlock(hourly, s, e, lang = 'ru') {
   if (s < 0) return null;
   const wArr = hourly.wind_speed_10m || [];
   const gArr = hourly.wind_gusts_10m || [];
@@ -2546,43 +2557,39 @@ function buildWindBlock(hourly, s, e) {
     if (wArr[i] != null && wArr[i] > maxW) { maxW = wArr[i]; maxIdx = i; }
     if (gArr[i] != null && gArr[i] > gust) gust = gArr[i];
   }
-  if (maxW < 0.5) return `🌬 Ветер: штиль`;
-  const dir = windDirName(dArr[maxIdx]);
-  let line = `🌬 Ветер: до <b>${Math.round(maxW)} м/с</b>`;
-  if (gust >= maxW + 2) line += `, порывы <b>${Math.round(gust)} м/с</b>`;
+  if (maxW < 0.5) return t('block.wind.calm', lang);
+  const dir = tWindDir(dArr[maxIdx], lang);
+  let line = t('block.wind.main', lang, { ms: Math.round(maxW) });
+  if (gust >= maxW + 2) line += t('block.wind.gusts', lang, { ms: Math.round(gust) });
   if (dir) line += `, ${dir}`;
   return line;
 }
 
-function buildFeelsBlock(hourly, s, e) {
+function buildFeelsBlock(hourly, s, e, lang = 'ru') {
   if (s < 0) return null;
   const ap = hourly.apparent_temperature || [];
-  const t  = hourly.temperature_2m || [];
+  const temps  = hourly.temperature_2m || [];
   let apMin = Infinity, apMax = -Infinity, maxDelta = 0;
   for (let i = s; i < e; i++) {
     if (ap[i] == null) continue;
     if (ap[i] < apMin) apMin = ap[i];
     if (ap[i] > apMax) apMax = ap[i];
-    if (t[i] != null) {
-      const d = Math.abs(ap[i] - t[i]);
+    if (temps[i] != null) {
+      const d = Math.abs(ap[i] - temps[i]);
       if (d > maxDelta) maxDelta = d;
     }
   }
   if (!Number.isFinite(apMin)) return null;
-  // Если ощущается почти как фактическая температура — короткая строка
-  if (maxDelta < 1.5) {
-    return `🌡 По ощущениям: близко к фактической`;
-  }
-  return `🌡 По ощущениям: <b>${Math.round(apMin)}…${Math.round(apMax)}°C</b>`;
+  if (maxDelta < 1.5) return t('block.feels.close', lang);
+  return t('block.feels.range', lang, { min: Math.round(apMin), max: Math.round(apMax) });
 }
 
-function buildAstroBlock(daily) {
+function buildAstroBlock(daily, lang = 'ru') {
   const sr = daily.sunrise?.[0];
   const ss = daily.sunset?.[0];
   if (!sr || !ss) return null;
   const srTime = sr.slice(11, 16);
   const ssTime = ss.slice(11, 16);
-  // Длина дня в минутах (sr/ss — оба в локальном времени, без TZ-offsetа)
   const toMin = (iso) => {
     const [hh, mm] = iso.slice(11, 16).split(':').map(Number);
     return (hh|0) * 60 + (mm|0);
@@ -2591,12 +2598,12 @@ function buildAstroBlock(daily) {
   if (lenMin < 0) lenMin += 24 * 60;
   const lenH = Math.floor(lenMin / 60);
   const lenM = lenMin % 60;
-  return `🌅 <b>${srTime}</b>  🌇 <b>${ssTime}</b> · день ${lenH}ч ${lenM}м`;
+  return t('block.astro.line', lang, { sr: srTime, ss: ssTime, h: lenH, m: lenM });
 }
 
 // Блок «Туман» — ищет в hourly за сегодня weather_code 45 (туман) или 48
 // (изморозь). Если есть — возвращает окно появления. Иначе — «✓ Тумана нет».
-function buildFogBlock(hourly, s, e) {
+function buildFogBlock(hourly, s, e, lang = 'ru') {
   if (s < 0) return null;
   const wcArr = hourly.weather_code || [];
   const times = hourly.time || [];
@@ -2608,19 +2615,19 @@ function buildFogBlock(hourly, s, e) {
       if (winStart < 0) winStart = i;
       winEnd = i;
     } else if (winStart >= 0) {
-      break; // первое окно тумана
+      break;
     }
   }
-  if (winStart < 0) return `✓ Тумана не ожидается`;
+  if (winStart < 0) return t('block.fog.none', lang);
   const from = times[winStart].slice(11, 16);
   const to = times[winEnd + 1] ? times[winEnd + 1].slice(11, 16) : (times[winEnd].slice(11, 13) + ':59');
-  return `🌫 Туман: <b>${from}–${to}</b>`;
+  return t('block.fog.window', lang, { from, to });
 }
 
 // Блок «Фаза Луны» — текущая фаза + процент освещения + растущая/убывающая.
 // Считается математически (синодический цикл 29.53 дней от опорного новолуния).
-function buildMoonBlock() {
-  const REF = Date.UTC(2000, 0, 6, 18, 14); // опорное новолуние
+function buildMoonBlock(lang = 'ru') {
+  const REF = Date.UTC(2000, 0, 6, 18, 14);
   const SYNODIC = 29.5305882;
   const now = Date.now();
   const days = (now - REF) / 86400000;
@@ -2629,21 +2636,21 @@ function buildMoonBlock() {
   const illum = Math.round((1 - Math.cos(phase * 2 * Math.PI)) / 2 * 100);
   const waxing = phase < 0.5;
 
-  let name, emoji;
-  if (phase < 0.03 || phase > 0.97)       { name = 'Новолуние';         emoji = '🌑'; }
-  else if (phase < 0.22)                  { name = 'Молодая луна';      emoji = '🌒'; }
-  else if (phase < 0.28)                  { name = 'Первая четверть';   emoji = '🌓'; }
-  else if (phase < 0.47)                  { name = 'Прибывающая луна';  emoji = '🌔'; }
-  else if (phase < 0.53)                  { name = 'Полнолуние';        emoji = '🌕'; }
-  else if (phase < 0.72)                  { name = 'Убывающая луна';    emoji = '🌖'; }
-  else if (phase < 0.78)                  { name = 'Последняя четверть'; emoji = '🌗'; }
-  else                                    { name = 'Старая луна';       emoji = '🌘'; }
+  // 8 фаз → индексы: 0..7. См. tMoonName/tMoonTrend в i18n.js.
+  let idx, emoji;
+  if (phase < 0.03 || phase > 0.97)  { idx = 0; emoji = '🌑'; }
+  else if (phase < 0.22)             { idx = 1; emoji = '🌒'; }
+  else if (phase < 0.28)             { idx = 2; emoji = '🌓'; }
+  else if (phase < 0.47)             { idx = 3; emoji = '🌔'; }
+  else if (phase < 0.53)             { idx = 4; emoji = '🌕'; }
+  else if (phase < 0.72)             { idx = 5; emoji = '🌖'; }
+  else if (phase < 0.78)             { idx = 6; emoji = '🌗'; }
+  else                               { idx = 7; emoji = '🌘'; }
 
-  const trend = waxing ? '↑ растёт' : '↓ убывает';
-  return `${emoji} ${name} · ${illum}% · ${trend}`;
+  return `${emoji} ${tMoonName(idx, lang)} · ${illum}% · ${tMoonTrend(waxing, lang)}`;
 }
 
-function buildStormBlock(hourly, s, e) {
+function buildStormBlock(hourly, s, e, lang = 'ru') {
   if (s < 0) return null;
   const wcArr = hourly.weather_code || [];
   const capeArr = hourly.cape || [];
@@ -2661,37 +2668,24 @@ function buildStormBlock(hourly, s, e) {
       break;
     }
   }
-  if (winStart < 0) return `✓ Грозы не ожидается`;
+  if (winStart < 0) return t('block.storm.none', lang);
   const from = times[winStart].slice(11, 16);
   const to = times[winEnd + 1] ? times[winEnd + 1].slice(11, 16) : (times[winEnd].slice(11, 13) + ':59');
-  return `⛈ Возможна гроза: <b>${from}–${to}</b>`;
+  return t('block.storm.window', lang, { from, to });
 }
 
-function buildTomorrowBlock(daily) {
+function buildTomorrowBlock(daily, lang = 'ru') {
   if (!daily.time || daily.time.length < 2) return null;
   const tMin = daily.temperature_2m_min?.[1];
   const tMax = daily.temperature_2m_max?.[1];
   const pSum = daily.precipitation_sum?.[1] || 0;
   const wc = daily.weather_code?.[1];
-  const label = weatherCodeLabel(wc);
+  const label = tWeatherCodeLabel(wc, lang);
   const tStr = `${tMin != null ? Math.round(tMin) : '?'}…${tMax != null ? Math.round(tMax) : '?'}°C`;
-  const precipStr = pSum > 0.5 ? `${pSum.toFixed(1)} мм осадков` : 'без осадков';
-  return `📊 Завтра: <b>${tStr}</b>, ${label}, ${precipStr}`;
-}
-
-function weatherCodeLabel(code) {
-  if (code == null) return '☁ Прогноз';
-  if (code === 0) return '☀ Ясно';
-  if (code <= 2) return '🌤 Переменная облачность';
-  if (code === 3) return '☁ Облачно';
-  if (code === 45 || code === 48) return '🌫 Туман';
-  if (code <= 57) return '🌧 Морось';
-  if (code <= 67) return '🌧 Дождь';
-  if (code <= 77) return '🌨 Снег';
-  if (code <= 82) return '⛈ Ливень';
-  if (code <= 86) return '🌨 Снегопад';
-  if (code <= 99) return '⛈ Гроза';
-  return '☁ Прогноз';
+  const precipStr = pSum > 0.5
+    ? t('block.tomorrow.precip', lang, { mm: pSum.toFixed(1) })
+    : t('block.tomorrow.noPrecip', lang);
+  return t('block.tomorrow.line', lang, { tStr, label, precipStr });
 }
 
 // ============================================================

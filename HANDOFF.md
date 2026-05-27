@@ -3,8 +3,8 @@
 > Шпаргалка для входа в проект в новой сессии Claude.
 > **Полная история проекта** — [PROJECT_STATUS.md](PROJECT_STATUS.md).
 >
-> **Дата обновления:** 26 мая 2026
-> **Текущая версия:** v1.43.1
+> **Дата обновления:** 27 мая 2026
+> **Текущая версия:** v1.50.0
 
 ---
 
@@ -36,12 +36,13 @@
 ☁ **Worker:** https://meteo-star-bot.stanislav-perec.workers.dev
 📦 **GitHub:** https://github.com/meteo-star/kharkiv-weather
 
-**Что работает (v1.43.0):**
+**Что работает (v1.50.0):**
 - Прогноз на 10 дней по 8 моделям с **weighted AVG** (вес = 1/MAE), **bias-correction**, **per-variable best** (🏆 отдельно для Tmax/Tmin/precip), **зелёное выделение** лидера в accuracy-таблице
 - **15-мин nowcast осадков** на hero — плашка «🌧 Дождь через ~30 мин» с 6 типами осадков (дождь / морось / снег / мокрый снег / ледяной дождь / гроза)
 - **Реальный ground truth** в KV — бот каждую ночь в 05:00 UTC тянет наблюдения из Open-Meteo Archive (ERA5/ERA5T) и перезаписывает actual
-- **Telegram-бот**: 6 типов правил, cron каждые 30 мин, веб-админка, magic-link `/login`, multi-account UI, групповые чаты, утренняя сводка с подразделами. Использует minutely_15 для precip_soon с windowHours ≤ 2.
-- **PWA** (iOS/Android), pull-to-refresh, sticky hero, dark+light темы, 3 языка (RU/UK/EN)
+- **Telegram-бот**: 6 типов правил, cron каждые 30 мин, веб-админка, magic-link `/login`, multi-account UI, групповые чаты, утренняя сводка с подразделами. Использует minutely_15 для precip_soon с windowHours ≤ 2. **i18n** на 16 языков (push'и приходят на родном языке юзера).
+- **PWA** (iOS/Android), pull-to-refresh, sticky hero, dark+light темы
+- **🌐 16 языков интерфейса** (v1.50.0): ru, uk, en, de, pl, cs, fr, it, es, ro, hu, sk, pt, nl, tr, el. Автодетект из `navigator.language` / `update.message.from.language_code`. iOS-style picker в Settings (3 кнопки RU/UK/EN + chevron на EN → bottom-sheet со всеми 16). Автосинк сайт↔бот при смене языка.
 
 ---
 
@@ -50,10 +51,11 @@
 | Файл | Что внутри |
 |---|---|
 | `index.html` | HTML-разметка, ~1000 строк |
-| `app.js` | Вся клиентская логика, ванильный JS, **~10000 строк** |
+| `app.js` | Вся клиентская логика, ванильный JS, **~16000 строк** (из них ~7000 — словарь I18N на 16 языков) |
 | `style.css` | Liquid Glass UI, dark+light темы, responsive |
 | `service-worker.js` | PWA cache strategies (network-first для HTML/JS, cache-first для assets) |
 | `bot/src/index.js` | Cloudflare Worker, **~2700 строк**: webhook, команды бота, cron, accuracy-cron, HTTP API |
+| `bot/src/i18n.js` | **Словарь бота на 16 языков** + хелперы `t/tWhenStr/tPluralDays/tWindDir/tWeatherCodeLabel/tMoonName/tSourceFooter/detectLang` |
 | `bot/wrangler.toml` | Конфиг Worker'а (account_id, KV bindings, cron, ADMIN_USER_ID) |
 | `assets/scenes/` | 16 hero-фото (4 tod × 4 уровня облачности) |
 | `admin.html` + `admin.js` | Веб-админка бота, защищена ADMIN_TOKEN |
@@ -99,6 +101,7 @@
 | v1.42.4 | Fix: whenStr UTC-дата + бот max→mean precipitation (как сайт) + storm требует cape ≥ 500 |
 | v1.43.0 | Стрелки ‹ › и touch-swipe в почасовой ленте модалки дня |
 | v1.43.1 | Footer «по данным X» в каждом уведомлении бота (avg / ECMWF / AIFS / GFS / ICON / GEM / JMA / Météo-France / UKMO) |
+| v1.50.0 | **🌐 i18n релиз — 16 языков:** ru/uk/en + 13 новых (de/pl/cs/fr/it/es/ro/hu/sk/pt/nl/tr/el). Авто-detect, iOS-style picker, автосинк сайт↔бот через `/api/rules-set` body.lang, локализованный бот (`bot/src/i18n.js`), все push-уведомления и утренние сводки на родном языке. ~9000 переводов суммарно (сайт ~7000 + бот ~1100). RULE_DEFS, токены, alerts, aria-labels, единицы измерения — всё через `t()`. |
 
 ---
 
@@ -122,7 +125,7 @@
 
 ## 7. Следующий шаг
 
-**Пауза** — юзер просил дать данным накопиться (1-2 недели).
+**v1.50.0 задеплоен** — i18n полностью завершён по плану из 3 релизов (PLAN_I18N.md удалён). Теперь — **пауза** для накопления данных:
 
 В KV копится **accuracy** на 0.1°-сетку. Каждую ночь archive-api пишет реальные `actual`. Когда наберётся ≥5 ground-truth замеров per model per location:
 - `dumpBias()` в DevTools покажет реальные смещения моделей

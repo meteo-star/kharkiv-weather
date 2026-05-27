@@ -6,7 +6,7 @@
 <!-- Content Security Policy: разрешаем только нужные источники (Chart.js CDN, Google Fonts, Open-Meteo API, Nominatim).
      'unsafe-inline' оставлен потому что у нас inline-стили и inline-скрипт в одном файле. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://tilecache.rainviewer.com https://*.basemaps.cartocdn.com https://*.tile.openstreetmap.org; connect-src 'self' https://api.open-meteo.com https://air-quality-api.open-meteo.com https://archive-api.open-meteo.com https://geocoding-api.open-meteo.com https://nominatim.openstreetmap.org https://api.rainviewer.com https://meteo-star-bot.stanislav-perec.workers.dev; frame-src https://embed.windy.com https://www.windy.com; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
-<title>Метеоагрегатор · Харьков</title>
+<title>Meteo Star</title>
 <!-- PWA manifest + apple-touch + theme-color -->
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -40,7 +40,7 @@
      stacking-контекст body выше container.z-index:1 и накрывал собой
      hero внутри контейнера) -->
 
-<h2 class="sr-only">Прогноз погоды для Харькова с переключателем источников</h2>
+<h2 class="sr-only" data-i18n="page.h2">Прогноз погоды с переключателем источников</h2>
 
 <div class="particle" style="left:5%;animation:float-zigzag 21s linear 7s infinite;background:rgba(94,234,212,0.4);box-shadow:0 0 10px rgba(94,234,212,0.6)"></div>
 <div class="particle" style="left:10%;animation:float-up 18s linear 0s infinite"></div>
@@ -101,7 +101,7 @@
         <span class="sep">·</span>
         <span class="val" id="chipTemp">°C</span>
         <span class="sep">·</span>
-        <span class="val" id="chipWind">м/с</span>
+        <span class="val" id="chipWind">—</span>
       </button>
       <div class="source-indicator" id="sourceIndicator" role="button" tabindex="0" aria-haspopup="dialog" aria-controls="sourceDataModal" title="Открыть карточки источника и точности" data-i18n-title="sources.openHint">
         <span class="si-dot"></span>
@@ -230,10 +230,10 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
     </span>
     <div class="err-content">
-      <div class="err-title" id="apiErrorTitle">Не удалось загрузить прогноз</div>
-      <div class="err-msg" id="apiErrorMsg">Показаны демо-данные. Проверь интернет и попробуй ещё раз.</div>
+      <div class="err-title" id="apiErrorTitle" data-i18n="apiErr.title">Не удалось загрузить прогноз</div>
+      <div class="err-msg" id="apiErrorMsg" data-i18n="apiErr.msg">Показаны демо-данные. Проверь интернет и попробуй ещё раз.</div>
     </div>
-    <button class="err-retry" id="apiErrorRetry" type="button">Повторить</button>
+    <button class="err-retry" id="apiErrorRetry" type="button" data-i18n="apiErr.retry">Повторить</button>
   </div>
 
   <div class="glass hero" id="heroBlock" data-tod="night">
@@ -253,7 +253,7 @@
     </div>
     <div class="weather-icon-3d" id="heroIcon"></div>
     <div class="hero-loader"></div>
-    <div class="hero-loader-text" id="heroLoaderText">Загрузка...</div>
+    <div class="hero-loader-text" id="heroLoaderText" data-i18n="loader.fetching">Загрузка...</div>
   </div>
 
   <div class="metrics">
@@ -265,7 +265,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
-      <div class="metric-value" id="metricWind">3<span>м/с</span></div>
+      <div class="metric-value" id="metricWind">—</div>
       <div class="metric-sub" id="metricWindSub">Северо-западный · порывы 6</div>
     </div>
     <div class="glass metric metric-clickable" id="metricRainCard" role="button" tabindex="0" aria-label="Подробности об осадках" data-i18n-aria="metric.rain.tapHint">
@@ -287,7 +287,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
-      <div class="metric-value" id="metricPressure">756<span>мм рт.ст.</span></div>
+      <div class="metric-value" id="metricPressure">—</div>
       <div class="metric-sub" id="metricPressureSub">Понижается ↓</div>
     </div>
     <div class="glass metric metric-clickable" id="metricHumidityCard" role="button" tabindex="0" aria-label="Подробности о влажности" data-i18n-aria="metric.humidity.tapHint" data-open-metric="humidity">
@@ -299,7 +299,7 @@
         </div>
       </div>
       <div class="metric-value" id="metricHumidity">72<span>%</span></div>
-      <div class="metric-sub" id="metricHumiditySub">Точка росы 11°C</div>
+      <div class="metric-sub" id="metricHumiditySub">—</div>
     </div>
   </div>
 
@@ -307,7 +307,7 @@
     <div class="glass sun-moon">
       <div class="sun-section">
         <div class="sun-title" data-i18n="astro.sun">Солнце</div>
-        <div class="daylen" id="dayLength">15ч 19мин</div>
+        <div class="daylen" id="dayLength">—</div>
         <div class="sun-arc-wrap" id="sunArc"></div>
         <div class="sun-times">
           <span><span class="lbl" data-i18n="astro.sunrise">Восход</span><strong id="sunriseTime">05:13</strong></span>
@@ -325,13 +325,13 @@
       <div class="lbl" data-i18n="astro.uv">УФ-индекс</div>
       <div class="uv-gauge" id="uvGauge"></div>
       <div class="uv-val" id="uvVal">5</div>
-      <div class="uv-status" id="uvStatus" style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)">Умеренный</div>
+      <div class="uv-status" id="uvStatus" style="background:rgba(250,204,21,0.15);color:#facc15;border:1px solid rgba(250,204,21,0.3)">—</div>
     </div>
 
     <div class="glass aqi-card">
       <div class="lbl" data-i18n="astro.aqi">Качество воздуха</div>
       <div class="aqi-val" id="aqiVal">42</div>
-      <div class="aqi-status" id="aqiStatus" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)">Хорошее</div>
+      <div class="aqi-status" id="aqiStatus" style="background:rgba(74,222,128,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.3)">—</div>
       <div class="aqi-bar"><div class="aqi-marker" id="aqiMarker" style="left:8.4%"></div></div>
       <div class="aqi-scale"><span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300+</span></div>
     </div>
@@ -352,16 +352,16 @@
       <button class="ht-tab" data-metric="pressure" role="tab"><span data-i18n="metric.pressure">Давление</span></button>
     </div>
     <div class="scroll-wrap">
-      <button class="scroll-arrow left" data-scroll-target="hourlyRow" aria-label="Прокрутить влево">‹</button>
+      <button class="scroll-arrow left" data-scroll-target="hourlyRow" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
       <div class="hours-scroll hourly-row" id="hourlyRow"></div>
-      <button class="scroll-arrow right" data-scroll-target="hourlyRow" aria-label="Прокрутить вправо">›</button>
+      <button class="scroll-arrow right" data-scroll-target="hourlyRow" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
     </div>
   </div>
 
   <div class="scroll-wrap" id="daysWrap">
-    <button class="scroll-arrow left" data-scroll-target="daysGrid" aria-label="Прокрутить влево">‹</button>
+    <button class="scroll-arrow left" data-scroll-target="daysGrid" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
     <div class="days" id="daysGrid"></div>
-    <button class="scroll-arrow right" data-scroll-target="daysGrid" aria-label="Прокрутить вправо">›</button>
+    <button class="scroll-arrow right" data-scroll-target="daysGrid" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
   </div>
 
   <div class="glass activity-windows" id="activityWindowsCard">
@@ -453,7 +453,8 @@
   </div>
 
   <div class="glass footer-info">
-    <div class="left" id="clockLine">обновлено: 23:10:42 UTC+3 · v0.4 prototype</div>
+    <!-- clockLine заполняется updateClock() через t('footer.updated', ...) -->
+    <div class="left" id="clockLine">—</div>
     <button class="btn-refresh" id="btnRefresh" type="button">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
       <span data-i18n="footer.refresh">Обновить</span>
@@ -497,7 +498,7 @@
 
     <div class="city-error" id="cityGeoError" style="display:none">
       <svg class="err-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-      <div id="cityGeoErrorText">Не удалось определить местоположение</div>
+      <div id="cityGeoErrorText" data-i18n="city.geoErr.generic">Не удалось определить местоположение</div>
     </div>
 
     <div class="city-search-wrap">
@@ -531,7 +532,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       </span>
       <input type="search" class="city-search-input" id="comparePickerInput" placeholder="Поиск города..." data-i18n-placeholder="city.search.placeholder" autocomplete="off" spellcheck="false">
-      <button class="city-search-clear" id="comparePickerClear" aria-label="Очистить" type="button">
+      <button class="city-search-clear" id="comparePickerClear" data-i18n-aria="city.search.clearAria" aria-label="Очистить" type="button">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
@@ -661,11 +662,8 @@
         </span>
         <span data-i18n="settings.lang.title">Язык интерфейса</span>
       </div>
-      <div class="segmented" id="segLang">
-        <button class="seg-btn" type="button" data-val="ru"><span class="seg-main">RU</span><span class="seg-sub">Русский</span></button>
-        <button class="seg-btn" type="button" data-val="uk"><span class="seg-main">UK</span><span class="seg-sub">Українська</span></button>
-        <button class="seg-btn" type="button" data-val="en"><span class="seg-main">EN</span><span class="seg-sub">English</span></button>
-      </div>
+      <!-- segLang генерируется в JS из SUPPORTED_LANGS / LANG_META (см. renderLangSegmented в app.js) -->
+      <div class="segmented segmented-lang" id="segLang"></div>
     </div>
 
     <div class="settings-section">
@@ -751,10 +749,10 @@
         <div class="notif-code" id="notifCode">000000</div>
         <p class="notif-hint-small">
           <span data-i18n="settings.notif.codeCmd">Команда:</span>
-          <button type="button" class="notif-copy-btn" id="notifCopyCmdBtn" aria-label="Скопировать команду">
+          <button type="button" class="notif-copy-btn" id="notifCopyCmdBtn" data-i18n-aria="notif.copyCmdAria" aria-label="Скопировать команду">
             <code id="notifCodeCmd">/pair 000000</code>
             <span class="ncb-icon" aria-hidden="true">📋</span>
-            <span class="ncb-toast" id="notifCopyToast">Скопировано ✓</span>
+            <span class="ncb-toast" id="notifCopyToast" data-i18n="toast.copied">Скопировано ✓</span>
           </button>
         </p>
         <p class="notif-hint-small notif-timer" id="notifTimer">
@@ -789,8 +787,8 @@
         <div class="notif-source-info" id="notifSourceInfo">
           <span class="nsi-icon">🛰</span>
           <div class="nsi-text">
-            <div class="nsi-title">Уведомления используют источник: <strong id="notifSourceName">Среднее (8 моделей)</strong></div>
-            <div class="nsi-hint">Если хочешь другую точность — поменяй источник погоды на главной и сохрани правила заново</div>
+            <div class="nsi-title"><span data-i18n="notif.sourceLabel">Уведомления используют источник:</span> <strong id="notifSourceName">Среднее (8 моделей)</strong></div>
+            <div class="nsi-hint" data-i18n="notif.sourceHint">Если хочешь другую точность — поменяй источник погоды на главной и сохрани правила заново</div>
           </div>
         </div>
 
@@ -832,7 +830,7 @@
                data-i18n-placeholder="search.placeholder"
                placeholder="например: без дождя 6 часов, тепло выше +20, ясное утро"
                autocomplete="off" autocapitalize="off" spellcheck="false">
-        <button type="button" class="search-clear-btn" id="searchClearBtn" aria-label="Очистить" style="display:none">×</button>
+        <button type="button" class="search-clear-btn" id="searchClearBtn" data-i18n-aria="city.search.clearAria" aria-label="Очистить" style="display:none">×
       </div>
       <button type="button" class="search-submit-btn" id="searchSubmitBtn" data-i18n="search.button">Найти</button>
     </div>
@@ -850,7 +848,7 @@
   <div class="hdm-sheet">
     <div class="swipe-handle" aria-hidden="true"></div>
     <div class="hdm-top">
-      <button class="hdm-back" id="pdmBack" aria-label="Назад">←</button>
+      <button class="hdm-back" id="pdmBack" data-i18n-aria="modal.back" aria-label="Назад">←</button>
       <div class="hdm-title" id="pdmTitle" data-i18n="precipDetail.title">Детали осадков</div>
     </div>
     <div class="pdm-scroll">
@@ -864,7 +862,7 @@
         <div class="scroll-wrap precip-scroll-wrap">
           <div class="precip-y-axis" id="precipYAxis" aria-hidden="true"></div>
           <div class="precip-scroll-area">
-            <button class="scroll-arrow left" data-scroll-target="precipScroll" aria-label="Прокрутить влево">‹</button>
+            <button class="scroll-arrow left" data-scroll-target="precipScroll" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
             <div class="precip-scroll" id="precipScroll">
               <div class="precip-inner" id="precipInner">
                 <div class="precip-chart-wrap"><canvas id="precipChart"></canvas></div>
@@ -872,7 +870,7 @@
                 <div class="precip-days" id="precipDays"></div>
               </div>
             </div>
-            <button class="scroll-arrow right" data-scroll-target="precipScroll" aria-label="Прокрутить вправо">›</button>
+            <button class="scroll-arrow right" data-scroll-target="precipScroll" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
           </div>
         </div>
       </div>
@@ -888,10 +886,10 @@
         <div class="storm-heatmap" id="stormHeatmap"></div>
         <div class="storm-axis">
           <span data-i18n="storm.axisNow">сейчас</span>
-          <span>+12ч</span>
-          <span>+24ч</span>
-          <span>+36ч</span>
-          <span>+48ч</span>
+          <span data-i18n-h="12">+12ч</span>
+          <span data-i18n-h="24">+24ч</span>
+          <span data-i18n-h="36">+36ч</span>
+          <span data-i18n-h="48">+48ч</span>
         </div>
         <div class="storm-legend" id="stormLegend"></div>
       </div>
@@ -917,7 +915,7 @@
               <svg class="rp-play" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
               <svg class="rp-pause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
             </button>
-            <input type="range" class="radar-slider" id="radarSlider" min="0" max="0" step="1" value="0" aria-label="Время кадра">
+            <input type="range" class="radar-slider" id="radarSlider" min="0" max="0" step="1" value="0" data-i18n-aria="radar.sliderAria" aria-label="Время кадра">
             <div class="radar-time" id="radarTime">—</div>
           </div>
           <div class="radar-status" id="radarStatus" data-i18n="radar.loading">Загружаем тайлы радара…</div>
@@ -938,15 +936,15 @@
   <div class="hdm-sheet">
     <div class="swipe-handle" aria-hidden="true"></div>
     <div class="hdm-top">
-      <button class="hdm-back" id="hdmBack" aria-label="Назад">←</button>
+      <button class="hdm-back" id="hdmBack" data-i18n-aria="modal.back" aria-label="Назад">←</button>
       <div class="hdm-title" id="hdmTitle" data-i18n="hdm.title">Почасовой</div>
     </div>
-    <button class="scroll-arrow hdm-arrow left" data-scroll-target="hdmScroll" aria-label="Прокрутить влево">‹</button>
-    <button class="scroll-arrow hdm-arrow right" data-scroll-target="hdmScroll" aria-label="Прокрутить вправо">›</button>
+    <button class="scroll-arrow hdm-arrow left" data-scroll-target="hdmScroll" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
+    <button class="scroll-arrow hdm-arrow right" data-scroll-target="hdmScroll" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
     <div class="hdm-scroll" id="hdmScroll">
       <div class="hdm-inner" id="hdmInner">
         <div class="hdm-sticky-hours" id="hdmStickyHours">
-          <div class="hdm-day-label" id="hdmDayLabel">Сегодня</div>
+          <div class="hdm-day-label" id="hdmDayLabel" data-i18n="day.today">Сегодня</div>
           <div class="hdm-hours-row" id="hdmHoursRow"></div>
         </div>
         <div class="hdm-metrics" id="hdmMetrics"></div>

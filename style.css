@@ -1188,6 +1188,62 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .seg-btn .seg-sub{font-size:10px;color:rgba(232,240,255,0.5);font-weight:400;line-height:1.2}
 .seg-btn.active .seg-sub{color:rgba(232,240,255,0.75)}
 
+/* ===== Переключатель языка: 3 кнопки, на 3-й (EN) — chevron ▾ → picker ===== */
+.seg-btn-with-more{position:relative;padding-right:24px}
+.seg-chevron{position:absolute;top:4px;right:4px;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;color:rgba(232,240,255,0.55);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:5px;cursor:pointer;transition:all 0.15s;user-select:none}
+.seg-chevron:hover{color:#fff;background:rgba(167,139,250,0.25);border-color:rgba(167,139,250,0.5);transform:scale(1.08)}
+.seg-btn.active .seg-chevron{color:rgba(232,240,255,0.85);background:rgba(255,255,255,0.08);border-color:rgba(167,139,250,0.4)}
+:root[data-theme="light"] .seg-chevron{color:rgba(45,26,16,0.55);background:rgba(255,255,255,0.6);border-color:rgba(45,26,16,0.08)}
+:root[data-theme="light"] .seg-chevron:hover{color:#2d1a10;background:rgba(167,139,250,0.2);border-color:rgba(167,139,250,0.5)}
+
+/* ===== iOS-style picker (bottom-sheet) ===== */
+.lang-picker-overlay{position:fixed;inset:0;z-index:1000;display:flex;justify-content:center;align-items:flex-end;background:rgba(2,6,26,0);transition:background 0.25s ease;-webkit-tap-highlight-color:transparent}
+.lang-picker-overlay[hidden]{display:none}
+.lang-picker-overlay.open{background:rgba(2,6,26,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.lang-picker-sheet{width:100%;max-width:480px;max-height:75vh;background:rgba(20,24,46,0.96);border:1px solid rgba(167,139,250,0.25);border-bottom:none;border-radius:20px 20px 0 0;display:flex;flex-direction:column;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 -12px 40px rgba(0,0,0,0.5);transform:translateY(100%);transition:transform 0.28s cubic-bezier(.32,.72,.2,1);padding-bottom:env(safe-area-inset-bottom)}
+.lang-picker-overlay.open .lang-picker-sheet{transform:translateY(0)}
+.lang-picker-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.25);margin:8px auto 4px;flex-shrink:0}
+.lang-picker-header{display:flex;align-items:center;justify-content:space-between;padding:10px 18px 8px;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+.lang-picker-title{margin:0;font-size:15px;font-weight:600;color:#fff;letter-spacing:0.1px}
+.lang-picker-close{background:rgba(255,255,255,0.06);border:none;color:rgba(232,240,255,0.7);font-size:14px;width:28px;height:28px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.lang-picker-close:hover{background:rgba(255,255,255,0.12);color:#fff}
+.lang-picker-list{overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:8px;display:flex;flex-direction:column;gap:2px;flex:1 1 auto;min-height:0;scroll-behavior:smooth}
+.lang-picker-list::-webkit-scrollbar{width:8px}
+.lang-picker-list::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.3);border-radius:4px}
+.lang-picker-list::-webkit-scrollbar-track{background:transparent}
+.lang-picker-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;background:transparent;border:none;color:rgba(232,240,255,0.9);font-family:inherit;font-size:15px;font-weight:500;cursor:pointer;border-radius:10px;text-align:left;transition:background 0.12s,color 0.12s;width:100%}
+.lang-picker-opt:hover{background:rgba(167,139,250,0.12);color:#fff}
+.lang-picker-opt:active{background:rgba(167,139,250,0.2)}
+.lang-picker-opt.active{background:linear-gradient(135deg,rgba(167,139,250,0.22) 0%,rgba(0,212,255,0.1) 100%);color:#fff}
+.lang-picker-opt .flag{font-size:22px;line-height:1;flex-shrink:0;width:28px;text-align:center}
+.lang-picker-opt .name{flex:1 1 auto;font-size:15px}
+.lang-picker-opt .code{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(232,240,255,0.45);letter-spacing:0.6px;background:rgba(255,255,255,0.04);padding:3px 7px;border-radius:5px}
+.lang-picker-opt.active .code{color:rgba(232,240,255,0.85);background:rgba(167,139,250,0.2)}
+.lang-picker-opt .check{color:#a78bfa;font-size:16px;font-weight:700;margin-left:4px}
+
+/* Десктоп: центрируем sheet, чуть скругляем нижние углы */
+@media (min-width: 640px){
+  .lang-picker-overlay{align-items:center}
+  .lang-picker-sheet{border-radius:18px;border-bottom:1px solid rgba(167,139,250,0.25);max-height:70vh;transform:translateY(20px) scale(0.96);opacity:0;transition:transform 0.22s cubic-bezier(.32,.72,.2,1),opacity 0.22s ease}
+  .lang-picker-overlay.open .lang-picker-sheet{transform:translateY(0) scale(1);opacity:1}
+  .lang-picker-handle{display:none}
+}
+
+/* Light theme */
+:root[data-theme="light"] .lang-picker-overlay.open{background:rgba(80,40,20,0.4)}
+:root[data-theme="light"] .lang-picker-sheet{background:rgba(255,248,238,0.98);border-color:rgba(167,139,250,0.3);box-shadow:0 -12px 40px rgba(80,40,20,0.25)}
+:root[data-theme="light"] .lang-picker-handle{background:rgba(45,26,16,0.25)}
+:root[data-theme="light"] .lang-picker-header{border-bottom-color:rgba(45,26,16,0.1)}
+:root[data-theme="light"] .lang-picker-title{color:#2d1a10}
+:root[data-theme="light"] .lang-picker-close{background:rgba(45,26,16,0.06);color:rgba(45,26,16,0.7)}
+:root[data-theme="light"] .lang-picker-close:hover{background:rgba(45,26,16,0.12);color:#2d1a10}
+:root[data-theme="light"] .lang-picker-opt{color:rgba(45,26,16,0.9)}
+:root[data-theme="light"] .lang-picker-opt:hover{background:rgba(167,139,250,0.16);color:#2d1a10}
+:root[data-theme="light"] .lang-picker-opt.active{background:linear-gradient(135deg,rgba(167,139,250,0.28) 0%,rgba(0,212,255,0.14) 100%);color:#2d1a10}
+:root[data-theme="light"] .lang-picker-opt .code{color:rgba(45,26,16,0.55);background:rgba(45,26,16,0.06)}
+:root[data-theme="light"] .lang-picker-opt.active .code{color:#2d1a10;background:rgba(167,139,250,0.25)}
+:root[data-theme="light"] .lang-picker-opt .check{color:#7c3aed}
+
 @media (max-width: 640px){
   .settings-chip{font-size:10px;padding:6px 10px;gap:6px}
   .settings-chip .val:nth-of-type(n+3),.settings-chip .sep:nth-of-type(n+2){display:none}
