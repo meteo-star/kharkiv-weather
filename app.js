@@ -9298,6 +9298,20 @@ function renderHourlyRow(forecast) {
     b.classList.toggle('active', b.dataset.metric === metric);
   });
 
+  // Однократно вешаем listener на физический scroll — отличает программный
+  // scroll (когда мы центрируем) от пользовательского (когда он листает).
+  //   - wheel: гарантированно user-initiated на десктопе (тачпад / мышь).
+  //   - touchmove: на мобильных триггерится только при движении пальца ПО
+  //     элементу — обычный tap (без свайпа) не сработает. Это важно: иначе
+  //     случайный тап на ленте мгновенно бы отключил авто-центрирование.
+  // pointerdown НЕ используем — он триггерится даже на одиночный tap.
+  if (!row._userScrollHooked) {
+    row._userScrollHooked = true;
+    const markScrolled = () => { _userScrolledHourly = true; };
+    row.addEventListener('wheel', markScrolled, { passive: true });
+    row.addEventListener('touchmove', markScrolled, { passive: true });
+  }
+
   // Сохраняем позицию scroll'а перед перерисовкой (например при переключении метрики)
   const savedScroll = row.scrollLeft;
 
@@ -9328,21 +9342,50 @@ function renderHourlyRow(forecast) {
     });
   });
 
-  // Если пользователь раньше не скроллил (savedScroll === 0) — центрируем текущий час
-  // в видимой области. Иначе восстанавливаем его позицию, чтобы переключение таба
-  // не сбрасывало вид. rAF — гарантирует что layout стабилизировался (clientWidth != 0).
-  if (savedScroll > 0) {
+  // Центрирование текущего часа. Используем флаг _userScrolledHourly: пока юзер
+  // не дёргал ленту руками — каждый ре-рендер пере-центрирует. Когда юзер скроллит
+  // (scroll event с большой дельтой) — флаг ставится в true и мы восстанавливаем
+  // его позицию вместо центрирования.
+  //
+  // Используем встроенный scrollIntoView({inline:'center'}) — нативный метод
+  // надёжнее ручного scrollLeft при нестабильном layout. И повторяем попытку
+  // несколько раз (rAF + setTimeout 100/300/600 мс) на случай медленных шрифтов
+  // или re-render'ов после fetch'а свежих данных поверх кэша.
+  if (_userScrolledHourly && savedScroll > 0) {
     row.scrollLeft = savedScroll;
-  } else {
-    const centerNow = () => {
-      const nowCell = row.querySelector('.hour-cell.now');
-      if (!nowCell) return;
-      const target = nowCell.offsetLeft - (row.clientWidth / 2) + (nowCell.offsetWidth / 2);
-      row.scrollLeft = Math.max(0, target);
-    };
-    requestAnimationFrame(centerNow);
+    return;
   }
+  // Ручной scrollLeft вместо scrollIntoView. Причины:
+  //  - iOS Safari до 17.4 (март 2024) молча игнорирует behavior:'instant',
+  //    подставляя 'auto' (на части настроек получается плавный скролл,
+  //    что бросается в глаза при первой загрузке).
+  //  - scrollIntoView с block:'nearest' на iOS может скроллить ВСЮ страницу,
+  //    если hourly-row хотя бы частично выходит за viewport (например в
+  //    короткой ландшафтной ориентации). Ручной scrollLeft работает строго
+  //    по горизонтали внутри контейнера и в страницу не «утекает».
+  const centerNow = () => {
+    const nowCell = row.querySelector('.hour-cell.now');
+    if (!nowCell) return;
+    const rowW = row.clientWidth;
+    const cellW = nowCell.offsetWidth;
+    if (rowW < 50 || cellW < 20) return; // layout не готов
+    const target = Math.max(0, nowCell.offsetLeft - (rowW / 2) + (cellW / 2));
+    row.scrollLeft = target;
+  };
+  // Несколько попыток с разными задержками — кто-нибудь да поймает стабильный
+  // layout (медленные шрифты / re-render после cache → fresh fetch / iOS PWA cold).
+  requestAnimationFrame(() => requestAnimationFrame(centerNow));
+  setTimeout(centerNow, 100);
+  setTimeout(centerNow, 300);
+  setTimeout(centerNow, 600);
 }
+
+// Глобальный флаг: пользователь физически прокрутил почасовую ленту?
+// Ставится из scroll-handler'а в renderHourlyRow init (см. ниже).
+// Пока флаг false — ре-рендеры (например при смене метрики) пере-центрируют
+// на текущий час. Когда юзер скроллит руками — флаг становится true, и его
+// позиция сохраняется.
+let _userScrolledHourly = false;
 
 /* ============================================
    HOURLY DETAIL MODAL — полноэкранная карточка "Почасовой"
