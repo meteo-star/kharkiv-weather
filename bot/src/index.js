@@ -1410,8 +1410,11 @@ function validateRule(r) {
 const COOLDOWNS_MS = {
   temp_below:      12 * 3600 * 1000,
   temp_above:      12 * 3600 * 1000,
-  rain_soon:        6 * 3600 * 1000,
-  precip_soon:      6 * 3600 * 1000,
+  // v1.50.3: precip-cooldown снижен с 6ч до 3ч. 6ч было перебором — за это
+  // время может пройти один дождевой эпизод и начаться второй. 3ч + smart-
+  // reset (см. runCronCheck) даёт нормальный баланс «не спамить vs полезно».
+  rain_soon:        3 * 3600 * 1000,
+  precip_soon:      3 * 3600 * 1000,
   storm_alert:     12 * 3600 * 1000,
   dry_streak:      24 * 3600 * 1000,
   // morning_summary — особый случай: проверяется по дате, не cooldown
@@ -1743,13 +1746,20 @@ async function runCronCheck(env) {
         if (!rule || !rule.type) continue;
         const ruleKey = ruleKeyOf(rule);
 
-        // Cooldown — для большинства правил по времени
+        // v1.50.3: для precip-правил мы НЕ просто пропускаем cron при активном
+        // cooldown — нам надо детектировать конец «дождевого эпизода» чтобы
+        // сбросить lastFired и дать следующему эпизоду пройти раньше срока.
+        // Поэтому считаем cooldownActive как флаг и решаем позже что делать.
+        const isPrecip = (rule.type === 'precip_soon' || rule.type === 'rain_soon');
+        let cooldownActive = false;
         if (COOLDOWNS_MS[rule.type]) {
           const lastTs = sub.lastFired[ruleKey];
           if (lastTs && (Date.now() - new Date(lastTs).getTime()) < COOLDOWNS_MS[rule.type]) {
-            continue;
+            cooldownActive = true;
           }
         }
+        // Для не-precip правил: cooldown = skip как раньше (защита от спама)
+        if (cooldownActive && !isPrecip) continue;
 
         // morning_summary — раз в сутки в указанное время (±15 мин окно)
         if (rule.type === 'morning_summary') {
@@ -1782,6 +1792,23 @@ async function runCronCheck(env) {
 
         // Остальные правила — evaluate
         const result = evaluateRule(rule, fc, sub);
+
+        // v1.50.3 SMART-RESET для precip-правил:
+        // если cooldown ещё активен, но evaluateRule сообщает что в окне
+        // осадков НЕТ — значит предыдущий «дождевой эпизод» закончился.
+        // Сбрасываем lastFired, чтобы следующее реальное появление дождя
+        // вызвало уведомление сразу, не дожидаясь полного cooldown'а.
+        // Так бот корректно ловит «дождь → пауза → новый дождь» в один день.
+        if (isPrecip && cooldownActive) {
+          if (!(result && result.fired) && sub.lastFired[ruleKey]) {
+            delete sub.lastFired[ruleKey];
+            changed = true;
+          }
+          // В cooldown НЕ шлём уведомление даже если fired=true —
+          // это та же защита от спама что и раньше.
+          continue;
+        }
+
         if (result && result.fired) {
           try {
             await sendMessage(env, sub.chatId, result.message, { parse_mode: 'HTML' });
