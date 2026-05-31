@@ -2183,7 +2183,11 @@ function evaluateRule(rule, fc, sub) {
         }
         return { fired: false };
       }
-      for (let i = nowIdx; i < Math.min(nowIdx + windowH, temps.length); i++) {
+      // FIX v1.50.2: пропускаем текущий час (i = nowIdx + 1). Раньше начинали
+      // с nowIdx → в 14:30 cron видел mm в hourly[14:00] и слал «скоро дождь
+      // сегодня в 14:00», хотя час уже на 30 мин прошёл. «Скоро» = в будущем.
+      // minutely_15-ветка выше уже корректно ищет только в future минутах.
+      for (let i = nowIdx + 1; i < Math.min(nowIdx + 1 + windowH, temps.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
         // Open-Meteo НЕ возвращает probability для конкретных моделей —
@@ -2270,7 +2274,8 @@ function evaluateRule(rule, fc, sub) {
         }
         return { fired: false };
       }
-      for (let i = nowIdx; i < Math.min(nowIdx + windowH, temps.length); i++) {
+      // FIX v1.50.2: пропускаем текущий час — см. комментарий выше в rain_soon.
+      for (let i = nowIdx + 1; i < Math.min(nowIdx + 1 + windowH, temps.length); i++) {
         const prob = pp[i] || 0;
         const mm = pm[i] || 0;
         const code = wc[i];
