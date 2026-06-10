@@ -752,7 +752,7 @@ async function handleAdminSummaryTest(env, chatId, args) {
       ? { wind: true, precip: true, fog: true, astro: true, moon: true, storm: true, feels: true, tomorrow: true }
       : { [mode]: true };
 
-  const fc = await fetchWeather(sub.lat, sub.lon, sub);
+  const fc = await fetchWeather(sub.lat, sub.lon, sub, env);
   if (!fc) return sendMessage(env, chatId, `Не удалось получить погоду.`);
 
   const fakeRule = { type: 'morning_summary', hour: 7, minute: 0, sections };
@@ -1921,8 +1921,19 @@ async function runCronCheck(env) {
       if (!Array.isArray(sub.rules) || sub.rules.length === 0) continue;
 
       // Тянем погоду один раз для всех правил этой подписки
-      const fc = await fetchWeather(sub.lat, sub.lon, sub);
+      const fc = await fetchWeather(sub.lat, sub.lon, sub, env);
       if (!fc) continue;
+
+      // v1.54.0: ансамблевая вероятность осадков (ECMWF ENS, 51 сценарий)
+      // для precip-правил с hourly-окнами (> 2ч) у avg/smart подписок.
+      // Сбой → fc.ensP = null → evaluateRule работает по-старому.
+      const srcForRules = sub.source || 'avg';
+      const wantsEnsP = (srcForRules === 'avg' || srcForRules === 'smart')
+        && sub.rules.some(r => r && (r.type === 'rain_soon' || r.type === 'precip_soon')
+            && (Number(r.windowHours) || 3) > 2);
+      if (wantsEnsP) {
+        fc.ensP = await getEnsembleProbMap(sub.lat, sub.lon);
+      }
 
       let changed = false;
       sub.lastFired = sub.lastFired || {};
@@ -2061,14 +2072,122 @@ const SUB_SOURCE_TO_MODEL = {
 // Используется в evaluateRule (fired-сообщения) и buildMorningSummary.
 // Переехало в bot/src/i18n.js → tSourceLabel(sourceId, lang) / tSourceFooter(sourceId, lang).
 
-async function fetchWeather(lat, lon, sub = null) {
+// === v1.54.0: этап 4 — синхронизация push'ей со Smart-экраном сайта ===
+// (a) getSmartConfig: per-variable веса + дебиазы из KV-записей локации —
+//     те же формулы что smartWeightsWorker/smartEffBias (v1.52.0).
+// (b) getEnsembleProbMap: вероятность осадков по часам = доля членов
+//     ECMWF ENS (51 сценарий) — для precip-правил с окнами > 2ч.
+// Кэши на время жизни isolate (TTL < интервала cron) — десятки подписок
+// в одной точке не дёргают KV/ансамбль по кругу.
+const MODEL_TO_SRCID = {
+  ecmwf_ifs025: 'ecmwf', ecmwf_aifs025_single: 'aifs',
+  gfs_seamless: 'gfs', icon_seamless: 'icon', gem_seamless: 'gem',
+  jma_seamless: 'jma', meteofrance_seamless: 'mf', ukmo_seamless: 'ukmo'
+};
+
+const _smartCfgCache = new Map(); // gridKey → { ts, cfg }
+const SMART_CFG_TTL_MS = 25 * 60 * 1000;
+
+// Возвращает { perModel: { <model>: { tempW, maxW, minW, precW, biasMax, biasMin, biasMid } } }
+// или null (нет данных / ошибка KV) — тогда агрегация падает в обычный mean.
+async function getSmartConfig(env, lat, lon) {
+  const [lat1, lon1] = accGridCoords(lat, lon);
+  const gridKey = `${lat1.toFixed(1)}_${lon1.toFixed(1)}`;
+  const cached = _smartCfgCache.get(gridKey);
+  if (cached && Date.now() - cached.ts < SMART_CFG_TTL_MS) return cached.cfg;
+  let cfg = null;
+  try {
+    const stored = await env.STATS.get(`acc:loc:${gridKey}`, { type: 'json' });
+    const records = stored && Array.isArray(stored.records) ? stored.records : [];
+    const stats = smartStatsFromRecords(records);
+    const ids = Object.values(MODEL_TO_SRCID);
+    const wMax = smartWeightsWorker(stats, ids, 'tempMax');
+    const wMin = smartWeightsWorker(stats, ids, 'tempMin');
+    const wPrec = smartWeightsWorker(stats, ids, 'precip');
+    const perModel = {};
+    for (const m of Object.keys(MODEL_TO_SRCID)) {
+      const id = MODEL_TO_SRCID[m];
+      const s = stats[id];
+      const biasMax = s ? smartEffBias(s.biasMax, s.nMax) : 0;
+      const biasMin = s ? smartEffBias(s.biasMin, s.nMin) : 0;
+      perModel[m] = {
+        // почасовая T: смесь дневных/ночных весов и смещений (упрощение —
+        // на сайте интерполяция по позиции часа в суточном ходе; для push'ей
+        // с типичными |bias| < 1° середина достаточно близка)
+        tempW: ((wMax.get(id) || 0) + (wMin.get(id) || 0)) / 2,
+        maxW: wMax.get(id) || 0,
+        minW: wMin.get(id) || 0,
+        precW: wPrec.get(id) || 0,
+        biasMax, biasMin,
+        biasMid: (biasMax + biasMin) / 2
+      };
+    }
+    cfg = { perModel };
+  } catch (e) {
+    console.error('getSmartConfig:', e);
+    cfg = null;
+  }
+  _smartCfgCache.set(gridKey, { ts: Date.now(), cfg });
+  return cfg;
+}
+
+const _ensPCache = new Map(); // gridKey → { ts, map }
+const ENS_P_TTL_MS = 25 * 60 * 1000;
+
+// Карта time-строка → % членов ансамбля с осадками ≥0.1 мм в этот час.
+// Времена локальные (timezone=auto), та же точка что у fetchWeather → строки
+// совпадают с fc.hourly.time, матчим по точному ключу без индексной математики.
+// null при любом сбое (negative-кэшируется — не молотим API при недоступности).
+async function getEnsembleProbMap(lat, lon) {
+  const [lat1, lon1] = accGridCoords(lat, lon);
+  const gridKey = `${lat1.toFixed(1)}_${lon1.toFixed(1)}`;
+  const cached = _ensPCache.get(gridKey);
+  if (cached && Date.now() - cached.ts < ENS_P_TTL_MS) return cached.map;
+  let map = null;
+  try {
+    const params = new URLSearchParams({
+      latitude: String(lat), longitude: String(lon),
+      hourly: 'precipitation', models: 'ecmwf_ifs025',
+      forecast_days: '3', timezone: 'auto'
+    });
+    const r = await fetch(`https://ensemble-api.open-meteo.com/v1/ensemble?${params}`);
+    if (r.ok) {
+      const data = await r.json();
+      const h = data.hourly || {};
+      const times = h.time || [];
+      const memberKeys = Object.keys(h).filter(k => k === 'precipitation' || k.startsWith('precipitation_member'));
+      if (memberKeys.length >= 10 && times.length > 0) {
+        map = {};
+        for (let i = 0; i < times.length; i++) {
+          let wet = 0, valid = 0;
+          for (const k of memberKeys) {
+            const v = h[k][i];
+            if (typeof v !== 'number' || Number.isNaN(v)) continue;
+            valid++;
+            if (v >= 0.1) wet++;
+          }
+          if (valid > 0) map[times[i]] = Math.round((wet / valid) * 100);
+        }
+      }
+    }
+  } catch (e) {
+    console.error('getEnsembleProbMap:', e);
+    map = null;
+  }
+  _ensPCache.set(gridKey, { ts: Date.now(), map });
+  return map;
+}
+
+// v1.54.0: + env — для smart-источника достаём per-variable веса из KV.
+async function fetchWeather(lat, lon, sub = null, env = null) {
   // Если подписка задала конкретный источник — используем только эту модель.
   // Если 'avg' / null / неизвестный — используем все 8 и считаем AVG.
   const wantedSource = (sub && sub.source) || 'avg';
-  // v1.52.0: 'smart' в боте пока эквивалентен avg (невзвешенный mean по 8
-  // моделям). Этап 4: Worker будет считать те же per-variable веса из своих
-  // KV-записей — тогда push'и совпадут со Smart-экраном сайта.
+  // v1.54.0 (этап 4): 'smart' агрегируется с per-variable весами из KV
+  // (getSmartConfig) — push'и совпадают со Smart-экраном сайта. 'avg'
+  // остаётся невзвешенным mean (идентичность «среднее по 8 моделям»).
   const useAllModels = wantedSource === 'avg' || wantedSource === 'smart';
+  const isSmart = wantedSource === 'smart';
   const singleModel = useAllModels ? null : SUB_SOURCE_TO_MODEL[wantedSource];
 
   const params = new URLSearchParams({
@@ -2111,11 +2230,13 @@ async function fetchWeather(lat, lon, sub = null) {
         timezone: data.timezone || 'UTC'
       };
     }
-    // AVG из 8 моделей — усредняем все поля (precipitation — берём MAX
-    // как консервативный сигнал «хоть одна модель видит дождь», temperature
-    // и пр. — обычное среднее, weather_code — max).
-    const avgHourly = averageHourlyMultiModel(data.hourly || {}, WEATHER_MODELS);
-    const avgDaily = averageDailyMultiModel(data.daily || {}, WEATHER_MODELS);
+    // AVG из 8 моделей — усредняем все поля (precipitation — mean,
+    // weather_code — max). Для smart (v1.54.0) — per-variable веса + дебиаз
+    // температуры членов + взвешенная медиана мм; при отсутствии данных в KV
+    // getSmartConfig вернёт null → агрегация эквивалентна avg.
+    const smartCfg = (isSmart && env) ? await getSmartConfig(env, lat, lon) : null;
+    const avgHourly = averageHourlyMultiModel(data.hourly || {}, WEATHER_MODELS, smartCfg);
+    const avgDaily = averageDailyMultiModel(data.daily || {}, WEATHER_MODELS, smartCfg);
     const avgMinutely15 = averageMinutely15MultiModel(data.minutely_15 || {}, WEATHER_MODELS);
     return {
       hourly: avgHourly,
@@ -2151,7 +2272,7 @@ function stripModelSuffix(obj, model) {
 
 // Усреднение hourly/daily когда запрошены несколько моделей. Возвращает поля
 // БЕЗ суффиксов моделей — для совместимости с evaluateRule/buildPrecipBlock.
-function averageHourlyMultiModel(hourly, models) {
+function averageHourlyMultiModel(hourly, models, smartCfg = null) {
   const time = hourly.time || [];
   const result = { time };
   if (!time.length || !models.length) return result;
@@ -2162,11 +2283,17 @@ function averageHourlyMultiModel(hourly, models) {
   // weather_code оставлен max — консерватизм по типу события (если хоть
   // одна модель видит грозу 95-99, обозначаем). Но storm-alert теперь
   // дополнительно требует cape ≥ 500 (см. evaluateRule).
+  //
+  // v1.54.0: smartCfg (источник 'smart') добавляет per-variable обработку:
+  //   temperature/apparent — взвешенный mean (tempW) с дебиазом члена (−biasMid);
+  //   precipitation — взвешенная МЕДИАНА (precW), ливень-выброс не размазывается;
+  //   precipitation_probability — взвешенный mean (precW).
+  // Остальные поля — как у avg. smart-режим поля задаёт ключ smart в FIELDS.
   const FIELDS = [
-    { base: 'temperature_2m', aggregate: 'mean' },
-    { base: 'apparent_temperature', aggregate: 'mean' },
-    { base: 'precipitation', aggregate: 'mean' },
-    { base: 'precipitation_probability', aggregate: 'mean' },
+    { base: 'temperature_2m', aggregate: 'mean', smart: 'temp' },
+    { base: 'apparent_temperature', aggregate: 'mean', smart: 'temp' },
+    { base: 'precipitation', aggregate: 'mean', smart: 'precMedian' },
+    { base: 'precipitation_probability', aggregate: 'mean', smart: 'precMean' },
     { base: 'weather_code', aggregate: 'max' },
     { base: 'wind_speed_10m', aggregate: 'mean' },
     { base: 'wind_gusts_10m', aggregate: 'max' },
@@ -2174,16 +2301,37 @@ function averageHourlyMultiModel(hourly, models) {
     { base: 'cape', aggregate: 'mean' },
     { base: 'lifted_index', aggregate: 'mean' }
   ];
-  for (const { base, aggregate } of FIELDS) {
+  for (const { base, aggregate, smart } of FIELDS) {
+    const smartMode = smartCfg ? smart : null;
     const arr = new Array(time.length).fill(null);
     for (let i = 0; i < time.length; i++) {
       const vals = [];
+      const entries = smartMode ? [] : null;
       for (const m of models) {
         const v = hourly[`${base}_${m}`]?.[i];
-        if (v != null && Number.isFinite(v)) vals.push(v);
+        if (v != null && Number.isFinite(v)) {
+          vals.push(v);
+          if (entries) entries.push({ v, pm: smartCfg.perModel[m] });
+        }
       }
       if (vals.length === 0) { arr[i] = null; continue; }
-      if (aggregate === 'mean') arr[i] = vals.reduce((s, x) => s + x, 0) / vals.length;
+      if (smartMode === 'temp') {
+        let s = 0, w = 0;
+        for (const e of entries) {
+          const wgt = e.pm ? e.pm.tempW : 0;
+          s += (e.v - (e.pm ? e.pm.biasMid : 0)) * wgt; w += wgt;
+        }
+        arr[i] = w > 0 ? s / w : vals.reduce((a, x) => a + x, 0) / vals.length;
+      } else if (smartMode === 'precMedian') {
+        arr[i] = weightedMedianWorker(entries.map(e => ({ v: e.v, w: e.pm ? e.pm.precW : 0 })));
+      } else if (smartMode === 'precMean') {
+        let s = 0, w = 0;
+        for (const e of entries) {
+          const wgt = e.pm ? e.pm.precW : 0;
+          s += e.v * wgt; w += wgt;
+        }
+        arr[i] = w > 0 ? s / w : vals.reduce((a, x) => a + x, 0) / vals.length;
+      } else if (aggregate === 'mean') arr[i] = vals.reduce((s, x) => s + x, 0) / vals.length;
       else if (aggregate === 'max') arr[i] = Math.max(...vals);
       else if (aggregate === 'first') arr[i] = vals[0];
     }
@@ -2192,28 +2340,48 @@ function averageHourlyMultiModel(hourly, models) {
   return result;
 }
 
-function averageDailyMultiModel(daily, models) {
+// v1.54.0: smartCfg — per-variable обработка для источника 'smart':
+//   temperature_2m_max/min — взвешенный mean (maxW/minW) с дебиазом (biasMax/biasMin);
+//   precipitation_sum — взвешенная МЕДИАНА (precW) вместо консервативного max.
+function averageDailyMultiModel(daily, models, smartCfg = null) {
   const time = daily.time || [];
   const result = { time };
   if (!time.length || !models.length) return result;
   const FIELDS = [
-    { base: 'temperature_2m_max', aggregate: 'mean' },
-    { base: 'temperature_2m_min', aggregate: 'mean' },
-    { base: 'precipitation_sum', aggregate: 'max' },  // макс среди моделей — консервативно
+    { base: 'temperature_2m_max', aggregate: 'mean', smart: 'tMax' },
+    { base: 'temperature_2m_min', aggregate: 'mean', smart: 'tMin' },
+    { base: 'precipitation_sum', aggregate: 'max', smart: 'precMedian' },  // avg: макс среди моделей — консервативно
     { base: 'weather_code', aggregate: 'max' },
     { base: 'sunrise', aggregate: 'first' },
     { base: 'sunset', aggregate: 'first' }
   ];
-  for (const { base, aggregate } of FIELDS) {
+  for (const { base, aggregate, smart } of FIELDS) {
+    const smartMode = smartCfg ? smart : null;
     const arr = new Array(time.length).fill(null);
     for (let i = 0; i < time.length; i++) {
       const vals = [];
+      const entries = smartMode ? [] : null;
       for (const m of models) {
         const v = daily[`${base}_${m}`]?.[i];
-        if (v != null) vals.push(v);
+        if (v != null) {
+          vals.push(v);
+          if (entries && Number.isFinite(v)) entries.push({ v, pm: smartCfg.perModel[m] });
+        }
       }
       if (vals.length === 0) continue;
-      if (aggregate === 'mean') {
+      if (smartMode === 'tMax' || smartMode === 'tMin') {
+        let s = 0, w = 0;
+        for (const e of entries) {
+          const wgt = e.pm ? (smartMode === 'tMax' ? e.pm.maxW : e.pm.minW) : 0;
+          const bias = e.pm ? (smartMode === 'tMax' ? e.pm.biasMax : e.pm.biasMin) : 0;
+          s += (e.v - bias) * wgt; w += wgt;
+        }
+        if (w > 0) { arr[i] = s / w; continue; }
+        const nums = vals.filter(v => Number.isFinite(v));
+        arr[i] = nums.length ? nums.reduce((a, x) => a + x, 0) / nums.length : null;
+      } else if (smartMode === 'precMedian') {
+        arr[i] = weightedMedianWorker(entries.map(e => ({ v: e.v, w: e.pm ? e.pm.precW : 0 })));
+      } else if (aggregate === 'mean') {
         const nums = vals.filter(v => Number.isFinite(v));
         arr[i] = nums.length ? nums.reduce((s, x) => s + x, 0) / nums.length : null;
       }
@@ -2403,11 +2571,16 @@ function evaluateRule(rule, fc, sub) {
       // сегодня в 14:00», хотя час уже на 30 мин прошёл. «Скоро» = в будущем.
       // minutely_15-ветка выше уже корректно ищет только в future минутах.
       for (let i = nowIdx + 1; i < Math.min(nowIdx + 1 + windowH, temps.length); i++) {
-        const prob = pp[i] || 0;
+        // v1.54.0: если runCronCheck прикрепил fc.ensP — вероятность берём из
+        // ансамбля ECMWF ENS (доля из 51 сценария с осадками в этот час).
+        // Это РЕАЛЬНАЯ вероятность: ensP=0 значит «ни один сценарий не видит
+        // дождь» — proxy «mm выше порога → 100%» к ней не применяем.
+        const ensProb = fc.ensP ? fc.ensP[times[i]] : null;
+        const prob = ensProb != null ? ensProb : (pp[i] || 0);
         const mm = pm[i] || 0;
         // Open-Meteo НЕ возвращает probability для конкретных моделей —
         // если prob=0 но mm выше порога, считаем что дождь точно будет (proxy 100%).
-        const effProb = prob > 0 ? prob : (mm >= minMm ? 100 : 0);
+        const effProb = ensProb != null ? ensProb : (prob > 0 ? prob : (mm >= minMm ? 100 : 0));
         if (effProb >= minProb && mm >= minMm) {
           return {
             fired: true,
@@ -2491,10 +2664,12 @@ function evaluateRule(rule, fc, sub) {
       }
       // FIX v1.50.2: пропускаем текущий час — см. комментарий выше в rain_soon.
       for (let i = nowIdx + 1; i < Math.min(nowIdx + 1 + windowH, temps.length); i++) {
-        const prob = pp[i] || 0;
+        // v1.54.0: вероятность из ансамбля (см. комментарий в rain_soon).
+        const ensProb = fc.ensP ? fc.ensP[times[i]] : null;
+        const prob = ensProb != null ? ensProb : (pp[i] || 0);
         const mm = pm[i] || 0;
         const code = wc[i];
-        const effProb = prob > 0 ? prob : (mm >= minMm ? 100 : 0);
+        const effProb = ensProb != null ? ensProb : (prob > 0 ? prob : (mm >= minMm ? 100 : 0));
         if (mm < minMm || effProb < minProb) continue;
         const isRain = (code >= 51 && code <= 67) || (code >= 80 && code <= 82) || (code >= 95 && code <= 99);
         const isSnow = (code >= 71 && code <= 77) || (code >= 85 && code <= 86);
