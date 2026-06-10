@@ -135,6 +135,7 @@ const I18N = {
     'sources.avgSub': 'Агрегация 8 моделей · ансамблевый прогноз',
     'sources.smartTitle': 'Smart-комбинация',
     'sources.smartSub': 'Лучшее по каждому параметру · веса из реальной точности',
+    'modal.precipBand': 'Ансамбль ECMWF, {n} членов: дождь в {p}% сценариев · сумма {lo}–{hi} мм (P10–P90)',
     'sources.avgShort': 'Среднее по 8 моделям',
     'sources.dividerOr': 'или конкретный источник',
     'sources.confHint': 'Цветная полоска под карточкой дня — согласие 8 моделей:',
@@ -563,6 +564,7 @@ const I18N = {
     'sources.avgSub': 'Агрегація 8 моделей · ансамблевий прогноз',
     'sources.smartTitle': 'Smart-комбінація',
     'sources.smartSub': 'Найкраще за кожним параметром · ваги з реальної точності',
+    'modal.precipBand': 'Ансамбль ECMWF, {n} членів: дощ у {p}% сценаріїв · сума {lo}–{hi} мм (P10–P90)',
     'sources.confHint': 'Кольорова смужка під карткою дня — згода 8 моделей:',
     'sources.confLegend.high': 'надійний',
     'sources.confLegend.mid': 'середній',
@@ -978,6 +980,7 @@ const I18N = {
     'sources.avgSub': 'Aggregation of 8 models · ensemble forecast',
     'sources.smartTitle': 'Smart blend',
     'sources.smartSub': 'Best per parameter · weights from real accuracy',
+    'modal.precipBand': 'ECMWF ensemble, {n} members: rain in {p}% of scenarios · total {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Coloured bar under the day card — agreement of 8 models:',
     'sources.confLegend.high': 'reliable',
     'sources.confLegend.mid': 'medium',
@@ -1392,6 +1395,7 @@ const I18N = {
     'sources.avgSub': 'Aggregation von 8 Modellen · Ensemble-Prognose',
     'sources.smartTitle': 'Smart-Kombination',
     'sources.smartSub': 'Bestes je Parameter · Gewichte aus echter Genauigkeit',
+    'modal.precipBand': 'ECMWF-Ensemble, {n} Member: Regen in {p}% der Szenarien · Summe {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Farbiger Balken unter der Tageskarte — Übereinstimmung der 8 Modelle:',
     'sources.confLegend.high': 'zuverlässig',
     'sources.confLegend.mid': 'mittel',
@@ -1806,6 +1810,7 @@ const I18N = {
     'sources.avgSub': 'Agregacja 8 modeli · prognoza zespołowa',
     'sources.smartTitle': 'Kombinacja Smart',
     'sources.smartSub': 'Najlepsze dla każdego parametru · wagi z rzeczywistej dokładności',
+    'modal.precipBand': 'Wiązka ECMWF, {n} członków: deszcz w {p}% scenariuszy · suma {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Kolorowy pasek pod kartą dnia — zgodność 8 modeli:',
     'sources.confLegend.high': 'wiarygodne',
     'sources.confLegend.mid': 'średnie',
@@ -2221,6 +2226,7 @@ const I18N = {
     'sources.avgSub': 'Agregace 8 modelů · ansámblová předpověď',
     'sources.smartTitle': 'Kombinace Smart',
     'sources.smartSub': 'Nejlepší pro každý parametr · váhy ze skutečné přesnosti',
+    'modal.precipBand': 'Ansámbl ECMWF, {n} členů: déšť v {p} % scénářů · úhrn {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Barevný pruh pod kartou dne — shoda 8 modelů:',
     'sources.confLegend.high': 'spolehlivé',
     'sources.confLegend.mid': 'střední',
@@ -2636,6 +2642,7 @@ const I18N = {
     'sources.avgSub': 'Agrégation de 8 modèles · prévision d\'ensemble',
     'sources.smartTitle': 'Combinaison Smart',
     'sources.smartSub': 'Le meilleur par paramètre · poids selon la précision réelle',
+    'modal.precipBand': 'Ensemble ECMWF, {n} membres : pluie dans {p}% des scénarios · cumul {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Barre colorée sous la carte du jour — accord des 8 modèles :',
     'sources.confLegend.high': 'fiable',
     'sources.confLegend.mid': 'moyen',
@@ -3050,6 +3057,7 @@ const I18N = {
     'sources.avgSub': 'Aggregazione di 8 modelli · previsione di ensemble',
     'sources.smartTitle': 'Combinazione Smart',
     'sources.smartSub': 'Il meglio per ogni parametro · pesi dalla precisione reale',
+    'modal.precipBand': 'Ensemble ECMWF, {n} membri: pioggia nel {p}% degli scenari · totale {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Barra colorata sotto la carta del giorno — accordo degli 8 modelli:',
     'sources.confLegend.high': 'affidabile',
     'sources.confLegend.mid': 'medio',
@@ -3464,6 +3472,7 @@ const I18N = {
     'sources.avgSub': 'Agregación de 8 modelos · previsión por ensemble',
     'sources.smartTitle': 'Combinación Smart',
     'sources.smartSub': 'Lo mejor por parámetro · pesos según la precisión real',
+    'modal.precipBand': 'Ensemble ECMWF, {n} miembros: lluvia en {p}% de escenarios · total {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Barra de color bajo la tarjeta del día — acuerdo de los 8 modelos:',
     'sources.confLegend.high': 'fiable',
     'sources.confLegend.mid': 'medio',
@@ -3878,6 +3887,7 @@ const I18N = {
     'sources.avgSub': 'Agregare a 8 modele · prognoză de ansamblu',
     'sources.smartTitle': 'Combinație Smart',
     'sources.smartSub': 'Cel mai bun pe fiecare parametru · ponderi din precizia reală',
+    'modal.precipBand': 'Ansamblu ECMWF, {n} membri: ploaie în {p}% din scenarii · total {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Bara colorată sub cardul zilei — acordul celor 8 modele:',
     'sources.confLegend.high': 'fiabil',
     'sources.confLegend.mid': 'mediu',
@@ -4292,6 +4302,7 @@ const I18N = {
     'sources.avgSub': '8 modell aggregálása · együttes előrejelzés',
     'sources.smartTitle': 'Smart kombináció',
     'sources.smartSub': 'Paraméterenként a legjobb · súlyok a valós pontosságból',
+    'modal.precipBand': 'ECMWF együttes, {n} tag: eső a forgatókönyvek {p}%-ában · összeg {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Színes sáv a napi kártya alatt — a 8 modell egyetértése:',
     'sources.confLegend.high': 'megbízható',
     'sources.confLegend.mid': 'közepes',
@@ -4706,6 +4717,7 @@ const I18N = {
     'sources.avgSub': 'Agregácia 8 modelov · súborová predpoveď',
     'sources.smartTitle': 'Kombinácia Smart',
     'sources.smartSub': 'Najlepšie pre každý parameter · váhy zo skutočnej presnosti',
+    'modal.precipBand': 'Ansámbel ECMWF, {n} členov: dážď v {p} % scenárov · úhrn {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Farebný pruh pod kartou dňa — zhoda 8 modelov:',
     'sources.confLegend.high': 'spoľahlivé',
     'sources.confLegend.mid': 'stredné',
@@ -5120,6 +5132,7 @@ const I18N = {
     'sources.avgSub': 'Agregação de 8 modelos · previsão por ensemble',
     'sources.smartTitle': 'Combinação Smart',
     'sources.smartSub': 'O melhor por parâmetro · pesos da precisão real',
+    'modal.precipBand': 'Ensemble ECMWF, {n} membros: chuva em {p}% dos cenários · total {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Barra colorida sob o cartão do dia — concordância dos 8 modelos:',
     'sources.confLegend.high': 'fiável',
     'sources.confLegend.mid': 'médio',
@@ -5534,6 +5547,7 @@ const I18N = {
     'sources.avgSub': 'Aggregatie van 8 modellen · ensemble-voorspelling',
     'sources.smartTitle': 'Smart-combinatie',
     'sources.smartSub': 'Beste per parameter · gewichten uit echte nauwkeurigheid',
+    'modal.precipBand': 'ECMWF-ensemble, {n} leden: regen in {p}% van de scenario\'s · totaal {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Gekleurde balk onder de dagkaart — overeenstemming van 8 modellen:',
     'sources.confLegend.high': 'betrouwbaar',
     'sources.confLegend.mid': 'gemiddeld',
@@ -5948,6 +5962,7 @@ const I18N = {
     'sources.avgSub': '8 model toplaması · topluluk tahmini',
     'sources.smartTitle': 'Smart kombinasyon',
     'sources.smartSub': 'Her parametrede en iyisi · gerçek doğruluktan ağırlıklar',
+    'modal.precipBand': 'ECMWF topluluğu, {n} üye: yağmur olasılığı %{p} · toplam {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Gün kartının altındaki renkli çubuk — 8 modelin uyumu:',
     'sources.confLegend.high': 'güvenilir',
     'sources.confLegend.mid': 'orta',
@@ -6362,6 +6377,7 @@ const I18N = {
     'sources.avgSub': 'Συνάθροιση 8 μοντέλων · πρόγνωση συνόλου',
     'sources.smartTitle': 'Συνδυασμός Smart',
     'sources.smartSub': 'Το καλύτερο ανά παράμετρο · βάρη από πραγματική ακρίβεια',
+    'modal.precipBand': 'Σύνολο ECMWF, {n} μέλη: βροχή στο {p}% των σεναρίων · σύνολο {lo}–{hi} mm (P10–P90)',
     'sources.confHint': 'Χρωματιστή μπάρα κάτω από την κάρτα ημέρας — συμφωνία 8 μοντέλων:',
     'sources.confLegend.high': 'αξιόπιστα',
     'sources.confLegend.mid': 'μέτρια',
@@ -11602,6 +11618,15 @@ function openModal(dayId) {
       <div class="mini-m"><div class="l">${t('metric.humidity')}</div><div class="v">${d.humidity}<span> %</span></div></div>
     </div>
 
+    ${(d.precipBand && (d.precipBand.pDay >= 5 || (typeof d.precipBand.p90 === 'number' && d.precipBand.p90 >= 0.1)))
+      ? `<div class="modal-ens-band">🎲 ${t('modal.precipBand', {
+            n: d.precipBand.members,
+            p: d.precipBand.pDay,
+            lo: String(d.precipBand.p10 ?? 0),
+            hi: String(d.precipBand.p90 ?? 0)
+          })}</div>`
+      : ''}
+
     <div class="modal-astro">
       <div class="modal-astro-cell sun">
         <div class="ico">${sunMini3D(48)}</div>
@@ -14780,7 +14805,12 @@ function weightedMedian(pairs) {
 // нет — это no-op, а когда Smart накопит собственные замеры — скорректирует
 // остаточное смещение готового продукта (двойного счёта нет: члены дебиазятся
 // своей статистикой, продукт — своей).
-function computeSmartForecast(forecasts, modelIds) {
+// v1.53.0: третий параметр ensemble (parseEnsembleHourly) — если передан и
+// выровнен по датам, вероятности осадков берутся из долей членов ECMWF ENS
+// (час: ≥0.1 мм; день: max почасовой доли — зеркало precipitation_probability_max),
+// а в день добавляется precipBand {pDay, p10, p50, p90, members} для модалки.
+// Мм-поля (pmm/precipSum) НЕ трогаем — остаются взвешенной медианой моделей.
+function computeSmartForecast(forecasts, modelIds, ensemble = null) {
   if (!forecasts || forecasts.length === 0) return [];
   const wMaxMap  = computeSmartWeights(modelIds, 'tempMax');
   const wMinMap  = computeSmartWeights(modelIds, 'tempMin');
@@ -14894,10 +14924,14 @@ function computeSmartForecast(forecasts, modelIds) {
       const wcVals = hourPairs.map(p => p.hour.wc).filter(v => typeof v === 'number');
       const smartWc = wcVals.length > 0 ? Math.max(...wcVals) : null;
 
+      // v1.53.0: вероятность часа — доля членов ансамбля (если доступен)
+      const ensHour = (ensemble && ensemble.hours) ? ensemble.hours[i * 24 + h] : null;
+      const ensP = (ensHour && typeof ensHour.pWet === 'number') ? ensHour.pWet : null;
+
       hourly.push({
         h: hourPairs[0].hour.h,
         t: tVal,
-        p: wMean('p', byPrec, 0) ?? 0,
+        p: ensP != null ? ensP : (wMean('p', byPrec, 0) ?? 0),
         pmm: pmmVal,
         pmmMax: Math.max(0, ...hourPairs.map(p => typeof p.hour.pmm === 'number' ? p.hour.pmm : 0)),
         w: wMean('w', byComp, 0) ?? 0,
@@ -14938,6 +14972,18 @@ function computeSmartForecast(forecasts, modelIds) {
       .map(it => ({ v: it.day.precipSum, w: it.wPrec }));
     const precipSumVal = sumPairs.length ? Math.round(weightedMedian(sumPairs) * 10) / 10 : 0;
 
+    // v1.53.0: дневная вероятность из ансамбля — max почасовой доли членов
+    // за день (зеркало семантики precipitation_probability_max), плюс полоса
+    // P10–P90 суточных сумм по членам для модалки дня.
+    const ensDay = (ensemble && ensemble.daily) ? ensemble.daily[i] : null;
+    let ensDayMaxP = null;
+    if (ensemble && ensemble.hours) {
+      for (let k2 = i * 24; k2 < (i + 1) * 24 && k2 < ensemble.hours.length; k2++) {
+        const pv = ensemble.hours[k2] && ensemble.hours[k2].pWet;
+        if (typeof pv === 'number') ensDayMaxP = ensDayMaxP == null ? pv : Math.max(ensDayMaxP, pv);
+      }
+    }
+
     const uvVals = items.map(it => it.day.uv).filter(v => typeof v === 'number' && !Number.isNaN(v));
     const smartUv = uvVals.length > 0 ? Math.round(uvVals.reduce((a, b) => a + b, 0) / uvVals.length) : null;
     const smartWind = Math.round(dMean('wind', byCompD));
@@ -14970,8 +15016,9 @@ function computeSmartForecast(forecasts, modelIds) {
       condDesc: first.condDesc,
       max: hourlyTs.length ? Math.max(...hourlyTs) : Math.round(dMean('max', (it) => it.wMax)),
       min: hourlyTs.length ? Math.min(...hourlyTs) : Math.round(dMean('min', (it) => it.wMin)),
-      precip: Math.round(dMean('precip', byPrecD)),
+      precip: ensDayMaxP != null ? ensDayMaxP : Math.round(dMean('precip', byPrecD)),
       precipSum: precipSumVal,
+      precipBand: ensDay ? { pDay: ensDay.pWet, p10: ensDay.p10, p50: ensDay.p50, p90: ensDay.p90, members: ensDay.members } : null,
       wind: smartWind,
       windDir: first.windDir,
       windGust: Math.round(dMean('windGust', byCompD)),
@@ -15085,6 +15132,99 @@ async function fetchAirQuality(lat, lon, signal = null) {
   } catch (e) {
     return null; // не критично — UI должен работать даже без AQI
   }
+}
+
+// === v1.53.0: Ансамблевая вероятность осадков (Open-Meteo Ensemble API) ===
+// ECMWF ENS: 51 равноправный член (контрольный прогон + 50 с возмущёнными
+// начальными условиями). Вероятность дождя = доля членов, видящих осадки —
+// это калиброванная вероятность из НАСТОЯЩЕГО ансамбля, в отличие от
+// «вероятности» детерминированных моделей. Бесплатно, без ключа.
+// Используется ТОЛЬКО для Smart: p часа, precip% дня, полоса P10–P90 в модалке.
+// Любой сбой → null: ансамбль — усиление, не зависимость.
+const ENSEMBLE_WET_HOUR_MM = 0.1;  // член «видит дождь в час» от 0.1 мм
+const ENSEMBLE_FORECAST_DAYS = 7;  // hourly у ENS доступен на 7 суток
+
+async function fetchEnsemblePrecip(lat, lon) {
+  const params = new URLSearchParams({
+    latitude: lat.toFixed(4),
+    longitude: lon.toFixed(4),
+    hourly: 'precipitation',
+    models: 'ecmwf_ifs025',
+    forecast_days: String(ENSEMBLE_FORECAST_DAYS),
+    timezone: 'auto'
+  });
+  const url = `https://ensemble-api.open-meteo.com/v1/ensemble?${params.toString()}`;
+  try {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => { try { ctrl.abort('timeout'); } catch (_) {} }, 12000);
+    const resp = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+// Квантиль с линейной интерполяцией (q: 0..1) по отсортированному массиву.
+function quantileSorted(sorted, q) {
+  if (!sorted || sorted.length === 0) return null;
+  const pos = q * (sorted.length - 1);
+  const lo = Math.floor(pos), hi = Math.ceil(pos);
+  if (lo === hi) return sorted[lo];
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (pos - lo);
+}
+
+// Ответ Ensemble API → { startDate, hours: [{pWet}], daily: [{date, pWet, p10, p50, p90, members}] }.
+// Поле `precipitation` — контрольный член, `precipitation_memberNN` — возмущённые.
+// hours.pWet — % членов с ≥0.1 мм в этот час; daily.pWet — % членов с суточной
+// суммой ≥ WET_DAY_MM (тот же порог 0.5 мм, что в honest-precip метриках).
+function parseEnsembleHourly(data) {
+  if (!data || !data.hourly || !Array.isArray(data.hourly.time)) return null;
+  const h = data.hourly;
+  const times = h.time;
+  const memberKeys = Object.keys(h).filter(k => k === 'precipitation' || k.startsWith('precipitation_member'));
+  if (memberKeys.length < 10) return null; // не похоже на ансамбль
+  const nMembers = memberKeys.length;
+
+  const hours = [];
+  for (let i = 0; i < times.length; i++) {
+    let wet = 0, valid = 0;
+    for (const k of memberKeys) {
+      const v = h[k][i];
+      if (typeof v !== 'number' || Number.isNaN(v)) continue;
+      valid++;
+      if (v >= ENSEMBLE_WET_HOUR_MM) wet++;
+    }
+    hours.push({ pWet: valid > 0 ? Math.round((wet / valid) * 100) : null });
+  }
+
+  const numDays = Math.floor(times.length / 24);
+  const daily = [];
+  for (let d = 0; d < numDays; d++) {
+    const sums = [];
+    for (const k of memberKeys) {
+      let s = 0, any = false;
+      for (let i = d * 24; i < (d + 1) * 24; i++) {
+        const v = h[k][i];
+        if (typeof v === 'number' && !Number.isNaN(v)) { s += v; any = true; }
+      }
+      if (any) sums.push(s);
+    }
+    if (sums.length === 0) { daily.push(null); continue; }
+    sums.sort((a, b) => a - b);
+    const wetDays = sums.filter(s => s >= WET_DAY_MM).length;
+    const r1 = (x) => x == null ? null : Math.round(x * 10) / 10;
+    daily.push({
+      date: times[d * 24].slice(0, 10),
+      pWet: Math.round((wetDays / sums.length) * 100),
+      p10: r1(quantileSorted(sums, 0.1)),
+      p50: r1(quantileSorted(sums, 0.5)),
+      p90: r1(quantileSorted(sums, 0.9)),
+      members: nMembers
+    });
+  }
+  return { startDate: times[0] ? times[0].slice(0, 10) : null, hours, daily };
 }
 
 // Из ответа Air Quality берём дневное среднее для каждого вида пыльцы.
@@ -15384,7 +15524,9 @@ function parseOpenMeteoToForecast(data, suffix = '') {
 // await setTimeout(0) — браузер успевает отрисовать промежуточные кадры,
 // принять пользовательский ввод и т.п. Каждый чанк (одна модель) занимает
 // ~10–20мс — это укладывается в 16мс-кадр без jank'а.
-async function parseAllModels(data, sources) {
+// v1.53.0: третий параметр ensemble — распарсенный parseEnsembleHourly(...)
+// (ансамблевая вероятность осадков для Smart) либо null.
+async function parseAllModels(data, sources, ensemble = null) {
   const result = {};
   const validForecasts = [];
   const validIds = [];
@@ -15417,8 +15559,16 @@ async function parseAllModels(data, sources) {
     // v1.52.0: 🎯 Smart — per-variable заострённые веса + медиана мм + дебиаз
     // членов. Из тех же распарсенных моделей, без дополнительных запросов.
     // При любой ошибке тихо пропускаем — getForecast('smart') откатится на avg.
+    // v1.53.0: + ансамблевые осадки ECMWF ENS. Перед использованием сверяем
+    // стартовую дату ансамбля с датой прогноза (фетчи у полуночи могут
+    // разъехаться на день — тогда ансамбль пропускаем, индексы не сдвигаем).
+    let ensAligned = null;
+    if (ensemble && ensemble.startDate && data.daily && Array.isArray(data.daily.time)
+        && data.daily.time[0] === ensemble.startDate) {
+      ensAligned = ensemble;
+    }
     try {
-      result.smart = computeSmartForecast(validForecasts, validIds);
+      result.smart = computeSmartForecast(validForecasts, validIds, ensAligned);
     } catch (e) {
       console.warn('Smart-комбинация не собралась, fallback на avg:', e);
     }
@@ -15829,7 +15979,9 @@ async function refreshForecast(force = false) {
     const results = await Promise.allSettled([
       fetchOpenMeteo(currentLocation.lat, currentLocation.lon, modelIds),
       fetchAirQuality(currentLocation.lat, currentLocation.lon),
-      climatePromise
+      climatePromise,
+      // v1.53.0: ансамблевые осадки ECMWF ENS (51 член) — для Smart-источника.
+      fetchEnsemblePrecip(currentLocation.lat, currentLocation.lon)
     ]);
     // Основной прогноз обязателен — если он упал, бросаем ошибку дальше
     if (results[0].status === 'rejected') throw results[0].reason;
@@ -15837,13 +15989,19 @@ async function refreshForecast(force = false) {
     const aqiData    = results[1].status === 'fulfilled' ? results[1].value : null;
     const climateData = results[2].status === 'fulfilled' ? results[2].value : null;
     CLIMATE_DATA = climateData;
+    // v1.53.0: парс ансамбля (не критичен — Smart работает и без него)
+    let ensembleData = null;
+    try {
+      const ensRaw = results[3] && results[3].status === 'fulfilled' ? results[3].value : null;
+      ensembleData = ensRaw ? parseEnsembleHourly(ensRaw) : null;
+    } catch (e) { ensembleData = null; }
     // v1.36.0: подгружаем accuracy ДО parseAllModels, чтобы computeAverageForecast
     // мог использовать накопленные веса (1/MAE) с самого первого fetch'а.
     // Если данных мало — внутри computeEnsembleWeights вернётся uniform.
     try {
       ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
     } catch (e) { /* без accuracy parseAllModels всё равно работает с uniform */ }
-    const byModel = await parseAllModels(data, SOURCES);
+    const byModel = await parseAllModels(data, SOURCES, ensembleData);
     if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
     }
