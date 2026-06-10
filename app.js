@@ -272,12 +272,13 @@ const I18N = {
     'accuracy.colModel': 'Модель',
     'accuracy.colScore': 'Композитная точность',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%осад',
+    'accuracy.colPrecip': 'Осадки',
     'accuracy.legendQ1': 'отлично',
     'accuracy.legendQ2': 'хорошо',
     'accuracy.legendQ3': 'средне',
     'accuracy.legendQ4': 'слабо',
     'accuracy.legendAvgWin': 'точнее всех',
+    'accuracy.precipLegend': 'Осадки: % промахов «дождь/сухо» (порог 0.5 мм) и ±ошибка в мм — по реальным наблюдениям',
     'accuracy.bestBadge': 'Самая точная модель по последним замерам',
     'footer.refresh': 'Обновить',
     'footer.speak': 'Озвучить',
@@ -697,12 +698,13 @@ const I18N = {
     'accuracy.colModel': 'Модель',
     'accuracy.colScore': 'Композитна точність',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%опад',
+    'accuracy.colPrecip': 'Опади',
     'accuracy.legendQ1': 'відмінно',
     'accuracy.legendQ2': 'добре',
     'accuracy.legendQ3': 'середньо',
     'accuracy.legendQ4': 'слабко',
     'accuracy.legendAvgWin': 'точніше за всі',
+    'accuracy.precipLegend': 'Опади: % промахів «дощ/сухо» (поріг 0.5 мм) та ±похибка в мм — за реальними спостереженнями',
     'accuracy.bestBadge': 'Найточніша модель за останніми замірами',
     'footer.refresh': 'Оновити',
     'footer.speak': 'Озвучити',
@@ -1109,12 +1111,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Composite accuracy',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%precip',
+    'accuracy.colPrecip': 'Precip',
     'accuracy.legendQ1': 'excellent',
     'accuracy.legendQ2': 'good',
     'accuracy.legendQ3': 'fair',
     'accuracy.legendQ4': 'poor',
     'accuracy.legendAvgWin': 'best of all',
+    'accuracy.precipLegend': 'Precip: % of wet/dry misses (0.5 mm threshold) and ±error in mm — vs real observations',
     'accuracy.bestBadge': 'Most accurate model by recent samples',
     'footer.refresh': 'Refresh',
     'footer.speak': 'Speak',
@@ -1520,12 +1523,13 @@ const I18N = {
     'accuracy.colModel': 'Modell',
     'accuracy.colScore': 'Gesamtgenauigkeit',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%Niederschlag',
+    'accuracy.colPrecip': 'Niederschl.',
     'accuracy.legendQ1': 'ausgezeichnet',
     'accuracy.legendQ2': 'gut',
     'accuracy.legendQ3': 'akzeptabel',
     'accuracy.legendQ4': 'schlecht',
     'accuracy.legendAvgWin': 'das beste aller',
+    'accuracy.precipLegend': 'Niederschlag: % Fehltreffer nass/trocken (Schwelle 0.5 mm) und ±Fehler in mm — vs. echte Beobachtungen',
     'accuracy.bestBadge': 'Genauestes Modell nach jüngsten Messungen',
     'footer.refresh': 'Aktualisieren',
     'footer.speak': 'Vorlesen',
@@ -1931,12 +1935,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Łączna dokładność',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%opady',
+    'accuracy.colPrecip': 'Opady',
     'accuracy.legendQ1': 'doskonale',
     'accuracy.legendQ2': 'dobrze',
     'accuracy.legendQ3': 'umiarkowanie',
     'accuracy.legendQ4': 'słabo',
     'accuracy.legendAvgWin': 'najlepszy ze wszystkich',
+    'accuracy.precipLegend': 'Opady: % pomyłek deszcz/sucho (próg 0.5 mm) i ±błąd w mm — wzgl. rzeczywistych obserwacji',
     'accuracy.bestBadge': 'Najdokładniejszy model według ostatnich próbek',
     'footer.refresh': 'Odśwież',
     'footer.speak': 'Czytaj',
@@ -2343,12 +2348,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Celková přesnost',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%srážky',
+    'accuracy.colPrecip': 'Srážky',
     'accuracy.legendQ1': 'výborná',
     'accuracy.legendQ2': 'dobrá',
     'accuracy.legendQ3': 'přijatelná',
     'accuracy.legendQ4': 'špatná',
     'accuracy.legendAvgWin': 'nejlepší ze všech',
+    'accuracy.precipLegend': 'Srážky: % omylů déšť/sucho (práh 0.5 mm) a ±chyba v mm — vs. skutečná pozorování',
     'accuracy.bestBadge': 'Nejpřesnější model podle posledních vzorků',
     'footer.refresh': 'Obnovit',
     'footer.speak': 'Přečíst',
@@ -2755,12 +2761,13 @@ const I18N = {
     'accuracy.colModel': 'Modèle',
     'accuracy.colScore': 'Précision globale',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%précip.',
+    'accuracy.colPrecip': 'Précip.',
     'accuracy.legendQ1': 'excellent',
     'accuracy.legendQ2': 'bon',
     'accuracy.legendQ3': 'correct',
     'accuracy.legendQ4': 'faible',
     'accuracy.legendAvgWin': 'meilleur de tous',
+    'accuracy.precipLegend': 'Précip. : % de ratés pluie/sec (seuil 0.5 mm) et ±écart en mm — vs observations réelles',
     'accuracy.bestBadge': 'Modèle le plus précis selon les échantillons récents',
     'footer.refresh': 'Actualiser',
     'footer.speak': 'Lire',
@@ -3166,12 +3173,13 @@ const I18N = {
     'accuracy.colModel': 'Modello',
     'accuracy.colScore': 'Precisione complessiva',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%precip.',
+    'accuracy.colPrecip': 'Precip.',
     'accuracy.legendQ1': 'eccellente',
     'accuracy.legendQ2': 'buono',
     'accuracy.legendQ3': 'discreto',
     'accuracy.legendQ4': 'scarso',
     'accuracy.legendAvgWin': 'il migliore di tutti',
+    'accuracy.precipLegend': 'Precip.: % di errori pioggia/secco (soglia 0.5 mm) e ±errore in mm — vs osservazioni reali',
     'accuracy.bestBadge': 'Modello più preciso secondo i campioni recenti',
     'footer.refresh': 'Aggiorna',
     'footer.speak': 'Leggi',
@@ -3577,12 +3585,13 @@ const I18N = {
     'accuracy.colModel': 'Modelo',
     'accuracy.colScore': 'Precisión global',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%precip.',
+    'accuracy.colPrecip': 'Precip.',
     'accuracy.legendQ1': 'excelente',
     'accuracy.legendQ2': 'buena',
     'accuracy.legendQ3': 'aceptable',
     'accuracy.legendQ4': 'pobre',
     'accuracy.legendAvgWin': 'el mejor de todos',
+    'accuracy.precipLegend': 'Precip.: % de fallos lluvia/seco (umbral 0.5 mm) y ±error en mm — vs observaciones reales',
     'accuracy.bestBadge': 'Modelo más preciso según muestras recientes',
     'footer.refresh': 'Actualizar',
     'footer.speak': 'Leer',
@@ -3988,12 +3997,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Precizie globală',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%precip.',
+    'accuracy.colPrecip': 'Precip.',
     'accuracy.legendQ1': 'excelent',
     'accuracy.legendQ2': 'bun',
     'accuracy.legendQ3': 'acceptabil',
     'accuracy.legendQ4': 'slab',
     'accuracy.legendAvgWin': 'cel mai bun dintre toate',
+    'accuracy.precipLegend': 'Precip.: % erori ploaie/uscat (prag 0.5 mm) și ±eroare în mm — vs observații reale',
     'accuracy.bestBadge': 'Cel mai precis model conform eșantioanelor recente',
     'footer.refresh': 'Reîmprospătează',
     'footer.speak': 'Citește',
@@ -4399,12 +4409,13 @@ const I18N = {
     'accuracy.colModel': 'Modell',
     'accuracy.colScore': 'Általános pontosság',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%csap.',
+    'accuracy.colPrecip': 'Csap.',
     'accuracy.legendQ1': 'kiváló',
     'accuracy.legendQ2': 'jó',
     'accuracy.legendQ3': 'elfogadható',
     'accuracy.legendQ4': 'gyenge',
     'accuracy.legendAvgWin': 'a legjobb mind közül',
+    'accuracy.precipLegend': 'Csapadék: eső/száraz tévesztések %-a (0.5 mm küszöb) és ±hiba mm-ben — valós mérésekhez képest',
     'accuracy.bestBadge': 'A legpontosabb modell a legutóbbi minták szerint',
     'footer.refresh': 'Frissítés',
     'footer.speak': 'Felolvasás',
@@ -4810,12 +4821,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Celková presnosť',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%zrážky',
+    'accuracy.colPrecip': 'Zrážky',
     'accuracy.legendQ1': 'výborná',
     'accuracy.legendQ2': 'dobrá',
     'accuracy.legendQ3': 'prijateľná',
     'accuracy.legendQ4': 'slabá',
     'accuracy.legendAvgWin': 'najlepší zo všetkých',
+    'accuracy.precipLegend': 'Zrážky: % omylov dážď/sucho (prah 0.5 mm) a ±chyba v mm — vs. skutočné pozorovania',
     'accuracy.bestBadge': 'Najpresnejší model podľa nedávnych vzoriek',
     'footer.refresh': 'Obnoviť',
     'footer.speak': 'Prečítať',
@@ -5221,12 +5233,13 @@ const I18N = {
     'accuracy.colModel': 'Modelo',
     'accuracy.colScore': 'Precisão global',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%precip.',
+    'accuracy.colPrecip': 'Precip.',
     'accuracy.legendQ1': 'excelente',
     'accuracy.legendQ2': 'bom',
     'accuracy.legendQ3': 'aceitável',
     'accuracy.legendQ4': 'fraco',
     'accuracy.legendAvgWin': 'o melhor de todos',
+    'accuracy.precipLegend': 'Precip.: % de erros chuva/seco (limiar 0.5 mm) e ±erro em mm — vs observações reais',
     'accuracy.bestBadge': 'Modelo mais preciso segundo as amostras recentes',
     'footer.refresh': 'Atualizar',
     'footer.speak': 'Ler',
@@ -5632,12 +5645,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Totale nauwkeurigheid',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%neerslag',
+    'accuracy.colPrecip': 'Neerslag',
     'accuracy.legendQ1': 'uitstekend',
     'accuracy.legendQ2': 'goed',
     'accuracy.legendQ3': 'acceptabel',
     'accuracy.legendQ4': 'slecht',
     'accuracy.legendAvgWin': 'het beste van allemaal',
+    'accuracy.precipLegend': 'Neerslag: % missers nat/droog (drempel 0.5 mm) en ±fout in mm — vs echte waarnemingen',
     'accuracy.bestBadge': 'Meest nauwkeurig model volgens recente monsters',
     'footer.refresh': 'Verversen',
     'footer.speak': 'Voorlezen',
@@ -6043,12 +6057,13 @@ const I18N = {
     'accuracy.colModel': 'Model',
     'accuracy.colScore': 'Genel doğruluk',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%yağış',
+    'accuracy.colPrecip': 'Yağış',
     'accuracy.legendQ1': 'mükemmel',
     'accuracy.legendQ2': 'iyi',
     'accuracy.legendQ3': 'kabul edilebilir',
     'accuracy.legendQ4': 'zayıf',
     'accuracy.legendAvgWin': 'hepsinin en iyisi',
+    'accuracy.precipLegend': 'Yağış: yağmur/kuru hata yüzdesi (0.5 mm eşik) ve mm cinsinden ±hata — gerçek gözlemlere göre',
     'accuracy.bestBadge': 'Son örneklere göre en doğru model',
     'footer.refresh': 'Yenile',
     'footer.speak': 'Oku',
@@ -6454,12 +6469,13 @@ const I18N = {
     'accuracy.colModel': 'Μοντέλο',
     'accuracy.colScore': 'Συνολική ακρίβεια',
     'accuracy.colTemp': '°C',
-    'accuracy.colPrecip': '%βροχ.',
+    'accuracy.colPrecip': 'Υετός',
     'accuracy.legendQ1': 'άριστο',
     'accuracy.legendQ2': 'καλό',
     'accuracy.legendQ3': 'αποδεκτό',
     'accuracy.legendQ4': 'φτωχό',
     'accuracy.legendAvgWin': 'το καλύτερο όλων',
+    'accuracy.precipLegend': 'Υετός: % αστοχιών βροχή/στεγνό (όριο 0.5 mm) και ±σφάλμα σε mm — έναντι πραγματικών παρατηρήσεων',
     'accuracy.bestBadge': 'Πιο ακριβές μοντέλο σύμφωνα με τα πρόσφατα δείγματα',
     'footer.refresh': 'Ανανέωση',
     'footer.speak': 'Ανάγνωση',
@@ -8956,6 +8972,40 @@ window.dumpBias = function() {
     const effPrecip = eff ? `${eff.precip >= 0 ? '+' : ''}${eff.precip.toFixed(1)}%` : '0';
     console.log(`${id.padEnd(10)} n=${(s.nTempMax || 0).toString().padStart(2)}  raw: max ${rawMax}/min ${rawMin}/p ${rawPrecip}   eff: max ${effMax}/min ${effMin}/p ${effPrecip}`);
   }
+};
+
+// === DEBUG: dumpPrecip() — честные precip-метрики по моделям (v1.51.0). ===
+// occMiss — % промахов «дождь/сухо» (1 − CSI, порог 0.5 мм/сутки),
+// amtMAE — средняя ошибка суточной суммы в мм, score — композит для рейтинга.
+// Всё против реальных наблюдений archive-api (ERA5/ERA5T).
+window.dumpPrecip = function() {
+  const state = (typeof ACCURACY_STATE !== 'undefined') ? ACCURACY_STATE : null;
+  if (!state || !state.stats || Object.keys(state.stats).length === 0) {
+    console.log('Precip-данных пока нет. Накопи замеры (см. dumpAccuracy()).');
+    return;
+  }
+  console.log(`Осадки vs ground truth (порог wet-дня: ${WET_DAY_MM} мм/сутки):`);
+  console.log(`occMiss = % промахов дождь/сухо (1 − CSI), amtMAE = ошибка мм/сутки.\n`);
+  const rows = Object.keys(state.stats).map(id => {
+    const s = state.stats[id];
+    return {
+      id,
+      score: precipScoreOf(s),
+      occMiss: s.precipOccMiss,
+      amtMAE: s.precipAmtMAE,
+      events: s.precipOccEvents || 0,
+      nGt: s.nPrecipGt || 0,
+      legacyProbMAE: s.precipMAE
+    };
+  }).filter(r => r.score != null || r.legacyProbMAE != null);
+  rows.sort((a, b) => (a.score ?? Infinity) - (b.score ?? Infinity));
+  for (const r of rows) {
+    const occ = r.occMiss != null ? `${r.occMiss.toFixed(0)}%`.padStart(5) : '    —';
+    const amt = r.amtMAE != null ? `${r.amtMAE.toFixed(1)}мм`.padStart(6) : '     —';
+    const sc = r.score != null ? r.score.toFixed(2).padStart(5) : '    —';
+    console.log(`${r.id.padEnd(10)} score=${sc}  occMiss=${occ} (события: ${r.events})  amtMAE=${amt}  n_gt=${r.nGt}  legacy_probMAE=${r.legacyProbMAE ?? '—'}`);
+  }
+  console.log('\nЕсли occMiss/amtMAE везде «—» — ground truth ещё не накопился (см. groundTruthSamples).');
 };
 
 // Toast «Выбранный источник не самый точный» — показывается один раз за сессию
@@ -11952,12 +12002,34 @@ const ACCURACY_TARGET_SAMPLES = 7;
 
 // Композитный скор = MAE °C по max + MAE °C по min + MAE %осад / 10 (приводим % к ° по масштабу).
 // Чем меньше — тем точнее. Возвращает null если данных совсем нет.
+// v1.51.0: композитный скор осадков из ground-truth метрик (см.
+// computeAccuracyStats). Шкала подобрана так, чтобы слагаемое было
+// соизмеримо с температурными MAE в °C:
+//   occMiss 0–100% → /12.5 → 0–8   (типичные 15–50% промахов → 1.2–4.0)
+//   amtMAE  кап на 6 мм → /2 → 0–3 (защита от пары экстремальных ливней)
+// null — если ground-truth замеров по осадкам ещё нет.
+function precipScoreOf(s) {
+  if (!s) return null;
+  const hasOcc = typeof s.precipOccMiss === 'number';
+  const hasAmt = typeof s.precipAmtMAE === 'number';
+  if (!hasOcc && !hasAmt) return null;
+  const occPart = hasOcc ? s.precipOccMiss / 12.5 : 0;
+  const amtPart = hasAmt ? Math.min(s.precipAmtMAE, 6) / 2 : 0;
+  return Math.round((occPart + amtPart) * 100) / 100;
+}
+
 function accuracyComposite(s) {
   if (!s) return null;
   const parts = [];
   if (typeof s.tempMaxMAE === 'number') parts.push(s.tempMaxMAE);
   if (typeof s.tempMinMAE === 'number') parts.push(s.tempMinMAE);
-  if (typeof s.precipMAE  === 'number') parts.push(s.precipMAE / 10);
+  // v1.51.0: осадки в композите — по реальным мм (occurrence + amount).
+  // Legacy probability-MAE (циклическая метрика «прогноз vs прокси ансамбля»)
+  // остаётся только как fallback, пока нет ground truth — например, в
+  // офлайн-режиме без серверной синхронизации.
+  const ps = precipScoreOf(s);
+  if (ps != null) parts.push(ps);
+  else if (typeof s.precipMAE === 'number') parts.push(s.precipMAE / 10);
   if (parts.length === 0) return null;
   return parts.reduce((a, b) => a + b, 0);
 }
@@ -12038,24 +12110,34 @@ function renderAccuracy() {
   // точнее любой одиночной модели — это позитивный сигнал «AVG работает», и его
   // надо выделять отдельно (зелёным best-col-avg, чтобы отличать от золотого
   // best-col у моделей).
-  function bestByField(field) {
+  // v1.51.0: вместо имени поля — аксессор. Осадки сравниваются по
+  // ground-truth скору (precipScoreOf), а не по legacy probability-MAE.
+  function bestBy(metricFn) {
     let bestId = null, bestVal = Infinity;
     for (const r of rows) {
-      const v = r.s[field];
+      const v = metricFn(r.s);
       if (typeof v === 'number' && v < bestVal) {
         bestVal = v; bestId = r.src.id;
       }
     }
     // Проверяем AVG отдельно — он может побить модели.
-    if (avgS && typeof avgS[field] === 'number' && avgS[field] < bestVal) {
-      bestId = 'avg';
+    if (avgS) {
+      const v = metricFn(avgS);
+      if (typeof v === 'number' && v < bestVal) bestId = 'avg';
     }
     return bestId;
   }
+  // Fallback на legacy-шкалу (precipMAE/10 сопоставима со скором) — только
+  // пока ground truth не накопился (например, офлайн без серверной sync).
+  const precipMetric = (s) => {
+    const ps = precipScoreOf(s);
+    if (ps != null) return ps;
+    return (typeof s.precipMAE === 'number') ? s.precipMAE / 10 : null;
+  };
   const bestByVar = {
-    tempMax: bestByField('tempMaxMAE'),
-    tempMin: bestByField('tempMinMAE'),
-    precip:  bestByField('precipMAE')
+    tempMax: bestBy(s => s.tempMaxMAE),
+    tempMin: bestBy(s => s.tempMinMAE),
+    precip:  bestBy(precipMetric)
   };
   // v1.42.0: общий «победитель композитного скора» — может быть avg, может быть модель.
   // Зелёное выделение даём строке-победителю независимо от того AVG это или модель.
@@ -12116,6 +12198,25 @@ function renderAccuracy() {
     return `<div class="acc-metric${naCls}${bestCls}">${badge}${formatMetric(val, unit, decimals)}</div>`;
   }
 
+  // v1.51.0: ячейка осадков — две цифры: % промахов «дождь/сухо» (крупно)
+  // и ±средняя ошибка суточной суммы в мм (мелко). Обе — против реальных
+  // наблюдений archive-api. Пока ground truth не накопился — fallback на
+  // legacy probability-MAE, как было до v1.51.0.
+  function precipCell(srcId, s, bestId) {
+    if (typeof s.precipOccMiss !== 'number' && typeof s.precipAmtMAE !== 'number') {
+      return metricCell(srcId, s.precipMAE, '%', 0, bestId);
+    }
+    const isBest = srcId === bestId;
+    const badge = isBest ? '<span class="acm-best">✓</span>' : '';
+    const main = (typeof s.precipOccMiss === 'number')
+      ? formatMetric(s.precipOccMiss, '%', 0)
+      : '<span class="acm-val">—</span>';
+    const sub = (typeof s.precipAmtMAE === 'number')
+      ? `<span class="acm-sub">±${s.precipAmtMAE.toFixed(1)}${t('unit.mm')}</span>`
+      : '';
+    return `<div class="acc-metric${isBest ? ' best-col' : ''}">${badge}${main}${sub}</div>`;
+  }
+
   function buildRow({ src, s, score }, rank) {
     const q = accuracyQuality(score, minScore, maxScore) || 0;
     const w = barWidth(score);
@@ -12131,7 +12232,7 @@ function renderAccuracy() {
         <div class="acc-bar-wrap"><div class="acc-bar${barCls}" style="width:${w}%"></div></div>
         ${metricCell(src.id, s.tempMaxMAE, '°', 1, bestByVar.tempMax)}
         ${metricCell(src.id, s.tempMinMAE, '°', 1, bestByVar.tempMin)}
-        ${metricCell(src.id, s.precipMAE, '%', 0, bestByVar.precip)}
+        ${precipCell(src.id, s, bestByVar.precip)}
       </div>`;
   }
 
@@ -12178,7 +12279,7 @@ function renderAccuracy() {
         <div class="acc-bar-wrap"><div class="acc-bar${barCls}" style="width:${w}%"></div></div>
         ${metricCell('avg', avgS.tempMaxMAE, '°', 1, bestByVar.tempMax)}
         ${metricCell('avg', avgS.tempMinMAE, '°', 1, bestByVar.tempMin)}
-        ${metricCell('avg', avgS.precipMAE, '%', 0, bestByVar.precip)}
+        ${precipCell('avg', avgS, bestByVar.precip)}
       </div>`;
   }
 
@@ -14148,7 +14249,10 @@ function saveForecastCache(lat, lon, byModel) {
 // Когда эти даты наступают (становятся forecast[0]), записываем actual из avg[0] —
 // лучший доступный наблюдаемый сигнал без backend (archive-api лагает 5 дней).
 // MAE считаем по накопленным парам (prediction, actual).
-const ACCURACY_MAX_RECORDS = 30;
+// v1.51.0: 30 → 60. Для occurrence-метрики осадков («дождь/сухо») значимы
+// только дни, где дождь был или прогнозировался — таких в месяце мало,
+// окно в 2 месяца даёт вдвое больше информативных случаев.
+const ACCURACY_MAX_RECORDS = 60;
 
 // Округление координат для ключа: 1 знак после точки ≈ 10 км.
 // Раньше было 2 знака (≈1 км) — но накопление за неделю с десятка визитов
@@ -14229,7 +14333,9 @@ function extractDayMetrics(day) {
   return {
     tempMax: day.max,
     tempMin: typeof day.min === 'number' ? day.min : null,
-    precip: typeof day.precip === 'number' ? day.precip : null
+    precip: typeof day.precip === 'number' ? day.precip : null,
+    // v1.51.0: реальная сумма мм/сутки — основа «честных» precip-метрик
+    precipSum: typeof day.precipSum === 'number' ? day.precipSum : null
   };
 }
 function todayIso() { return new Date().toISOString().slice(0, 10); }
@@ -14284,6 +14390,22 @@ function updateAccuracyData(lat, lon, byModel) {
 // sampleSize = число записей с заполненным actual.
 // Bias = mean(predicted - actual). Положительный = модель завышает, отрицательный = занижает.
 // Bias используется для пост-калибровки прогноза (v1.35.1, bias-correction).
+//
+// v1.51.0 «честные осадки»: legacy-метрика precipMAE сравнивала прогноз
+// ВЕРОЯТНОСТИ с прокси от ансамбля (actual.precip — это avg-прогноз дня-0,
+// а не факт) — рейтинг по осадкам получался «по кругу» и структурно
+// благоволил AVG. Теперь добавлены метрики по реальным мм из archive-api:
+//   precipOccMiss — % промахов «дождь/сухо» (порог WET_DAY_MM мм/сутки).
+//                   Считается как 1 − CSI: дни «сухо у всех и по факту сухо»
+//                   НЕ учитываются, иначе редкие дожди тонут в лёгких сухих
+//                   попаданиях и все модели выглядят одинаково точными.
+//   precipAmtMAE  — средняя абсолютная ошибка суточной суммы, мм.
+// Обе считаются ТОЛЬКО по записям с actualSource === 'archive' (реальные
+// наблюдения ERA5/ERA5T) — прокси-actual сюда не допускается by design.
+// legacy precipMAE/precipBias сохранены: на них держится bias-коррекция
+// вероятности и fallback-отображение, пока ground truth не накопился.
+const WET_DAY_MM = 0.5; // порог «дождливого дня», мм/сутки (ниже — следы/морось)
+
 function computeAccuracyStats(records) {
   const acc = {};
   let sampleSize = 0;
@@ -14293,7 +14415,10 @@ function computeAccuracyStats(records) {
   for (const rec of records) {
     if (!rec.actual || !rec.predictions) continue;
     sampleSize++;
-    if (rec.actualSource === 'archive') groundTruthSamples++;
+    const isArchive = rec.actualSource === 'archive';
+    if (isArchive) groundTruthSamples++;
+    // ground truth по осадкам: реальная суточная сумма из archive
+    const actSum = (isArchive && typeof rec.actual.precipSum === 'number') ? rec.actual.precipSum : null;
     for (const srcId of Object.keys(rec.predictions)) {
       const pred = rec.predictions[srcId];
       if (!pred) continue;
@@ -14301,7 +14426,8 @@ function computeAccuracyStats(records) {
         acc[srcId] = {
           tempMaxSum: 0, tempMinSum: 0, precipSum: 0,
           nTempMax: 0, nTempMin: 0, nPrecip: 0,
-          tempMaxBiasSum: 0, tempMinBiasSum: 0, precipBiasSum: 0
+          tempMaxBiasSum: 0, tempMinBiasSum: 0, precipBiasSum: 0,
+          occHits: 0, occMisses: 0, occFalse: 0, amtSum: 0, nAmt: 0
         };
       }
       const s = acc[srcId];
@@ -14317,12 +14443,24 @@ function computeAccuracyStats(records) {
         const diff = pred.precip - rec.actual.precip;
         s.precipSum += Math.abs(diff); s.precipBiasSum += diff; s.nPrecip++;
       }
+      // v1.51.0: ground-truth метрики осадков (только реальные наблюдения)
+      if (actSum != null && typeof pred.precipSum === 'number') {
+        const predWet = pred.precipSum >= WET_DAY_MM;
+        const actWet  = actSum >= WET_DAY_MM;
+        if (predWet && actWet) s.occHits++;
+        else if (!predWet && actWet) s.occMisses++;
+        else if (predWet && !actWet) s.occFalse++;
+        // сухо-сухо — не событие, в occurrence не участвует (1 − CSI)
+        s.amtSum += Math.abs(pred.precipSum - actSum);
+        s.nAmt++;
+      }
     }
   }
 
   const out = {};
   for (const srcId of Object.keys(acc)) {
     const s = acc[srcId];
+    const occEvents = s.occHits + s.occMisses + s.occFalse;
     out[srcId] = {
       tempMaxMAE: s.nTempMax > 0 ? Math.round((s.tempMaxSum / s.nTempMax) * 10) / 10 : null,
       tempMinMAE: s.nTempMin > 0 ? Math.round((s.tempMinSum / s.nTempMin) * 10) / 10 : null,
@@ -14330,6 +14468,11 @@ function computeAccuracyStats(records) {
       tempMaxBias: s.nTempMax > 0 ? Math.round((s.tempMaxBiasSum / s.nTempMax) * 10) / 10 : null,
       tempMinBias: s.nTempMin > 0 ? Math.round((s.tempMinBiasSum / s.nTempMin) * 10) / 10 : null,
       precipBias:  s.nPrecip  > 0 ? Math.round((s.precipBiasSum  / s.nPrecip)  * 10) / 10 : null,
+      // v1.51.0: честные precip-метрики (vs реальные мм из archive)
+      precipOccMiss: occEvents > 0 ? Math.round((1 - s.occHits / occEvents) * 1000) / 10 : null,
+      precipAmtMAE:  s.nAmt > 0 ? Math.round((s.amtSum / s.nAmt) * 10) / 10 : null,
+      nPrecipGt: s.nAmt,
+      precipOccEvents: occEvents,
       n: Math.max(s.nTempMax, s.nTempMin, s.nPrecip),
       nTempMax: s.nTempMax, nTempMin: s.nTempMin, nPrecip: s.nPrecip
     };
@@ -14509,7 +14652,11 @@ function convertServerRecord(sRec) {
       tempMax: typeof m.tempMax === 'number' ? Math.round(m.tempMax * 10) / 10 : null,
       tempMin: typeof m.tempMin === 'number' ? Math.round(m.tempMin * 10) / 10 : null,
       // На сервере precipProb — probability_max (%) — совпадает с локальным precip
-      precip: typeof m.precipProb === 'number' ? Math.round(m.precipProb) : null
+      precip: typeof m.precipProb === 'number' ? Math.round(m.precipProb) : null,
+      // v1.51.0: суточная сумма мм. В predictions — прогноз модели, в actual
+      // (при actualSource='archive') — реальные наблюдения ERA5/ERA5T.
+      // Сервер копит её с v1.37 — основа честных precip-метрик.
+      precipSum: typeof m.precipSum === 'number' ? Math.round(m.precipSum * 10) / 10 : null
     };
   };
   const predictions = {};

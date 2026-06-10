@@ -905,7 +905,10 @@ const ALLOWED_ORIGINS = [
   'http://localhost:8000',
   'http://localhost:8765',
   'http://127.0.0.1:8000',
-  'http://127.0.0.1:8765'
+  'http://127.0.0.1:8765',
+  // v1.51.0: порт Launch-превью Claude Code (смоук-тесты в сэндбокс-браузере)
+  'http://localhost:8770',
+  'http://127.0.0.1:8770'
 ];
 
 function corsHeaders(origin) {
@@ -1432,7 +1435,11 @@ function accGridCoords(lat, lon) {
 }
 
 const ACC_REGISTRY_KEY = 'acc:registry';
-const ACC_MAX_RECORDS = 30;
+// v1.51.0: 30 → 60. Для occurrence-метрики осадков на сайте («дождь/сухо»)
+// значимы только дни, где дождь был или прогнозировался — таких мало,
+// окно в 2 месяца даёт вдвое больше информативных случаев. Размер KV-значения
+// всё равно копеечный (~60 записей × 9 источников × 4 числа).
+const ACC_MAX_RECORDS = 60;
 const ACC_REGISTRY_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 дней без запросов → удаление
 
 // Добавляет/обновляет точку в registry «интересных» координат.
