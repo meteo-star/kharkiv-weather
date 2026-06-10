@@ -1759,6 +1759,11 @@ body.compare-mode .astro-photo { display:none !important }
 .acc-metric.best-col{background:rgba(74,222,128,0.13);border-radius:6px;padding:2px 4px;box-shadow:inset 0 0 0 1.5px rgba(74,222,128,0.45);font-weight:700}
 .acc-metric.best-col .acm-val{color:#86efac;font-weight:700}
 .acc-metric .acm-best{display:inline-block;margin-right:3px;color:#4ade80;font-size:10px;font-weight:700;vertical-align:middle;filter:drop-shadow(0 0 3px rgba(74,222,128,0.7))}
+/* v1.51.0: вторая строка в ячейке осадков — ±ошибка суточной суммы в мм */
+.acc-metric .acm-sub{display:block;font-size:8.5px;line-height:1.2;color:rgba(232,240,255,0.45);margin-top:1px}
+.acc-metric.best-col .acm-sub{color:rgba(134,239,172,0.75)}
+:root[data-theme="light"] .acc-metric .acm-sub{color:rgba(45,26,16,0.45)}
+:root[data-theme="light"] .acc-metric.best-col .acm-sub{color:rgba(20,83,45,0.7)}
 :root[data-theme="light"] .acc-metric.best-col{background:rgba(22,163,74,0.15);box-shadow:inset 0 0 0 1.5px rgba(22,163,74,0.50)}
 :root[data-theme="light"] .acc-metric.best-col .acm-val{color:#14532d}
 :root[data-theme="light"] .acc-metric .acm-best{color:#16a34a;filter:drop-shadow(0 0 2px rgba(22,163,74,0.5))}
@@ -1796,6 +1801,8 @@ body.compare-mode .astro-photo { display:none !important }
    Тот же зелёный градиент что у .acc-bar.q-avg-win, чтобы пользователь
    связал плашку зелёного выделения AVG в таблице с этой строкой легенды. */
 .acc-legend .al-sw.q-winner{background:linear-gradient(90deg,#4ade80,#22d3ee);box-shadow:0 0 4px rgba(74,222,128,0.5)}
+/* v1.51.0: пояснение precip-метрик — отдельной строкой на всю ширину */
+.acc-legend .al-note{flex-basis:100%;opacity:0.8;line-height:1.45}
 
 .acc-thead{display:grid;grid-template-columns:24px 80px 1fr 52px 52px 52px;align-items:center;gap:8px;padding:0 10px 6px 10px;font-size:10px;color:rgba(232,240,255,0.4);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.06em}
 .acc-thead .acth-r{text-align:right}
