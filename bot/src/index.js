@@ -1020,7 +1020,9 @@ async function handleApi(url, request, env, ctx) {
     // Сохраняем выбранный пользователем источник погоды — fetchWeather будет
     // использовать его при cron-проверках. Если 'avg' / null — все 8 моделей.
     if (typeof body.source === 'string') {
-      const allowed = ['avg', 'ecmwf', 'aifs', 'gfs', 'icon', 'gem', 'jma', 'mf', 'ukmo'];
+      // v1.52.0: + 'smart' — выбор сохраняется; cron пока считает его как avg
+      // (этап 4 перенесёт per-variable веса в Worker), footer покажет «Smart».
+      const allowed = ['avg', 'smart', 'ecmwf', 'aifs', 'gfs', 'icon', 'gem', 'jma', 'mf', 'ukmo'];
       if (allowed.includes(body.source)) sub.source = body.source;
     }
     // Фаза 3 i18n: сайт может прислать lang при смене языка в Settings —
@@ -1558,6 +1560,174 @@ async function fetchModelsForecast(lat, lon) {
   }
 }
 
+// === v1.52.0: 🎯 Smart-комбинация на сервере ===
+// Зеркало клиентской логики (app.js: computeSmartWeights / computeSmartForecast),
+// но на ДНЕВНЫХ полях — этого достаточно для accuracy-записей. Smart пишется в
+// predictions.smart каждой новой записи → копит собственные замеры → появляется
+// в таблице точности на сайте и честно соревнуется с AVG и моделями.
+// Формулы и константы держать СИНХРОННЫМИ с app.js!
+const SMART_ALPHA = 2;            // заострение: w = 1/(err+ε)^α
+const SMART_EPS = 0.5;            // = WEIGHT_EPSILON на сайте
+const SMART_MIN_N = 3;            // < 3 замеров по параметру → медианный вес
+const SMART_FULL_N = 10;          // глобальный shrink к uniform до 10 замеров
+const SMART_WET_MM = 0.5;         // порог wet-дня (= WET_DAY_MM на сайте)
+const SMART_BIAS_MIN_N = 5;       // дебиаз членов: shrinkage как effectiveBias
+const SMART_BIAS_FULL_N = 15;
+const SMART_BIAS_CAP = 3.0;       // ±3°C
+
+// Статистика моделей из накопленных записей этой локации (только реальные
+// модели — avg/smart исключаются, веса строятся по «сырью»).
+// Температуры — по всем actual; осадки — только по actualSource='archive'.
+function smartStatsFromRecords(records) {
+  const acc = {};
+  for (const rec of (records || [])) {
+    if (!rec || !rec.actual || !rec.predictions) continue;
+    const isArchive = rec.actualSource === 'archive';
+    const actSum = (isArchive && typeof rec.actual.precipSum === 'number') ? rec.actual.precipSum : null;
+    for (const id of Object.keys(rec.predictions)) {
+      if (id === 'avg' || id === 'smart') continue;
+      const p = rec.predictions[id];
+      if (!p) continue;
+      const s = acc[id] || (acc[id] = {
+        dMax: 0, bMax: 0, nMax: 0, dMin: 0, bMin: 0, nMin: 0,
+        occH: 0, occM: 0, occF: 0, amt: 0, nAmt: 0
+      });
+      if (typeof p.tempMax === 'number' && typeof rec.actual.tempMax === 'number') {
+        const d = p.tempMax - rec.actual.tempMax;
+        s.dMax += Math.abs(d); s.bMax += d; s.nMax++;
+      }
+      if (typeof p.tempMin === 'number' && typeof rec.actual.tempMin === 'number') {
+        const d = p.tempMin - rec.actual.tempMin;
+        s.dMin += Math.abs(d); s.bMin += d; s.nMin++;
+      }
+      if (actSum != null && typeof p.precipSum === 'number') {
+        const pw = p.precipSum >= SMART_WET_MM, aw = actSum >= SMART_WET_MM;
+        if (pw && aw) s.occH++;
+        else if (!pw && aw) s.occM++;
+        else if (pw && !aw) s.occF++;
+        s.amt += Math.abs(p.precipSum - actSum); s.nAmt++;
+      }
+    }
+  }
+  const out = {};
+  for (const id of Object.keys(acc)) {
+    const s = acc[id];
+    const ev = s.occH + s.occM + s.occF;
+    // precipScore — та же шкала что precipScoreOf на сайте: occMiss/12.5 + min(amt,6)/2
+    let precipScore = null;
+    if (ev > 0 || s.nAmt > 0) {
+      const occPart = ev > 0 ? ((1 - s.occH / ev) * 100) / 12.5 : 0;
+      const amtPart = s.nAmt > 0 ? Math.min(s.amt / s.nAmt, 6) / 2 : 0;
+      precipScore = occPart + amtPart;
+    }
+    out[id] = {
+      maeMax: s.nMax > 0 ? s.dMax / s.nMax : null, nMax: s.nMax,
+      maeMin: s.nMin > 0 ? s.dMin / s.nMin : null, nMin: s.nMin,
+      biasMax: s.nMax > 0 ? s.bMax / s.nMax : 0,
+      biasMin: s.nMin > 0 ? s.bMin / s.nMin : 0,
+      precipScore, nPrecip: s.nAmt
+    };
+  }
+  return out;
+}
+
+// Эффективный bias члена: shrinkage + cap (зеркало effectiveBias на сайте).
+function smartEffBias(rawBias, n) {
+  if (!Number.isFinite(rawBias) || n < SMART_BIAS_MIN_N) return 0;
+  const sh = n >= SMART_BIAS_FULL_N ? 1 : (n - SMART_BIAS_MIN_N) / (SMART_BIAS_FULL_N - SMART_BIAS_MIN_N);
+  return Math.max(-SMART_BIAS_CAP, Math.min(SMART_BIAS_CAP, rawBias)) * sh;
+}
+
+// Per-variable веса (metric: 'tempMax' | 'tempMin' | 'precip') — зеркало
+// computeSmartWeights: заострение α=2, медианный вес для моделей без данных,
+// uniform при < половины моделей с данными, глобальный shrink по minN.
+function smartWeightsWorker(stats, ids, metric) {
+  const n = ids.length;
+  if (n === 0) return new Map();
+  const uniform = 1 / n;
+  const errOf = (s) => !s ? null
+    : metric === 'tempMax' ? s.maeMax
+    : metric === 'tempMin' ? s.maeMin
+    : s.precipScore;
+  const nOf = (s) => !s ? 0
+    : metric === 'tempMax' ? s.nMax
+    : metric === 'tempMin' ? s.nMin
+    : s.nPrecip;
+  const raw = {};
+  let useful = 0, minN = Infinity;
+  for (const id of ids) {
+    const s = stats[id];
+    const e = s ? errOf(s) : null;
+    if (!s || nOf(s) < SMART_MIN_N || e == null) { raw[id] = null; continue; }
+    raw[id] = 1 / Math.pow(e + SMART_EPS, SMART_ALPHA);
+    useful++;
+    minN = Math.min(minN, nOf(s));
+  }
+  if (useful < Math.max(2, Math.ceil(n / 2))) return new Map(ids.map(id => [id, uniform]));
+  const valid = Object.values(raw).filter(v => v != null).sort((a, b) => a - b);
+  const median = valid[Math.floor(valid.length / 2)];
+  for (const id of ids) if (raw[id] == null) raw[id] = median;
+  const sum = Object.values(raw).reduce((a, b) => a + b, 0);
+  const sharp = Math.max(0, Math.min(1, (minN - SMART_MIN_N) / (SMART_FULL_N - SMART_MIN_N)));
+  return new Map(ids.map(id => [id, (raw[id] / sum) * sharp + uniform * (1 - sharp)]));
+}
+
+function weightedMedianWorker(pairs) {
+  if (!pairs || pairs.length === 0) return null;
+  const sorted = pairs.slice().sort((a, b) => a.v - b.v);
+  const total = sorted.reduce((s, p) => s + p.w, 0);
+  if (total <= 0) return sorted[Math.floor(sorted.length / 2)].v;
+  let acc = 0;
+  for (const p of sorted) {
+    acc += p.w;
+    if (acc >= total / 2) return p.v;
+  }
+  return sorted[sorted.length - 1].v;
+}
+
+// Smart-день из дневных полей byModel: температуры — взвешенные per-variable
+// с дебиазом членов, мм — взвешенная медиана, prob — взвешенный mean.
+function computeSmartDayWorker(byModel, stats, offset) {
+  const ids = Object.keys(byModel).filter(k => k !== 'avg' && k !== 'smart');
+  if (ids.length === 0) return null;
+  const wMax = smartWeightsWorker(stats, ids, 'tempMax');
+  const wMin = smartWeightsWorker(stats, ids, 'tempMin');
+  const wPrec = smartWeightsWorker(stats, ids, 'precip');
+  let sMax = 0, wMaxSum = 0, sMin = 0, wMinSum = 0, sProb = 0, wProbSum = 0;
+  const mmPairs = [];
+  for (const id of ids) {
+    const d = byModel[id] && byModel[id][offset];
+    if (!d) continue;
+    const st = stats[id];
+    if (typeof d.tempMax === 'number') {
+      const b = st ? smartEffBias(st.biasMax, st.nMax) : 0;
+      const w = wMax.get(id) || 0;
+      sMax += (d.tempMax - b) * w; wMaxSum += w;
+    }
+    if (typeof d.tempMin === 'number') {
+      const b = st ? smartEffBias(st.biasMin, st.nMin) : 0;
+      const w = wMin.get(id) || 0;
+      sMin += (d.tempMin - b) * w; wMinSum += w;
+    }
+    if (typeof d.precipProb === 'number') {
+      const w = wPrec.get(id) || 0;
+      sProb += d.precipProb * w; wProbSum += w;
+    }
+    if (typeof d.precipSum === 'number') {
+      mmPairs.push({ v: d.precipSum, w: wPrec.get(id) || 0 });
+    }
+  }
+  if (wMaxSum === 0 && wMinSum === 0) return null;
+  const r1 = (x) => Math.round(x * 10) / 10;
+  const med = weightedMedianWorker(mmPairs);
+  return {
+    tempMax: wMaxSum > 0 ? r1(sMax / wMaxSum) : null,
+    tempMin: wMinSum > 0 ? r1(sMin / wMinSum) : null,
+    precipSum: med != null ? r1(med) : null,
+    precipProb: wProbSum > 0 ? Math.round(sProb / wProbSum) : null
+  };
+}
+
 // Обновляет accuracy-records для точки: заполняет actual для записей с date=today
 // (из byModel.avg[0]) и добавляет новые predictions на +1 и +2 дня.
 async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
@@ -1581,6 +1751,9 @@ async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
   }
 
   // (b) Добавить predictions на +1 и +2 дня
+  // v1.52.0: + Smart-комбинация. Веса строятся из УЖЕ накопленных записей
+  // этой локации (до добавления сегодняшних прогнозов — на них ещё нет actual).
+  const smartStats = smartStatsFromRecords(records);
   for (let offset = 1; offset <= 2; offset++) {
     const day = byModel.avg[offset];
     if (!day || !day.date) continue;
@@ -1594,6 +1767,11 @@ async function updateAccuracyForLocation(env, lat1, lon1, byModel) {
         predictions[k] = { tempMax: d.tempMax, tempMin: d.tempMin, precipSum: d.precipSum, precipProb: d.precipProb };
         hasAny = true;
       }
+    }
+    const smartDay = computeSmartDayWorker(byModel, smartStats, offset);
+    if (smartDay && smartDay.tempMax != null) {
+      predictions.smart = smartDay;
+      hasAny = true;
     }
     if (hasAny) records.push({ date: targetDate, predictions, actual: null });
   }
@@ -1887,7 +2065,10 @@ async function fetchWeather(lat, lon, sub = null) {
   // Если подписка задала конкретный источник — используем только эту модель.
   // Если 'avg' / null / неизвестный — используем все 8 и считаем AVG.
   const wantedSource = (sub && sub.source) || 'avg';
-  const useAllModels = wantedSource === 'avg';
+  // v1.52.0: 'smart' в боте пока эквивалентен avg (невзвешенный mean по 8
+  // моделям). Этап 4: Worker будет считать те же per-variable веса из своих
+  // KV-записей — тогда push'и совпадут со Smart-экраном сайта.
+  const useAllModels = wantedSource === 'avg' || wantedSource === 'smart';
   const singleModel = useAllModels ? null : SUB_SOURCE_TO_MODEL[wantedSource];
 
   const params = new URLSearchParams({
