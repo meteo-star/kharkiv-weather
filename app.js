@@ -133,6 +133,8 @@ const I18N = {
     'sources.sub': 'Выбери источник или используй среднее по всем 8 моделям',
     'sources.avgTitle': 'Среднее по всем сервисам',
     'sources.avgSub': 'Агрегация 8 моделей · ансамблевый прогноз',
+    'sources.smartTitle': 'Smart-комбинация',
+    'sources.smartSub': 'Лучшее по каждому параметру · веса из реальной точности',
     'sources.avgShort': 'Среднее по 8 моделям',
     'sources.dividerOr': 'или конкретный источник',
     'sources.confHint': 'Цветная полоска под карточкой дня — согласие 8 моделей:',
@@ -559,6 +561,8 @@ const I18N = {
     'sources.sub': 'Обери джерело або використовуй середнє по 8 моделях',
     'sources.avgTitle': 'Середнє по всіх сервісах',
     'sources.avgSub': 'Агрегація 8 моделей · ансамблевий прогноз',
+    'sources.smartTitle': 'Smart-комбінація',
+    'sources.smartSub': 'Найкраще за кожним параметром · ваги з реальної точності',
     'sources.confHint': 'Кольорова смужка під карткою дня — згода 8 моделей:',
     'sources.confLegend.high': 'надійний',
     'sources.confLegend.mid': 'середній',
@@ -972,6 +976,8 @@ const I18N = {
     'sources.sub': 'Pick a source or use the average of all 8 models',
     'sources.avgTitle': 'Average of all services',
     'sources.avgSub': 'Aggregation of 8 models · ensemble forecast',
+    'sources.smartTitle': 'Smart blend',
+    'sources.smartSub': 'Best per parameter · weights from real accuracy',
     'sources.confHint': 'Coloured bar under the day card — agreement of 8 models:',
     'sources.confLegend.high': 'reliable',
     'sources.confLegend.mid': 'medium',
@@ -1384,6 +1390,8 @@ const I18N = {
     'sources.sub': 'Wähle eine Quelle oder das Mittel aller 8 Modelle',
     'sources.avgTitle': 'Mittel aller Dienste',
     'sources.avgSub': 'Aggregation von 8 Modellen · Ensemble-Prognose',
+    'sources.smartTitle': 'Smart-Kombination',
+    'sources.smartSub': 'Bestes je Parameter · Gewichte aus echter Genauigkeit',
     'sources.confHint': 'Farbiger Balken unter der Tageskarte — Übereinstimmung der 8 Modelle:',
     'sources.confLegend.high': 'zuverlässig',
     'sources.confLegend.mid': 'mittel',
@@ -1796,6 +1804,8 @@ const I18N = {
     'sources.sub': 'Wybierz źródło lub użyj średniej z 8 modeli',
     'sources.avgTitle': 'Średnia ze wszystkich serwisów',
     'sources.avgSub': 'Agregacja 8 modeli · prognoza zespołowa',
+    'sources.smartTitle': 'Kombinacja Smart',
+    'sources.smartSub': 'Najlepsze dla każdego parametru · wagi z rzeczywistej dokładności',
     'sources.confHint': 'Kolorowy pasek pod kartą dnia — zgodność 8 modeli:',
     'sources.confLegend.high': 'wiarygodne',
     'sources.confLegend.mid': 'średnie',
@@ -2209,6 +2219,8 @@ const I18N = {
     'sources.sub': 'Vyberte zdroj nebo použijte průměr všech 8 modelů',
     'sources.avgTitle': 'Průměr všech služeb',
     'sources.avgSub': 'Agregace 8 modelů · ansámblová předpověď',
+    'sources.smartTitle': 'Kombinace Smart',
+    'sources.smartSub': 'Nejlepší pro každý parametr · váhy ze skutečné přesnosti',
     'sources.confHint': 'Barevný pruh pod kartou dne — shoda 8 modelů:',
     'sources.confLegend.high': 'spolehlivé',
     'sources.confLegend.mid': 'střední',
@@ -2622,6 +2634,8 @@ const I18N = {
     'sources.sub': 'Choisissez une source ou utilisez la moyenne des 8 modèles',
     'sources.avgTitle': 'Moyenne de tous les services',
     'sources.avgSub': 'Agrégation de 8 modèles · prévision d\'ensemble',
+    'sources.smartTitle': 'Combinaison Smart',
+    'sources.smartSub': 'Le meilleur par paramètre · poids selon la précision réelle',
     'sources.confHint': 'Barre colorée sous la carte du jour — accord des 8 modèles :',
     'sources.confLegend.high': 'fiable',
     'sources.confLegend.mid': 'moyen',
@@ -3034,6 +3048,8 @@ const I18N = {
     'sources.sub': 'Scegli una fonte o usa la media di tutti gli 8 modelli',
     'sources.avgTitle': 'Media di tutti i servizi',
     'sources.avgSub': 'Aggregazione di 8 modelli · previsione di ensemble',
+    'sources.smartTitle': 'Combinazione Smart',
+    'sources.smartSub': 'Il meglio per ogni parametro · pesi dalla precisione reale',
     'sources.confHint': 'Barra colorata sotto la carta del giorno — accordo degli 8 modelli:',
     'sources.confLegend.high': 'affidabile',
     'sources.confLegend.mid': 'medio',
@@ -3446,6 +3462,8 @@ const I18N = {
     'sources.sub': 'Elige una fuente o usa el promedio de los 8 modelos',
     'sources.avgTitle': 'Promedio de todos los servicios',
     'sources.avgSub': 'Agregación de 8 modelos · previsión por ensemble',
+    'sources.smartTitle': 'Combinación Smart',
+    'sources.smartSub': 'Lo mejor por parámetro · pesos según la precisión real',
     'sources.confHint': 'Barra de color bajo la tarjeta del día — acuerdo de los 8 modelos:',
     'sources.confLegend.high': 'fiable',
     'sources.confLegend.mid': 'medio',
@@ -3858,6 +3876,8 @@ const I18N = {
     'sources.sub': 'Alege o sursă sau folosește media celor 8 modele',
     'sources.avgTitle': 'Media tuturor serviciilor',
     'sources.avgSub': 'Agregare a 8 modele · prognoză de ansamblu',
+    'sources.smartTitle': 'Combinație Smart',
+    'sources.smartSub': 'Cel mai bun pe fiecare parametru · ponderi din precizia reală',
     'sources.confHint': 'Bara colorată sub cardul zilei — acordul celor 8 modele:',
     'sources.confLegend.high': 'fiabil',
     'sources.confLegend.mid': 'mediu',
@@ -4270,6 +4290,8 @@ const I18N = {
     'sources.sub': 'Válassz forrást vagy használd mind a 8 modell átlagát',
     'sources.avgTitle': 'Minden szolgáltatás átlaga',
     'sources.avgSub': '8 modell aggregálása · együttes előrejelzés',
+    'sources.smartTitle': 'Smart kombináció',
+    'sources.smartSub': 'Paraméterenként a legjobb · súlyok a valós pontosságból',
     'sources.confHint': 'Színes sáv a napi kártya alatt — a 8 modell egyetértése:',
     'sources.confLegend.high': 'megbízható',
     'sources.confLegend.mid': 'közepes',
@@ -4682,6 +4704,8 @@ const I18N = {
     'sources.sub': 'Vyberte zdroj alebo použite priemer všetkých 8 modelov',
     'sources.avgTitle': 'Priemer všetkých služieb',
     'sources.avgSub': 'Agregácia 8 modelov · súborová predpoveď',
+    'sources.smartTitle': 'Kombinácia Smart',
+    'sources.smartSub': 'Najlepšie pre každý parameter · váhy zo skutočnej presnosti',
     'sources.confHint': 'Farebný pruh pod kartou dňa — zhoda 8 modelov:',
     'sources.confLegend.high': 'spoľahlivé',
     'sources.confLegend.mid': 'stredné',
@@ -5094,6 +5118,8 @@ const I18N = {
     'sources.sub': 'Escolhe uma fonte ou usa a média dos 8 modelos',
     'sources.avgTitle': 'Média de todos os serviços',
     'sources.avgSub': 'Agregação de 8 modelos · previsão por ensemble',
+    'sources.smartTitle': 'Combinação Smart',
+    'sources.smartSub': 'O melhor por parâmetro · pesos da precisão real',
     'sources.confHint': 'Barra colorida sob o cartão do dia — concordância dos 8 modelos:',
     'sources.confLegend.high': 'fiável',
     'sources.confLegend.mid': 'médio',
@@ -5506,6 +5532,8 @@ const I18N = {
     'sources.sub': 'Kies een bron of gebruik het gemiddelde van alle 8 modellen',
     'sources.avgTitle': 'Gemiddelde van alle diensten',
     'sources.avgSub': 'Aggregatie van 8 modellen · ensemble-voorspelling',
+    'sources.smartTitle': 'Smart-combinatie',
+    'sources.smartSub': 'Beste per parameter · gewichten uit echte nauwkeurigheid',
     'sources.confHint': 'Gekleurde balk onder de dagkaart — overeenstemming van 8 modellen:',
     'sources.confLegend.high': 'betrouwbaar',
     'sources.confLegend.mid': 'gemiddeld',
@@ -5918,6 +5946,8 @@ const I18N = {
     'sources.sub': 'Bir kaynak seç veya 8 modelin ortalamasını kullan',
     'sources.avgTitle': 'Tüm hizmetlerin ortalaması',
     'sources.avgSub': '8 model toplaması · topluluk tahmini',
+    'sources.smartTitle': 'Smart kombinasyon',
+    'sources.smartSub': 'Her parametrede en iyisi · gerçek doğruluktan ağırlıklar',
     'sources.confHint': 'Gün kartının altındaki renkli çubuk — 8 modelin uyumu:',
     'sources.confLegend.high': 'güvenilir',
     'sources.confLegend.mid': 'orta',
@@ -6330,6 +6360,8 @@ const I18N = {
     'sources.sub': 'Επίλεξε πηγή ή χρησιμοποίησε τον μέσο όρο 8 μοντέλων',
     'sources.avgTitle': 'Μέσος όρος όλων των υπηρεσιών',
     'sources.avgSub': 'Συνάθροιση 8 μοντέλων · πρόγνωση συνόλου',
+    'sources.smartTitle': 'Συνδυασμός Smart',
+    'sources.smartSub': 'Το καλύτερο ανά παράμετρο · βάρη από πραγματική ακρίβεια',
     'sources.confHint': 'Χρωματιστή μπάρα κάτω από την κάρτα ημέρας — συμφωνία 8 μοντέλων:',
     'sources.confLegend.high': 'αξιόπιστα',
     'sources.confLegend.mid': 'μέτρια',
@@ -7735,6 +7767,7 @@ const DAY_SHORT_TO_KEY = {
 function localizeDayShort(name) { return DAY_SHORT_TO_KEY[name] ? t(DAY_SHORT_TO_KEY[name]) : name; }
 
 // Имя источника (для SOURCES.shortName, который захардкожен по-русски)
+// «Smart» и имена моделей (ECMWF, GFS…) — language-neutral, без перевода.
 function localizeSourceName(src) {
   if (!src) return '';
   if (src.id === 'avg') return t('sources.avgShort');
@@ -8230,6 +8263,10 @@ function uvGauge(value) {
 // (Google GraphCast у Open-Meteo сейчас не публикует данные — добавим если/когда вернётся.)
 const SOURCES = [
   { id: 'avg',       name: 'Среднее по всем моделям', shortName: 'Среднее по 8 моделям', tag: 'AVG',       color: '#00d4ff', model: null },
+  // v1.52.0: Smart — per-variable заострённые веса (Tmax/Tmin/осадки — отдельные
+  // наборы) + медиана для мм + дебиаз членов. model:null — вычисляется из тех же
+  // 8 моделей, отдельный запрос не нужен. Имя «Smart» — language-neutral.
+  { id: 'smart',     name: '🎯 Smart',                 shortName: 'Smart',                tag: 'SMART',     color: '#4ade80', model: null },
   { id: 'ecmwf',     name: 'ECMWF IFS 0.25°',          shortName: 'ECMWF',                tag: 'ECMWF',     color: '#60a5fa', model: 'ecmwf_ifs025' },
   { id: 'aifs',      name: 'ECMWF AIFS (AI)',          shortName: 'ECMWF AIFS',           tag: 'AIFS',      color: '#22d3ee', model: 'ecmwf_aifs025_single' },
   { id: 'gfs',       name: 'NOAA GFS',                 shortName: 'GFS',                  tag: 'GFS',       color: '#a78bfa', model: 'gfs_seamless' },
@@ -8410,6 +8447,7 @@ function getCurrentSource() { return getSrc(currentSourceId); }
 // тёплые/глубокие варианты тех же оттенков.
 const SOURCE_COLORS_LIGHT = {
   avg:       '#c0532a',  // terracotta вместо cyan
+  smart:     '#16a34a',  // deep green
   ecmwf:     '#2563eb',  // deep blue
   aifs:      '#0891b2',  // deep cyan
   gfs:       '#7c3aed',  // deep purple
@@ -9008,6 +9046,29 @@ window.dumpPrecip = function() {
   console.log('\nЕсли occMiss/amtMAE везде «—» — ground truth ещё не накопился (см. groundTruthSamples).');
 };
 
+// === DEBUG: dumpSmart() — per-variable веса Smart-комбинации (v1.52.0). ===
+// Для каждого параметра — своё распределение весов (заострение α=2).
+// «Дебиаз» — какое смещение вычитается из вклада модели (только температура).
+window.dumpSmart = function() {
+  const modelIds = SOURCES.filter(s => s.model).map(s => s.id);
+  const metrics = [['tempMax', 'Tmax'], ['tempMin', 'Tmin'], ['precip', 'Осадки'], [null, 'Композит (прочее)']];
+  console.log(`🎯 Smart-веса: w = 1/(err + ${WEIGHT_EPSILON})^${SMART_ALPHA}, shrink к uniform до ${SMART_FULL_SHARP_SAMPLES} замеров.\n`);
+  for (const [metric, label] of metrics) {
+    const w = computeSmartWeights(modelIds, metric);
+    const rows = modelIds
+      .map(id => ({ id, pct: (w.get(id) || 0) * 100 }))
+      .sort((a, b) => b.pct - a.pct);
+    console.log(`— ${label}:`);
+    for (const r of rows) console.log(`  ${r.id.padEnd(10)} ${r.pct.toFixed(1).padStart(5)}%`);
+  }
+  console.log('\nДебиаз членов (вычитается из вклада модели до смешивания):');
+  for (const id of modelIds) {
+    const b = getEffectiveBiasForSource(id);
+    if (!b) continue;
+    console.log(`  ${id.padEnd(10)} Tmax ${b.tempMax >= 0 ? '−' : '+'}${Math.abs(b.tempMax).toFixed(1)}°, Tmin ${b.tempMin >= 0 ? '−' : '+'}${Math.abs(b.tempMin).toFixed(1)}°`);
+  }
+};
+
 // Toast «Выбранный источник не самый точный» — показывается один раз за сессию
 // после первого успешного fetch + accuracy update. Подсказывает пользователю
 // что есть более точная модель для его локации, и предлагает переключиться.
@@ -9186,7 +9247,8 @@ function renderHeroAccuracyHint() {
   if (!top && avgScore == null) { el.innerHTML = ''; return; }
 
   // Общее число моделей (для красивого «№N из 7» с учётом моделей без данных)
-  const totalModels = SOURCES.filter(s => s.id !== 'avg').length;
+  // v1.52.0: считаем только реальные модели (smart — виртуальный источник)
+  const totalModels = SOURCES.filter(s => s.model).length;
 
   let txt = '';
   let cls = 'hap-leader';
@@ -11450,7 +11512,8 @@ function renderSourceButtons() {
   const grid = document.getElementById('sourcesGrid');
   grid.innerHTML = '';
   const bestId = bestAccuracySourceId();
-  SOURCES.filter(s => s.id !== 'avg').forEach(s => {
+  // v1.52.0: в грид — только реальные модели; smart имеет свою main-кнопку
+  SOURCES.filter(s => s.model).forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'source-btn' + (currentSourceId === s.id ? ' active' : '');
     btn.dataset.source = s.id;
@@ -11473,6 +11536,8 @@ function selectSource(id) {
   try { localStorage.setItem(SOURCE_STORAGE_KEY, id); } catch (e) {}
   // Update buttons state
   document.getElementById('mainSrcBtn').classList.toggle('active', id === 'avg');
+  const smartBtn = document.getElementById('smartSrcBtn');
+  if (smartBtn) smartBtn.classList.toggle('active', id === 'smart');
   document.querySelectorAll('.source-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.source === id);
   });
@@ -11485,6 +11550,8 @@ function selectSource(id) {
 }
 
 document.getElementById('mainSrcBtn').addEventListener('click', () => selectSource('avg'));
+const _smartSrcBtn = document.getElementById('smartSrcBtn');
+if (_smartSrcBtn) _smartSrcBtn.addEventListener('click', () => selectSource('smart'));
 
 /* ============================================
    MODAL
@@ -14612,6 +14679,325 @@ function applyBiasCorrection(forecast, srcId) {
   return forecast;
 }
 
+// === 🎯 Smart-комбинация (v1.52.0) ===
+// Идея: не «среднее по моделям» и не «жёсткий выбор лучшей», а per-variable
+// взвешивание с заострением. Для каждого параметра (Tmax / Tmin / осадки) —
+// СВОЙ набор весов из накопленной точности именно по этому параметру:
+//   w_i = 1 / (err_i + ε)^α,  α = 2 (заострение).
+// Когда одна модель стабильно лучше с заметным отрывом — она получает
+// доминирующий вес (фактически «самая точная модель»), когда модели
+// неразличимы — веса ровные (честный ансамбль). Защиты:
+// – модель с < SMART_MIN_SAMPLES замеров по параметру → медианный вес;
+// – < половины моделей с данными → uniform;
+// – глобальный shrink к uniform пока минимальная выборка < SMART_FULL_SHARP:
+//   sharp = (minN − MIN) / (FULL − MIN), w = sharp·w_заострённый + (1−sharp)·uniform.
+const SMART_ALPHA = 2;
+const SMART_MIN_SAMPLES = 3;
+const SMART_FULL_SHARP_SAMPLES = 10;
+
+// metric: 'tempMax' | 'tempMin' | 'precip' | null (композит — для полей без
+// собственной статистики: ветер, давление, влажность и т.д.)
+function computeSmartWeights(modelIds, metric) {
+  const state = ACCURACY_STATE;
+  const n = modelIds.length;
+  if (n === 0) return new Map();
+  const uniform = 1 / n;
+  if (!state || !state.stats) return new Map(modelIds.map(id => [id, uniform]));
+
+  const errOf = (s) => {
+    if (!s) return null;
+    if (metric === 'tempMax') return (typeof s.tempMaxMAE === 'number') ? s.tempMaxMAE : null;
+    if (metric === 'tempMin') return (typeof s.tempMinMAE === 'number') ? s.tempMinMAE : null;
+    if (metric === 'precip') {
+      const ps = precipScoreOf(s);
+      if (ps != null) return ps;
+      return (typeof s.precipMAE === 'number') ? s.precipMAE / 10 : null; // legacy fallback
+    }
+    return (typeof accuracyComposite === 'function') ? accuracyComposite(s) : null;
+  };
+  const nOf = (s) => {
+    if (!s) return 0;
+    if (metric === 'tempMax') return s.nTempMax || 0;
+    if (metric === 'tempMin') return s.nTempMin || 0;
+    if (metric === 'precip') return s.nPrecipGt || s.nPrecip || 0;
+    return s.n || 0;
+  };
+
+  const raw = {};
+  let useful = 0;
+  let minN = Infinity;
+  for (const id of modelIds) {
+    const s = state.stats[id];
+    const err = errOf(s);
+    if (!s || nOf(s) < SMART_MIN_SAMPLES || err == null) { raw[id] = null; continue; }
+    raw[id] = 1 / Math.pow(err + WEIGHT_EPSILON, SMART_ALPHA);
+    useful++;
+    minN = Math.min(minN, nOf(s));
+  }
+  if (useful < Math.max(2, Math.ceil(n / 2))) {
+    return new Map(modelIds.map(id => [id, uniform]));
+  }
+  const valid = Object.values(raw).filter(v => v != null).sort((a, b) => a - b);
+  const median = valid[Math.floor(valid.length / 2)];
+  for (const id of modelIds) if (raw[id] == null) raw[id] = median;
+  const sum = Object.values(raw).reduce((a, b) => a + b, 0);
+  const sharp = Math.max(0, Math.min(1,
+    (minN - SMART_MIN_SAMPLES) / (SMART_FULL_SHARP_SAMPLES - SMART_MIN_SAMPLES)));
+  const result = new Map();
+  for (const id of modelIds) {
+    result.set(id, (raw[id] / sum) * sharp + uniform * (1 - sharp));
+  }
+  return result;
+}
+
+// Взвешенная медиана: значение, на котором накопленный вес достигает 50%.
+// Для мм осадков устойчивее среднего: «2 модели из 8 видят ливень» не
+// превращается в «морось везде», а одиночный выброс не растягивает дождь.
+function weightedMedian(pairs) {
+  if (!pairs || pairs.length === 0) return null;
+  const sorted = pairs.slice().sort((a, b) => a.v - b.v);
+  const total = sorted.reduce((s, p) => s + p.w, 0);
+  if (total <= 0) return sorted[Math.floor(sorted.length / 2)].v;
+  let acc = 0;
+  for (const p of sorted) {
+    acc += p.w;
+    if (acc >= total / 2) return p.v;
+  }
+  return sorted[sorted.length - 1].v;
+}
+
+// Сборка Smart-прогноза из распарсенных моделей.
+// Отличия от computeAverageForecast:
+//   1) per-variable веса: Tmax-веса для тёплых часов, Tmin-веса для холодных
+//      (плавная интерполяция по позиции часа в суточном ходе — как в
+//      applyBiasCorrection), precip-веса для осадков, композитные для прочего;
+//   2) температура членов ДЕБИАЗИТСЯ до усреднения (MOS-lite): известное
+//      систематическое смещение модели (vs реальные наблюдения, с shrinkage
+//      и кэпом из effectiveBias) вычитается из её вклада. Осадки не дебиазим:
+//      для мм нет накопленного bias, а prob-bias построен на legacy-прокси;
+//   3) мм-поля (pmm почасовой, precipSum дневной) — взвешенная МЕДИАНА.
+// Display-вызов applyBiasCorrection(copy,'smart') остаётся: пока stats.smart
+// нет — это no-op, а когда Smart накопит собственные замеры — скорректирует
+// остаточное смещение готового продукта (двойного счёта нет: члены дебиазятся
+// своей статистикой, продукт — своей).
+function computeSmartForecast(forecasts, modelIds) {
+  if (!forecasts || forecasts.length === 0) return [];
+  const wMaxMap  = computeSmartWeights(modelIds, 'tempMax');
+  const wMinMap  = computeSmartWeights(modelIds, 'tempMin');
+  const wPrecMap = computeSmartWeights(modelIds, 'precip');
+  const wCompMap = computeSmartWeights(modelIds, null);
+  const biases = modelIds.map(id => getEffectiveBiasForSource(id)); // null | {tempMax,tempMin,precip}
+
+  const numDays = Math.min(...forecasts.map(f => f.length));
+  const result = [];
+
+  for (let i = 0; i < numDays; i++) {
+    const items = [];
+    for (let k = 0; k < forecasts.length; k++) {
+      const day = forecasts[k][i];
+      if (!day) continue;
+      items.push({
+        day,
+        wMax:  wMaxMap.get(modelIds[k])  ?? 0,
+        wMin:  wMinMap.get(modelIds[k])  ?? 0,
+        wPrec: wPrecMap.get(modelIds[k]) ?? 0,
+        wComp: wCompMap.get(modelIds[k]) ?? 0,
+        bias: biases[k],
+        origMax: day.max,
+        origMin: day.min
+      });
+    }
+    if (items.length === 0) continue;
+    const first = items[0].day;
+
+    // --- Проход 1: дебиазнутые температуры всех членов по часам + средняя ---
+    const numHours = Math.min(...items.map(it => it.day.hourly.length));
+    const debiasedT = [];   // debiasedT[h][j] — t члена j в час h (после дебиаза)
+    const meanT = [];       // невзвешенное среднее по часу (для ratio суточного хода)
+    for (let h = 0; h < numHours; h++) {
+      const row = items.map(it => {
+        const hour = it.day.hourly[h];
+        if (!hour || typeof hour.t !== 'number') return null;
+        let tv = hour.t;
+        if (it.bias) {
+          const range = (typeof it.origMax === 'number' && typeof it.origMin === 'number')
+            ? it.origMax - it.origMin : 0;
+          const ratio = range > 0 ? Math.max(0, Math.min(1, (tv - it.origMin) / range)) : 0.5;
+          tv = tv - (it.bias.tempMin + (it.bias.tempMax - it.bias.tempMin) * ratio);
+        }
+        return tv;
+      });
+      debiasedT.push(row);
+      const vals = row.filter(v => v != null);
+      meanT.push(vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null);
+    }
+    const meanVals = meanT.filter(v => v != null);
+    const dayMeanMin = meanVals.length ? Math.min(...meanVals) : 0;
+    const dayMeanMax = meanVals.length ? Math.max(...meanVals) : 0;
+    const dayMeanRange = dayMeanMax - dayMeanMin;
+
+    // --- Проход 2: сборка часов ---
+    const hourly = [];
+    for (let h = 0; h < numHours; h++) {
+      const hourPairs = items.map((it, j) => ({ it, j, hour: it.day.hourly[h] })).filter(p => p.hour);
+      if (hourPairs.length === 0) continue;
+
+      // Позиция часа в суточном ходе: 0 = ночной минимум, 1 = дневной пик.
+      // Определяет смесь Tmin-весов и Tmax-весов для этого часа.
+      const ratio = (dayMeanRange > 0 && meanT[h] != null)
+        ? Math.max(0, Math.min(1, (meanT[h] - dayMeanMin) / dayMeanRange))
+        : 0.5;
+
+      // Температура: per-hour веса, дебиазнутые значения.
+      let tSum = 0, tW = 0;
+      for (const p of hourPairs) {
+        const tv = debiasedT[h][p.j];
+        if (tv == null) continue;
+        const w = p.it.wMin + (p.it.wMax - p.it.wMin) * ratio;
+        tSum += tv * w; tW += w;
+      }
+      const tVal = tW > 0 ? Math.round(tSum / tW) : 0;
+
+      // feels: те же per-hour веса и тот же сдвиг дебиаза (через t-дельту члена).
+      let fSum = 0, fW = 0;
+      for (const p of hourPairs) {
+        if (typeof p.hour.feels !== 'number') continue;
+        const tShift = (debiasedT[h][p.j] != null && typeof p.hour.t === 'number')
+          ? debiasedT[h][p.j] - p.hour.t : 0;
+        const w = p.it.wMin + (p.it.wMax - p.it.wMin) * ratio;
+        fSum += (p.hour.feels + tShift) * w; fW += w;
+      }
+
+      // Универсальный взвешенный mean по выбранному весу.
+      const wMean = (field, weightOf, decimals = 0) => {
+        let s = 0, w = 0;
+        for (const p of hourPairs) {
+          const v = p.hour[field];
+          if (typeof v !== 'number' || Number.isNaN(v)) continue;
+          const pw = weightOf(p.it);
+          s += v * pw; w += pw;
+        }
+        if (w === 0) return null;
+        const f = Math.pow(10, decimals);
+        return Math.round((s / w) * f) / f;
+      };
+      const byPrec = (it) => it.wPrec;
+      const byComp = (it) => it.wComp;
+
+      // Осадки: prob — взвешенный mean (precip-веса), мм — взвешенная МЕДИАНА.
+      const pmmPairs = hourPairs
+        .filter(p => typeof p.hour.pmm === 'number')
+        .map(p => ({ v: p.hour.pmm, w: p.it.wPrec }));
+      const pmmVal = pmmPairs.length ? Math.round(weightedMedian(pmmPairs) * 10) / 10 : 0;
+
+      const tValsRaw = hourPairs.map(p => debiasedT[h][p.j]).filter(v => v != null);
+      const wcVals = hourPairs.map(p => p.hour.wc).filter(v => typeof v === 'number');
+      const smartWc = wcVals.length > 0 ? Math.max(...wcVals) : null;
+
+      hourly.push({
+        h: hourPairs[0].hour.h,
+        t: tVal,
+        p: wMean('p', byPrec, 0) ?? 0,
+        pmm: pmmVal,
+        pmmMax: Math.max(0, ...hourPairs.map(p => typeof p.hour.pmm === 'number' ? p.hour.pmm : 0)),
+        w: wMean('w', byComp, 0) ?? 0,
+        c: smartWc != null ? codeToCondition(smartWc) : (hourPairs[0].hour.c || 'cloudy'),
+        feels: fW > 0 ? Math.round(fSum / fW) : null,
+        cl: wMean('cl', byComp, 0),
+        pr: wMean('pr', byComp, 0),
+        hum: wMean('hum', byComp, 0),
+        dp:  wMean('dp', byComp, 0),
+        uvi: wMean('uvi', byComp, 1),
+        vis: wMean('vis', byComp, 1),
+        sr:  wMean('sr', byComp, 0),
+        tMin: tValsRaw.length ? Math.round(Math.min(...tValsRaw)) : null,
+        tMax: tValsRaw.length ? Math.round(Math.max(...tValsRaw)) : null,
+        wc: smartWc,
+        cape: wMean('cape', byComp, 0),
+        li:   wMean('li', byComp, 1)
+      });
+    }
+    downgradeWetHourlyConditions(hourly);
+
+    // --- Дневные поля ---
+    const dMean = (field, weightOf) => {
+      let s = 0, w = 0;
+      for (const it of items) {
+        const v = it.day[field];
+        if (typeof v !== 'number' || Number.isNaN(v)) continue;
+        const pw = weightOf(it);
+        s += v * pw; w += pw;
+      }
+      return w > 0 ? s / w : 0;
+    };
+    const byPrecD = (it) => it.wPrec;
+    const byCompD = (it) => it.wComp;
+
+    const sumPairs = items
+      .filter(it => typeof it.day.precipSum === 'number')
+      .map(it => ({ v: it.day.precipSum, w: it.wPrec }));
+    const precipSumVal = sumPairs.length ? Math.round(weightedMedian(sumPairs) * 10) / 10 : 0;
+
+    const uvVals = items.map(it => it.day.uv).filter(v => typeof v === 'number' && !Number.isNaN(v));
+    const smartUv = uvVals.length > 0 ? Math.round(uvVals.reduce((a, b) => a + b, 0) / uvVals.length) : null;
+    const smartWind = Math.round(dMean('wind', byCompD));
+
+    const trendCounts = {};
+    items.forEach(it => { if (it.day.pressureTrend) trendCounts[it.day.pressureTrend] = (trendCounts[it.day.pressureTrend] || 0) + 1; });
+    const smartTrend = Object.keys(trendCounts).sort((a, b) => trendCounts[b] - trendCounts[a])[0] || 'stable';
+
+    // Индекс согласия — та же формула что в AVG (по сырому разбросу моделей).
+    const dayMaxes = items.map(it => it.day.max).filter(v => typeof v === 'number');
+    const dayMins  = items.map(it => it.day.min).filter(v => typeof v === 'number');
+    const maxRange = dayMaxes.length > 1 ? Math.max(...dayMaxes) - Math.min(...dayMaxes) : 0;
+    const minRange = dayMins.length > 1  ? Math.max(...dayMins)  - Math.min(...dayMins)  : 0;
+    const tempRange = Math.max(maxRange, minRange);
+    let confidence = Math.round(99 - (tempRange / 5) * 49);
+    if (confidence > 99) confidence = 99;
+    if (confidence < 30) confidence = 30;
+
+    // max/min дня — из почасовой ленты (консистентность с модалкой, как в AVG).
+    const hourlyTs = hourly.map(hh => hh.t).filter(v => typeof v === 'number');
+
+    result.push({
+      id: first.id,
+      name: first.name,
+      dayName: first.dayName,
+      date: first.date,
+      condition: first.condition,
+      condLabel: first.condLabel,
+      condDescKey: first.condDescKey,
+      condDesc: first.condDesc,
+      max: hourlyTs.length ? Math.max(...hourlyTs) : Math.round(dMean('max', (it) => it.wMax)),
+      min: hourlyTs.length ? Math.min(...hourlyTs) : Math.round(dMean('min', (it) => it.wMin)),
+      precip: Math.round(dMean('precip', byPrecD)),
+      precipSum: precipSumVal,
+      wind: smartWind,
+      windDir: first.windDir,
+      windGust: Math.round(dMean('windGust', byCompD)),
+      humidity: Math.round(dMean('humidity', byCompD)),
+      pressure: Math.round(dMean('pressure', byCompD)),
+      pressureTrend: smartTrend,
+      dewPoint: Math.round(dMean('dewPoint', byCompD)),
+      sunrise: first.sunrise,
+      sunset: first.sunset,
+      dayLen: first.dayLen,
+      moonIllum: first.moonIllum,
+      moonName: first.moonName,
+      moonWaxing: first.moonWaxing,
+      uv: smartUv,
+      uvLabel: smartUv != null ? uvLabelFromValue(smartUv) : null,
+      aqi: first.aqi,
+      aqiLabel: first.aqiLabel,
+      confidence,
+      tempRange: Math.round(tempRange * 10) / 10,
+      modelCount: items.length,
+      hourly
+    });
+  }
+  return result;
+}
+
 // Состояние accuracy — обновляется в refreshForecast, читается в renderAccuracy.
 let ACCURACY_STATE = { stats: {}, sampleSize: 0 };
 
@@ -15028,6 +15414,14 @@ async function parseAllModels(data, sources) {
     const weightsMap = computeEnsembleWeights(validIds);
     const weights = validIds.map(id => weightsMap.get(id));
     result.avg = computeAverageForecast(validForecasts, weights);
+    // v1.52.0: 🎯 Smart — per-variable заострённые веса + медиана мм + дебиаз
+    // членов. Из тех же распарсенных моделей, без дополнительных запросов.
+    // При любой ошибке тихо пропускаем — getForecast('smart') откатится на avg.
+    try {
+      result.smart = computeSmartForecast(validForecasts, validIds);
+    } catch (e) {
+      console.warn('Smart-комбинация не собралась, fallback на avg:', e);
+    }
   }
   // v1.39.0: 15-минутный nowcast осадков. Не привязан к моделям — у Open-Meteo
   // это глобальный набор (на основе gfs_seamless + ассимиляции). Кладём в
@@ -16237,11 +16631,8 @@ function updateNotifSourceLabel() {
   if (!el) return;
   const src = (typeof getCurrentSource === 'function') ? getCurrentSource() : null;
   if (!src) { el.textContent = t('sources.avgShort'); return; }
-  if (src.id === 'avg') {
-    el.textContent = t('sources.avgShort');
-  } else {
-    el.textContent = src.shortName || src.name;
-  }
+  // localizeSourceName покрывает avg (i18n), smart и модели (language-neutral)
+  el.textContent = localizeSourceName(src);
 }
 
 async function startPairing() {

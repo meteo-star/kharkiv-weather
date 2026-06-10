@@ -212,7 +212,10 @@ export function tWindDir(deg, lang) {
 // Источник данных в footer'е «по данным X». ID источника + язык → строка.
 const SOURCE_NAMES = {
   ecmwf: 'ECMWF', aifs: 'ECMWF AIFS (AI)', gfs: 'GFS', icon: 'ICON',
-  gem: 'GEM', jma: 'JMA', mf: 'Météo-France', ukmo: 'UKMO'
+  gem: 'GEM', jma: 'JMA', mf: 'Météo-France', ukmo: 'UKMO',
+  // v1.52.0: Smart на сайте; в боте пока считается как avg (этап 4 даст
+  // боту те же per-variable веса), но footer честно показывает выбор юзера.
+  smart: '🎯 Smart'
 };
 const SOURCE_AVG_LABEL = {
   ru: 'усреднения 8 моделей',
