@@ -12019,6 +12019,18 @@ function renderPollen() {
    ============================================ */
 
 // Уровень риска грозы для одного часа: 0 нет / 1 слабый / 2 умеренный / 3 высокий / 4 опасный.
+//
+// v1.54.4 (фидбек юзера «откуда гроза, если нет дождя»): уровни ≥2 требуют
+// ПОДТВЕРЖДЕНИЯ, а не одного сигнала:
+// – Грозовой weather_code (95/96/99) — это MAX по 8 моделям: один outlier
+//   из восьми «рисует грозу» всем. Без CAPE ≥ 500 код капится на уровень 1
+//   (тот же урок, что v1.42.4 в боте — теперь и на сайте).
+// – Чистый CAPE — это запас энергии («топливо»), а не сама гроза: жарким
+//   влажным летом CAPE 800–1500 висит сутками без единой капли. Без
+//   влажностного сигнала (вероятность ≥30% или мм > 0) капится на уровень 1 —
+//   легенда уровня 1 ровно об этом: «возможны отдалённые грозы, без осадков».
+// Попутно закрыта дыра старой лестницы: CAPE > 2500 при LI ≥ −6 проваливался
+// мимо всех веток в «нет риска» (диапазоны были жёстко capped ≤2500).
 function stormRiskLevel(h) {
   if (!h) return 0;
   const wc   = typeof h.wc === 'number' ? h.wc : null;
@@ -12026,26 +12038,31 @@ function stormRiskLevel(h) {
   const li   = typeof h.li === 'number' ? h.li : null;
   const pp   = typeof h.p === 'number' ? h.p : null;
   const cl   = typeof h.cl === 'number' ? h.cl : null;
+  const pmm  = typeof h.pmm === 'number' ? h.pmm : null;
 
-  // 4 — опасный: явный код грозы с градом/ливнем или экстремальные CAPE+LI
-  if (wc === 99) return 4;
-  if (cape != null && cape > 2500 && li != null && li < -6) return 4;
+  const capeV = cape != null ? cape : -1;
+  const codeStorm = wc === 95 || wc === 96 || wc === 99;
+  const capeOk = capeV >= 500;                                  // код подтверждён энергией
+  const wet = (pp != null && pp >= 30) || (pmm != null && pmm >= 0.1); // влажностный сигнал
 
-  // 3 — высокий: гроза с умеренным/сильным градом, или CAPE 1500..2500
-  if (wc === 96) return 3;
-  if (cape != null && cape > 1500 && cape <= 2500) return 3;
-  if (cape != null && cape > 1500 && li != null && li < -4) return 3;
+  // Базовый уровень по прежним порогам (cape > 1500 теперь без верхней
+  // границы — закрывает дыру с CAPE > 2500 при умеренном LI)
+  let level = 0;
+  if (wc === 99) level = 4;
+  else if (capeV > 2500 && li != null && li < -6) level = 4;
+  else if (wc === 96) level = 3;
+  else if (capeV > 1500) level = 3;
+  else if (wc === 95) level = 2;
+  else if (capeV > 800) level = 2;
+  else if (capeV >= 300) level = 1;
+  else if (pp != null && pp >= 60 && cl != null && cl >= 70 && capeV >= 200) level = 1;
 
-  // 2 — умеренный: обычный грозовой код, или CAPE 800..1500
-  if (wc === 95) return 2;
-  if (cape != null && cape > 800 && cape <= 1500) return 2;
-
-  // 1 — слабый: малый CAPE (нестабильность есть, но энергии мало),
-  // либо высокая вероятность дождя при густой облачности и небольшом CAPE.
-  if (cape != null && cape >= 300 && cape <= 800) return 1;
-  if (pp != null && pp >= 60 && cl != null && cl >= 70 && cape != null && cape >= 200) return 1;
-
-  return 0;
+  // Подтверждения для уровней ≥2
+  if (level >= 2) {
+    if (codeStorm && !capeOk) level = 1;        // outlier-код без энергии
+    else if (!codeStorm && !wet) level = 1;     // голая термодинамика без влаги
+  }
+  return level;
 }
 
 // Строит массив 48 часов начиная с ТЕКУЩЕГО часа из AVG-прогноза.
