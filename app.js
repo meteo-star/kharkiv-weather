@@ -40,6 +40,10 @@ const I18N = {
     'metric.rain.light': 'слабый дождь',
     'metric.rain.moderate': 'умеренный дождь',
     'metric.rain.heavy': 'сильный дождь',
+    'metric.rain.possible': 'возможен слабый дождь',
+    'metric.rain.peakSub': 'пик {peak} мм/ч · ({mm} мм всего) · {desc}',
+    'precip.byEns': 'ансамбль ECMWF (всего {n})',
+    'precip.ensNote': 'Вероятности = доля вариантов прогноза с осадками (всего {n}, ансамбль ECMWF)',
     'metric.pressure.falling': 'Понижается ↓',
     'metric.pressure.rising': 'Растёт ↑',
     'metric.pressure.stable': 'Стабильное',
@@ -469,6 +473,10 @@ const I18N = {
     'metric.rain.light': 'слабкий дощ',
     'metric.rain.moderate': 'помірний дощ',
     'metric.rain.heavy': 'сильний дощ',
+    'metric.rain.possible': 'можливий слабкий дощ',
+    'metric.rain.peakSub': 'пік {peak} мм/год · ({mm} мм всього) · {desc}',
+    'precip.byEns': 'ансамбль ECMWF (усього {n})',
+    'precip.ensNote': 'Імовірності = частка варіантів прогнозу з опадами (усього {n}, ансамбль ECMWF)',
     'metric.pressure.falling': 'Знижується ↓',
     'metric.pressure.rising': 'Зростає ↑',
     'metric.pressure.stable': 'Стабільний',
@@ -885,6 +893,10 @@ const I18N = {
     'metric.rain.light': 'light rain',
     'metric.rain.moderate': 'moderate rain',
     'metric.rain.heavy': 'heavy rain',
+    'metric.rain.possible': 'light rain possible',
+    'metric.rain.peakSub': 'peak {peak} mm/h · ({mm} mm total) · {desc}',
+    'precip.byEns': 'from {n} runs',
+    'precip.ensNote': 'Probabilities = share of {n} forecast runs (ECMWF ensemble)',
     'metric.pressure.falling': 'Falling ↓',
     'metric.pressure.rising': 'Rising ↑',
     'metric.pressure.stable': 'Stable',
@@ -1300,6 +1312,10 @@ const I18N = {
     'metric.rain.light': 'leichter Regen',
     'metric.rain.moderate': 'mäßiger Regen',
     'metric.rain.heavy': 'starker Regen',
+    'metric.rain.possible': 'leichter Regen möglich',
+    'metric.rain.peakSub': 'Spitze {peak} mm/h · ({mm} mm gesamt) · {desc}',
+    'precip.byEns': 'aus {n} Läufen',
+    'precip.ensNote': 'Wahrscheinlichkeiten = Anteil von {n} Prognoseläufen (ECMWF-Ensemble)',
     'metric.pressure.falling': 'Fällt ↓',
     'metric.pressure.rising': 'Steigt ↑',
     'metric.pressure.stable': 'Stabil',
@@ -1715,6 +1731,10 @@ const I18N = {
     'metric.rain.light': 'słaby deszcz',
     'metric.rain.moderate': 'umiarkowany deszcz',
     'metric.rain.heavy': 'silny deszcz',
+    'metric.rain.possible': 'możliwy słaby deszcz',
+    'metric.rain.peakSub': 'szczyt {peak} mm/h · ({mm} mm łącznie) · {desc}',
+    'precip.byEns': 'z {n} przebiegów',
+    'precip.ensNote': 'Prawdopodobieństwa = udział z {n} wariantów prognozy (wiązka ECMWF)',
     'metric.pressure.falling': 'Spada ↓',
     'metric.pressure.rising': 'Rośnie ↑',
     'metric.pressure.stable': 'Stabilne',
@@ -2131,6 +2151,10 @@ const I18N = {
     'metric.rain.light': 'slabý déšť',
     'metric.rain.moderate': 'mírný déšť',
     'metric.rain.heavy': 'silný déšť',
+    'metric.rain.possible': 'možný slabý déšť',
+    'metric.rain.peakSub': 'špička {peak} mm/h · ({mm} mm celkem) · {desc}',
+    'precip.byEns': 'z {n} běhů',
+    'precip.ensNote': 'Pravděpodobnosti = podíl z {n} variant předpovědi (ansámbl ECMWF)',
     'metric.pressure.falling': 'Klesá ↓',
     'metric.pressure.rising': 'Stoupá ↑',
     'metric.pressure.stable': 'Stabilní',
@@ -2547,6 +2571,10 @@ const I18N = {
     'metric.rain.light': 'pluie légère',
     'metric.rain.moderate': 'pluie modérée',
     'metric.rain.heavy': 'forte pluie',
+    'metric.rain.possible': 'pluie légère possible',
+    'metric.rain.peakSub': 'pic {peak} mm/h · ({mm} mm au total) · {desc}',
+    'precip.byEns': 'sur {n} simulations',
+    'precip.ensNote': 'Probabilités = part des {n} simulations (ensemble ECMWF)',
     'metric.pressure.falling': 'En baisse ↓',
     'metric.pressure.rising': 'En hausse ↑',
     'metric.pressure.stable': 'Stable',
@@ -2962,6 +2990,10 @@ const I18N = {
     'metric.rain.light': 'pioggia leggera',
     'metric.rain.moderate': 'pioggia moderata',
     'metric.rain.heavy': 'pioggia forte',
+    'metric.rain.possible': 'possibile pioggia leggera',
+    'metric.rain.peakSub': 'picco {peak} mm/h · ({mm} mm totali) · {desc}',
+    'precip.byEns': 'su {n} simulazioni',
+    'precip.ensNote': 'Probabilità = quota di {n} simulazioni (ensemble ECMWF)',
     'metric.pressure.falling': 'In calo ↓',
     'metric.pressure.rising': 'In aumento ↑',
     'metric.pressure.stable': 'Stabile',
@@ -3377,6 +3409,10 @@ const I18N = {
     'metric.rain.light': 'lluvia ligera',
     'metric.rain.moderate': 'lluvia moderada',
     'metric.rain.heavy': 'lluvia fuerte',
+    'metric.rain.possible': 'posible lluvia ligera',
+    'metric.rain.peakSub': 'pico {peak} mm/h · ({mm} mm en total) · {desc}',
+    'precip.byEns': 'de {n} simulaciones',
+    'precip.ensNote': 'Probabilidades = proporción de {n} simulaciones (ensemble ECMWF)',
     'metric.pressure.falling': 'Cae ↓',
     'metric.pressure.rising': 'Sube ↑',
     'metric.pressure.stable': 'Estable',
@@ -3792,6 +3828,10 @@ const I18N = {
     'metric.rain.light': 'ploaie ușoară',
     'metric.rain.moderate': 'ploaie moderată',
     'metric.rain.heavy': 'ploaie puternică',
+    'metric.rain.possible': 'posibilă ploaie slabă',
+    'metric.rain.peakSub': 'vârf {peak} mm/h · ({mm} mm în total) · {desc}',
+    'precip.byEns': 'din {n} simulări',
+    'precip.ensNote': 'Probabilități = pondere din {n} simulări (ansamblu ECMWF)',
     'metric.pressure.falling': 'În scădere ↓',
     'metric.pressure.rising': 'În creștere ↑',
     'metric.pressure.stable': 'Stabilă',
@@ -4207,6 +4247,10 @@ const I18N = {
     'metric.rain.light': 'gyenge eső',
     'metric.rain.moderate': 'mérsékelt eső',
     'metric.rain.heavy': 'erős eső',
+    'metric.rain.possible': 'gyenge eső lehetséges',
+    'metric.rain.peakSub': 'csúcs {peak} mm/h · (összesen {mm} mm) · {desc}',
+    'precip.byEns': '{n} futtatásból',
+    'precip.ensNote': 'Valószínűségek = {n} előrejelzési futtatás aránya (ECMWF együttes)',
     'metric.pressure.falling': 'Csökken ↓',
     'metric.pressure.rising': 'Emelkedik ↑',
     'metric.pressure.stable': 'Stabil',
@@ -4622,6 +4666,10 @@ const I18N = {
     'metric.rain.light': 'slabý dážď',
     'metric.rain.moderate': 'mierny dážď',
     'metric.rain.heavy': 'silný dážď',
+    'metric.rain.possible': 'možný slabý dážď',
+    'metric.rain.peakSub': 'špička {peak} mm/h · ({mm} mm spolu) · {desc}',
+    'precip.byEns': 'z {n} behov',
+    'precip.ensNote': 'Pravdepodobnosti = podiel z {n} variantov predpovede (ansámbel ECMWF)',
     'metric.pressure.falling': 'Klesá ↓',
     'metric.pressure.rising': 'Stúpa ↑',
     'metric.pressure.stable': 'Stabilný',
@@ -5037,6 +5085,10 @@ const I18N = {
     'metric.rain.light': 'chuva fraca',
     'metric.rain.moderate': 'chuva moderada',
     'metric.rain.heavy': 'chuva forte',
+    'metric.rain.possible': 'possível chuva fraca',
+    'metric.rain.peakSub': 'pico {peak} mm/h · ({mm} mm no total) · {desc}',
+    'precip.byEns': 'de {n} simulações',
+    'precip.ensNote': 'Probabilidades = fração de {n} simulações (ensemble ECMWF)',
     'metric.pressure.falling': 'A descer ↓',
     'metric.pressure.rising': 'A subir ↑',
     'metric.pressure.stable': 'Estável',
@@ -5452,6 +5504,10 @@ const I18N = {
     'metric.rain.light': 'lichte regen',
     'metric.rain.moderate': 'matige regen',
     'metric.rain.heavy': 'zware regen',
+    'metric.rain.possible': 'lichte regen mogelijk',
+    'metric.rain.peakSub': 'piek {peak} mm/u · ({mm} mm totaal) · {desc}',
+    'precip.byEns': 'uit {n} berekeningen',
+    'precip.ensNote': 'Kansen = aandeel van {n} berekeningen (ECMWF-ensemble)',
     'metric.pressure.falling': 'Dalend ↓',
     'metric.pressure.rising': 'Stijgend ↑',
     'metric.pressure.stable': 'Stabiel',
@@ -5867,6 +5923,10 @@ const I18N = {
     'metric.rain.light': 'hafif yağmur',
     'metric.rain.moderate': 'orta yağmur',
     'metric.rain.heavy': 'kuvvetli yağmur',
+    'metric.rain.possible': 'hafif yağmur olası',
+    'metric.rain.peakSub': 'tepe {peak} mm/sa · (toplam {mm} mm) · {desc}',
+    'precip.byEns': '{n} senaryodan',
+    'precip.ensNote': 'Olasılıklar = {n} tahmin senaryosunun payı (ECMWF topluluğu)',
     'metric.pressure.falling': 'Düşüyor ↓',
     'metric.pressure.rising': 'Yükseliyor ↑',
     'metric.pressure.stable': 'Sabit',
@@ -6282,6 +6342,10 @@ const I18N = {
     'metric.rain.light': 'ελαφρά βροχή',
     'metric.rain.moderate': 'μέτρια βροχή',
     'metric.rain.heavy': 'δυνατή βροχή',
+    'metric.rain.possible': 'πιθανή ασθενής βροχή',
+    'metric.rain.peakSub': 'κορύφωση {peak} mm/h · ({mm} mm συνολικά) · {desc}',
+    'precip.byEns': 'από {n} σενάρια',
+    'precip.ensNote': 'Πιθανότητες = ποσοστό από {n} σενάρια πρόγνωσης (σύνολο ECMWF)',
     'metric.pressure.falling': 'Πέφτει ↓',
     'metric.pressure.rising': 'Ανεβαίνει ↑',
     'metric.pressure.stable': 'Σταθερή',
@@ -7795,11 +7859,24 @@ function localizeSourceFullName(src) {
   return src.name;
 }
 
-// Описание осадков по проценту
-function precipDescKey(p) {
-  if (!p || p < 5) return 'metric.rain.none';
-  if (p < 30) return 'metric.rain.light';
-  if (p < 60) return 'metric.rain.moderate';
+// Интенсивность осадков по ПИКОВОЙ мм/ч (v1.54.1).
+// Раньше считалась по ВЕРОЯТНОСТИ — «80% шанс лёгкой мороси» помечался как
+// «сильный дождь» (вероятность отвечает «будет ли дождь», интенсивность —
+// «какой он»; смешивать нельзя). Smart с честной ансамблевой вероятностью
+// 80% при 0.2 мм обнажил этот баг.
+// Пороги под сглаженные модельные мм/ч (грид-среднее ниже точечных пиков):
+//   <1 — слабый, <4 — умеренный, ≥4 — сильный.
+// Если мм ~0, но вероятность ≥30% (ансамбль видит шанс) — «возможен слабый
+// дождь»: честное описание случая «вероятно, но мало».
+function precipIntensityKey(peakMm, totalMm, probPct) {
+  const peak = typeof peakMm === 'number' ? peakMm : 0;
+  const total = typeof totalMm === 'number' ? totalMm : 0;
+  if (peak < 0.1 && total < 0.1) {
+    if (typeof probPct === 'number' && probPct >= 30) return 'metric.rain.possible';
+    return 'metric.rain.none';
+  }
+  if (peak < 1) return 'metric.rain.light';
+  if (peak < 4) return 'metric.rain.moderate';
   return 'metric.rain.heavy';
 }
 
@@ -8848,16 +8925,21 @@ function renderHeroAndMetrics(forecast) {
       ? today.precipSum
       : Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
   }
-  // Подпись: «пик 0.2 мм/ч · 0.7 мм всего · слабый дождь»
-  // (если pик 0 — показываем только описание; если сумма 0 — лаконичнее)
-  const desc = t(precipDescKey(dayPrecipPct));
+  // Подпись: «пик 0.2 мм/ч · (0.2 мм всего) · слабый дождь»
+  // v1.54.1: интенсивность по мм (не по вероятности!) + строка локализована
+  // (раньше была ru-hardcode для всех 16 языков).
+  const desc = t(precipIntensityKey(peak, mm, dayPrecipPct));
   let subText;
   if (peak > 0) {
-    subText = `пик ${peak} мм/ч · (${mm} мм всего) · ${desc}`;
+    subText = t('metric.rain.peakSub', { peak, mm, desc });
   } else if (mm > 0) {
-    subText = `${mm} мм · ${desc}`;
+    subText = t('metric.rainSub', { mm, desc });
   } else {
     subText = desc;
+  }
+  // v1.54.1: в Smart вероятность — доля сценариев ансамбля; помечаем источник
+  if (currentSourceId === 'smart' && today.precipBand && today.precipBand.members) {
+    subText += ` · ${t('precip.byEns', { n: today.precipBand.members })}`;
   }
   document.getElementById('metricRainSub').textContent = subText;
 
@@ -11082,6 +11164,16 @@ function renderPrecipChart(forecast) {
   const typesBar = document.getElementById('precipTypes');
   if (!canvas || !inner || !daysBar || !typesBar) return;
   if (!forecast || !forecast[0] || !forecast[0].hourly) return;
+
+  // v1.54.1: атрибуция ансамбля — в Smart вероятности осадков считаются как
+  // доля сценариев ECMWF ENS; поясняем это прямо в модалке деталей.
+  const ensNote = document.getElementById('precipEnsNote');
+  if (ensNote) {
+    const band = forecast[0].precipBand;
+    const showEns = currentSourceId === 'smart' && band && band.members;
+    ensNote.style.display = showEns ? '' : 'none';
+    if (showEns) ensNote.textContent = `🎲 ${t('precip.ensNote', { n: band.members })}`;
+  }
   // Lazy-load Chart.js — если ещё не загружен, дотягиваем и пере-вызываем себя
   if (!window.Chart) {
     ensureChartJs().then(() => renderPrecipChart(forecast)).catch(err => {
