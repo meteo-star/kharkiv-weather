@@ -511,6 +511,13 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .main-source-btn.smart .msb-arrow{color:#4ade80}
 .main-source-btn.smart .msb-check{background:#4ade80;box-shadow:0 0 20px rgba(74,222,128,0.6)}
 
+/* v1.54.1: атрибуция ансамбля в «Детали осадков» */
+.precip-ens-note{
+  margin-top:6px;font-size:10.5px;font-family:'JetBrains Mono',monospace;
+  color:rgba(74,222,128,0.8);line-height:1.4;
+}
+:root[data-theme="light"] .precip-ens-note{color:#15803d}
+
 /* v1.53.0: строка ансамблевой полосы осадков (P10–P90) в модалке дня */
 .modal-ens-band{
   margin:10px 0 2px;padding:8px 12px;border-radius:10px;
