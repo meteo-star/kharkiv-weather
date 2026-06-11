@@ -8877,57 +8877,48 @@ function renderHeroAndMetrics(forecast) {
   document.getElementById('metricWindSub').textContent =
     t('metric.windSub', { dir: localizeWindDirFull(today.windDir), gust: fmtWind(today.windGust) });
 
-  // Для конкретных моделей Open-Meteo НЕ возвращает precipitation_probability_max
-  // (это поле есть только в ensemble/best_match). Приходит 0. Если так —
-  // оценим % синтетически: из max hourly probability за сегодня, либо
-  // (если и hourly probability пуст) из доли часов с pmm > 0.1.
-  let dayPrecipPct = today.precip || 0;
-  if (dayPrecipPct === 0 && today.hourly && Array.isArray(today.hourly)) {
-    let wetHours = 0;
-    let maxHourlyProb = 0;
-    let totalHours = 0;
-    for (const h of today.hourly) {
-      totalHours++;
-      if ((h.pmm || 0) > 0.1) wetHours++;
-      if (typeof h.p === 'number' && h.p > maxHourlyProb) maxHourlyProb = h.p;
-    }
-    if (maxHourlyProb > 0) {
-      dayPrecipPct = maxHourlyProb;
-    } else if (wetHours > 0 && totalHours > 0) {
-      dayPrecipPct = Math.max(15, Math.round((wetHours / totalHours) * 100));
-    }
-  }
-  document.getElementById('metricRain').innerHTML = `${dayPrecipPct}<span>%</span>`;
-  // Считаем сумму осадков с ТЕКУЩЕГО часа до конца суток — это то, что юзер
-  // видит на почасовом графике «Детали осадков» (он показывает будущие часы).
-  // Так плитка визуально совпадает с графиком. Если будущих часов нет
-  // (например, сейчас 23:50) или сумма ~0 — fallback на daily.precipSum
-  // (полные сутки) или старую аппроксимацию.
-  // Считаем сумму осадков и пиковую интенсивность с ТЕКУЩЕГО часа до конца
-  // суток — обе метрики берутся из того же массива hourly, что использует
-  // почасовой график «Детали осадков». Сумма (мм) и пик (мм/ч) — разные
-  // метрики, юзер видит обе для контекста.
+  // v1.54.3: ПЛИТКА «ОСАДКИ» = ОСТАТОК ДНЯ (фидбек юзера 11.06).
+  // Раньше % брался за ВЕСЬ день (today.precip), а fallback-мм — из полных
+  // суток (precipSum): в 10 утра после прошедшего дождя плитка показывала
+  // «80% · ~0.5 мм · слабый дождь», тогда как график «Детали осадков»
+  // (только будущие часы) — ровный ноль. Теперь все три числа плитки
+  // (%, мм, пик) считаются с ТЕКУЩЕГО часа до конца суток — то же окно,
+  // что у графика. Разделение зон ответственности: полные сутки — карточка
+  // дня «СЕГОДНЯ», остаток дня — эта плитка, ближайшие 2ч — nowcast на hero.
+  let dayPrecipPct = 0;
   let mm = 0;
   let peak = 0;
-  if (today.hourly && Array.isArray(today.hourly)) {
+  if (today.hourly && Array.isArray(today.hourly) && NOW_HOUR < today.hourly.length) {
+    let maxP = 0, wetHours = 0, totalHours = 0;
     for (let i = NOW_HOUR; i < today.hourly.length; i++) {
-      const v = today.hourly[i]?.pmm;
+      const h = today.hourly[i];
+      if (!h) continue;
+      totalHours++;
+      const v = h.pmm;
       if (typeof v === 'number') {
         mm += v;
         if (v > peak) peak = v;
+        if (v > 0.1) wetHours++;
       }
+      if (typeof h.p === 'number' && h.p > maxP) maxP = h.p;
     }
     mm = Math.round(mm * 10) / 10;
     peak = Math.round(peak * 10) / 10;
+    // % — max почасовой вероятности по оставшимся часам. Одиночные модели
+    // probability не отдают (всегда 0) — тогда синтетика из доли мокрых часов.
+    if (maxP > 0) dayPrecipPct = maxP;
+    else if (wetHours > 0 && totalHours > 0) dayPrecipPct = Math.max(15, Math.round((wetHours / totalHours) * 100));
+  } else {
+    // hourly недоступен (битый/старый кэш) — деградация на дневные поля
+    dayPrecipPct = today.precip || 0;
+    mm = (typeof today.precipSum === 'number' && today.precipSum > 0) ? today.precipSum : 0;
   }
-  if (mm <= 0) {
-    mm = (typeof today.precipSum === 'number' && today.precipSum > 0)
-      ? today.precipSum
-      : Math.max(0, Math.round(today.precip * 0.07 * 10) / 10);
-  }
-  // Подпись: «пик 0.2 мм/ч · (0.2 мм всего) · слабый дождь»
-  // v1.54.1: интенсивность по мм (не по вероятности!) + строка локализована
-  // (раньше была ru-hardcode для всех 16 языков).
+  document.getElementById('metricRain').innerHTML = `${dayPrecipPct}<span>%</span>`;
+  // Подпись: «пик 0.2 мм/ч · (0.2 мм всего) · слабый дождь».
+  // Fallback'а на полные сутки больше НЕТ: если впереди сухо — мм честно 0,
+  // а случай «вероятность заметная, мм ~0» опишет precipIntensityKey
+  // («возможен слабый дождь» при ≥30%). v1.54.1: интенсивность по мм,
+  // не по вероятности; строка локализована ×16.
   const desc = t(precipIntensityKey(peak, mm, dayPrecipPct));
   let subText;
   if (peak > 0) {
