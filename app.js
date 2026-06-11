@@ -353,6 +353,8 @@ const I18N = {
     'apiErr.retry': 'Повторить',
     'apiErr.cors': 'Сервис погоды недоступен (CORS / сеть)',
     'apiErr.timeout': 'Превышено время ожидания ответа от Open-Meteo',
+    'apiErr.degradedTitle': 'Упрощённый прогноз',
+    'apiErr.degraded': 'Open-Meteo перегружен — показана одна модель вместо 8. Полный прогноз вернётся при следующем обновлении.',
     'apiErr.http': 'Ошибка ответа сервера ({code})',
     'apiErr.parse': 'Не удалось разобрать ответ Open-Meteo',
     'settings.aria': 'Настройки',
@@ -773,6 +775,8 @@ const I18N = {
     'apiErr.retry': 'Повторити',
     'apiErr.cors': 'Сервіс погоди недоступний (CORS / мережа)',
     'apiErr.timeout': 'Перевищено час очікування відповіді від Open-Meteo',
+    'apiErr.degradedTitle': 'Спрощений прогноз',
+    'apiErr.degraded': 'Open-Meteo перевантажений — показано одну модель замість 8. Повний прогноз повернеться з наступним оновленням.',
     'apiErr.http': 'Помилка відповіді сервера ({code})',
     'apiErr.parse': 'Не вдалося розібрати відповідь Open-Meteo',
     'settings.aria': 'Налаштування',
@@ -1193,6 +1197,8 @@ const I18N = {
     'apiErr.retry': 'Retry',
     'apiErr.cors': 'Weather service unreachable (CORS / network)',
     'apiErr.timeout': 'Open-Meteo response timed out',
+    'apiErr.degradedTitle': 'Simplified forecast',
+    'apiErr.degraded': 'Open-Meteo is overloaded — showing one model instead of 8. The full forecast will return on the next refresh.',
     'apiErr.http': 'Server response error ({code})',
     'apiErr.parse': 'Failed to parse Open-Meteo response',
     'settings.aria': 'Settings',
@@ -1612,6 +1618,8 @@ const I18N = {
     'apiErr.retry': 'Erneut versuchen',
     'apiErr.cors': 'Wetterdienst nicht erreichbar (CORS / Netzwerk)',
     'apiErr.timeout': 'Open-Meteo-Antwort zeitüberschritten',
+    'apiErr.degradedTitle': 'Vereinfachte Prognose',
+    'apiErr.degraded': 'Open-Meteo ist überlastet — ein Modell statt 8 wird angezeigt. Die volle Prognose kommt beim nächsten Update zurück.',
     'apiErr.http': 'Server-Antwortfehler ({code})',
     'apiErr.parse': 'Open-Meteo-Antwort konnte nicht verarbeitet werden',
     'settings.aria': 'Einstellungen',
@@ -2031,6 +2039,8 @@ const I18N = {
     'apiErr.retry': 'Spróbuj ponownie',
     'apiErr.cors': 'Serwis pogodowy niedostępny (CORS / sieć)',
     'apiErr.timeout': 'Przekroczono czas odpowiedzi Open-Meteo',
+    'apiErr.degradedTitle': 'Uproszczona prognoza',
+    'apiErr.degraded': 'Open-Meteo jest przeciążone — pokazujemy jeden model zamiast 8. Pełna prognoza wróci przy następnym odświeżeniu.',
     'apiErr.http': 'Błąd odpowiedzi serwera ({code})',
     'apiErr.parse': 'Nie udało się przetworzyć odpowiedzi Open-Meteo',
     'settings.aria': 'Ustawienia',
@@ -2451,6 +2461,8 @@ const I18N = {
     'apiErr.retry': 'Zkusit znovu',
     'apiErr.cors': 'Služba počasí nedostupná (CORS / síť)',
     'apiErr.timeout': 'Vypršel časový limit odpovědi Open-Meteo',
+    'apiErr.degradedTitle': 'Zjednodušená předpověď',
+    'apiErr.degraded': 'Open-Meteo je přetížené — zobrazen jeden model místo 8. Plná předpověď se vrátí při příští aktualizaci.',
     'apiErr.http': 'Chyba odpovědi serveru ({code})',
     'apiErr.parse': 'Nepodařilo se zpracovat odpověď Open-Meteo',
     'settings.aria': 'Nastavení',
@@ -2871,6 +2883,8 @@ const I18N = {
     'apiErr.retry': 'Réessayer',
     'apiErr.cors': 'Service météo inaccessible (CORS / réseau)',
     'apiErr.timeout': 'Délai de réponse Open-Meteo dépassé',
+    'apiErr.degradedTitle': 'Prévision simplifiée',
+    'apiErr.degraded': 'Open-Meteo est surchargé — un modèle au lieu de 8. La prévision complète reviendra à la prochaine mise à jour.',
     'apiErr.http': 'Erreur de réponse serveur ({code})',
     'apiErr.parse': 'Impossible d\'analyser la réponse Open-Meteo',
     'settings.aria': 'Paramètres',
@@ -3290,6 +3304,8 @@ const I18N = {
     'apiErr.retry': 'Riprova',
     'apiErr.cors': 'Servizio meteo irraggiungibile (CORS / rete)',
     'apiErr.timeout': 'Timeout della risposta Open-Meteo',
+    'apiErr.degradedTitle': 'Previsione semplificata',
+    'apiErr.degraded': 'Open-Meteo è sovraccarico — un modello invece di 8. La previsione completa tornerà al prossimo aggiornamento.',
     'apiErr.http': 'Errore di risposta del server ({code})',
     'apiErr.parse': 'Impossibile analizzare la risposta Open-Meteo',
     'settings.aria': 'Impostazioni',
@@ -3709,6 +3725,8 @@ const I18N = {
     'apiErr.retry': 'Reintentar',
     'apiErr.cors': 'Servicio meteorológico inaccesible (CORS / red)',
     'apiErr.timeout': 'Tiempo de respuesta de Open-Meteo agotado',
+    'apiErr.degradedTitle': 'Pronóstico simplificado',
+    'apiErr.degraded': 'Open-Meteo está sobrecargado — un modelo en lugar de 8. El pronóstico completo volverá en la próxima actualización.',
     'apiErr.http': 'Error de respuesta del servidor ({code})',
     'apiErr.parse': 'No se pudo analizar la respuesta de Open-Meteo',
     'settings.aria': 'Ajustes',
@@ -4128,6 +4146,8 @@ const I18N = {
     'apiErr.retry': 'Reîncearcă',
     'apiErr.cors': 'Serviciu meteo inaccesibil (CORS / rețea)',
     'apiErr.timeout': 'Timpul de răspuns Open-Meteo a expirat',
+    'apiErr.degradedTitle': 'Prognoză simplificată',
+    'apiErr.degraded': 'Open-Meteo este supraîncărcat — un model în loc de 8. Prognoza completă revine la următoarea actualizare.',
     'apiErr.http': 'Eroare răspuns server ({code})',
     'apiErr.parse': 'Nu s-a putut analiza răspunsul Open-Meteo',
     'settings.aria': 'Setări',
@@ -4547,6 +4567,8 @@ const I18N = {
     'apiErr.retry': 'Újrapróbálás',
     'apiErr.cors': 'Az időjárási szolgáltatás nem elérhető (CORS / hálózat)',
     'apiErr.timeout': 'Az Open-Meteo válasz időtúllépést szenvedett',
+    'apiErr.degradedTitle': 'Egyszerűsített előrejelzés',
+    'apiErr.degraded': 'Az Open-Meteo túlterhelt — egy modell látható 8 helyett. A teljes előrejelzés a következő frissítéskor tér vissza.',
     'apiErr.http': 'Szerverválasz-hiba ({code})',
     'apiErr.parse': 'Nem sikerült feldolgozni az Open-Meteo választ',
     'settings.aria': 'Beállítások',
@@ -4966,6 +4988,8 @@ const I18N = {
     'apiErr.retry': 'Skúsiť znova',
     'apiErr.cors': 'Služba počasia nedostupná (CORS / sieť)',
     'apiErr.timeout': 'Vypršal časový limit odpovede Open-Meteo',
+    'apiErr.degradedTitle': 'Zjednodušená predpoveď',
+    'apiErr.degraded': 'Open-Meteo je preťažené — zobrazený jeden model namiesto 8. Plná predpoveď sa vráti pri ďalšej aktualizácii.',
     'apiErr.http': 'Chyba odpovede servera ({code})',
     'apiErr.parse': 'Nepodarilo sa spracovať odpoveď Open-Meteo',
     'settings.aria': 'Nastavenia',
@@ -5385,6 +5409,8 @@ const I18N = {
     'apiErr.retry': 'Tentar novamente',
     'apiErr.cors': 'Serviço meteorológico inacessível (CORS / rede)',
     'apiErr.timeout': 'Tempo de resposta da Open-Meteo esgotado',
+    'apiErr.degradedTitle': 'Previsão simplificada',
+    'apiErr.degraded': 'O Open-Meteo está sobrecarregado — um modelo em vez de 8. A previsão completa volta na próxima atualização.',
     'apiErr.http': 'Erro de resposta do servidor ({code})',
     'apiErr.parse': 'Falha ao analisar a resposta da Open-Meteo',
     'settings.aria': 'Definições',
@@ -5804,6 +5830,8 @@ const I18N = {
     'apiErr.retry': 'Opnieuw proberen',
     'apiErr.cors': 'Weerservice onbereikbaar (CORS / netwerk)',
     'apiErr.timeout': 'Open-Meteo antwoord time-out',
+    'apiErr.degradedTitle': 'Vereenvoudigde voorspelling',
+    'apiErr.degraded': 'Open-Meteo is overbelast — één model i.p.v. 8. De volledige voorspelling keert terug bij de volgende update.',
     'apiErr.http': 'Server-antwoordfout ({code})',
     'apiErr.parse': 'Kon Open-Meteo antwoord niet verwerken',
     'settings.aria': 'Instellingen',
@@ -6223,6 +6251,8 @@ const I18N = {
     'apiErr.retry': 'Tekrar dene',
     'apiErr.cors': 'Hava servisi erişilemez (CORS / ağ)',
     'apiErr.timeout': 'Open-Meteo yanıt zaman aşımı',
+    'apiErr.degradedTitle': 'Basitleştirilmiş tahmin',
+    'apiErr.degraded': 'Open-Meteo aşırı yüklü — 8 yerine tek model gösteriliyor. Tam tahmin sonraki güncellemede dönecek.',
     'apiErr.http': 'Sunucu yanıt hatası ({code})',
     'apiErr.parse': 'Open-Meteo yanıtı ayrıştırılamadı',
     'settings.aria': 'Ayarlar',
@@ -6642,6 +6672,8 @@ const I18N = {
     'apiErr.retry': 'Δοκιμή ξανά',
     'apiErr.cors': 'Η υπηρεσία καιρού δεν είναι προσβάσιμη (CORS / δίκτυο)',
     'apiErr.timeout': 'Λήξη χρόνου απόκρισης Open-Meteo',
+    'apiErr.degradedTitle': 'Απλοποιημένη πρόγνωση',
+    'apiErr.degraded': 'Το Open-Meteo είναι υπερφορτωμένο — ένα μοντέλο αντί για 8. Η πλήρης πρόγνωση επιστρέφει στην επόμενη ανανέωση.',
     'apiErr.http': 'Σφάλμα απόκρισης διακομιστή ({code})',
     'apiErr.parse': 'Αποτυχία ανάλυσης απόκρισης Open-Meteo',
     'settings.aria': 'Ρυθμίσεις',
@@ -15973,12 +16005,15 @@ const apiErrorRetry  = document.getElementById('apiErrorRetry');
 
 function showApiError(errCode, detail) {
   if (!apiErrorBanner) return;
-  apiErrorTitle.textContent = t('apiErr.title');
+  // v1.54.5: 'degraded' — не ошибка, а предупреждение (данные показаны,
+  // но по одной модели вместо 8 из-за перегрузки Open-Meteo)
+  apiErrorTitle.textContent = errCode === 'degraded' ? t('apiErr.degradedTitle') : t('apiErr.title');
   let msg;
   if (errCode === 'cors')    msg = t('apiErr.cors');
   else if (errCode === 'timeout') msg = t('apiErr.timeout');
   else if (errCode === 'http')    msg = t('apiErr.http', { code: detail || '?' });
   else if (errCode === 'parse')   msg = t('apiErr.parse');
+  else if (errCode === 'degraded') msg = t('apiErr.degraded');
   else msg = t('apiErr.msg');
   apiErrorMsg.textContent = msg;
   apiErrorRetry.textContent = t('apiErr.retry');
@@ -16083,9 +16118,25 @@ async function refreshForecast(force = false) {
       // v1.53.0: ансамблевые осадки ECMWF ENS (51 член) — для Smart-источника.
       fetchEnsemblePrecip(currentLocation.lat, currentLocation.lon)
     ]);
-    // Основной прогноз обязателен — если он упал, бросаем ошибку дальше
-    if (results[0].status === 'rejected') throw results[0].reason;
-    const data       = results[0].value;
+    // Основной прогноз обязателен. v1.54.5: при инциденте Open-Meteo
+    // (11.06.2026) деградация была ИЗБИРАТЕЛЬНОЙ — лёгкие запросы отвечали,
+    // тяжёлый multi-model (8 моделей × 17 переменных) висел бесконечно.
+    // Поэтому при падении тяжёлого пробуем лёгкий best_match (одна модель):
+    // честный упрощённый прогноз с предупреждением лучше, чем баннер ошибки
+    // поверх устаревшего кэша.
+    let degraded = false;
+    let data;
+    if (results[0].status === 'fulfilled') {
+      data = results[0].value;
+    } else {
+      try {
+        data = await fetchOpenMeteo(currentLocation.lat, currentLocation.lon, null);
+        degraded = true;
+        console.warn('Open-Meteo: multi-model запрос упал, работаем на best_match (degraded mode)');
+      } catch (e2) {
+        throw results[0].reason; // и лёгкий не прошёл — полноценная ошибка
+      }
+    }
     const aqiData    = results[1].status === 'fulfilled' ? results[1].value : null;
     const climateData = results[2].status === 'fulfilled' ? results[2].value : null;
     CLIMATE_DATA = climateData;
@@ -16101,7 +16152,16 @@ async function refreshForecast(force = false) {
     try {
       ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
     } catch (e) { /* без accuracy parseAllModels всё равно работает с uniform */ }
-    const byModel = await parseAllModels(data, SOURCES, ensembleData);
+    let byModel;
+    if (degraded) {
+      // best_match: поля без модельных суффиксов → один прогноз, кладём как
+      // avg; все остальные источники через getForecast() откатятся на него.
+      byModel = { avg: parseOpenMeteoToForecast(data, '') };
+      const m15deg = parseMinutely15(data);
+      if (m15deg && m15deg.length > 0) byModel.__minutely15__ = m15deg;
+    } else {
+      byModel = await parseAllModels(data, SOURCES, ensembleData);
+    }
     if (!byModel.avg || byModel.avg.length === 0) {
       const e = new Error('empty'); e.code = 'parse'; throw e;
     }
@@ -16125,10 +16185,14 @@ async function refreshForecast(force = false) {
     ACTIVE_FORECAST_BY_MODEL = byModel;
     API_STATE.lastSuccess = new Date();
     API_STATE.lastError = null;
-    // Кэш в localStorage — мгновенный показ при следующем открытии в течение 15 минут
-    saveForecastCache(currentLocation.lat, currentLocation.lon, byModel);
-    // Самооценка точности (В7) — копим историю предсказаний и фактов
-    updateAccuracyData(currentLocation.lat, currentLocation.lon, byModel);
+    // v1.54.5: деградированный (best_match) результат НЕ кэшируем и НЕ пишем
+    // в accuracy — следующий refresh снова попробует полный multi-model.
+    if (!degraded) {
+      // Кэш в localStorage — мгновенный показ при следующем открытии в течение 15 минут
+      saveForecastCache(currentLocation.lat, currentLocation.lon, byModel);
+      // Самооценка точности (В7) — копим историю предсказаний и фактов
+      updateAccuracyData(currentLocation.lat, currentLocation.lon, byModel);
+    }
     ACCURACY_STATE = computeAccuracyStats(loadAccuracyData(currentLocation.lat, currentLocation.lon).records);
     // Параллельно — публичная сводка с бота (sync между устройствами)
     fetchAccuracyFromServer(currentLocation.lat, currentLocation.lon);
@@ -16145,6 +16209,8 @@ async function refreshForecast(force = false) {
     renderSourceButtons();
     renderAll();
     updateClock();
+    // v1.54.5: данные показаны, но это одна модель вместо 8 — честно предупреждаем
+    if (degraded) showApiError('degraded');
   } catch (err) {
     if (err.code === 'timeout' && err.name === 'AbortError') return; // тихая отмена при смене города
     console.warn('Open-Meteo error:', err.code, err.message);
