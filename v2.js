@@ -1419,10 +1419,71 @@
   }
 
   /* ============================================================
+     ЭТАП 6 — ОБСЕРВАТОРИЯ
+     Прибор точности: человеческий вывод сверху, полная таблица — в
+     модалке (кнопка). Данные берём ИЗ DOM после renderAccuracy
+     (строка-победитель .acc-row.winner) — статистику не пересчитываем.
+     ============================================================ */
+  function v2BuildObservatory() {
+    if (document.getElementById('v2Observatory')) return;
+    const scroll = document.getElementById('v2DeckScroll');
+    if (!scroll) return;
+    const card = document.createElement('section');
+    card.id = 'v2Observatory';
+    card.className = 'glass v2-observatory';
+    card.innerHTML =
+      '<div class="v2-obs-verdict" id="v2ObsVerdict"></div>' +
+      '<div class="v2-obs-sub" id="v2ObsSub"></div>' +
+      '<button class="v2-obs-open" id="v2ObsOpen" type="button"></button>';
+    scroll.insertBefore(card, scroll.firstChild); // первой, самой крупной в бенто
+    const open = card.querySelector('#v2ObsOpen');
+    open.addEventListener('click', () => {
+      const si = document.getElementById('sourceIndicator');
+      if (si) si.click();
+    });
+  }
+
+  function v2SyncObservatory() {
+    const card = document.getElementById('v2Observatory');
+    if (!card) return;
+    const verdictEl = document.getElementById('v2ObsVerdict');
+    const subEl = document.getElementById('v2ObsSub');
+    const openBtn = document.getElementById('v2ObsOpen');
+    // локализованный ярлык кнопки из app i18n
+    let title = 'accuracy';
+    try { title = t('accuracy.title'); } catch (_) {}
+    openBtn.textContent = '🔭 ' + title + ' →';
+
+    const tbl = document.getElementById('accuracyTable');
+    const empty = document.getElementById('accuracyEmpty');
+    const winnerRow = tbl ? tbl.querySelector('.acc-row.winner') : null;
+    const accumulating = !winnerRow || (tbl && tbl.style.display === 'none') ||
+      (empty && empty.style.display !== 'none');
+
+    if (accumulating) {
+      card.classList.add('v2-obs-accum');
+      // переиспользуем уже локализованный текст накопления из модалки app
+      const titleEl = empty ? empty.querySelector('.acc-empty-title') : null;
+      const progEl = document.getElementById('accuracyProgress');
+      verdictEl.textContent = titleEl ? titleEl.textContent : title;
+      subEl.textContent = progEl ? progEl.textContent : '';
+      return;
+    }
+    card.classList.remove('v2-obs-accum');
+    const nameEl = winnerRow.querySelector('.ac-text');
+    const name = nameEl ? nameEl.textContent.trim() : '';
+    verdictEl.textContent = v2t('v2.obs.bestNow', { src: name });
+    // типичная ошибка лидера — первая метрика-ячейка (Tmax MAE), нейтрально «±X°»
+    const firstVal = winnerRow.querySelector('.acc-metric .acm-val');
+    const err = firstVal ? firstVal.textContent.trim() : '';
+    subEl.textContent = err && err !== '—' ? ('±' + err + '°') : '';
+  }
+
+  /* ============================================================
      Объект V2 — единая точка входа.
      ============================================================ */
   const V2 = {
-    version: 'stage-5',
+    version: 'stage-6',
     booted: false,
     hooks: { renderAll: 0, applyTranslations: 0 },
     sky: new SkyEngine(),
@@ -1484,6 +1545,8 @@
         if (this.time && this.time.ready && !this.time.scrubbing) this.time.rebuild();
         // дни-«горизонты»: температурная полоса (после renderDays)
         v2DecorateDays();
+        // обсерватория: вывод-строка из DOM точности
+        v2SyncObservatory();
       } catch (e) { if (DEBUG) console.warn('[V2] afterRenderAll error', e); }
       if (DEBUG) {
         const s = this.computeScene();
@@ -1518,6 +1581,7 @@
       try { this.time = makeTimeLens(); this.time.mount(); } catch (e) { console.warn('[V2] timeLens.mount error', e); }
       try { v2InitHeader(); } catch (e) { console.warn('[V2] header init error', e); }
       try { v2BuildLayout(); } catch (e) { console.warn('[V2] buildLayout error', e); }
+      try { v2BuildObservatory(); } catch (e) { console.warn('[V2] observatory error', e); }
       try { v2BuildDock(); } catch (e) { console.warn('[V2] buildDock error', e); }
       this.applyTranslations();
       this.afterRenderAll();
@@ -1541,7 +1605,10 @@
   }
   const okR = patch('renderAll', V2.afterRenderAll);
   const okI = patch('applyTranslations', V2.applyTranslations);
-  if (DEBUG) console.log('[V2] monkey-patch: renderAll=' + okR + ', applyTranslations=' + okI);
+  // renderAccuracy вызывается отдельно от renderAll (в applyAll) — патчим, чтобы
+  // обсерватория обновлялась при каждом ре-рендере таблицы точности.
+  const okA = patch('renderAccuracy', function () { v2SyncObservatory(); });
+  if (DEBUG) console.log('[V2] monkey-patch: renderAll=' + okR + ', applyTranslations=' + okI + ', renderAccuracy=' + okA);
 
   raf(() => V2.init());
 })();

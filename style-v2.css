@@ -374,3 +374,55 @@ body.v2 .v2-dock-btn:focus-visible { outline: 2px solid var(--v2-accent); outlin
 
 /* место снизу под плавающий док */
 body.v2 .container { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+
+/* ============================================================
+   ЭТАП 6 — ОБСЕРВАТОРИЯ (прибор точности в палубе)
+   ============================================================ */
+body.v2 .v2-observatory {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  justify-content: center;
+}
+body.v2 .v2-obs-verdict {
+  font-size: 21px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+body.v2 .v2-obs-accum .v2-obs-verdict {
+  font-size: 16px;
+  color: rgba(232, 240, 255, 0.82);
+  font-weight: 500;
+}
+body.v2 .v2-obs-sub {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--v2-accent-strong);
+}
+body.v2 .v2-obs-accum .v2-obs-sub {
+  color: rgba(232, 240, 255, 0.55);
+  font-weight: 500;
+  font-size: 13px;
+}
+body.v2 .v2-obs-open {
+  align-self: flex-start;
+  margin-top: 10px;
+  background: var(--v2-accent-soft);
+  color: var(--v2-accent-strong);
+  border: 1px solid var(--v2-glass-edge);
+  border-radius: 14px;
+  padding: 9px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+body.v2 .v2-obs-open:hover { background: var(--v2-accent); color: #fff; }
+body.v2 .v2-obs-open:focus-visible { outline: 2px solid var(--v2-accent); outline-offset: 2px; }
+@media (min-width: 1024px) {
+  body.v2 #v2Observatory { grid-column: span 12; }
+}
