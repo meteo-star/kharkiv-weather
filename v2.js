@@ -1300,10 +1300,129 @@
   }
 
   /* ============================================================
+     ЭТАП 5 — «Скоро + Глубже + док»
+     ============================================================ */
+  /* цвет по температуре (синий холод → красный жар) */
+  function v2TempColor(c) {
+    const tt = clamp((c + 10) / 45, 0, 1);
+    return 'hsl(' + Math.round(lerp(210, 12, tt)) + ',78%,60%)';
+  }
+  /* Дни-«горизонты»: декорируем .day температурной полосой min→max в общей
+     10-дневной шкале (как Apple Weather). Чистая надстройка над разметкой
+     app.js — обработчики кликов не трогаем. */
+  function v2DecorateDays() {
+    const grid = document.getElementById('daysGrid');
+    if (!grid) return;
+    const days = Array.prototype.slice.call(grid.querySelectorAll('.day'));
+    if (!days.length) return;
+    const parsed = days.map(d => {
+      const hi = parseInt((d.querySelector('.day-hi') || {}).textContent, 10);
+      const lo = parseInt((d.querySelector('.day-lo') || {}).textContent, 10);
+      return { d, hi: isNaN(hi) ? null : hi, lo: isNaN(lo) ? null : lo };
+    });
+    const his = parsed.filter(v => v.hi != null).map(v => v.hi);
+    const los = parsed.filter(v => v.lo != null).map(v => v.lo);
+    if (!his.length || !los.length) return;
+    const gMax = Math.max.apply(null, his), gMin = Math.min.apply(null, los);
+    const range = Math.max(1, gMax - gMin);
+    for (const v of parsed) {
+      if (v.hi == null || v.lo == null) continue;
+      let bar = v.d.querySelector('.v2-day-bar');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.className = 'v2-day-bar';
+        bar.innerHTML = '<div class="v2-day-bar-seg"></div>';
+        const temps = v.d.querySelector('.day-temps');
+        if (temps) temps.parentNode.insertBefore(bar, temps);
+        else v.d.appendChild(bar);
+      }
+      const seg = bar.firstChild;
+      seg.style.left = ((v.lo - gMin) / range * 100) + '%';
+      seg.style.width = Math.max(5, (v.hi - v.lo) / range * 100) + '%';
+      seg.style.background = 'linear-gradient(90deg,' + v2TempColor(v.lo) + ',' + v2TempColor(v.hi) + ')';
+    }
+  }
+
+  /* Перекладка секций: зона «Скоро» (заголовок) + палуба «Глубже» (v2Deck)
+     с page-level карточками. Гроза/радар/точность остаются в своих модалках
+     (доступны кнопками) — функционал не ломаем (правило §4). */
+  function v2BuildLayout() {
+    const container = document.querySelector('body.v2 .container');
+    if (!container || document.getElementById('v2Deck')) return;
+    const hourly = container.querySelector('.hourly-card');
+    if (hourly) {
+      if (!hourly.id) hourly.id = 'v2HourlyCard';
+      if (!document.getElementById('v2ZoneSoon')) {
+        const h = document.createElement('h2');
+        h.id = 'v2ZoneSoon'; h.className = 'v2-zone-title';
+        h.setAttribute('data-v2-i18n', 'v2.zone.soon'); h.textContent = v2t('v2.zone.soon');
+        hourly.parentNode.insertBefore(h, hourly);
+      }
+    }
+    const deck = document.createElement('section');
+    deck.id = 'v2Deck'; deck.className = 'v2-deck';
+    const dh = document.createElement('h2');
+    dh.className = 'v2-zone-title'; dh.setAttribute('data-v2-i18n', 'v2.zone.deeper'); dh.textContent = v2t('v2.zone.deeper');
+    const scroll = document.createElement('div');
+    scroll.id = 'v2DeckScroll'; scroll.className = 'v2-deck-scroll';
+    deck.appendChild(dh); deck.appendChild(scroll);
+    const footer = container.querySelector('.footer-info');
+    if (footer) container.insertBefore(deck, footer); else container.appendChild(deck);
+    ['activityWindowsCard', 'pollenCard', 'climateCard', 'astroPhotoCard'].forEach(id => {
+      const el = document.getElementById(id); if (el) scroll.appendChild(el);
+    });
+  }
+
+  /* Нижний док + scrollspy (IntersectionObserver). */
+  function v2BuildDock() {
+    if (document.getElementById('v2Dock')) return;
+    const ICON = {
+      now: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M19 5l-1.4 1.4M6.4 17.6 5 19"/></svg>',
+      hours: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      days: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+      more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
+    };
+    const ITEMS = [
+      { k: 'now', target: 'heroBlock' },
+      { k: 'hours', target: 'v2HourlyCard' },
+      { k: 'days', target: 'daysWrap' },
+      { k: 'more', target: 'v2Deck' }
+    ];
+    const dock = document.createElement('nav');
+    dock.id = 'v2Dock'; dock.className = 'v2-dock';
+    dock.setAttribute('aria-label', 'V2');
+    dock.innerHTML = ITEMS.map(it =>
+      '<button class="v2-dock-btn" type="button" data-target="' + it.target + '">' +
+      '<span class="v2-dock-ico">' + ICON[it.k] + '</span>' +
+      '<span class="v2-dock-lbl" data-v2-i18n="v2.dock.' + it.k + '">' + v2t('v2.dock.' + it.k) + '</span></button>'
+    ).join('');
+    document.body.appendChild(dock);
+    dock.addEventListener('click', (e) => {
+      const b = e.target.closest('.v2-dock-btn'); if (!b) return;
+      const el = document.getElementById(b.dataset.target);
+      if (el) el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+    // scrollspy
+    const btns = Array.prototype.slice.call(dock.querySelectorAll('.v2-dock-btn'));
+    const order = ITEMS.map(it => it.target);
+    const inter = new Set();
+    const setActive = (id) => btns.forEach(b => b.classList.toggle('active', b.dataset.target === id));
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(en => { if (en.isIntersecting) inter.add(en.target.id); else inter.delete(en.target.id); });
+        const act = order.find(id => inter.has(id));
+        if (act) setActive(act);
+      }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+      order.forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
+    }
+    setActive('heroBlock');
+  }
+
+  /* ============================================================
      Объект V2 — единая точка входа.
      ============================================================ */
   const V2 = {
-    version: 'stage-4',
+    version: 'stage-5',
     booted: false,
     hooks: { renderAll: 0, applyTranslations: 0 },
     sky: new SkyEngine(),
@@ -1363,6 +1482,8 @@
         v2SyncHeader();
         // линза времени: пересобрать ряд под свежие данные (не во время скраба)
         if (this.time && this.time.ready && !this.time.scrubbing) this.time.rebuild();
+        // дни-«горизонты»: температурная полоса (после renderDays)
+        v2DecorateDays();
       } catch (e) { if (DEBUG) console.warn('[V2] afterRenderAll error', e); }
       if (DEBUG) {
         const s = this.computeScene();
@@ -1396,6 +1517,8 @@
       try { this.odometer = makeOdometer(); this.odometer.mount(); } catch (e) { console.warn('[V2] odometer.mount error', e); }
       try { this.time = makeTimeLens(); this.time.mount(); } catch (e) { console.warn('[V2] timeLens.mount error', e); }
       try { v2InitHeader(); } catch (e) { console.warn('[V2] header init error', e); }
+      try { v2BuildLayout(); } catch (e) { console.warn('[V2] buildLayout error', e); }
+      try { v2BuildDock(); } catch (e) { console.warn('[V2] buildDock error', e); }
       this.applyTranslations();
       this.afterRenderAll();
       if (DEBUG) console.log('[V2] init() выполнен, version=' + this.version);
