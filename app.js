@@ -54,7 +54,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Лидер среди моделей',
     'accuracy.hint.modelBetterRank': '🏆 {name} точнее · вы №{rank} из {total}',
     'settings.langPickerTitle': 'Язык интерфейса',
-    'unit.mmhg.short': 'мм',
+    'dock.now': 'Сейчас',
+    'dock.hours': 'Часы',
+    'dock.days': 'Дни',
+    'dock.more': 'Ещё',
+    'dock.aria': 'Навигация по разделам',    'unit.mmhg.short': 'мм',
     'unit.hpa.short': 'гПа',
     'pollen.unit': 'ч/м³',
     'storm.hoursAhead': '+{n}ч',
@@ -517,7 +521,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Лідер серед моделей',
     'accuracy.hint.modelBetterRank': '🏆 {name} точніше · ви №{rank} з {total}',
     'settings.langPickerTitle': 'Мова інтерфейсу',
-    'unit.mmhg.short': 'мм',
+    'dock.now': 'Зараз',
+    'dock.hours': 'Години',
+    'dock.days': 'Дні',
+    'dock.more': 'Ще',
+    'dock.aria': 'Навігація розділами',    'unit.mmhg.short': 'мм',
     'unit.hpa.short': 'гПа',
     'pollen.unit': 'ч/м³',
     'storm.hoursAhead': '+{n}год',
@@ -967,7 +975,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Best among models',
     'accuracy.hint.modelBetterRank': '🏆 {name} is better · you’re #{rank} of {total}',
     'settings.langPickerTitle': 'Interface language',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Now',
+    'dock.hours': 'Hours',
+    'dock.days': 'Days',
+    'dock.more': 'More',
+    'dock.aria': 'Section navigation',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -1416,7 +1428,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Bestes Modell',
     'accuracy.hint.modelBetterRank': '🏆 {name} genauer · Sie sind #{rank} von {total}',
     'settings.langPickerTitle': 'Sprache der Oberfläche',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Jetzt',
+    'dock.hours': 'Stunden',
+    'dock.days': 'Tage',
+    'dock.more': 'Mehr',
+    'dock.aria': 'Abschnittsnavigation',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -1865,7 +1881,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Najlepszy z modeli',
     'accuracy.hint.modelBetterRank': '🏆 {name} dokładniejszy · jesteś #{rank} z {total}',
     'settings.langPickerTitle': 'Język interfejsu',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Teraz',
+    'dock.hours': 'Godziny',
+    'dock.days': 'Dni',
+    'dock.more': 'Więcej',
+    'dock.aria': 'Nawigacja po sekcjach',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -2315,7 +2335,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Nejlepší z modelů',
     'accuracy.hint.modelBetterRank': '🏆 {name} přesnější · jste #{rank} z {total}',
     'settings.langPickerTitle': 'Jazyk rozhraní',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Teď',
+    'dock.hours': 'Hodiny',
+    'dock.days': 'Dny',
+    'dock.more': 'Více',
+    'dock.aria': 'Navigace po sekcích',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -2765,7 +2789,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Meilleur des modèles',
     'accuracy.hint.modelBetterRank': '🏆 {name} plus précis · vous êtes n°{rank} sur {total}',
     'settings.langPickerTitle': 'Langue de l\'interface',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Maintenant',
+    'dock.hours': 'Heures',
+    'dock.days': 'Jours',
+    'dock.more': 'Plus',
+    'dock.aria': 'Navigation par sections',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -3214,7 +3242,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Migliore tra i modelli',
     'accuracy.hint.modelBetterRank': '🏆 {name} più accurato · sei #{rank} su {total}',
     'settings.langPickerTitle': 'Lingua dell\'interfaccia',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Ora',
+    'dock.hours': 'Ore',
+    'dock.days': 'Giorni',
+    'dock.more': 'Altro',
+    'dock.aria': 'Navigazione sezioni',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -3663,7 +3695,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 La mejor entre los modelos',
     'accuracy.hint.modelBetterRank': '🏆 {name} más preciso · eres el #{rank} de {total}',
     'settings.langPickerTitle': 'Idioma de la interfaz',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Ahora',
+    'dock.hours': 'Horas',
+    'dock.days': 'Días',
+    'dock.more': 'Más',
+    'dock.aria': 'Navegación por secciones',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -4112,7 +4148,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Cel mai bun dintre modele',
     'accuracy.hint.modelBetterRank': '🏆 {name} mai precis · ești #{rank} din {total}',
     'settings.langPickerTitle': 'Limba interfeței',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Acum',
+    'dock.hours': 'Ore',
+    'dock.days': 'Zile',
+    'dock.more': 'Altele',
+    'dock.aria': 'Navigare pe secțiuni',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -4561,7 +4601,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 A legjobb modell',
     'accuracy.hint.modelBetterRank': '🏆 {name} pontosabb · Ön #{rank}/{total}',
     'settings.langPickerTitle': 'Felület nyelve',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Most',
+    'dock.hours': 'Órák',
+    'dock.days': 'Napok',
+    'dock.more': 'Több',
+    'dock.aria': 'Szakasznavigáció',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n} ó',
@@ -5010,7 +5054,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Najlepší z modelov',
     'accuracy.hint.modelBetterRank': '🏆 {name} presnejší · ste #{rank} z {total}',
     'settings.langPickerTitle': 'Jazyk rozhrania',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Teraz',
+    'dock.hours': 'Hodiny',
+    'dock.days': 'Dni',
+    'dock.more': 'Viac',
+    'dock.aria': 'Navigácia po sekciách',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -5459,7 +5507,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 A melhor entre os modelos',
     'accuracy.hint.modelBetterRank': '🏆 {name} mais preciso · é o #{rank} de {total}',
     'settings.langPickerTitle': 'Idioma da interface',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Agora',
+    'dock.hours': 'Horas',
+    'dock.days': 'Dias',
+    'dock.more': 'Mais',
+    'dock.aria': 'Navegação por secções',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -5908,7 +5960,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Beste van de modellen',
     'accuracy.hint.modelBetterRank': '🏆 {name} nauwkeuriger · je bent #{rank} van {total}',
     'settings.langPickerTitle': 'Interfacetaal',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Nu',
+    'dock.hours': 'Uren',
+    'dock.days': 'Dagen',
+    'dock.more': 'Meer',
+    'dock.aria': 'Sectienavigatie',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}u',
@@ -6357,7 +6413,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Modeller arasında en iyi',
     'accuracy.hint.modelBetterRank': '🏆 {name} daha doğru · {total} içinde #{rank}',
     'settings.langPickerTitle': 'Arayüz dili',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Şimdi',
+    'dock.hours': 'Saatler',
+    'dock.days': 'Günler',
+    'dock.more': 'Diğer',
+    'dock.aria': 'Bölüm gezinmesi',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n} sa',
@@ -6806,7 +6866,11 @@ const I18N = {
     'accuracy.hint.leadModels': '🏆 Το καλύτερο μοντέλο',
     'accuracy.hint.modelBetterRank': '🏆 {name} πιο ακριβές · είστε #{rank} από {total}',
     'settings.langPickerTitle': 'Γλώσσα διεπαφής',
-    'unit.mmhg.short': 'mm',
+    'dock.now': 'Τώρα',
+    'dock.hours': 'Ώρες',
+    'dock.days': 'Ημέρες',
+    'dock.more': 'Άλλα',
+    'dock.aria': 'Πλοήγηση ενοτήτων',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}ώ',
@@ -9010,8 +9074,6 @@ let modalChartInstance = null;
 let precipChartInstance = null;
 // Активная метрика почасовой карточки: 'temp' | 'feels' | 'precip' | 'wind' | 'pressure'
 let currentHourlyMetric = 'temp';
-// Отдельная метрика для модалки дня (сбрасывается на 'temp' при каждом открытии).
-let currentModalMetric = 'temp';
 
 function getCurrentSource() { return getSrc(currentSourceId); }
 
@@ -10022,28 +10084,89 @@ function confidenceClass(conf) {
   return 'veryLow';
 }
 
+// Цвет по температуре (°C) для заливки температурной полосы дня.
+// Плавная интерполяция в RGB между стопами: синий → голубой → циан →
+// зелёно-голубой → жёлтый → оранжевый → красный. Цвет НЕ зависит от
+// единиц отображения (вход всегда °C из данных).
+const DAY_TEMP_STOPS = [
+  [-10, [59, 130, 246]],   // синий
+  [0,   [56, 189, 248]],   // небесно-голубой
+  [8,   [34, 211, 238]],   // циан
+  [15,  [52, 211, 153]],   // зелёно-голубой
+  [21,  [253, 224, 71]],   // жёлтый
+  [27,  [251, 146, 60]],   // оранжевый
+  [34,  [239, 68, 68]]     // красный
+];
+function dayTempColor(tc) {
+  const s = DAY_TEMP_STOPS;
+  if (tc <= s[0][0]) return `rgb(${s[0][1].join(',')})`;
+  if (tc >= s[s.length - 1][0]) return `rgb(${s[s.length - 1][1].join(',')})`;
+  for (let i = 0; i < s.length - 1; i++) {
+    const [a, ca] = s[i], [b, cb] = s[i + 1];
+    if (tc >= a && tc <= b) {
+      const f = (tc - a) / (b - a);
+      const c = [0, 1, 2].map(k => Math.round(ca[k] + (cb[k] - ca[k]) * f));
+      return `rgb(${c.join(',')})`;
+    }
+  }
+  return `rgb(${s[s.length - 1][1].join(',')})`;
+}
+
+// v1.56.0: дни вертикальным списком строк-карточек (вместо горизонтальной ленты).
+// Температурная полоса каждого дня позиционируется на ОБЩЕЙ шкале min/max всех
+// 10 дней (как Apple Weather). «Сегодня» — неоновая строка (.day.today), на её
+// полосе — маркер текущей температуры. Полоска согласия моделей (confidence) —
+// тонкая вертикальная полоса у левого края (только для AVG). Клик → модалка дня.
 function renderDays(forecast) {
   const grid = document.getElementById('daysGrid');
   grid.innerHTML = '';
   // Confidence показываем только когда смотрим AVG (для конкретной модели спред бессмыслен).
   const showConf = currentSourceId === 'avg';
+  // Глобальная шкала температур по всем дням.
+  let gMin = Infinity, gMax = -Infinity;
+  forecast.forEach(d => {
+    if (typeof d.min === 'number' && d.min < gMin) gMin = d.min;
+    if (typeof d.max === 'number' && d.max > gMax) gMax = d.max;
+  });
+  if (!isFinite(gMin)) gMin = 0;
+  if (!isFinite(gMax)) gMax = 1;
+  const span = (gMax - gMin) || 1;
+  const dropSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
+  // Текущая температура — для маркера на строке «Сегодня».
+  const nowT = (forecast[0] && Array.isArray(forecast[0].hourly) && forecast[0].hourly[NOW_HOUR])
+    ? forecast[0].hourly[NOW_HOUR].t : null;
+
   forecast.forEach((d, i) => {
-    const card = document.createElement('div');
-    card.className = 'glass day' + (i === 0 ? ' today' : '');
+    const row = document.createElement('div');
+    row.className = 'glass day dayrow' + (i === 0 ? ' today' : '');
     const dayLabel = d.id === 0 ? t('day.today') : localizeDayShort(d.name);
     const confCls = showConf ? confidenceClass(d.confidence) : null;
-    card.innerHTML = `
-      <div class="day-name">${dayLabel}</div>
-      <div class="day-date">${d.date.slice(0,5)}</div>
-      <div class="day-icon">${weatherIcon(d.condition, 56)}</div>
-      <div class="day-temps"><span class="day-hi">${fmtTempNum(d.max)}°</span><span class="day-lo">${fmtTempNum(d.min)}°</span></div>
-      <div class="day-prec"><svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>${d.precip}%</div>
-      <div class="day-wind">${fmtWind(d.wind)} ${localizeWindDirShort(d.windDir)}</div>
-      <div class="day-tap">${t('day.tap')} ↑</div>
-      ${confCls ? `<div class="day-confidence-bar ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></div>` : ''}
+    const left = ((d.min - gMin) / span) * 100;
+    const width = Math.max(((d.max - d.min) / span) * 100, 4);
+    const grad = `linear-gradient(90deg,${dayTempColor(d.min)},${dayTempColor(d.max)})`;
+    const nowMarker = (i === 0 && nowT != null)
+      ? `<span class="dr-now" style="left:${Math.min(100, Math.max(0, ((nowT - gMin) / span) * 100))}%"></span>`
+      : '';
+    // Осадки: % + мм (если ≥ 0.3 мм); если сухо — прочерк.
+    const wet = (typeof d.precipSum === 'number' && d.precipSum >= 0.3) || d.precip >= 5;
+    let precHtml = '<span class="dr-dry">—</span>';
+    if (wet) {
+      const mmPart = (typeof d.precipSum === 'number' && d.precipSum >= 0.3)
+        ? ` <span class="dr-mm">· ${Math.round(d.precipSum * 10) / 10} ${t('unit.mm')}</span>` : '';
+      precHtml = `${dropSvg}<span class="dr-pp">${d.precip}%</span>${mmPart}`;
+    }
+    row.innerHTML = `
+      ${confCls ? `<span class="dr-conf ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></span>` : ''}
+      <div class="dr-day"><span class="dr-name">${dayLabel}</span><span class="dr-date">${d.date.slice(0, 5)}</span></div>
+      <div class="dr-icon">${weatherIcon(d.condition, 34)}</div>
+      <span class="dr-lo">${fmtTempNum(d.min)}°</span>
+      <div class="dr-bar"><span class="dr-fill" style="left:${left}%;width:${width}%;background:${grad}"></span>${nowMarker}</div>
+      <span class="dr-hi">${fmtTempNum(d.max)}°</span>
+      <div class="dr-prec">${precHtml}</div>
+      <span class="dr-chev" aria-hidden="true">›</span>
     `;
-    card.addEventListener('click', () => openModal(d.id));
-    grid.appendChild(card);
+    row.addEventListener('click', () => openModal(d.id));
+    grid.appendChild(row);
   });
 }
 
@@ -11817,6 +11940,14 @@ function renderPrecipChart(forecast) {
   // Фикс. ширина: PRECIP_PX_PER_HOUR на каждый час. Получаем горизонтальный scroll, если viewport уже.
   const totalWidth = merged.length * PRECIP_PX_PER_HOUR;
   inner.style.width = totalWidth + 'px';
+  // v1.56.0 fix: сразу пересчитать стрелки прокрутки. Иначе при открытии модалки
+  // «Детали осадков» они остаются в состоянии .disabled (из обновления, когда
+  // модалка была закрыта и у графика ещё не было ширины) и появляются только
+  // после первого скролла. Двойной rAF — дождаться применения ширины и layout.
+  const _precipScroll = document.getElementById('precipScroll');
+  if (_precipScroll && typeof updateScrollArrows === 'function') {
+    requestAnimationFrame(() => requestAnimationFrame(() => updateScrollArrows(_precipScroll)));
+  }
 
   // Полоска дней под графиком: по одному сегменту на каждый день.
   // Полное название (Среда, Четверг…) + чередующаяся подсветка тоном дня.
@@ -12198,7 +12329,7 @@ function renderAll() {
   renderConfidenceChip();
   // После любого ре-рендера пересчитать состояние стрелок прокрутки (ширина контента могла измениться)
   requestAnimationFrame(() => {
-    ['hourlyRow', 'daysGrid', 'precipScroll'].forEach(id => {
+    ['hourlyRow', 'precipScroll'].forEach(id => {
       const el = document.getElementById(id);
       if (el) updateScrollArrows(el);
     });
@@ -12378,18 +12509,7 @@ function openModal(dayId) {
 
     <div class="modal-hours-list">
       <h3>${t('modal.day.hoursTitle')}</h3>
-      <div class="hourly-tabs" id="modalHourlyTabs" role="tablist">
-        <button class="ht-tab" data-metric="temp" role="tab"><span data-i18n="metric.temp">Температура</span></button>
-        <button class="ht-tab" data-metric="feels" role="tab"><span data-i18n="metric.feels">По ощущениям</span></button>
-        <button class="ht-tab" data-metric="precip" role="tab"><span data-i18n="metric.rain">Осадки</span></button>
-        <button class="ht-tab" data-metric="wind" role="tab"><span data-i18n="metric.wind">Ветер</span></button>
-        <button class="ht-tab" data-metric="pressure" role="tab"><span data-i18n="metric.pressure">Давление</span></button>
-      </div>
-      <div class="scroll-wrap">
-        <button class="scroll-arrow left" data-scroll-target="modalHourlyRow" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
-        <div class="hours-scroll" id="modalHourlyRow"></div>
-        <button class="scroll-arrow right" data-scroll-target="modalHourlyRow" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
-      </div>
+      <div class="mh-list" id="modalHourlyRow"></div>
     </div>
   `;
 
@@ -12398,68 +12518,57 @@ function openModal(dayId) {
 
   // Модалка создаётся динамически через innerHTML — applyTranslations() не пройдёт
   // через data-i18n атрибуты внутри неё автоматически. Вызываем явно, чтобы
-  // tab-кнопки «Температура / По ощущениям / Осадки / Ветер / Давление» и aria
-  // переводы стрелок применились на выбранном языке.
+  // переводы (заголовки, aria) применились на выбранном языке.
   applyTranslations();
 
-  // Сбрасываем модальную метрику на температуру при каждом открытии — так UX предсказуемее.
-  currentModalMetric = 'temp';
+  // v1.56.1: почасовка — вертикальный список строк (этап 2). Табы метрик и
+  // стрелки ‹ › ленты удалены: каждая строка показывает t°/осадки/ветер сразу.
   renderModalHourlyRow(d);
-  setupModalHourlyTabs(d);
-  // v1.43.0: модалка создаётся динамически, поэтому setupScrollArrows() из init
-  // не покрывает её стрелки. Навешиваем обработчики вручную для конкретного row.
-  attachModalHourlyArrows();
 }
 
-// v1.43.0: подключение кнопок ‹ › для почасовой ленты в модалке дня.
-// Каждый раз при открытии модалки — стрелки новые (модалка пересоздана),
-// поэтому навешиваем обработчики заново. Старые не остаются в памяти —
-// modal.innerHTML = ... выкидывает их.
-function attachModalHourlyArrows() {
-  const row = document.getElementById('modalHourlyRow');
-  if (!row) return;
-  const modal = document.getElementById('modal');
-  if (!modal) return;
-  const arrows = modal.querySelectorAll('.scroll-arrow[data-scroll-target="modalHourlyRow"]');
-  arrows.forEach(btn => {
-    const isRight = btn.classList.contains('right');
-    btn.onclick = () => {
-      const delta = row.clientWidth * 0.8 * (isRight ? 1 : -1);
-      row.scrollBy({ left: delta, behavior: 'smooth' });
-    };
-  });
-  const update = () => updateScrollArrows(row);
-  row.addEventListener('scroll', update, { passive: true });
-  // Первичный update после рендера (rAF чтобы дождаться layout).
-  requestAnimationFrame(() => requestAnimationFrame(update));
-}
-
+// v1.56.1 (этап 2): почасовка в модалке дня — вертикальный список строк-часов
+// в визуальном языке этапа 1. Каждая строка показывает сразу: время · иконку ·
+// температуру числом · мини-полосу позиции t° в диапазоне ЭТОГО дня (градиент
+// по температуре) · осадки (% + мм, интенсивность синей заливкой ячейки) · ветер.
+// Для «Сегодня»: прошедшие часы приглушены, текущий час — неоновая строка.
 function renderModalHourlyRow(d) {
-  const row = document.getElementById('modalHourlyRow');
-  if (!row) return;
-  document.querySelectorAll('#modalHourlyTabs .ht-tab').forEach(b => {
-    b.classList.toggle('active', b.dataset.metric === currentModalMetric);
-  });
+  const list = document.getElementById('modalHourlyRow');
+  if (!list || !Array.isArray(d.hourly)) return;
   const isToday = (d.id === 0);
-  row.innerHTML = d.hourly.map((h, i) => {
-    const isNow = isToday && (i === NOW_HOUR);
-    return `
-    <div class="hour-cell${isNow ? ' now' : ''}">
-      <div class="h">${String(h.h).padStart(2,'0')}:00</div>
-      <div class="ic">${weatherIcon(h.c, 36)}</div>
-      <div class="t">${hourMetricValue(h, currentModalMetric)}</div>
-    </div>
-  `;
-  }).join('');
-}
-
-function setupModalHourlyTabs(d) {
-  document.querySelectorAll('#modalHourlyTabs .ht-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentModalMetric = btn.dataset.metric;
-      renderModalHourlyRow(d);
-    });
+  // Шкала температур в пределах этого дня — для мини-полосы позиции часа.
+  let dMin = Infinity, dMax = -Infinity;
+  d.hourly.forEach(h => {
+    if (typeof h.t === 'number') { if (h.t < dMin) dMin = h.t; if (h.t > dMax) dMax = h.t; }
   });
+  if (!isFinite(dMin)) dMin = 0;
+  if (!isFinite(dMax)) dMax = 1;
+  const dSpan = (dMax - dMin) || 1;
+  const dropSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
+
+  list.innerHTML = d.hourly.map((h, i) => {
+    const stateCls = isToday ? (i < NOW_HOUR ? ' past' : (i === NOW_HOUR ? ' now' : '')) : '';
+    const fillW = Math.max(Math.min(100, ((h.t - dMin) / dSpan) * 100), 6);
+    const pmm = (typeof h.pmm === 'number') ? h.pmm : 0;
+    const wet = pmm > 0 || h.p >= 5;
+    let prec;
+    if (wet) {
+      const mmPart = pmm > 0 ? ` <span class="mh-mm">· ${Math.round(pmm * 10) / 10} ${t('unit.mm')}</span>` : '';
+      prec = `${dropSvg}<span>${h.p}%</span>${mmPart}`;
+    } else {
+      prec = '<span class="mh-dry">—</span>';
+    }
+    const intensity = Math.min(1, pmm / 2);
+    const precBg = intensity > 0 ? ` style="background:rgba(0,212,255,${(intensity * 0.16).toFixed(3)})"` : '';
+    return `
+    <div class="mh-row${stateCls}">
+      <span class="mh-time">${String(h.h).padStart(2, '0')}:00</span>
+      <span class="mh-icon">${weatherIcon(h.c, 26)}</span>
+      <span class="mh-temp">${fmtTempNum(h.t)}°</span>
+      <span class="mh-bar"><span class="mh-fill" style="width:${fillW}%;background:${dayTempColor(h.t)}"></span></span>
+      <span class="mh-prec"${precBg}>${prec}</span>
+      <span class="mh-wind">💨 ${fmtWind(h.w)}</span>
+    </div>`;
+  }).join('');
 }
 
 function closeModal() {
@@ -18486,6 +18595,101 @@ if (typeof applySourceTheme === 'function') applySourceTheme();
 if (state.theme === 'system') {
   setTheme('system'); // повторно, чтобы навесить слушатель matchMedia
 }
+// v1.56.2 (этап 3): плавающий нижний док-навигация (Сейчас/Часы/Дни/Ещё).
+// Scrollspy: одна rAF-throttled линия активации под прилипшей шапкой — активным
+// становится последний якорь, чей верх прошёл линию (поэтому «Ещё» остаётся
+// активным для всего нижнего контента, а «Сейчас» — на самом верху). Клик —
+// плавный скролл (scroll-margin-top в CSS убирает секцию из-под sticky-hero;
+// «Сейчас» → к самому верху). Скрытие при любой модалке — через body overflow.
+function setupBottomDock() {
+  const dock = document.getElementById('bottomDock');
+  if (!dock) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const order = ['now', 'hours', 'days', 'more'];
+  const anchorFor = (key) => document.getElementById(
+    key === 'now' ? 'heroBlock' : key === 'hours' ? 'hourlyCard' : key === 'days' ? 'daysGrid' : 'activityWindowsCard'
+  );
+  const btns = [...dock.querySelectorAll('.dock-btn')];
+  const setActive = (key) => btns.forEach(b => b.classList.toggle('active', b.dataset.dock === key));
+
+  // Контентные модалки (день / ветер-давление-влажность / осадки) — над ними док
+  // ЗАКРЕПЛЁН (а не скрыт), чтобы можно было быстро вернуться к разделу. Клик по
+  // доку закрывает открытую контентную модалку и ведёт к секции.
+  const CONTENT_MODALS = ['modal', 'hourlyDetailModal', 'precipDetailModal'];
+  const openContentModal = () => CONTENT_MODALS
+    .map(id => document.getElementById(id))
+    .find(el => el && el.classList.contains('open'));
+  const closeContentModal = (el) => {
+    if (!el) return;
+    if (el.id === 'modal' && typeof closeModal === 'function') closeModal();
+    else if (el.id === 'hourlyDetailModal' && typeof closeHourlyDetail === 'function') closeHourlyDetail();
+    else if (el.id === 'precipDetailModal' && typeof closePrecipDetail === 'function') closePrecipDetail();
+  };
+
+  const SCROLL_OFFSET = 112; // px — убрать секцию из-под прилипшей шапки
+  // window.scrollTo надёжнее scrollIntoView: реальный скроллер — documentElement,
+  // а у body overflow-y:auto, из-за чего scrollIntoView целится не туда.
+  // Прилипшая шапка (#heroBlock) схлопывается при скролле и сдвигает позиции —
+  // после анимации делаем 1-2 мгновенные коррекции к актуальной цели.
+  function scrollToSection(el, behavior) {
+    const targetY = () => Math.max(0, el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET);
+    window.scrollTo({ top: targetY(), behavior });
+    if (behavior === 'auto') return;
+    let tries = 0;
+    const correct = () => {
+      const want = targetY();
+      if (Math.abs(want - window.scrollY) > 6 && tries < 3) {
+        tries++;
+        window.scrollTo({ top: want, behavior: 'auto' });
+        setTimeout(correct, 130);
+      }
+    };
+    setTimeout(correct, 460);
+  }
+  btns.forEach(b => b.addEventListener('click', () => {
+    const key = b.dataset.dock;
+    setActive(key);
+    // если открыта контентная модалка — закрываем (быстрый возврат к разделу)
+    closeContentModal(openContentModal());
+    const behavior = reduce ? 'auto' : 'smooth';
+    if (key === 'now') { window.scrollTo({ top: 0, behavior }); return; }
+    const el = anchorFor(key);
+    if (el) scrollToSection(el, behavior);
+  }));
+
+  // Scrollspy: один passive-слушатель + rAF.
+  const LINE = 130; // px от верха вьюпорта (ниже прилипшей шапки)
+  let ticking = false;
+  function compute() {
+    ticking = false;
+    let activeKey = order[0];
+    for (const key of order) {
+      const el = anchorFor(key);
+      if (el && el.getBoundingClientRect().top - LINE <= 0) activeKey = key;
+    }
+    setActive(activeKey);
+  }
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(compute); } };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  compute();
+
+  // Состояние дока vs модалки: над контентными — закрепляем поверх (body.dock-modal-pinned),
+  // над утилитарными (настройки/город/поиск/…) — скрываем. Сигнал любой модалки —
+  // body.style.overflow='hidden'; контентную распознаём по .open у её корня.
+  const syncDock = () => {
+    const locked = document.body.style.overflow === 'hidden';
+    const pinned = !!openContentModal();
+    dock.classList.toggle('dock-hidden', locked && !pinned);
+    document.body.classList.toggle('dock-modal-pinned', pinned);
+  };
+  const mo = new MutationObserver(syncDock);
+  mo.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+  // class контентных модалок может меняться без смены body.style (переход модалка→модалка)
+  CONTENT_MODALS.forEach(id => { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['class'] }); });
+  syncDock();
+}
+
 loadInitialLocation();
 renderLangSegmented();
 setupSegmentedHandlers();
@@ -18501,6 +18705,7 @@ setupCompareMode();
 setupSwipeToClose();
 setupPullToRefresh();
 setupHeroSticky();
+setupBottomDock();
 setupNotifSection();
 loadCompareState();
 applyAll();

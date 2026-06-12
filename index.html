@@ -338,7 +338,7 @@
     </div>
   </div>
 
-  <div class="glass hourly-card">
+  <div class="glass hourly-card" id="hourlyCard">
     <div class="card-title">
       <div>
         <h2 data-i18n="chart.title">Сегодня · почасовой прогноз</h2>
@@ -359,11 +359,7 @@
     </div>
   </div>
 
-  <div class="scroll-wrap" id="daysWrap">
-    <button class="scroll-arrow left" data-scroll-target="daysGrid" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
-    <div class="days" id="daysGrid"></div>
-    <button class="scroll-arrow right" data-scroll-target="daysGrid" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
-  </div>
+  <div class="days days-list" id="daysGrid"></div>
 
   <div class="glass activity-windows" id="activityWindowsCard">
     <h2><span class="aw-emoji">🎯</span><span data-i18n="windows.title">Окна возможностей</span></h2>
@@ -973,6 +969,26 @@
     </div>
   </div>
 </div>
+
+<!-- v1.56.2 (этап 3): плавающий нижний док-навигация. Активный пункт — неон. -->
+<nav class="bottom-dock" id="bottomDock" aria-label="Навигация по разделам" data-i18n-aria="dock.aria">
+  <button type="button" class="dock-btn" data-dock="now">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+    <span data-i18n="dock.now">Сейчас</span>
+  </button>
+  <button type="button" class="dock-btn" data-dock="hours">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <span data-i18n="dock.hours">Часы</span>
+  </button>
+  <button type="button" class="dock-btn" data-dock="days">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg>
+    <span data-i18n="dock.days">Дни</span>
+  </button>
+  <button type="button" class="dock-btn" data-dock="more">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+    <span data-i18n="dock.more">Ещё</span>
+  </button>
+</nav>
 
 <script src="app.js"></script>
 
