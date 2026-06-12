@@ -12246,6 +12246,15 @@ function renderSourceButtons() {
     btn.addEventListener('click', () => selectSource(s.id));
     grid.appendChild(btn);
   });
+  // v1.55.2: синхронизируем активное состояние main/smart-кнопок с currentSourceId.
+  // На клике это делает selectSource(), но renderSourceButtons зовётся из applyAll()
+  // при загрузке/смене языка — а в HTML у mainSrcBtn класс `active` зашит по умолчанию.
+  // Из-за этого сохранённый источник 'smart' (или одиночная модель) на старте
+  // показывал подсвеченным AVG. Теперь подсветка всегда отражает реальный источник.
+  const mainBtn = document.getElementById('mainSrcBtn');
+  if (mainBtn) mainBtn.classList.toggle('active', currentSourceId === 'avg');
+  const smartBtn = document.getElementById('smartSrcBtn');
+  if (smartBtn) smartBtn.classList.toggle('active', currentSourceId === 'smart');
 }
 
 function selectSource(id) {
