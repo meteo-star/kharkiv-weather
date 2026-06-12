@@ -316,6 +316,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero-condition{font-size:18px;color:#e8f0ff;font-weight:500;margin-bottom:4px}
 .hero-feels{font-size:13px;color:rgba(232,240,255,0.5)}
 .hero-feels strong{color:#00d4ff;font-weight:500}
+/* v1.55.0: строка-сводка «остаток дня + ночь» в hero, сразу под feels-строкой. */
+.hero-outlook{font-size:13px;color:rgba(232,240,255,0.82);margin-top:5px;line-height:1.4;font-feature-settings:'tnum';text-shadow:0 1px 6px rgba(0,0,0,0.35)}
+.hero-outlook:empty{display:none}
+.hero.stuck .hero-outlook{max-height:0;opacity:0;margin:0;overflow:hidden;pointer-events:none}
 .hero-source-note{font-size:11px;color:rgba(232,240,255,0.4);margin-top:6px;font-family:'JetBrains Mono',monospace}
 /* Подсказка точности на hero: лидер по MAE среди 8 моделей. Клик → Source Data Modal. */
 .hero-accuracy-hint{margin-top:8px;display:flex}
@@ -526,6 +530,9 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   background:rgba(74,222,128,0.07);border:1px solid rgba(74,222,128,0.18);
 }
 :root[data-theme="light"] .modal-ens-band{color:rgba(45,26,16,0.75);background:rgba(22,163,74,0.08);border-color:rgba(22,163,74,0.22)}
+
+.modal-outlook{margin:0 0 16px;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.5;color:rgba(232,240,255,0.8);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);font-feature-settings:'tnum'}
+:root[data-theme="light"] .modal-outlook{color:rgba(45,26,16,0.8);background:rgba(0,0,0,0.03);border-color:rgba(45,26,16,0.1)}
 
 /* Section divider */
 .sources-divider{display:flex;align-items:center;gap:10px;margin:18px 0 12px;color:rgba(232,240,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;font-weight:500}
@@ -2421,6 +2428,7 @@ body.compare-mode .astro-photo { display:none !important }
 :root[data-theme="light"] .hero-condition{color:#fff;text-shadow:0 1px 6px rgba(60,20,5,0.6)}
 :root[data-theme="light"] .hero-feels{color:rgba(255,235,210,0.95);text-shadow:0 1px 4px rgba(60,20,5,0.6)}
 :root[data-theme="light"] .hero-source-note{color:rgba(255,235,210,0.9);text-shadow:0 1px 4px rgba(60,20,5,0.6)}
+:root[data-theme="light"] .hero-outlook{color:rgba(255,242,225,0.97);text-shadow:0 1px 5px rgba(60,20,5,0.65)}
 /* Hero accuracy-pill — терракотовая палитра для light, чтобы вписаться в тёплую тему. */
 :root[data-theme="light"] .hero-acc-pill{
   background:rgba(255,250,237,0.85) !important;
