@@ -487,6 +487,43 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .dr-lo{width:28px}
   .dr-hi{width:32px}
 }
+
+/* v1.56.2 (этап 3): плавающий нижний док-навигация. */
+/* overflow-anchor:none — чтобы scroll-anchoring не «отскакивал» при reflow
+   контента выше во время программного скролла дока (надёжная навигация). */
+html{overflow-anchor:none}
+/* v1.56.2-fix: ниже по высоте, шире, усиленное матовое стекло (blur+saturate, прозрачнее). */
+/* Фон: fallback-подложка (где backdrop-filter не композитится — напр. headless-превью)
+   полупрозрачная, чтобы контент просвечивал; где есть — сильное матовое стекло. */
+/* Прозрачное стекло без заливки: только матовое размытие (где поддерживается)
+   + контур капсулы и тень. Фона нет — контент полностью просвечивает. */
+.bottom-dock{position:fixed;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:90;display:flex;gap:6px;padding:4px;border-radius:22px;background:transparent;border:1px solid rgba(255,255,255,0.14);box-shadow:0 12px 40px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.12);transition:opacity 0.3s ease,transform 0.35s cubic-bezier(0.4,0,0.2,1)}
+@supports ((backdrop-filter:blur(2px)) or (-webkit-backdrop-filter:blur(2px))){
+  .bottom-dock{backdrop-filter:blur(4px) saturate(118%);-webkit-backdrop-filter:blur(4px) saturate(118%)}
+}
+.bottom-dock.dock-hidden{opacity:0;pointer-events:none;transform:translate(-50%,150%)}
+/* закрепление поверх контентных модалок (день/ветер/осадки/давление/влажность) */
+body.dock-modal-pinned .bottom-dock{z-index:1300}
+body.dock-modal-pinned .modal-backdrop,
+body.dock-modal-pinned .hdm-scroll,
+body.dock-modal-pinned .pdm-scroll{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.dock-btn{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:76px;padding:4px 12px 3px;border:none;background:transparent;border-radius:14px;color:rgba(232,240,255,0.42);cursor:pointer;font:inherit;transition:color 0.25s,background 0.25s,box-shadow 0.25s;-webkit-tap-highlight-color:transparent}
+.dock-btn svg{width:19px;height:19px}
+.dock-btn span{font-size:10px;font-weight:600;letter-spacing:0.02em;white-space:nowrap}
+.dock-btn:hover{color:rgba(232,240,255,0.7)}
+.dock-btn.active{color:#fff;background:linear-gradient(135deg,rgba(0,212,255,0.48) 0%,rgba(167,139,250,0.34) 100%);box-shadow:0 6px 22px rgba(0,212,255,0.45),0 0 18px rgba(0,212,255,0.34),inset 0 1px 0 rgba(255,255,255,0.22)}
+.dock-btn.active svg{filter:drop-shadow(0 0 5px rgba(0,212,255,0.7))}
+/* чтобы док не перекрывал последний контент */
+.container{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+:root[data-theme="light"] .bottom-dock{background:transparent;border-color:rgba(217,96,47,0.3);box-shadow:0 12px 30px rgba(120,50,20,0.18),inset 0 1px 0 rgba(255,255,255,0.45)}
+:root[data-theme="light"] .dock-btn{color:rgba(90,53,32,0.45)}
+:root[data-theme="light"] .dock-btn:hover{color:rgba(90,53,32,0.75)}
+:root[data-theme="light"] .dock-btn.active{color:#a8451c;background:linear-gradient(135deg,rgba(255,170,90,0.55),rgba(217,96,47,0.32));box-shadow:0 6px 18px rgba(217,96,47,0.34),inset 0 1px 0 rgba(255,255,255,0.45)}
+:root[data-theme="light"] .dock-btn.active svg{filter:drop-shadow(0 0 5px rgba(217,96,47,0.6))}
+@media (prefers-reduced-motion: reduce){
+  .bottom-dock,.dock-btn{transition:none}
+  .dock-btn.active svg{filter:none}
+}
 .day.today{
   border-color:rgba(0,212,255,0.7);
   background:linear-gradient(135deg,rgba(0,212,255,0.16) 0%,rgba(167,139,250,0.08) 100%);

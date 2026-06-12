@@ -53,7 +53,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Среднее точнее на {n}°',
     'accuracy.hint.leadModels': '🏆 Лидер среди моделей',
     'accuracy.hint.modelBetterRank': '🏆 {name} точнее · вы №{rank} из {total}',
-    'settings.langPickerTitle': 'Язык интерфейса',    'unit.mmhg.short': 'мм',
+    'settings.langPickerTitle': 'Язык интерфейса',
+    'dock.now': 'Сейчас',
+    'dock.hours': 'Часы',
+    'dock.days': 'Дни',
+    'dock.more': 'Ещё',
+    'dock.aria': 'Навигация по разделам',    'unit.mmhg.short': 'мм',
     'unit.hpa.short': 'гПа',
     'pollen.unit': 'ч/м³',
     'storm.hoursAhead': '+{n}ч',
@@ -515,7 +520,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Середнє точніше на {n}°',
     'accuracy.hint.leadModels': '🏆 Лідер серед моделей',
     'accuracy.hint.modelBetterRank': '🏆 {name} точніше · ви №{rank} з {total}',
-    'settings.langPickerTitle': 'Мова інтерфейсу',    'unit.mmhg.short': 'мм',
+    'settings.langPickerTitle': 'Мова інтерфейсу',
+    'dock.now': 'Зараз',
+    'dock.hours': 'Години',
+    'dock.days': 'Дні',
+    'dock.more': 'Ще',
+    'dock.aria': 'Навігація розділами',    'unit.mmhg.short': 'мм',
     'unit.hpa.short': 'гПа',
     'pollen.unit': 'ч/м³',
     'storm.hoursAhead': '+{n}год',
@@ -964,7 +974,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Average is better by {n}°',
     'accuracy.hint.leadModels': '🏆 Best among models',
     'accuracy.hint.modelBetterRank': '🏆 {name} is better · you’re #{rank} of {total}',
-    'settings.langPickerTitle': 'Interface language',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Interface language',
+    'dock.now': 'Now',
+    'dock.hours': 'Hours',
+    'dock.days': 'Days',
+    'dock.more': 'More',
+    'dock.aria': 'Section navigation',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -1412,7 +1427,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Durchschnitt um {n}° genauer',
     'accuracy.hint.leadModels': '🏆 Bestes Modell',
     'accuracy.hint.modelBetterRank': '🏆 {name} genauer · Sie sind #{rank} von {total}',
-    'settings.langPickerTitle': 'Sprache der Oberfläche',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Sprache der Oberfläche',
+    'dock.now': 'Jetzt',
+    'dock.hours': 'Stunden',
+    'dock.days': 'Tage',
+    'dock.more': 'Mehr',
+    'dock.aria': 'Abschnittsnavigation',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -1860,7 +1880,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Średnia dokładniejsza o {n}°',
     'accuracy.hint.leadModels': '🏆 Najlepszy z modeli',
     'accuracy.hint.modelBetterRank': '🏆 {name} dokładniejszy · jesteś #{rank} z {total}',
-    'settings.langPickerTitle': 'Język interfejsu',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Język interfejsu',
+    'dock.now': 'Teraz',
+    'dock.hours': 'Godziny',
+    'dock.days': 'Dni',
+    'dock.more': 'Więcej',
+    'dock.aria': 'Nawigacja po sekcjach',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -2309,7 +2334,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Průměr je přesnější o {n}°',
     'accuracy.hint.leadModels': '🏆 Nejlepší z modelů',
     'accuracy.hint.modelBetterRank': '🏆 {name} přesnější · jste #{rank} z {total}',
-    'settings.langPickerTitle': 'Jazyk rozhraní',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Jazyk rozhraní',
+    'dock.now': 'Teď',
+    'dock.hours': 'Hodiny',
+    'dock.days': 'Dny',
+    'dock.more': 'Více',
+    'dock.aria': 'Navigace po sekcích',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -2758,7 +2788,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Moyenne plus précise de {n}°',
     'accuracy.hint.leadModels': '🏆 Meilleur des modèles',
     'accuracy.hint.modelBetterRank': '🏆 {name} plus précis · vous êtes n°{rank} sur {total}',
-    'settings.langPickerTitle': 'Langue de l\'interface',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Langue de l\'interface',
+    'dock.now': 'Maintenant',
+    'dock.hours': 'Heures',
+    'dock.days': 'Jours',
+    'dock.more': 'Plus',
+    'dock.aria': 'Navigation par sections',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -3206,7 +3241,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Media più accurata di {n}°',
     'accuracy.hint.leadModels': '🏆 Migliore tra i modelli',
     'accuracy.hint.modelBetterRank': '🏆 {name} più accurato · sei #{rank} su {total}',
-    'settings.langPickerTitle': 'Lingua dell\'interfaccia',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Lingua dell\'interfaccia',
+    'dock.now': 'Ora',
+    'dock.hours': 'Ore',
+    'dock.days': 'Giorni',
+    'dock.more': 'Altro',
+    'dock.aria': 'Navigazione sezioni',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -3654,7 +3694,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 La media es más precisa por {n}°',
     'accuracy.hint.leadModels': '🏆 La mejor entre los modelos',
     'accuracy.hint.modelBetterRank': '🏆 {name} más preciso · eres el #{rank} de {total}',
-    'settings.langPickerTitle': 'Idioma de la interfaz',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Idioma de la interfaz',
+    'dock.now': 'Ahora',
+    'dock.hours': 'Horas',
+    'dock.days': 'Días',
+    'dock.more': 'Más',
+    'dock.aria': 'Navegación por secciones',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -4102,7 +4147,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Media este mai precisă cu {n}°',
     'accuracy.hint.leadModels': '🏆 Cel mai bun dintre modele',
     'accuracy.hint.modelBetterRank': '🏆 {name} mai precis · ești #{rank} din {total}',
-    'settings.langPickerTitle': 'Limba interfeței',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Limba interfeței',
+    'dock.now': 'Acum',
+    'dock.hours': 'Ore',
+    'dock.days': 'Zile',
+    'dock.more': 'Altele',
+    'dock.aria': 'Navigare pe secțiuni',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -4550,7 +4600,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Az átlag {n}°-kal pontosabb',
     'accuracy.hint.leadModels': '🏆 A legjobb modell',
     'accuracy.hint.modelBetterRank': '🏆 {name} pontosabb · Ön #{rank}/{total}',
-    'settings.langPickerTitle': 'Felület nyelve',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Felület nyelve',
+    'dock.now': 'Most',
+    'dock.hours': 'Órák',
+    'dock.days': 'Napok',
+    'dock.more': 'Több',
+    'dock.aria': 'Szakasznavigáció',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n} ó',
@@ -4998,7 +5053,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Priemer je presnejší o {n}°',
     'accuracy.hint.leadModels': '🏆 Najlepší z modelov',
     'accuracy.hint.modelBetterRank': '🏆 {name} presnejší · ste #{rank} z {total}',
-    'settings.langPickerTitle': 'Jazyk rozhrania',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Jazyk rozhrania',
+    'dock.now': 'Teraz',
+    'dock.hours': 'Hodiny',
+    'dock.days': 'Dni',
+    'dock.more': 'Viac',
+    'dock.aria': 'Navigácia po sekciách',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -5446,7 +5506,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 A média é mais precisa em {n}°',
     'accuracy.hint.leadModels': '🏆 A melhor entre os modelos',
     'accuracy.hint.modelBetterRank': '🏆 {name} mais preciso · é o #{rank} de {total}',
-    'settings.langPickerTitle': 'Idioma da interface',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Idioma da interface',
+    'dock.now': 'Agora',
+    'dock.hours': 'Horas',
+    'dock.days': 'Dias',
+    'dock.more': 'Mais',
+    'dock.aria': 'Navegação por secções',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -5894,7 +5959,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Gemiddelde {n}° nauwkeuriger',
     'accuracy.hint.leadModels': '🏆 Beste van de modellen',
     'accuracy.hint.modelBetterRank': '🏆 {name} nauwkeuriger · je bent #{rank} van {total}',
-    'settings.langPickerTitle': 'Interfacetaal',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Interfacetaal',
+    'dock.now': 'Nu',
+    'dock.hours': 'Uren',
+    'dock.days': 'Dagen',
+    'dock.more': 'Meer',
+    'dock.aria': 'Sectienavigatie',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}u',
@@ -6342,7 +6412,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Ortalama {n}° daha doğru',
     'accuracy.hint.leadModels': '🏆 Modeller arasında en iyi',
     'accuracy.hint.modelBetterRank': '🏆 {name} daha doğru · {total} içinde #{rank}',
-    'settings.langPickerTitle': 'Arayüz dili',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Arayüz dili',
+    'dock.now': 'Şimdi',
+    'dock.hours': 'Saatler',
+    'dock.days': 'Günler',
+    'dock.more': 'Diğer',
+    'dock.aria': 'Bölüm gezinmesi',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n} sa',
@@ -6790,7 +6865,12 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Ο μέσος όρος πιο ακριβής κατά {n}°',
     'accuracy.hint.leadModels': '🏆 Το καλύτερο μοντέλο',
     'accuracy.hint.modelBetterRank': '🏆 {name} πιο ακριβές · είστε #{rank} από {total}',
-    'settings.langPickerTitle': 'Γλώσσα διεπαφής',    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Γλώσσα διεπαφής',
+    'dock.now': 'Τώρα',
+    'dock.hours': 'Ώρες',
+    'dock.days': 'Ημέρες',
+    'dock.more': 'Άλλα',
+    'dock.aria': 'Πλοήγηση ενοτήτων',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}ώ',
@@ -11860,6 +11940,14 @@ function renderPrecipChart(forecast) {
   // Фикс. ширина: PRECIP_PX_PER_HOUR на каждый час. Получаем горизонтальный scroll, если viewport уже.
   const totalWidth = merged.length * PRECIP_PX_PER_HOUR;
   inner.style.width = totalWidth + 'px';
+  // v1.56.0 fix: сразу пересчитать стрелки прокрутки. Иначе при открытии модалки
+  // «Детали осадков» они остаются в состоянии .disabled (из обновления, когда
+  // модалка была закрыта и у графика ещё не было ширины) и появляются только
+  // после первого скролла. Двойной rAF — дождаться применения ширины и layout.
+  const _precipScroll = document.getElementById('precipScroll');
+  if (_precipScroll && typeof updateScrollArrows === 'function') {
+    requestAnimationFrame(() => requestAnimationFrame(() => updateScrollArrows(_precipScroll)));
+  }
 
   // Полоска дней под графиком: по одному сегменту на каждый день.
   // Полное название (Среда, Четверг…) + чередующаяся подсветка тоном дня.
@@ -18507,6 +18595,101 @@ if (typeof applySourceTheme === 'function') applySourceTheme();
 if (state.theme === 'system') {
   setTheme('system'); // повторно, чтобы навесить слушатель matchMedia
 }
+// v1.56.2 (этап 3): плавающий нижний док-навигация (Сейчас/Часы/Дни/Ещё).
+// Scrollspy: одна rAF-throttled линия активации под прилипшей шапкой — активным
+// становится последний якорь, чей верх прошёл линию (поэтому «Ещё» остаётся
+// активным для всего нижнего контента, а «Сейчас» — на самом верху). Клик —
+// плавный скролл (scroll-margin-top в CSS убирает секцию из-под sticky-hero;
+// «Сейчас» → к самому верху). Скрытие при любой модалке — через body overflow.
+function setupBottomDock() {
+  const dock = document.getElementById('bottomDock');
+  if (!dock) return;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const order = ['now', 'hours', 'days', 'more'];
+  const anchorFor = (key) => document.getElementById(
+    key === 'now' ? 'heroBlock' : key === 'hours' ? 'hourlyCard' : key === 'days' ? 'daysGrid' : 'activityWindowsCard'
+  );
+  const btns = [...dock.querySelectorAll('.dock-btn')];
+  const setActive = (key) => btns.forEach(b => b.classList.toggle('active', b.dataset.dock === key));
+
+  // Контентные модалки (день / ветер-давление-влажность / осадки) — над ними док
+  // ЗАКРЕПЛЁН (а не скрыт), чтобы можно было быстро вернуться к разделу. Клик по
+  // доку закрывает открытую контентную модалку и ведёт к секции.
+  const CONTENT_MODALS = ['modal', 'hourlyDetailModal', 'precipDetailModal'];
+  const openContentModal = () => CONTENT_MODALS
+    .map(id => document.getElementById(id))
+    .find(el => el && el.classList.contains('open'));
+  const closeContentModal = (el) => {
+    if (!el) return;
+    if (el.id === 'modal' && typeof closeModal === 'function') closeModal();
+    else if (el.id === 'hourlyDetailModal' && typeof closeHourlyDetail === 'function') closeHourlyDetail();
+    else if (el.id === 'precipDetailModal' && typeof closePrecipDetail === 'function') closePrecipDetail();
+  };
+
+  const SCROLL_OFFSET = 112; // px — убрать секцию из-под прилипшей шапки
+  // window.scrollTo надёжнее scrollIntoView: реальный скроллер — documentElement,
+  // а у body overflow-y:auto, из-за чего scrollIntoView целится не туда.
+  // Прилипшая шапка (#heroBlock) схлопывается при скролле и сдвигает позиции —
+  // после анимации делаем 1-2 мгновенные коррекции к актуальной цели.
+  function scrollToSection(el, behavior) {
+    const targetY = () => Math.max(0, el.getBoundingClientRect().top + window.scrollY - SCROLL_OFFSET);
+    window.scrollTo({ top: targetY(), behavior });
+    if (behavior === 'auto') return;
+    let tries = 0;
+    const correct = () => {
+      const want = targetY();
+      if (Math.abs(want - window.scrollY) > 6 && tries < 3) {
+        tries++;
+        window.scrollTo({ top: want, behavior: 'auto' });
+        setTimeout(correct, 130);
+      }
+    };
+    setTimeout(correct, 460);
+  }
+  btns.forEach(b => b.addEventListener('click', () => {
+    const key = b.dataset.dock;
+    setActive(key);
+    // если открыта контентная модалка — закрываем (быстрый возврат к разделу)
+    closeContentModal(openContentModal());
+    const behavior = reduce ? 'auto' : 'smooth';
+    if (key === 'now') { window.scrollTo({ top: 0, behavior }); return; }
+    const el = anchorFor(key);
+    if (el) scrollToSection(el, behavior);
+  }));
+
+  // Scrollspy: один passive-слушатель + rAF.
+  const LINE = 130; // px от верха вьюпорта (ниже прилипшей шапки)
+  let ticking = false;
+  function compute() {
+    ticking = false;
+    let activeKey = order[0];
+    for (const key of order) {
+      const el = anchorFor(key);
+      if (el && el.getBoundingClientRect().top - LINE <= 0) activeKey = key;
+    }
+    setActive(activeKey);
+  }
+  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(compute); } };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  compute();
+
+  // Состояние дока vs модалки: над контентными — закрепляем поверх (body.dock-modal-pinned),
+  // над утилитарными (настройки/город/поиск/…) — скрываем. Сигнал любой модалки —
+  // body.style.overflow='hidden'; контентную распознаём по .open у её корня.
+  const syncDock = () => {
+    const locked = document.body.style.overflow === 'hidden';
+    const pinned = !!openContentModal();
+    dock.classList.toggle('dock-hidden', locked && !pinned);
+    document.body.classList.toggle('dock-modal-pinned', pinned);
+  };
+  const mo = new MutationObserver(syncDock);
+  mo.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+  // class контентных модалок может меняться без смены body.style (переход модалка→модалка)
+  CONTENT_MODALS.forEach(id => { const el = document.getElementById(id); if (el) mo.observe(el, { attributes: true, attributeFilter: ['class'] }); });
+  syncDock();
+}
+
 loadInitialLocation();
 renderLangSegmented();
 setupSegmentedHandlers();
@@ -18522,6 +18705,7 @@ setupCompareMode();
 setupSwipeToClose();
 setupPullToRefresh();
 setupHeroSticky();
+setupBottomDock();
 setupNotifSection();
 loadCompareState();
 applyAll();
