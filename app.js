@@ -53,8 +53,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Среднее точнее на {n}°',
     'accuracy.hint.leadModels': '🏆 Лидер среди моделей',
     'accuracy.hint.modelBetterRank': '🏆 {name} точнее · вы №{rank} из {total}',
-    'settings.langPickerTitle': 'Язык интерфейса',
-    'unit.mmhg.short': 'мм',
+    'settings.langPickerTitle': 'Язык интерфейса',    'unit.mmhg.short': 'мм',
     'unit.hpa.short': 'гПа',
     'pollen.unit': 'ч/м³',
     'storm.hoursAhead': '+{n}ч',
@@ -516,8 +515,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Середнє точніше на {n}°',
     'accuracy.hint.leadModels': '🏆 Лідер серед моделей',
     'accuracy.hint.modelBetterRank': '🏆 {name} точніше · ви №{rank} з {total}',
-    'settings.langPickerTitle': 'Мова інтерфейсу',
-    'unit.mmhg.short': 'мм',
+    'settings.langPickerTitle': 'Мова інтерфейсу',    'unit.mmhg.short': 'мм',
     'unit.hpa.short': 'гПа',
     'pollen.unit': 'ч/м³',
     'storm.hoursAhead': '+{n}год',
@@ -966,8 +964,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Average is better by {n}°',
     'accuracy.hint.leadModels': '🏆 Best among models',
     'accuracy.hint.modelBetterRank': '🏆 {name} is better · you’re #{rank} of {total}',
-    'settings.langPickerTitle': 'Interface language',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Interface language',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -1415,8 +1412,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Durchschnitt um {n}° genauer',
     'accuracy.hint.leadModels': '🏆 Bestes Modell',
     'accuracy.hint.modelBetterRank': '🏆 {name} genauer · Sie sind #{rank} von {total}',
-    'settings.langPickerTitle': 'Sprache der Oberfläche',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Sprache der Oberfläche',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -1864,8 +1860,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Średnia dokładniejsza o {n}°',
     'accuracy.hint.leadModels': '🏆 Najlepszy z modeli',
     'accuracy.hint.modelBetterRank': '🏆 {name} dokładniejszy · jesteś #{rank} z {total}',
-    'settings.langPickerTitle': 'Język interfejsu',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Język interfejsu',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -2314,8 +2309,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Průměr je přesnější o {n}°',
     'accuracy.hint.leadModels': '🏆 Nejlepší z modelů',
     'accuracy.hint.modelBetterRank': '🏆 {name} přesnější · jste #{rank} z {total}',
-    'settings.langPickerTitle': 'Jazyk rozhraní',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Jazyk rozhraní',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -2764,8 +2758,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Moyenne plus précise de {n}°',
     'accuracy.hint.leadModels': '🏆 Meilleur des modèles',
     'accuracy.hint.modelBetterRank': '🏆 {name} plus précis · vous êtes n°{rank} sur {total}',
-    'settings.langPickerTitle': 'Langue de l\'interface',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Langue de l\'interface',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -3213,8 +3206,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Media più accurata di {n}°',
     'accuracy.hint.leadModels': '🏆 Migliore tra i modelli',
     'accuracy.hint.modelBetterRank': '🏆 {name} più accurato · sei #{rank} su {total}',
-    'settings.langPickerTitle': 'Lingua dell\'interfaccia',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Lingua dell\'interfaccia',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -3662,8 +3654,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 La media es más precisa por {n}°',
     'accuracy.hint.leadModels': '🏆 La mejor entre los modelos',
     'accuracy.hint.modelBetterRank': '🏆 {name} más preciso · eres el #{rank} de {total}',
-    'settings.langPickerTitle': 'Idioma de la interfaz',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Idioma de la interfaz',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -4111,8 +4102,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Media este mai precisă cu {n}°',
     'accuracy.hint.leadModels': '🏆 Cel mai bun dintre modele',
     'accuracy.hint.modelBetterRank': '🏆 {name} mai precis · ești #{rank} din {total}',
-    'settings.langPickerTitle': 'Limba interfeței',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Limba interfeței',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -4560,8 +4550,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Az átlag {n}°-kal pontosabb',
     'accuracy.hint.leadModels': '🏆 A legjobb modell',
     'accuracy.hint.modelBetterRank': '🏆 {name} pontosabb · Ön #{rank}/{total}',
-    'settings.langPickerTitle': 'Felület nyelve',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Felület nyelve',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n} ó',
@@ -5009,8 +4998,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Priemer je presnejší o {n}°',
     'accuracy.hint.leadModels': '🏆 Najlepší z modelov',
     'accuracy.hint.modelBetterRank': '🏆 {name} presnejší · ste #{rank} z {total}',
-    'settings.langPickerTitle': 'Jazyk rozhrania',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Jazyk rozhrania',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -5458,8 +5446,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 A média é mais precisa em {n}°',
     'accuracy.hint.leadModels': '🏆 A melhor entre os modelos',
     'accuracy.hint.modelBetterRank': '🏆 {name} mais preciso · é o #{rank} de {total}',
-    'settings.langPickerTitle': 'Idioma da interface',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Idioma da interface',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}h',
@@ -5907,8 +5894,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Gemiddelde {n}° nauwkeuriger',
     'accuracy.hint.leadModels': '🏆 Beste van de modellen',
     'accuracy.hint.modelBetterRank': '🏆 {name} nauwkeuriger · je bent #{rank} van {total}',
-    'settings.langPickerTitle': 'Interfacetaal',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Interfacetaal',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}u',
@@ -6356,8 +6342,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Ortalama {n}° daha doğru',
     'accuracy.hint.leadModels': '🏆 Modeller arasında en iyi',
     'accuracy.hint.modelBetterRank': '🏆 {name} daha doğru · {total} içinde #{rank}',
-    'settings.langPickerTitle': 'Arayüz dili',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Arayüz dili',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n} sa',
@@ -6805,8 +6790,7 @@ const I18N = {
     'accuracy.hint.avgBetterBy': '📊 Ο μέσος όρος πιο ακριβής κατά {n}°',
     'accuracy.hint.leadModels': '🏆 Το καλύτερο μοντέλο',
     'accuracy.hint.modelBetterRank': '🏆 {name} πιο ακριβές · είστε #{rank} από {total}',
-    'settings.langPickerTitle': 'Γλώσσα διεπαφής',
-    'unit.mmhg.short': 'mm',
+    'settings.langPickerTitle': 'Γλώσσα διεπαφής',    'unit.mmhg.short': 'mm',
     'unit.hpa.short': 'hPa',
     'pollen.unit': 'gr/m³',
     'storm.hoursAhead': '+{n}ώ',
@@ -10022,28 +10006,89 @@ function confidenceClass(conf) {
   return 'veryLow';
 }
 
+// Цвет по температуре (°C) для заливки температурной полосы дня.
+// Плавная интерполяция в RGB между стопами: синий → голубой → циан →
+// зелёно-голубой → жёлтый → оранжевый → красный. Цвет НЕ зависит от
+// единиц отображения (вход всегда °C из данных).
+const DAY_TEMP_STOPS = [
+  [-10, [59, 130, 246]],   // синий
+  [0,   [56, 189, 248]],   // небесно-голубой
+  [8,   [34, 211, 238]],   // циан
+  [15,  [52, 211, 153]],   // зелёно-голубой
+  [21,  [253, 224, 71]],   // жёлтый
+  [27,  [251, 146, 60]],   // оранжевый
+  [34,  [239, 68, 68]]     // красный
+];
+function dayTempColor(tc) {
+  const s = DAY_TEMP_STOPS;
+  if (tc <= s[0][0]) return `rgb(${s[0][1].join(',')})`;
+  if (tc >= s[s.length - 1][0]) return `rgb(${s[s.length - 1][1].join(',')})`;
+  for (let i = 0; i < s.length - 1; i++) {
+    const [a, ca] = s[i], [b, cb] = s[i + 1];
+    if (tc >= a && tc <= b) {
+      const f = (tc - a) / (b - a);
+      const c = [0, 1, 2].map(k => Math.round(ca[k] + (cb[k] - ca[k]) * f));
+      return `rgb(${c.join(',')})`;
+    }
+  }
+  return `rgb(${s[s.length - 1][1].join(',')})`;
+}
+
+// v1.56.0: дни вертикальным списком строк-карточек (вместо горизонтальной ленты).
+// Температурная полоса каждого дня позиционируется на ОБЩЕЙ шкале min/max всех
+// 10 дней (как Apple Weather). «Сегодня» — неоновая строка (.day.today), на её
+// полосе — маркер текущей температуры. Полоска согласия моделей (confidence) —
+// тонкая вертикальная полоса у левого края (только для AVG). Клик → модалка дня.
 function renderDays(forecast) {
   const grid = document.getElementById('daysGrid');
   grid.innerHTML = '';
   // Confidence показываем только когда смотрим AVG (для конкретной модели спред бессмыслен).
   const showConf = currentSourceId === 'avg';
+  // Глобальная шкала температур по всем дням.
+  let gMin = Infinity, gMax = -Infinity;
+  forecast.forEach(d => {
+    if (typeof d.min === 'number' && d.min < gMin) gMin = d.min;
+    if (typeof d.max === 'number' && d.max > gMax) gMax = d.max;
+  });
+  if (!isFinite(gMin)) gMin = 0;
+  if (!isFinite(gMax)) gMax = 1;
+  const span = (gMax - gMin) || 1;
+  const dropSvg = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
+  // Текущая температура — для маркера на строке «Сегодня».
+  const nowT = (forecast[0] && Array.isArray(forecast[0].hourly) && forecast[0].hourly[NOW_HOUR])
+    ? forecast[0].hourly[NOW_HOUR].t : null;
+
   forecast.forEach((d, i) => {
-    const card = document.createElement('div');
-    card.className = 'glass day' + (i === 0 ? ' today' : '');
+    const row = document.createElement('div');
+    row.className = 'glass day dayrow' + (i === 0 ? ' today' : '');
     const dayLabel = d.id === 0 ? t('day.today') : localizeDayShort(d.name);
     const confCls = showConf ? confidenceClass(d.confidence) : null;
-    card.innerHTML = `
-      <div class="day-name">${dayLabel}</div>
-      <div class="day-date">${d.date.slice(0,5)}</div>
-      <div class="day-icon">${weatherIcon(d.condition, 56)}</div>
-      <div class="day-temps"><span class="day-hi">${fmtTempNum(d.max)}°</span><span class="day-lo">${fmtTempNum(d.min)}°</span></div>
-      <div class="day-prec"><svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>${d.precip}%</div>
-      <div class="day-wind">${fmtWind(d.wind)} ${localizeWindDirShort(d.windDir)}</div>
-      <div class="day-tap">${t('day.tap')} ↑</div>
-      ${confCls ? `<div class="day-confidence-bar ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></div>` : ''}
+    const left = ((d.min - gMin) / span) * 100;
+    const width = Math.max(((d.max - d.min) / span) * 100, 4);
+    const grad = `linear-gradient(90deg,${dayTempColor(d.min)},${dayTempColor(d.max)})`;
+    const nowMarker = (i === 0 && nowT != null)
+      ? `<span class="dr-now" style="left:${Math.min(100, Math.max(0, ((nowT - gMin) / span) * 100))}%"></span>`
+      : '';
+    // Осадки: % + мм (если ≥ 0.3 мм); если сухо — прочерк.
+    const wet = (typeof d.precipSum === 'number' && d.precipSum >= 0.3) || d.precip >= 5;
+    let precHtml = '<span class="dr-dry">—</span>';
+    if (wet) {
+      const mmPart = (typeof d.precipSum === 'number' && d.precipSum >= 0.3)
+        ? ` <span class="dr-mm">· ${Math.round(d.precipSum * 10) / 10} ${t('unit.mm')}</span>` : '';
+      precHtml = `${dropSvg}<span class="dr-pp">${d.precip}%</span>${mmPart}`;
+    }
+    row.innerHTML = `
+      ${confCls ? `<span class="dr-conf ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></span>` : ''}
+      <div class="dr-day"><span class="dr-name">${dayLabel}</span><span class="dr-date">${d.date.slice(0, 5)}</span></div>
+      <div class="dr-icon">${weatherIcon(d.condition, 34)}</div>
+      <span class="dr-lo">${fmtTempNum(d.min)}°</span>
+      <div class="dr-bar"><span class="dr-fill" style="left:${left}%;width:${width}%;background:${grad}"></span>${nowMarker}</div>
+      <span class="dr-hi">${fmtTempNum(d.max)}°</span>
+      <div class="dr-prec">${precHtml}</div>
+      <span class="dr-chev" aria-hidden="true">›</span>
     `;
-    card.addEventListener('click', () => openModal(d.id));
-    grid.appendChild(card);
+    row.addEventListener('click', () => openModal(d.id));
+    grid.appendChild(row);
   });
 }
 
@@ -12198,7 +12243,7 @@ function renderAll() {
   renderConfidenceChip();
   // После любого ре-рендера пересчитать состояние стрелок прокрутки (ширина контента могла измениться)
   requestAnimationFrame(() => {
-    ['hourlyRow', 'daysGrid', 'precipScroll'].forEach(id => {
+    ['hourlyRow', 'precipScroll'].forEach(id => {
       const el = document.getElementById(id);
       if (el) updateScrollArrows(el);
     });
