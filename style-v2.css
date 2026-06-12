@@ -426,3 +426,76 @@ body.v2 .v2-obs-open:focus-visible { outline: 2px solid var(--v2-accent); outlin
 @media (min-width: 1024px) {
   body.v2 #v2Observatory { grid-column: span 12; }
 }
+
+/* ============================================================
+   ЭТАП 7 — МАТЕРИАЛЬНАЯ ЧЕСТНОСТЬ (погода на стекле hero)
+   Слои поверх стекла hero, под текстом (.hero-info z-index:2).
+   ============================================================ */
+body.v2 .v2-hero-fx,
+body.v2 .v2-hero-frost,
+body.v2 .v2-hero-heat {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 24px;
+}
+body.v2 .v2-hero-fx { opacity: 0; transition: opacity 0.5s ease; }
+/* иней в углах при морозе ≤ −5° */
+body.v2 .v2-hero-frost {
+  display: none;
+  background:
+    radial-gradient(circle 130px at 0 0, rgba(214, 236, 255, 0.24), transparent 66%),
+    radial-gradient(circle 120px at 100% 0, rgba(214, 236, 255, 0.20), transparent 66%),
+    radial-gradient(circle 150px at 100% 100%, rgba(214, 236, 255, 0.16), transparent 66%),
+    radial-gradient(circle 110px at 0 100%, rgba(214, 236, 255, 0.15), transparent 66%);
+  mix-blend-mode: screen;
+}
+/* тёплое марево в жару ≥ +30° */
+body.v2 .v2-hero-heat {
+  display: none;
+  background: linear-gradient(0deg, rgba(255, 170, 110, 0.13), transparent 42%);
+  animation: v2heat 4.5s ease-in-out infinite;
+}
+@keyframes v2heat { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+@media (prefers-reduced-motion: reduce) {
+  body.v2 .v2-hero-heat { animation: none; opacity: 0.6; }
+}
+
+/* ============================================================
+   ЭТАП 7 — СВЕТЛАЯ ТЕМА (то же небо, «молочное» стекло, тёмный текст)
+   data-theme="light" выставляет app.js на <html>; небо не меняем.
+   ============================================================ */
+:root[data-theme="light"] body.v2 {
+  --v2-glass-tint: rgba(248, 250, 255, 0.62);
+  --v2-glass-edge: rgba(120, 140, 180, 0.20);
+}
+:root[data-theme="light"] body.v2 .hero {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.68));
+}
+/* Текст hero — тёмный. V1 держит его белым (поверх яркого фото-фона) правилами
+   ":root[data-theme=light] .hero[data-tod][data-cond] *{color:#fff !important}"
+   (важность + специфичность 0,5,0). Фото в V2 скрыто, поэтому добавляем в
+   селектор .hero (специфичность 0,5,1 > 0,5,0) + !important — осознанно
+   перебиваем светлую тему V1. */
+:root[data-theme="light"] body.v2 .hero .v2-odo,
+:root[data-theme="light"] body.v2 .hero .v2-odo * { color: #16203a !important; }
+:root[data-theme="light"] body.v2 .hero .v2-odo { text-shadow: 0 2px 18px rgba(255, 255, 255, 0.5); }
+:root[data-theme="light"] body.v2 .hero .hero-temp-unit { color: rgba(22, 32, 58, 0.7) !important; }
+:root[data-theme="light"] body.v2 .hero .hero-label { color: rgba(22, 32, 58, 0.55) !important; }
+:root[data-theme="light"] body.v2 .hero .hero-condition { color: #16203a !important; text-shadow: none !important; }
+:root[data-theme="light"] body.v2 .hero .hero-feels { color: rgba(22, 32, 58, 0.66) !important; text-shadow: none !important; }
+:root[data-theme="light"] body.v2 .hero .hero-feels strong { color: #b25a12 !important; }
+:root[data-theme="light"] body.v2 .hero .hero-source-note { color: rgba(22, 32, 58, 0.6) !important; text-shadow: none !important; }
+:root[data-theme="light"] body.v2 .hero .v2-brief { color: rgba(22, 32, 58, 0.86) !important; }
+:root[data-theme="light"] body.v2 .location-text h1 { color: #16203a; }
+:root[data-theme="light"] body.v2 .v2-zone-title { color: #16203a; }
+:root[data-theme="light"] body.v2 .v2-obs-verdict { color: #16203a; }
+:root[data-theme="light"] body.v2.v2-head-shrink .header {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.62));
+}
+:root[data-theme="light"] body.v2 #v2Dock { background: rgba(248, 250, 255, 0.72); border-color: rgba(120, 140, 180, 0.18); }
+:root[data-theme="light"] body.v2 .v2-dock-btn { color: rgba(22, 32, 58, 0.55); }
+:root[data-theme="light"] body.v2 .v2-dock-btn:hover { color: rgba(22, 32, 58, 0.85); }
+:root[data-theme="light"] body.v2 .v2-day-bar { background: rgba(20, 30, 55, 0.10); }
+:root[data-theme="light"] body.v2 .v2-hero-frost { mix-blend-mode: normal; }

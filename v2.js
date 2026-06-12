@@ -1480,10 +1480,107 @@
   }
 
   /* ============================================================
+     ЭТАП 7 — МАТЕРИАЛЬНАЯ ЧЕСТНОСТЬ: погода на стекле hero.
+     Лёгкий отдельный канвас только над hero: капли в дождь; иней в
+     углах при морозе ≤ −5°; тёплое марево в жару ≥ +30° (CSS-слои).
+     ============================================================ */
+  function makeGlassFx() {
+    return {
+      canvas: null, ctx: null, hero: null, frostEl: null, heatEl: null,
+      W: 0, H: 0, dpr: 1, drops: [], runners: [], running: false, rafId: null, active: false, last: 0,
+      mount() {
+        this.hero = document.querySelector('body.v2 .hero');
+        if (!this.hero) return;
+        if (!document.getElementById('v2HeroFx')) {
+          const c = document.createElement('canvas');
+          c.id = 'v2HeroFx'; c.className = 'v2-hero-fx'; c.setAttribute('aria-hidden', 'true');
+          this.hero.insertBefore(c, this.hero.firstChild);
+          const frost = document.createElement('div'); frost.className = 'v2-hero-frost'; frost.setAttribute('aria-hidden', 'true');
+          const heat = document.createElement('div'); heat.className = 'v2-hero-heat'; heat.setAttribute('aria-hidden', 'true');
+          this.hero.insertBefore(frost, this.hero.firstChild);
+          this.hero.insertBefore(heat, this.hero.firstChild);
+        }
+        this.canvas = document.getElementById('v2HeroFx');
+        this.ctx = this.canvas.getContext('2d');
+        this.frostEl = this.hero.querySelector('.v2-hero-frost');
+        this.heatEl = this.hero.querySelector('.v2-hero-heat');
+        this.resize();
+        window.addEventListener('resize', () => this.resize(), { passive: true });
+      },
+      resize() {
+        if (!this.hero || !this.ctx) return;
+        const r = this.hero.getBoundingClientRect();
+        this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.W = r.width; this.H = r.height;
+        this.canvas.width = Math.round(this.W * this.dpr); this.canvas.height = Math.round(this.H * this.dpr);
+        this.canvas.style.width = this.W + 'px'; this.canvas.style.height = this.H + 'px';
+        this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+        this.buildDrops();
+        if (reducedMotion && this.active) this.drawStatic(true);
+      },
+      buildDrops() {
+        this.drops = [];
+        const n = this.W < 500 ? 20 : 38;
+        for (let i = 0; i < n; i++) this.drops.push({ x: Math.random() * this.W, y: Math.random() * this.H, r: 1.2 + Math.random() * 2.3 });
+      },
+      setWeather(wet, temp) {
+        if (!this.hero) return;
+        if (this.frostEl) this.frostEl.style.display = (temp <= -5) ? 'block' : 'none';
+        if (this.heatEl) this.heatEl.style.display = (temp >= 30) ? 'block' : 'none';
+        const want = !!wet;
+        if (want && !this.active) {
+          this.active = true; this.canvas.style.opacity = '1';
+          if (reducedMotion) this.drawStatic(true); else this.start();
+        } else if (!want && this.active) {
+          this.active = false; this.stop(); this.canvas.style.opacity = '0';
+          if (this.ctx) this.ctx.clearRect(0, 0, this.W, this.H);
+        }
+      },
+      start() {
+        if (this.running || reducedMotion) return;
+        this.running = true; this.last = performance.now();
+        const loop = (t) => {
+          if (!this.running) return;
+          const dt = Math.min((t - this.last) / 1000, 0.05); this.last = t;
+          this.frame(dt); this.rafId = raf(loop);
+        };
+        this.rafId = raf(loop);
+      },
+      stop() { this.running = false; if (this.rafId) caf(this.rafId); },
+      drawStatic(clear) {
+        const ctx = this.ctx; if (!ctx) return;
+        if (clear) ctx.clearRect(0, 0, this.W, this.H);
+        for (const d of this.drops) {
+          ctx.globalAlpha = 0.32; ctx.fillStyle = 'rgba(210,225,248,0.5)';
+          ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 0.5; ctx.fillStyle = 'rgba(255,255,255,0.65)';
+          ctx.beginPath(); ctx.arc(d.x - d.r * 0.3, d.y - d.r * 0.3, d.r * 0.35, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      },
+      frame(dt) {
+        const ctx = this.ctx; ctx.clearRect(0, 0, this.W, this.H);
+        this.drawStatic(false);
+        if (Math.random() < dt * 2.0 && this.runners.length < 7) {
+          this.runners.push({ x: Math.random() * this.W, y: -4, r: 2 + Math.random() * 2.4, spd: 30 + Math.random() * 70 });
+        }
+        for (const rr of this.runners) rr.y += rr.spd * dt;
+        this.runners = this.runners.filter(rr => rr.y < this.H + 10);
+        for (const rr of this.runners) {
+          ctx.globalAlpha = 0.22; ctx.fillStyle = 'rgba(205,222,247,0.6)';
+          ctx.fillRect(rr.x - 0.6, rr.y - 20, 1.2, 20);
+          ctx.globalAlpha = 0.62; ctx.beginPath(); ctx.arc(rr.x, rr.y, rr.r, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+    };
+  }
+
+  /* ============================================================
      Объект V2 — единая точка входа.
      ============================================================ */
   const V2 = {
-    version: 'stage-6',
+    version: 'stage-7',
     booted: false,
     hooks: { renderAll: 0, applyTranslations: 0 },
     sky: new SkyEngine(),
@@ -1536,6 +1633,7 @@
           const sc = this.computeScene();
           this.sky.setScene(sc);
           if (this.skyline && this.skyline.ready) this.skyline.update(sc);
+          if (this.glassFx) this.glassFx.setWeather(isWetKind(sc.precip), sc.temp);
         }
         // hero: одометр температуры, брифинг, компактная температура в шапке
         if (this.odometer && !(this.time && this.time.scrubbing)) this.odometer.sync();
@@ -1568,6 +1666,10 @@
         });
         // брифинг зависит от языка — пересобрать
         v2SyncBriefing();
+        // aria-label линзы выставлялся императивно — обновить под язык
+        if (this.time && this.time.el) this.time.el.setAttribute('aria-label', v2t('v2.lens.aria'));
+        // обсерватория (кнопка/состояние) — под язык
+        v2SyncObservatory();
       } catch (e) { if (DEBUG) console.warn('[V2] applyTranslations error', e); }
       if (DEBUG) console.log('[V2] applyTranslations #' + this.hooks.applyTranslations + ' · lang=' + currentLang());
     },
@@ -1582,6 +1684,7 @@
       try { v2InitHeader(); } catch (e) { console.warn('[V2] header init error', e); }
       try { v2BuildLayout(); } catch (e) { console.warn('[V2] buildLayout error', e); }
       try { v2BuildObservatory(); } catch (e) { console.warn('[V2] observatory error', e); }
+      try { this.glassFx = makeGlassFx(); this.glassFx.mount(); } catch (e) { console.warn('[V2] glassFx error', e); }
       try { v2BuildDock(); } catch (e) { console.warn('[V2] buildDock error', e); }
       this.applyTranslations();
       this.afterRenderAll();
