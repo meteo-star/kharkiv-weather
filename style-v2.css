@@ -203,3 +203,80 @@ body.v2.v2-head-shrink .v2-head-temp {
   font-weight: 600;
   color: var(--v2-accent);
 }
+
+/* ============================================================
+   ЭТАП 4 — ЛИНЗА ВРЕМЕНИ (лента часов-скраб)
+   ============================================================ */
+body.v2 #v2TimeLens {
+  grid-column: 1 / -1;
+  margin-top: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body.v2 .v2-lens-label {
+  min-height: 18px;
+  height: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  color: var(--v2-accent-strong);
+  letter-spacing: 0.01em;
+  transition: opacity 0.2s ease;
+}
+body.v2 .v2-lens-track {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: flex-end;
+  /* лента перехватывает горизонтальный жест; вертикальный скролл страницы
+     вне ленты не страдает (ТЗ §4.7) */
+  touch-action: none;
+  cursor: ew-resize;
+  padding-top: 16px;
+}
+body.v2 .v2-lens-tick {
+  flex: 1 1 0;
+  height: 9px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+}
+body.v2 .v2-lens-tick.major { height: 15px; border-left-color: rgba(255, 255, 255, 0.30); }
+body.v2 .v2-lens-tick .lh {
+  position: absolute;
+  top: -15px;
+  left: -1px;
+  font-size: 9px;
+  color: rgba(232, 240, 255, 0.5);
+}
+body.v2 .v2-lens-tick.wet::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--v2-accent);
+  box-shadow: 0 0 5px var(--v2-accent);
+}
+body.v2 .v2-lens-cursor {
+  position: absolute;
+  top: 12px; bottom: 0;
+  left: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--v2-accent-strong);
+  box-shadow: 0 0 10px var(--v2-accent), 0 0 3px var(--v2-accent-strong);
+  pointer-events: none;
+  transition: left 0.12s ease;
+}
+body.v2 #v2TimeLens.v2-lens-active .v2-lens-cursor { transition: none; }
+body.v2 #v2TimeLens:focus-visible {
+  outline: 2px solid var(--v2-accent);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.v2 .v2-lens-cursor { transition: none; }
+}

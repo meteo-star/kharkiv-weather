@@ -346,6 +346,16 @@
     return this._sim ? Object.assign({}, this.target, this._sim) : this.target;
   };
 
+  /* Скраб «линзы времени»: жёстко зафиксировать сцену выбранного часа. */
+  SkyEngine.prototype.setScrub = function (scene) {
+    this._scrub = Object.assign(defaultScene(), scene);
+    if (reducedMotion) { this.cur = Object.assign({}, this._scrub); this.drawFrame(0); }
+  };
+  SkyEngine.prototype.clearScrub = function () {
+    this._scrub = null;
+    if (reducedMotion) { this.cur = this.effectiveTarget(); this.drawFrame(0); }
+  };
+
   SkyEngine.prototype.start = function () {
     if (this.running || reducedMotion) return;
     this.running = true;
@@ -366,8 +376,11 @@
 
   /* Сглаживаем cur → target (экспоненциально), дрейфим облака, рисуем. */
   SkyEngine.prototype.frame = function (dt, t) {
-    const tgt = this.effectiveTarget();
-    const k = 1 - Math.pow(0.0001, dt); // ~быстрое, но плавное приближение
+    // Скраб «линзы времени»: целимся в выбранный час и СНАПим (k=1) для
+    // мгновенного отклика; при отпускании _scrub=null → cur пружинит назад.
+    const scrub = this._scrub;
+    const tgt = scrub ? scrub : this.effectiveTarget();
+    const k = scrub ? 1 : (1 - Math.pow(0.0001, dt));
     // углы (минуты) интерполируем кратчайшим путём по суткам
     this.cur.nowMin = lerpAngleMin(this.cur.nowMin, tgt.nowMin, k);
     this.cur.sunriseMin = lerp(this.cur.sunriseMin, tgt.sunriseMin, k);
@@ -1098,10 +1111,199 @@
   }
 
   /* ============================================================
+     ЛИНЗА ВРЕМЕНИ (этап 4) — лента часов-скраб под температурой.
+     Тянешь → сцена и hero-цифры живут в выбранном часе; отпустил →
+     пружинный возврат к «сейчас».
+     ============================================================ */
+  function v2DispTemp(c) {
+    let v = c;
+    try { if (state && state.units && state.units.temp === 'F') v = c * 9 / 5 + 32; } catch (_) {}
+    return Math.round(v);
+  }
+  // Плоский почасовой ряд по всем дням прогноза + индекс «сейчас».
+  function v2FlatHourly() {
+    const f = activeForecast();
+    if (!f) return null;
+    const flat = [];
+    let nowIndex = 0;
+    const hr = nowHour();
+    for (let di = 0; di < f.length; di++) {
+      const d = f[di];
+      if (!Array.isArray(d.hourly)) continue;
+      const srMin = hhmmToMin(d.sunrise) != null ? hhmmToMin(d.sunrise) : 330;
+      const ssMin = hhmmToMin(d.sunset) != null ? hhmmToMin(d.sunset) : 1230;
+      for (const h of d.hourly) {
+        if (di === 0 && h.h === hr) nowIndex = flat.length;
+        flat.push({
+          di, h: h.h, srMin, ssMin,
+          t: h.t != null ? h.t : 15, pmm: h.pmm || 0, cl: h.cl != null ? h.cl : 40,
+          wc: h.wc != null ? h.wc : 0, vis: h.vis != null ? h.vis : 20, p: h.p,
+          w: h.w != null ? h.w : 2, moonIllum: d.moonIllum, moonWaxing: d.moonWaxing, windDir: d.windDir
+        });
+      }
+    }
+    return { flat, nowIndex };
+  }
+  function v2SceneFromEntry(e) {
+    const kind = precipKind(e.wc, e.t, e.pmm);
+    return {
+      nowMin: e.h * 60, sunriseMin: e.srMin, sunsetMin: e.ssMin,
+      cloud: e.cl, vis: e.vis, pmm: e.pmm, wcode: e.wc, temp: e.t,
+      precip: kind, isStorm: kind === 'storm',
+      moonIllum: e.moonIllum != null ? e.moonIllum : 50, moonWaxing: !!e.moonWaxing,
+      wind: e.w, windDx: CARD_DX[e.windDir] != null ? CARD_DX[e.windDir] : 0.5
+    };
+  }
+
+  function makeTimeLens() {
+    const SPAN = 47; // 0..47ч вперёд
+    return {
+      ready: false, el: null, track: null, label: null, cursor: null,
+      offset: 0, scrubbing: false, data: null, _lastHr: -1,
+
+      mount() {
+        const hero = document.querySelector('body.v2 .hero');
+        if (!hero) return;
+        let el = document.getElementById('v2TimeLens');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'v2TimeLens';
+          el.className = 'v2-lens';
+          el.setAttribute('role', 'slider');
+          el.setAttribute('tabindex', '0');
+          el.setAttribute('aria-valuemin', '0');
+          el.setAttribute('aria-valuemax', String(SPAN));
+          el.setAttribute('aria-valuenow', '0');
+          el.innerHTML =
+            '<div class="v2-lens-label" id="v2LensLabel"></div>' +
+            '<div class="v2-lens-track" id="v2LensTrack"><div class="v2-lens-cursor" id="v2LensCursor"></div></div>';
+          hero.appendChild(el);
+        }
+        this.el = el;
+        this.track = document.getElementById('v2LensTrack');
+        this.label = document.getElementById('v2LensLabel');
+        this.cursor = document.getElementById('v2LensCursor');
+        this.el.setAttribute('aria-label', v2t('v2.lens.aria'));
+        this.attach();
+        this.ready = true;
+        this.rebuild();
+      },
+
+      rebuild() {
+        const fh = v2FlatHourly();
+        if (!fh) return;
+        this.data = fh;
+        // ленту-ticks строим один раз; при смене часа «сейчас» — перестраиваем подписи/осадки
+        const hr = nowHour();
+        if (this._lastHr !== hr || !this.track.querySelector('.v2-lens-tick')) {
+          this._lastHr = hr;
+          this.buildTicks();
+        }
+      },
+
+      buildTicks() {
+        const fh = this.data; if (!fh) return;
+        const frag = document.createDocumentFragment();
+        for (let o = 0; o <= SPAN; o++) {
+          const e = fh.flat[Math.min(fh.nowIndex + o, fh.flat.length - 1)];
+          const tick = document.createElement('div');
+          tick.className = 'v2-lens-tick';
+          const hod = e ? e.h : 0;
+          if (hod % 6 === 0) {
+            tick.classList.add('major');
+            const lh = document.createElement('span');
+            lh.className = 'lh';
+            lh.textContent = String(hod).padStart(2, '0');
+            tick.appendChild(lh);
+          }
+          if (e && (e.pmm > 0.15 || precipKind(e.wc, e.t, e.pmm) !== 'none')) tick.classList.add('wet');
+          frag.appendChild(tick);
+        }
+        // очистить старые ticks (оставить cursor)
+        Array.prototype.slice.call(this.track.querySelectorAll('.v2-lens-tick')).forEach(n => n.remove());
+        this.track.appendChild(frag);
+      },
+
+      offsetFromX(clientX) {
+        const r = this.track.getBoundingClientRect();
+        const frac = clamp((clientX - r.left) / r.width, 0, 1);
+        return Math.round(frac * SPAN);
+      },
+
+      apply(o, haptic) {
+        o = clamp(o | 0, 0, SPAN);
+        const changed = o !== this.offset;
+        this.offset = o;
+        this.cursor.style.left = (o / SPAN * 100) + '%';
+        this.el.setAttribute('aria-valuenow', String(o));
+        if (!this.data) this.rebuild();
+        if (o === 0) {
+          V2.sky.clearScrub();
+          this.label.textContent = v2t('v2.lens.now');
+          this.el.setAttribute('aria-valuetext', this.label.textContent);
+          if (V2.odometer) V2.odometer.sync();
+          return;
+        }
+        const e = this.data.flat[Math.min(this.data.nowIndex + o, this.data.flat.length - 1)];
+        if (!e) return;
+        V2.sky.setScrub(v2SceneFromEntry(e));
+        const parts = [v2FmtHour(e.h), v2FmtTemp(e.t)];
+        const kind = precipKind(e.wc, e.t, e.pmm);
+        if (e.pmm > 0.05) parts.push((kind === 'snow' || kind === 'sleet' ? '❄' : '💧') + ' ' + v2FmtMm(e.pmm));
+        this.label.textContent = parts.join(' · ');
+        this.el.setAttribute('aria-valuetext', this.label.textContent);
+        if (V2.odometer) V2.odometer.render(String(v2DispTemp(e.t)));
+        if (haptic && changed) { try { if (navigator.vibrate) navigator.vibrate(5); } catch (_) {} }
+      },
+
+      release() {
+        this.scrubbing = false;
+        this.el.classList.remove('v2-lens-active');
+        this.apply(0, false);
+      },
+
+      attach() {
+        const tr = this.track;
+        const onDown = (ev) => {
+          this.scrubbing = true;
+          this.el.classList.add('v2-lens-active');
+          try { tr.setPointerCapture(ev.pointerId); } catch (_) {}
+          this.apply(this.offsetFromX(ev.clientX), true);
+          ev.preventDefault();
+        };
+        const onMove = (ev) => {
+          if (!this.scrubbing) return;
+          this.apply(this.offsetFromX(ev.clientX), true);
+          ev.preventDefault();
+        };
+        const onUp = () => { if (this.scrubbing) this.release(); };
+        tr.addEventListener('pointerdown', onDown);
+        tr.addEventListener('pointermove', onMove);
+        tr.addEventListener('pointerup', onUp);
+        tr.addEventListener('pointercancel', onUp);
+        // клавиатура (a11y)
+        this.el.addEventListener('keydown', (ev) => {
+          let o = this.offset;
+          if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') o += 1;
+          else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') o -= 1;
+          else if (ev.key === 'Home' || ev.key === 'Escape') o = 0;
+          else if (ev.key === 'End') o = SPAN;
+          else if (ev.key === 'PageUp') o += 6;
+          else if (ev.key === 'PageDown') o -= 6;
+          else return;
+          ev.preventDefault();
+          this.apply(o, true);
+        });
+        this.el.addEventListener('blur', () => { if (this.offset !== 0 && !this.scrubbing) this.apply(0, false); });
+      }
+    };
+  }
+
+  /* ============================================================
      Объект V2 — единая точка входа.
      ============================================================ */
   const V2 = {
-    version: 'stage-3',
+    version: 'stage-4',
     booted: false,
     hooks: { renderAll: 0, applyTranslations: 0 },
     sky: new SkyEngine(),
@@ -1156,9 +1358,11 @@
           if (this.skyline && this.skyline.ready) this.skyline.update(sc);
         }
         // hero: одометр температуры, брифинг, компактная температура в шапке
-        if (this.odometer) this.odometer.sync();
+        if (this.odometer && !(this.time && this.time.scrubbing)) this.odometer.sync();
         v2SyncBriefing();
         v2SyncHeader();
+        // линза времени: пересобрать ряд под свежие данные (не во время скраба)
+        if (this.time && this.time.ready && !this.time.scrubbing) this.time.rebuild();
       } catch (e) { if (DEBUG) console.warn('[V2] afterRenderAll error', e); }
       if (DEBUG) {
         const s = this.computeScene();
@@ -1190,6 +1394,7 @@
       try { this.sky.mount(); } catch (e) { console.warn('[V2] sky.mount error', e); }
       try { this.skyline = makeSkyline(); this.skyline.mount(); } catch (e) { console.warn('[V2] skyline.mount error', e); }
       try { this.odometer = makeOdometer(); this.odometer.mount(); } catch (e) { console.warn('[V2] odometer.mount error', e); }
+      try { this.time = makeTimeLens(); this.time.mount(); } catch (e) { console.warn('[V2] timeLens.mount error', e); }
       try { v2InitHeader(); } catch (e) { console.warn('[V2] header init error', e); }
       this.applyTranslations();
       this.afterRenderAll();
