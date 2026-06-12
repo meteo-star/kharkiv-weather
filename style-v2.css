@@ -77,6 +77,44 @@ body.v2 > .particle { display: none !important; }
 body.v2 .hero-scene { display: none !important; }
 body.v2 .hero-overlay { display: none !important; }
 
+/* ============================================================
+   СИЛУЭТ ГОРОДА (этап 2) — отдельный inline-SVG над нижней кромкой
+   сцены, за контентом. Окна зажигаются по времени суток.
+   ============================================================ */
+body.v2 #v2Skyline {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: min(30vh, 250px);
+  z-index: 0;
+  pointer-events: none;
+}
+body.v2 #v2Skyline svg { display: block; width: 100%; height: 100%; }
+/* силуэт — тёмный, чуть прозрачный, чтобы свечение горизонта читалось по кромке */
+body.v2 .v2sl-sil { fill: #05070f; fill-opacity: 0.96; }
+/* окна: по умолчанию невидимы (силуэт сплошной); зажигаются тёплым */
+body.v2 .v2sl-win {
+  fill: #ffce7a;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+body.v2 .v2sl-win.v2sl-lit { opacity: 0.9; }
+/* маяк на телевышке — мигающий красный */
+body.v2 .v2sl-beacon { fill: #ff5a5a; animation: v2slBeacon 2.6s ease-in-out infinite; }
+@keyframes v2slBeacon { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+/* мокрый отблеск под силуэтом в дождь */
+body.v2 #v2Skyline.v2sl-wet::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 34%;
+  background: linear-gradient(to top, rgba(130,160,210,0.12), transparent);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.v2 .v2sl-beacon { animation: none; opacity: 0.85; }
+  body.v2 .v2sl-win { transition: none; }
+}
+
 /* Hero на этапе 1 — обычная стеклянная карточка над небом.
    Sticky-поведение нейтрализуем позже (этап 3), сейчас оставляем
    как есть — оно не мешает. Чуть усиливаем читаемость текста на

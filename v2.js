@@ -76,11 +76,13 @@
      ПАЛИТРЫ НЕБА (ключевые кадры из ТЗ §5).
      Каждая фаза: [верх, середина, горизонт, акцент].
      ============================================================ */
+  // Палитры приглушены (фидбек: «спокойнее/темнее») — небо как фон, стекло и
+  // текст читаются сильнее. День — мягкий стальной синий вместо неонового.
   const PH = {
-    night: ['#050714', '#0b1026', '#1a2140', '#6d7bd6'],
-    dawn:  ['#2b2a4a', '#7a4b6e', '#ffd9a0', '#ffb27a'],
-    day:   ['#3b82d9', '#7ab8f0', '#cfe8ff', '#4aa3ff'],
-    dusk:  ['#1f2a5e', '#714674', '#ffc46b', '#ff9d5c']
+    night: ['#040610', '#0a0e22', '#161d39', '#6470c4'],
+    dawn:  ['#241f3c', '#6e4360', '#e3bd84', '#d99a68'],
+    day:   ['#27496f', '#4d7aa4', '#9cbcd8', '#5a8fc2'],
+    dusk:  ['#1a2450', '#5c3a60', '#dba055', '#dd864a']
   };
   const GREY_DAY   = ['#5a6678', '#8b97a8', '#b9c2cf', '#7d8aa0'];
   const GREY_NIGHT = ['#0a0d18', '#141a2a', '#1b2233', '#4a5575'];
@@ -222,15 +224,30 @@
 
     this.stars = [];
     this.clouds = [];
+    this.precip = [];   // частицы дождя/снега
+    this.flash = null;  // активная вспышка молнии
+    this._slAccum = 0;  // троттл обновления силуэта/окон
   }
 
   function defaultScene() {
     return {
       nowMin: 12 * 60, sunriseMin: 330, sunsetMin: 1230,
       cloud: 30, vis: 20, moonIllum: 50, moonWaxing: true,
-      wind: 2, windDx: 1
+      wind: 2, windDx: 1,
+      pmm: 0, wcode: 0, temp: 15, precip: 'none', isStorm: false
     };
   }
+
+  /* Тип осадков для визуала: none / rain / sleet / snow / storm. */
+  function precipKind(wc, temp, pmm) {
+    if (wc >= 95) return 'storm';
+    const hasP = pmm > 0.02 || (wc >= 51); // код осадков даже при pmm≈0
+    if (!hasP) return 'none';
+    if ([71, 73, 75, 77, 85, 86].indexOf(wc) >= 0 || temp <= -0.5) return 'snow';
+    if ([56, 57, 66, 67].indexOf(wc) >= 0 || (temp > -0.5 && temp <= 1.8)) return 'sleet';
+    return 'rain';
+  }
+  function isWetKind(k) { return k === 'rain' || k === 'storm' || k === 'sleet'; }
 
   SkyEngine.prototype.mount = function () {
     let c = document.getElementById('v2Sky');
@@ -361,6 +378,12 @@
     this.cur.moonWaxing = tgt.moonWaxing;
     this.cur.wind = lerp(this.cur.wind, tgt.wind, k);
     this.cur.windDx = lerp(this.cur.windDx, tgt.windDx, k);
+    this.cur.pmm = lerp(this.cur.pmm, tgt.pmm, k);
+    this.cur.temp = lerp(this.cur.temp, tgt.temp, k);
+    // категориальные поля — копируем напрямую (не интерполируются)
+    this.cur.precip = tgt.precip;
+    this.cur.wcode = tgt.wcode;
+    this.cur.isStorm = tgt.isStorm;
 
     // дрейф облаков
     const drift = (this.cur.wind * 0.0006 + 0.0008);
@@ -369,6 +392,17 @@
       if (cl.x > 1.25) cl.x -= 1.5;
       if (cl.x < -0.25) cl.x += 1.5;
     }
+
+    this.updatePrecip(dt);
+    this.updateLightning(dt);
+
+    // силуэт/окна обновляем ~1/сек (бег времени зажигает окна на закате)
+    this._slAccum += dt;
+    if (this._slAccum > 1) {
+      this._slAccum = 0;
+      if (window.V2 && V2.skyline && V2.skyline.ready) V2.skyline.update(this.cur);
+    }
+
     this.drawFrame(t || 0);
   };
 
@@ -397,6 +431,20 @@
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
+    // Затемняющая виньетка сверху (зона шапки) + лёгкое притемнение по краям —
+    // делает сцену спокойнее и поднимает контраст текста на стекле (ТЗ §4.8).
+    const topDim = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+    topDim.addColorStop(0, 'rgba(2,4,14,0.34)');
+    topDim.addColorStop(1, 'rgba(2,4,14,0)');
+    ctx.fillStyle = topDim;
+    ctx.fillRect(0, 0, W, H * 0.5);
+
+    // Дождевой модификатор (ТЗ §5): темнее + синее под осадками.
+    if (isWetKind(sc.precip)) {
+      ctx.fillStyle = sc.precip === 'storm' ? 'rgba(8,12,28,0.34)' : 'rgba(10,16,34,0.18)';
+      ctx.fillRect(0, 0, W, H);
+    }
+
     // expose accent + horizon to CSS (интерфейс «в тон» небу)
     this.publishTokens(pal, sun);
 
@@ -422,6 +470,15 @@
 
     // --- 5. облака ---
     this.drawClouds(sc, sun, pal);
+
+    // --- 6. туман ---
+    this.drawFog(sc);
+
+    // --- 7. осадки ---
+    this.drawPrecip(sc);
+
+    // --- 8. молния (поверх всего) ---
+    this.drawLightning();
   };
 
   SkyEngine.prototype.publishTokens = function (pal, sun) {
@@ -503,11 +560,11 @@
     const haloC = mixRgb([255, 236, 180], [255, 140, 70], warm);
 
     ctx.save();
-    // ореол
-    const glowR = r * (3.4 + warm * 2.2);
+    // ореол (мягче — фидбек «спокойнее»)
+    const glowR = r * (3.0 + warm * 2.0);
     const halo = ctx.createRadialGradient(cx, cy, r * 0.5, cx, cy, glowR);
-    halo.addColorStop(0, rgbToCss(haloC, 0.5));
-    halo.addColorStop(0.4, rgbToCss(haloC, 0.18));
+    halo.addColorStop(0, rgbToCss(haloC, 0.36));
+    halo.addColorStop(0.4, rgbToCss(haloC, 0.13));
     halo.addColorStop(1, rgbToCss(haloC, 0));
     ctx.fillStyle = halo;
     ctx.beginPath(); ctx.arc(cx, cy, glowR, 0, Math.PI * 2); ctx.fill();
@@ -552,6 +609,133 @@
       ctx.fillStyle = rgbToCss(cloudRgb);
       ctx.fillRect(-cw / 2, -ch / 2, cw, ch);
       ctx.restore();
+    }
+    ctx.restore();
+  };
+
+  /* ----- ОСАДКИ: пул частиц, тип/плотность из сцены ----- */
+  SkyEngine.prototype.spawnDrop = function (type, anyY) {
+    const r = Math.random;
+    if (type === 'snow') {
+      return { x: r(), y: anyY ? r() : -0.02 - r() * 0.08, spd: 0.035 + r() * 0.05, rad: 1 + r() * 2.2, ph: r() * 6.28 };
+    }
+    if (type === 'storm') {
+      return { x: r(), y: anyY ? r() : -0.05 * r(), spd: 1.15 + r() * 0.6, len: 16 + r() * 16, w: 1 + r() * 0.7 };
+    }
+    // rain / sleet
+    return { x: r(), y: anyY ? r() : -0.05 * r(), spd: 0.7 + r() * 0.5, len: 9 + r() * 10, w: 0.8 + r() * 0.5 };
+  };
+
+  SkyEngine.prototype.updatePrecip = function (dt) {
+    const sc = this.cur, type = sc.precip;
+    const isMobile = this.W < 700;
+    let target = 0;
+    if (type === 'snow') target = clamp(sc.pmm * 30 + 12, 12, isMobile ? 60 : 120);
+    else if (type === 'storm') target = clamp(sc.pmm * 22 + 90, 80, isMobile ? 110 : 200);
+    else if (type === 'rain' || type === 'sleet') target = clamp(sc.pmm * 26 + 14, 14, isMobile ? 90 : 180);
+    target = Math.round(target);
+
+    // если сменился тип — пересоздаём пул
+    if (this._precipType !== type) { this.precip.length = 0; this._precipType = type; }
+    while (this.precip.length < target) this.precip.push(this.spawnDrop(type, true));
+    if (this.precip.length > target) this.precip.length = target;
+    if (!target) return;
+
+    const windPush = sc.windDx * (0.0004 + sc.wind * 0.00006);
+    for (const p of this.precip) {
+      p.y += p.spd * dt;
+      if (type === 'snow') p.x += Math.sin(p.y * 9 + p.ph) * 0.0007 + windPush * 0.7;
+      else p.x += windPush;
+      if (p.y > 1.04) Object.assign(p, this.spawnDrop(type, false));
+      if (p.x > 1.06) p.x -= 1.12;
+      if (p.x < -0.06) p.x += 1.12;
+    }
+  };
+
+  SkyEngine.prototype.drawPrecip = function (sc) {
+    const ctx = this.ctx, W = this.W, H = this.H, type = sc.precip;
+    if (type === 'none' || !this.precip.length) return;
+    ctx.save();
+    if (type === 'snow') {
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      for (const p of this.precip) {
+        ctx.globalAlpha = 0.45 + 0.5 * (p.rad / 3.2);
+        ctx.beginPath(); ctx.arc(p.x * W, p.y * H, p.rad, 0, Math.PI * 2); ctx.fill();
+      }
+    } else {
+      const storm = type === 'storm';
+      ctx.strokeStyle = storm ? 'rgba(185,208,238,0.5)' : 'rgba(172,200,230,0.42)';
+      ctx.lineCap = 'round';
+      const slantK = storm ? 1.15 : 1;
+      for (const p of this.precip) {
+        ctx.lineWidth = p.w;
+        const x = p.x * W, y = p.y * H, dx = sc.windDx * p.len * 0.32, dy = p.len * slantK;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dx, y + dy); ctx.stroke();
+      }
+    }
+    ctx.restore();
+  };
+
+  /* ----- ТУМАН: мягкие горизонтальные полосы у горизонта ----- */
+  SkyEngine.prototype.drawFog = function (sc) {
+    const foggy = sc.wcode === 45 || sc.wcode === 48 || (sc.vis != null && sc.vis < 2.5);
+    if (!foggy) return;
+    const ctx = this.ctx, W = this.W, H = this.H;
+    const strength = sc.vis != null ? clamp((2.5 - sc.vis) / 2.5, 0.3, 1) : 0.6;
+    ctx.save();
+    for (let i = 0; i < 3; i++) {
+      const y = this.horizonY - i * H * 0.07 - H * 0.01;
+      const g = ctx.createLinearGradient(0, y - H * 0.1, 0, y + H * 0.1);
+      const a = (0.10 + 0.05 * (3 - i)) * strength;
+      g.addColorStop(0, 'rgba(206,210,220,0)');
+      g.addColorStop(0.5, 'rgba(206,210,220,' + a.toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(206,210,220,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, y - H * 0.12, W, H * 0.24);
+    }
+    ctx.restore();
+  };
+
+  /* ----- МОЛНИЯ: редкие вспышки + зигзаг при грозе ----- */
+  SkyEngine.prototype.makeBolt = function () {
+    const W = this.W;
+    let x = (0.2 + Math.random() * 0.6) * W, y = 0;
+    const pts = [[x, y]];
+    const segs = 6 + Math.floor(Math.random() * 4);
+    const dy = (this.horizonY * 0.92) / segs;
+    for (let i = 0; i < segs; i++) {
+      x += (Math.random() - 0.5) * W * 0.09; y += dy;
+      pts.push([x, y]);
+    }
+    return pts;
+  };
+  SkyEngine.prototype.updateLightning = function (dt) {
+    if (this.cur.precip !== 'storm' && !this.cur.isStorm) { this.flash = null; return; }
+    if (!this.flash && Math.random() < dt * 0.16) {
+      this.flash = { life: 0.6 + Math.random() * 0.3, t: 0, bolt: this.makeBolt() };
+    }
+    if (this.flash) { this.flash.t += dt; if (this.flash.t > this.flash.life) this.flash = null; }
+  };
+  SkyEngine.prototype.drawLightning = function () {
+    const f = this.flash;
+    if (!f) return;
+    const ctx = this.ctx, W = this.W, H = this.H;
+    const decay = 1 - f.t / f.life;
+    const env = Math.max(0, Math.sin(Math.min(f.t * 20, Math.PI))) * decay;
+    if (env <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = env * 0.45;
+    ctx.fillStyle = 'rgba(202,216,255,1)';
+    ctx.fillRect(0, 0, W, H);
+    if (f.bolt && f.t < 0.16) {
+      ctx.globalAlpha = Math.max(0, 1 - f.t / 0.16);
+      ctx.strokeStyle = 'rgba(236,242,255,0.95)';
+      ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.lineWidth = 2;
+      ctx.shadowColor = 'rgba(200,220,255,0.9)'; ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.moveTo(f.bolt[0][0], f.bolt[0][1]);
+      for (let i = 1; i < f.bolt.length; i++) ctx.lineTo(f.bolt[i][0], f.bolt[i][1]);
+      ctx.stroke();
     }
     ctx.restore();
   };
@@ -622,10 +806,122 @@
   };
 
   /* ============================================================
+     СИЛУЭТ ГОРОДА — отдельный inline-SVG над нижней кромкой сцены
+     (не канвас, ТЗ §5). Харьков (Держпром + телевышка) или generic.
+     Окна — rect'ы; зажигаются по времени суток; порог на окно
+     фиксирован seed-рандомом от даты → стабильный паттерн за день.
+     ============================================================ */
+  function dateSeed() {
+    const d = new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+  function locationName() {
+    try { if (typeof currentLocation === 'object' && currentLocation && currentLocation.name) return currentLocation.name; } catch (_) {}
+    const el = document.getElementById('locationName');
+    return el ? (el.textContent || '') : '';
+  }
+  // прямоугольное здание + сетка окон → строки SVG
+  function emitBlock(x, w, G, h, opts) {
+    opts = opts || {};
+    let sil = `<rect x="${x}" y="${(G - h).toFixed(1)}" width="${w}" height="${h.toFixed(1)}"/>`;
+    let wins = '';
+    if (opts.windows !== false) {
+      const ww = opts.ww || 7, wh = opts.wh || 10, gx = opts.gx || 15, gy = opts.gy || 19, m = opts.m || 8;
+      const top = G - h + (opts.roofPad || 16);
+      for (let yy = top; yy < G - m - wh; yy += gy)
+        for (let xx = x + m; xx <= x + w - ww - m; xx += gx)
+          wins += `<rect class="v2sl-win" x="${xx.toFixed(1)}" y="${yy.toFixed(1)}" width="${ww}" height="${wh}"/>`;
+    }
+    return { sil, wins };
+  }
+  function buildKharkiv() {
+    const G = 320; let sil = '', wins = '', sil2 = '';
+    const plain = [[0, 130, 150], [140, 92, 118], [244, 110, 176], [360, 46, 120],
+      [770, 120, 168], [900, 84, 140], [1130, 120, 158], [1262, 90, 120], [1360, 80, 150]];
+    for (const b of plain) { const o = emitBlock(b[0], b[1], G, b[2]); sil += o.sil; wins += o.wins; }
+    // Держпром: ступенчатые башни с частой мелкой сеткой окон
+    const gos = [[410, 52, 205], [470, 52, 250], [528, 46, 224], [580, 52, 262], [640, 52, 232], [700, 50, 210]];
+    for (const b of gos) { const o = emitBlock(b[0], b[1], G, b[2], { gx: 13, gy: 15, ww: 6, wh: 8, m: 6, roofPad: 12 }); sil += o.sil; wins += o.wins; }
+    // перемычки-мосты Держпрома (две горизонтальные балки)
+    sil2 += `<rect x="468" y="${G - 150}" width="236" height="13"/>`;
+    sil2 += `<rect x="468" y="${G - 96}" width="236" height="13"/>`;
+    // телевышка: трапеция + мачта + площадка + маяк
+    const tx = 1030;
+    sil2 += `<polygon points="${tx - 7},${G} ${tx + 7},${G} ${tx + 3},44 ${tx - 3},44"/>`;
+    sil2 += `<rect x="${tx - 2}" y="10" width="4" height="34"/>`;
+    sil2 += `<rect x="${tx - 15}" y="120" width="30" height="6"/>`;
+    const beacon = `<circle class="v2sl-beacon" cx="${tx}" cy="12" r="3.4"/>`;
+    return { sil, sil2, wins, beacon };
+  }
+  function buildGeneric() {
+    const G = 320; let sil = '', wins = '';
+    const blocks = [[0, 120, 140], [126, 90, 182], [222, 70, 110], [298, 140, 210], [444, 80, 150],
+      [530, 110, 250], [646, 70, 130], [722, 128, 190], [856, 90, 160], [952, 150, 232],
+      [1108, 80, 140], [1194, 110, 200], [1310, 70, 120], [1386, 54, 172]];
+    for (const b of blocks) { const o = emitBlock(b[0], b[1], G, b[2]); sil += o.sil; wins += o.wins; }
+    const ax = 1027;
+    const sil2 = `<rect x="${ax - 1.5}" y="${G - 232 - 38}" width="3" height="38"/>`;
+    const beacon = `<circle class="v2sl-beacon" cx="${ax}" cy="${G - 232 - 38}" r="3"/>`;
+    return { sil, sil2, wins, beacon };
+  }
+  function makeSkyline() {
+    return {
+      ready: false, el: null, kind: null, windows: [], _litFrac: -1,
+      mount() {
+        let host = document.getElementById('v2Skyline');
+        if (!host) {
+          host = document.createElement('div');
+          host.id = 'v2Skyline';
+          host.setAttribute('aria-hidden', 'true');
+          const sky = document.getElementById('v2Sky');
+          if (sky && sky.parentNode) sky.parentNode.insertBefore(host, sky.nextSibling);
+          else document.body.appendChild(host);
+        }
+        this.el = host;
+        this.ready = true;
+        this.build(this.pickKind());
+      },
+      pickKind() {
+        return /харьк|kharkiv|харків/i.test(locationName()) ? 'kharkiv' : 'generic';
+      },
+      build(kind) {
+        this.kind = kind;
+        const d = kind === 'kharkiv' ? buildKharkiv() : buildGeneric();
+        this.el.innerHTML =
+          '<svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<g class="v2sl-sil">' + d.sil + (d.sil2 || '') + '</g>' +
+          '<g class="v2sl-wins">' + d.wins + '</g>' +
+          (d.beacon || '') +
+          '</svg>';
+        this.windows = Array.prototype.slice.call(this.el.querySelectorAll('.v2sl-win'));
+        const rnd = mulberry32(dateSeed());
+        for (const w of this.windows) w._th = rnd();
+        this._litFrac = -1;
+      },
+      update(scene) {
+        if (!this.ready || !scene) return;
+        const kind = this.pickKind();
+        if (kind !== this.kind) this.build(kind);
+        const sun = solarState(scene.nowMin, scene.sunriseMin, scene.sunsetMin);
+        const nightF = clamp(smoothstep(0.18, -0.10, sun.elev), 0, 1);
+        const frac = nightF > 0.12 ? nightF * 0.55 : 0;
+        if (Math.abs(frac - this._litFrac) > 0.015) {
+          this._litFrac = frac;
+          for (const w of this.windows) {
+            if (w._th < frac) w.classList.add('v2sl-lit');
+            else w.classList.remove('v2sl-lit');
+          }
+        }
+        this.el.classList.toggle('v2sl-wet', isWetKind(scene.precip));
+      }
+    };
+  }
+
+  /* ============================================================
      Объект V2 — единая точка входа.
      ============================================================ */
   const V2 = {
-    version: 'stage-1',
+    version: 'stage-2',
     booted: false,
     hooks: { renderAll: 0, applyTranslations: 0 },
     sky: new SkyEngine(),
@@ -651,11 +947,17 @@
       const cloud = (h && h.cl != null) ? h.cl : 40;
       const vis = (h && h.vis != null) ? h.vis : 20;
       const windDx = CARD_DX[d.windDir] != null ? CARD_DX[d.windDir] : 1;
+      const pmm = (h && h.pmm != null) ? h.pmm : 0;
+      const wcode = (h && h.wc != null) ? h.wc : 0;
+      const temp = (h && h.t != null) ? h.t : (d.max != null ? d.max : 15);
+      const kind = precipKind(wcode, temp, pmm);
       return {
         nowMin,
         sunriseMin: hhmmToMin(d.sunrise) ?? 330,
         sunsetMin: hhmmToMin(d.sunset) ?? 1230,
-        cloud, vis,
+        cloud, vis, pmm, wcode, temp,
+        precip: kind,
+        isStorm: kind === 'storm',
         moonIllum: d.moonIllum != null ? d.moonIllum : 50,
         moonWaxing: !!d.moonWaxing,
         wind: (h && h.w != null) ? h.w : (d.wind || 2),
@@ -666,7 +968,11 @@
     afterRenderAll() {
       this.hooks.renderAll++;
       try {
-        if (this.sky && this.sky.ctx) this.sky.setScene(this.computeScene());
+        if (this.sky && this.sky.ctx) {
+          const sc = this.computeScene();
+          this.sky.setScene(sc);
+          if (this.skyline && this.skyline.ready) this.skyline.update(sc);
+        }
       } catch (e) { if (DEBUG) console.warn('[V2] afterRenderAll sky error', e); }
       if (DEBUG) {
         const s = this.computeScene();
@@ -683,6 +989,7 @@
       if (this.booted) return;
       this.booted = true;
       try { this.sky.mount(); } catch (e) { console.warn('[V2] sky.mount error', e); }
+      try { this.skyline = makeSkyline(); this.skyline.mount(); } catch (e) { console.warn('[V2] skyline.mount error', e); }
       this.applyTranslations();
       this.afterRenderAll();
       if (DEBUG) console.log('[V2] init() выполнен, version=' + this.version);
