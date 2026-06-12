@@ -918,10 +918,190 @@
   }
 
   /* ============================================================
+     i18n V2 — только НОВЫЕ видимые строки (этапы 3–6). Прочее
+     (дни недели, единицы, условия) берём из app.js t(). Ключи
+     хранятся выровненными массивами — компактно и без рассинхрона.
+     ============================================================ */
+  const V2_I18N_KEYS = [
+    'dock.now', 'dock.hours', 'dock.days', 'dock.more', 'zone.soon', 'zone.deeper',
+    'brief.dryAllDay', 'brief.dryUntil', 'brief.rainFrom', 'brief.snowFrom',
+    'brief.rainAmt', 'brief.snowAmt', 'brief.nightTo', 'lens.now', 'lens.aria',
+    'obs.bestNow', 'obs.yesterday'
+  ];
+  const V2_I18N_RAW = {
+    ru: ['Сейчас', 'Часы', 'Дни', 'Ещё', 'Скоро', 'Подробнее', 'осадков не ожидается', 'до {t} сухо', 'дождь с {t}', 'снег с {t}', 'дождь {a}–{b} мм', 'снег {a}–{b} мм', 'ночью до {t}', 'сейчас', 'Линза времени — тяни, чтобы увидеть прогноз в течение дня', 'Точнее всех сейчас: {src}', 'вчера {src} ошибся на {x}°'],
+    uk: ['Зараз', 'Години', 'Дні', 'Ще', 'Скоро', 'Детальніше', 'опадів не очікується', 'до {t} сухо', 'дощ з {t}', 'сніг з {t}', 'дощ {a}–{b} мм', 'сніг {a}–{b} мм', 'вночі до {t}', 'зараз', 'Лінза часу — тягни, щоб побачити прогноз протягом дня', 'Найточніше зараз: {src}', 'вчора {src} помилився на {x}°'],
+    en: ['Now', 'Hours', 'Days', 'More', 'Soon', 'Details', 'no precipitation expected', 'dry until {t}', 'rain from {t}', 'snow from {t}', 'rain {a}–{b} mm', 'snow {a}–{b} mm', 'night low {t}', 'now', 'Time lens — drag to preview the day', 'Most accurate now: {src}', 'yesterday {src} was off by {x}°'],
+    de: ['Jetzt', 'Stunden', 'Tage', 'Mehr', 'Bald', 'Details', 'kein Niederschlag erwartet', 'trocken bis {t}', 'Regen ab {t}', 'Schnee ab {t}', 'Regen {a}–{b} mm', 'Schnee {a}–{b} mm', 'nachts bis {t}', 'jetzt', 'Zeitlinse — ziehen, um den Tag vorzuschauen', 'Am genauesten jetzt: {src}', 'gestern lag {src} um {x}° daneben'],
+    pl: ['Teraz', 'Godziny', 'Dni', 'Więcej', 'Wkrótce', 'Szczegóły', 'brak opadów', 'sucho do {t}', 'deszcz od {t}', 'śnieg od {t}', 'deszcz {a}–{b} mm', 'śnieg {a}–{b} mm', 'w nocy do {t}', 'teraz', 'Soczewka czasu — przeciągnij, aby zobaczyć dzień', 'Najdokładniej teraz: {src}', 'wczoraj {src} pomylił się o {x}°'],
+    cs: ['Teď', 'Hodiny', 'Dny', 'Více', 'Brzy', 'Detaily', 'beze srážek', 'sucho do {t}', 'déšť od {t}', 'sníh od {t}', 'déšť {a}–{b} mm', 'sníh {a}–{b} mm', 'v noci až {t}', 'teď', 'Časová čočka — táhni pro náhled dne', 'Nejpřesnější teď: {src}', 'včera se {src} spletl o {x}°'],
+    fr: ['Maintenant', 'Heures', 'Jours', 'Plus', 'Bientôt', 'Détails', 'pas de précipitations', 'sec jusqu’à {t}', 'pluie dès {t}', 'neige dès {t}', 'pluie {a}–{b} mm', 'neige {a}–{b} mm', 'nuit jusqu’à {t}', 'maintenant', 'Loupe temporelle — glissez pour parcourir la journée', 'Le plus précis maintenant : {src}', 'hier {src} s’est trompé de {x}°'],
+    it: ['Ora', 'Ore', 'Giorni', 'Altro', 'Presto', 'Dettagli', 'nessuna precipitazione', 'asciutto fino a {t}', 'pioggia da {t}', 'neve da {t}', 'pioggia {a}–{b} mm', 'neve {a}–{b} mm', 'notte fino a {t}', 'ora', 'Lente temporale — trascina per vedere la giornata', 'Più preciso ora: {src}', 'ieri {src} ha sbagliato di {x}°'],
+    es: ['Ahora', 'Horas', 'Días', 'Más', 'Pronto', 'Detalles', 'sin precipitaciones', 'seco hasta {t}', 'lluvia desde {t}', 'nieve desde {t}', 'lluvia {a}–{b} mm', 'nieve {a}–{b} mm', 'noche hasta {t}', 'ahora', 'Lente temporal — arrastra para ver el día', 'Más preciso ahora: {src}', 'ayer {src} falló por {x}°'],
+    ro: ['Acum', 'Ore', 'Zile', 'Mai mult', 'Curând', 'Detalii', 'fără precipitații', 'uscat până la {t}', 'ploaie de la {t}', 'ninsoare de la {t}', 'ploaie {a}–{b} mm', 'ninsoare {a}–{b} mm', 'noaptea până la {t}', 'acum', 'Lupa timpului — trage pentru a previzualiza ziua', 'Cel mai precis acum: {src}', 'ieri {src} a greșit cu {x}°'],
+    hu: ['Most', 'Órák', 'Napok', 'Több', 'Hamarosan', 'Részletek', 'nincs csapadék', 'száraz eddig: {t}', 'eső {t}-tól', 'hó {t}-tól', 'eső {a}–{b} mm', 'hó {a}–{b} mm', 'éjjel {t}', 'most', 'Időlencse — húzd a nap előnézetéhez', 'Most a legpontosabb: {src}', 'tegnap {src} {x}°-ot tévedett'],
+    sk: ['Teraz', 'Hodiny', 'Dni', 'Viac', 'Čoskoro', 'Detaily', 'bez zrážok', 'sucho do {t}', 'dážď od {t}', 'sneh od {t}', 'dážď {a}–{b} mm', 'sneh {a}–{b} mm', 'v noci do {t}', 'teraz', 'Časová šošovka — ťahaj pre náhľad dňa', 'Najpresnejší teraz: {src}', 'včera sa {src} zmýlil o {x}°'],
+    pt: ['Agora', 'Horas', 'Dias', 'Mais', 'Em breve', 'Detalhes', 'sem precipitação', 'seco até {t}', 'chuva a partir das {t}', 'neve a partir das {t}', 'chuva {a}–{b} mm', 'neve {a}–{b} mm', 'noite até {t}', 'agora', 'Lente do tempo — arraste para ver o dia', 'Mais preciso agora: {src}', 'ontem {src} errou por {x}°'],
+    nl: ['Nu', 'Uren', 'Dagen', 'Meer', 'Straks', 'Details', 'geen neerslag verwacht', 'droog tot {t}', 'regen vanaf {t}', 'sneeuw vanaf {t}', 'regen {a}–{b} mm', 'sneeuw {a}–{b} mm', 'nachts tot {t}', 'nu', 'Tijdlens — sleep om de dag te bekijken', 'Nu het nauwkeurigst: {src}', 'gisteren zat {src} er {x}° naast'],
+    tr: ['Şimdi', 'Saatler', 'Günler', 'Daha', 'Yakında', 'Ayrıntılar', 'yağış beklenmiyor', '{t} kadar kuru', 'yağmur {t}', 'kar {t}', 'yağmur {a}–{b} mm', 'kar {a}–{b} mm', 'gece {t}', 'şimdi', 'Zaman merceği — günü önizlemek için sürükleyin', 'Şu an en isabetli: {src}', 'dün {src} {x}° şaştı'],
+    el: ['Τώρα', 'Ώρες', 'Μέρες', 'Κι άλλα', 'Σύντομα', 'Λεπτομέρειες', 'χωρίς βροχή', 'στεγνά μέχρι {t}', 'βροχή από {t}', 'χιόνι από {t}', 'βροχή {a}–{b} mm', 'χιόνι {a}–{b} mm', 'νύχτα έως {t}', 'τώρα', 'Φακός χρόνου — σύρετε για προεπισκόπηση της ημέρας', 'Πιο ακριβές τώρα: {src}', 'χθες το {src} έπεσε έξω κατά {x}°']
+  };
+  const V2_I18N = {};
+  for (const lang in V2_I18N_RAW) {
+    V2_I18N[lang] = {};
+    const arr = V2_I18N_RAW[lang];
+    for (let i = 0; i < V2_I18N_KEYS.length; i++) V2_I18N[lang]['v2.' + V2_I18N_KEYS[i]] = arr[i];
+  }
+  function v2t(key, params) {
+    const lang = currentLang();
+    let s = (V2_I18N[lang] && V2_I18N[lang][key]);
+    if (s == null) s = V2_I18N.ru[key];
+    if (s == null) return key;
+    if (params) for (const k in params) s = String(s).replace(new RegExp('\\{' + k + '\\}', 'g'), params[k]);
+    return s;
+  }
+
+  /* ----- форматтеры для брифинга ----- */
+  function v2FmtHour(h) { return String(((h % 24) + 24) % 24).padStart(2, '0') + ':00'; }
+  function v2FmtTemp(c) {
+    let v = c;
+    try { if (state && state.units && state.units.temp === 'F') v = c * 9 / 5 + 32; } catch (_) {}
+    v = Math.round(v);
+    return (v > 0 ? '+' : '') + v + '°';
+  }
+  function v2FmtMm(v) { v = Math.round(v * 10) / 10; return (v % 1 === 0) ? String(v) : v.toFixed(1); }
+
+  /* Брифинг: одно предложение из hourly, фрагменты через « · » (порядок
+     слов нейтрален к языку — ТЗ §7). */
+  function v2BuildBriefing() {
+    const f = activeForecast(); const d = f && f[0];
+    if (!d || !Array.isArray(d.hourly)) return '';
+    const hr = nowHour();
+    const rest = d.hourly.filter(h => h.h >= hr);
+    if (!rest.length) return '';
+    const frags = [];
+    const wet = rest.filter(h => h.pmm > 0.12);
+    const firstWet = rest.find(h => h.pmm > 0.15 || (h.p != null && h.p >= 60 && h.pmm > 0.04));
+    const snowy = (firstWet && firstWet.t <= 0.8) || (wet.length > 0 && wet.every(h => h.t <= 0.8));
+    if (!firstWet) {
+      frags.push(v2t('v2.brief.dryAllDay'));
+    } else if (firstWet.h > hr) {
+      frags.push(v2t('v2.brief.dryUntil', { t: v2FmtHour(firstWet.h) }));
+    } else {
+      frags.push(v2t(snowy ? 'v2.brief.snowFrom' : 'v2.brief.rainFrom', { t: v2FmtHour(firstWet.h) }));
+    }
+    if (wet.length) {
+      const sum = wet.reduce((a, h) => a + h.pmm, 0);
+      const lo = Math.max(0.1, sum * 0.7), hi = Math.max(lo + 0.1, sum * 1.15);
+      frags.push(v2t(snowy ? 'v2.brief.snowAmt' : 'v2.brief.rainAmt', { a: v2FmtMm(lo), b: v2FmtMm(hi) }));
+    }
+    let lo = null;
+    const eve = rest.filter(h => h.h >= 20);
+    if (eve.length) lo = Math.min.apply(null, eve.map(h => h.t));
+    else if (d.min != null) lo = d.min;
+    if (lo != null && frags.length < 3) frags.push(v2t('v2.brief.nightTo', { t: v2FmtTemp(lo) }));
+    return frags.slice(0, 3).join(' · ');
+  }
+
+  /* ----- ОДОМЕТР температуры: барабанные цифры ----- */
+  function makeOdometer() {
+    return {
+      el: null, sig: null, cols: [],
+      mount() {
+        const host = document.querySelector('body.v2 .hero-temp');
+        if (!host) return;
+        let odo = document.getElementById('v2Odo');
+        if (!odo) {
+          odo = document.createElement('span');
+          odo.id = 'v2Odo'; odo.className = 'v2-odo'; odo.setAttribute('aria-hidden', 'true');
+          const unit = document.getElementById('heroTempUnit');
+          host.insertBefore(odo, unit || null);
+        }
+        this.el = odo;
+      },
+      sync() {
+        if (!this.el) { this.mount(); if (!this.el) return; }
+        const src = document.getElementById('heroTempNum');
+        if (!src) return;
+        this.render((src.textContent || '').trim());
+      },
+      render(txt) {
+        const chars = (txt || '').split('');
+        const sig = chars.map(c => /\d/.test(c) ? '#' : c).join('');
+        if (sig !== this.sig) {
+          this.el.innerHTML = '';
+          this.cols = [];
+          for (const c of chars) {
+            if (/\d/.test(c)) {
+              const col = document.createElement('span'); col.className = 'v2-odo-col';
+              const strip = document.createElement('span'); strip.className = 'v2-odo-strip';
+              for (let i = 0; i < 10; i++) { const dd = document.createElement('span'); dd.className = 'v2-odo-d'; dd.textContent = i; strip.appendChild(dd); }
+              col.appendChild(strip); this.el.appendChild(col);
+              this.cols.push({ strip, digit: -1 });
+            } else {
+              const s = document.createElement('span'); s.className = 'v2-odo-ch'; s.textContent = c;
+              this.el.appendChild(s); this.cols.push(null);
+            }
+          }
+          this.sig = sig;
+        }
+        let ci = 0;
+        for (const c of chars) {
+          const col = this.cols[ci++];
+          if (col && /\d/.test(c)) {
+            const d = +c;
+            if (d !== col.digit) { col.digit = d; col.strip.style.transform = 'translateY(' + (-d) + 'em)'; }
+          }
+        }
+      }
+    };
+  }
+
+  /* ----- ШАПКА: компактная стеклянная полоска при скролле > 80px ----- */
+  function v2InitHeader() {
+    const h1 = document.querySelector('body.v2 .location-text h1');
+    if (h1 && !document.getElementById('v2HeadTemp')) {
+      const span = document.createElement('span');
+      span.id = 'v2HeadTemp'; span.className = 'v2-head-temp'; span.setAttribute('aria-hidden', 'true');
+      h1.appendChild(span);
+    }
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return; ticking = true;
+      raf(() => { document.body.classList.toggle('v2-head-shrink', window.scrollY > 80); ticking = false; });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+  function v2SyncHeader() {
+    const el = document.getElementById('v2HeadTemp');
+    const src = document.getElementById('heroTempNum');
+    const unit = document.getElementById('heroTempUnit');
+    if (el && src) el.textContent = (src.textContent || '').trim() + (unit ? unit.textContent : '°');
+  }
+
+  /* Брифинг-строка: вставить элемент в hero-info, обновлять текст. */
+  function v2SyncBriefing() {
+    const info = document.querySelector('body.v2 .hero-info');
+    if (!info) return;
+    let el = document.getElementById('v2Brief');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'v2Brief'; el.className = 'v2-brief';
+      const after = document.getElementById('heroFeelsLine');
+      if (after && after.parentNode === info) info.insertBefore(el, after.nextSibling);
+      else info.appendChild(el);
+    }
+    const txt = v2BuildBriefing();
+    el.textContent = txt;
+    el.style.display = txt ? '' : 'none';
+  }
+
+  /* ============================================================
      Объект V2 — единая точка входа.
      ============================================================ */
   const V2 = {
-    version: 'stage-2',
+    version: 'stage-3',
     booted: false,
     hooks: { renderAll: 0, applyTranslations: 0 },
     sky: new SkyEngine(),
@@ -931,6 +1111,8 @@
     odometer: null,
     dock: null,
     glassFx: null,
+
+    t: v2t,
 
     /* Собрать параметры сцены из активного прогноза app.js. */
     computeScene() {
@@ -973,7 +1155,11 @@
           this.sky.setScene(sc);
           if (this.skyline && this.skyline.ready) this.skyline.update(sc);
         }
-      } catch (e) { if (DEBUG) console.warn('[V2] afterRenderAll sky error', e); }
+        // hero: одометр температуры, брифинг, компактная температура в шапке
+        if (this.odometer) this.odometer.sync();
+        v2SyncBriefing();
+        v2SyncHeader();
+      } catch (e) { if (DEBUG) console.warn('[V2] afterRenderAll error', e); }
       if (DEBUG) {
         const s = this.computeScene();
         console.log('[V2] afterRenderAll #' + this.hooks.renderAll, JSON.stringify(s));
@@ -982,6 +1168,19 @@
 
     applyTranslations() {
       this.hooks.applyTranslations++;
+      // перевести статические v2-элементы из словаря
+      try {
+        document.querySelectorAll('[data-v2-i18n]').forEach(el => {
+          const key = el.getAttribute('data-v2-i18n');
+          if (key) el.textContent = v2t(key);
+        });
+        document.querySelectorAll('[data-v2-i18n-aria]').forEach(el => {
+          const key = el.getAttribute('data-v2-i18n-aria');
+          if (key) el.setAttribute('aria-label', v2t(key));
+        });
+        // брифинг зависит от языка — пересобрать
+        v2SyncBriefing();
+      } catch (e) { if (DEBUG) console.warn('[V2] applyTranslations error', e); }
       if (DEBUG) console.log('[V2] applyTranslations #' + this.hooks.applyTranslations + ' · lang=' + currentLang());
     },
 
@@ -990,6 +1189,8 @@
       this.booted = true;
       try { this.sky.mount(); } catch (e) { console.warn('[V2] sky.mount error', e); }
       try { this.skyline = makeSkyline(); this.skyline.mount(); } catch (e) { console.warn('[V2] skyline.mount error', e); }
+      try { this.odometer = makeOdometer(); this.odometer.mount(); } catch (e) { console.warn('[V2] odometer.mount error', e); }
+      try { v2InitHeader(); } catch (e) { console.warn('[V2] header init error', e); }
       this.applyTranslations();
       this.afterRenderAll();
       if (DEBUG) console.log('[V2] init() выполнен, version=' + this.version);

@@ -115,12 +115,91 @@ body.v2 #v2Skyline.v2sl-wet::after {
   body.v2 .v2sl-win { transition: none; }
 }
 
-/* Hero на этапе 1 — обычная стеклянная карточка над небом.
-   Sticky-поведение нейтрализуем позже (этап 3), сейчас оставляем
-   как есть — оно не мешает. Чуть усиливаем читаемость текста на
-   ярком небе мягкой подложкой внутри стекла. */
+/* Hero — стеклянная карточка над небом. Мягкая подложка усиливает
+   читаемость текста (контраст ≥ 4.5:1 на ярком небе, ТЗ §4.8). */
 body.v2 .hero {
   background:
     linear-gradient(180deg, rgba(8, 12, 30, 0.30) 0%, rgba(8, 12, 30, 0.46) 100%),
     var(--v2-glass-tint);
+}
+
+/* ============================================================
+   ЭТАП 3 — HERO «СЕЙЧАС»
+   ============================================================ */
+
+/* --- Нейтрализация старого sticky-hero (механизм app.js .stuck).
+   Шапку сжимаем сами (ниже); hero просто скроллится. --- */
+body.v2 .hero { position: relative !important; top: auto !important; }
+body.v2 .hero.stuck .hero-temp { font-size: inherit; line-height: 1; margin-bottom: 8px; }
+body.v2 .hero.stuck .hero-temp-unit { font-size: clamp(26px, 5vw, 40px); }
+body.v2 .hero.stuck .hero-condition { font-size: 18px; margin-bottom: 4px; }
+body.v2 .hero.stuck .hero-nowcast-hint { max-height: none; opacity: 1; margin-top: 10px; overflow: visible; pointer-events: auto; }
+body.v2 .hero.stuck .hero-feels,
+body.v2 .hero.stuck .hero-label,
+body.v2 .hero.stuck .hero-source-note { opacity: 1; max-height: none; }
+
+/* --- Огромная температура-одометр --- */
+body.v2 .hero-temp { align-items: flex-start; gap: 6px; margin-bottom: 10px; }
+body.v2 .hero-temp-num { display: none; }  /* источник значения для одометра, визуально скрыт */
+body.v2 .v2-odo {
+  display: inline-flex;
+  font-size: clamp(74px, 20vw, 148px);
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  line-height: 0.86;
+  color: #fff;
+  text-shadow: 0 2px 34px rgba(0, 0, 0, 0.4);
+  font-feature-settings: 'tnum';
+}
+body.v2 .v2-odo-col { display: inline-block; height: 1em; overflow: hidden; vertical-align: bottom; }
+body.v2 .v2-odo-strip { display: flex; flex-direction: column; transition: transform 0.62s cubic-bezier(0.2, 0.85, 0.25, 1); }
+body.v2 .v2-odo-d { height: 1em; display: flex; align-items: center; justify-content: center; }
+body.v2 .v2-odo-ch { display: inline-block; }
+body.v2 .hero-temp-unit { font-size: clamp(26px, 5vw, 40px); font-weight: 200; margin-top: 0.1em; color: rgba(232, 240, 255, 0.7); }
+@media (prefers-reduced-motion: reduce) { body.v2 .v2-odo-strip { transition: none; } }
+
+/* --- Строка-брифинг --- */
+body.v2 .v2-brief {
+  margin-top: 10px;
+  font-size: clamp(13px, 2.6vw, 15px);
+  line-height: 1.45;
+  color: rgba(233, 240, 255, 0.85);
+  font-weight: 400;
+  max-width: 42ch;
+}
+
+/* --- Чипы метрик: крупные карточки → компактная флекс-строка --- */
+body.v2 .metrics { display: flex; flex-wrap: wrap; gap: 10px; }
+body.v2 .metric { flex: 1 1 calc(50% - 5px); min-width: 140px; padding: 13px 15px; border-radius: 16px; gap: 7px; }
+@media (min-width: 760px) { body.v2 .metric { flex: 1 1 calc(25% - 8px); } }
+body.v2 .metric-icon { width: 30px; height: 30px; border-radius: 9px; }
+body.v2 .metric-value { font-size: 22px; }
+body.v2 .metric-sub { font-size: 11px; line-height: 1.35; }
+
+/* --- Шапка: компактная стеклянная полоска при скролле > 80px --- */
+body.v2 .header {
+  position: sticky;
+  top: max(env(safe-area-inset-top, 0px), 0px);
+  z-index: 60;
+  padding: 10px 12px;
+  border-radius: 0 0 18px 18px;
+  transition: padding 0.34s ease, background 0.34s ease, box-shadow 0.34s ease, backdrop-filter 0.34s ease;
+}
+body.v2.v2-head-shrink .header {
+  background: linear-gradient(180deg, rgba(8, 12, 30, 0.74), rgba(8, 12, 30, 0.52));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.34);
+  padding-top: 8px; padding-bottom: 8px;
+}
+body.v2.v2-head-shrink #dateLine,
+body.v2.v2-head-shrink .location-edit-hint { display: none; }
+body.v2.v2-head-shrink .location-text h1 { font-size: 18px; }
+body.v2 .v2-head-temp { display: none; }
+body.v2.v2-head-shrink .v2-head-temp {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--v2-accent);
 }
