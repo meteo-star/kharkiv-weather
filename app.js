@@ -8994,8 +8994,6 @@ let modalChartInstance = null;
 let precipChartInstance = null;
 // Активная метрика почасовой карточки: 'temp' | 'feels' | 'precip' | 'wind' | 'pressure'
 let currentHourlyMetric = 'temp';
-// Отдельная метрика для модалки дня (сбрасывается на 'temp' при каждом открытии).
-let currentModalMetric = 'temp';
 
 function getCurrentSource() { return getSrc(currentSourceId); }
 
@@ -12423,18 +12421,7 @@ function openModal(dayId) {
 
     <div class="modal-hours-list">
       <h3>${t('modal.day.hoursTitle')}</h3>
-      <div class="hourly-tabs" id="modalHourlyTabs" role="tablist">
-        <button class="ht-tab" data-metric="temp" role="tab"><span data-i18n="metric.temp">Температура</span></button>
-        <button class="ht-tab" data-metric="feels" role="tab"><span data-i18n="metric.feels">По ощущениям</span></button>
-        <button class="ht-tab" data-metric="precip" role="tab"><span data-i18n="metric.rain">Осадки</span></button>
-        <button class="ht-tab" data-metric="wind" role="tab"><span data-i18n="metric.wind">Ветер</span></button>
-        <button class="ht-tab" data-metric="pressure" role="tab"><span data-i18n="metric.pressure">Давление</span></button>
-      </div>
-      <div class="scroll-wrap">
-        <button class="scroll-arrow left" data-scroll-target="modalHourlyRow" data-i18n-aria="scroll.left" aria-label="Прокрутить влево">‹</button>
-        <div class="hours-scroll" id="modalHourlyRow"></div>
-        <button class="scroll-arrow right" data-scroll-target="modalHourlyRow" data-i18n-aria="scroll.right" aria-label="Прокрутить вправо">›</button>
-      </div>
+      <div class="mh-list" id="modalHourlyRow"></div>
     </div>
   `;
 
@@ -12443,68 +12430,57 @@ function openModal(dayId) {
 
   // Модалка создаётся динамически через innerHTML — applyTranslations() не пройдёт
   // через data-i18n атрибуты внутри неё автоматически. Вызываем явно, чтобы
-  // tab-кнопки «Температура / По ощущениям / Осадки / Ветер / Давление» и aria
-  // переводы стрелок применились на выбранном языке.
+  // переводы (заголовки, aria) применились на выбранном языке.
   applyTranslations();
 
-  // Сбрасываем модальную метрику на температуру при каждом открытии — так UX предсказуемее.
-  currentModalMetric = 'temp';
+  // v1.56.1: почасовка — вертикальный список строк (этап 2). Табы метрик и
+  // стрелки ‹ › ленты удалены: каждая строка показывает t°/осадки/ветер сразу.
   renderModalHourlyRow(d);
-  setupModalHourlyTabs(d);
-  // v1.43.0: модалка создаётся динамически, поэтому setupScrollArrows() из init
-  // не покрывает её стрелки. Навешиваем обработчики вручную для конкретного row.
-  attachModalHourlyArrows();
 }
 
-// v1.43.0: подключение кнопок ‹ › для почасовой ленты в модалке дня.
-// Каждый раз при открытии модалки — стрелки новые (модалка пересоздана),
-// поэтому навешиваем обработчики заново. Старые не остаются в памяти —
-// modal.innerHTML = ... выкидывает их.
-function attachModalHourlyArrows() {
-  const row = document.getElementById('modalHourlyRow');
-  if (!row) return;
-  const modal = document.getElementById('modal');
-  if (!modal) return;
-  const arrows = modal.querySelectorAll('.scroll-arrow[data-scroll-target="modalHourlyRow"]');
-  arrows.forEach(btn => {
-    const isRight = btn.classList.contains('right');
-    btn.onclick = () => {
-      const delta = row.clientWidth * 0.8 * (isRight ? 1 : -1);
-      row.scrollBy({ left: delta, behavior: 'smooth' });
-    };
-  });
-  const update = () => updateScrollArrows(row);
-  row.addEventListener('scroll', update, { passive: true });
-  // Первичный update после рендера (rAF чтобы дождаться layout).
-  requestAnimationFrame(() => requestAnimationFrame(update));
-}
-
+// v1.56.1 (этап 2): почасовка в модалке дня — вертикальный список строк-часов
+// в визуальном языке этапа 1. Каждая строка показывает сразу: время · иконку ·
+// температуру числом · мини-полосу позиции t° в диапазоне ЭТОГО дня (градиент
+// по температуре) · осадки (% + мм, интенсивность синей заливкой ячейки) · ветер.
+// Для «Сегодня»: прошедшие часы приглушены, текущий час — неоновая строка.
 function renderModalHourlyRow(d) {
-  const row = document.getElementById('modalHourlyRow');
-  if (!row) return;
-  document.querySelectorAll('#modalHourlyTabs .ht-tab').forEach(b => {
-    b.classList.toggle('active', b.dataset.metric === currentModalMetric);
-  });
+  const list = document.getElementById('modalHourlyRow');
+  if (!list || !Array.isArray(d.hourly)) return;
   const isToday = (d.id === 0);
-  row.innerHTML = d.hourly.map((h, i) => {
-    const isNow = isToday && (i === NOW_HOUR);
-    return `
-    <div class="hour-cell${isNow ? ' now' : ''}">
-      <div class="h">${String(h.h).padStart(2,'0')}:00</div>
-      <div class="ic">${weatherIcon(h.c, 36)}</div>
-      <div class="t">${hourMetricValue(h, currentModalMetric)}</div>
-    </div>
-  `;
-  }).join('');
-}
-
-function setupModalHourlyTabs(d) {
-  document.querySelectorAll('#modalHourlyTabs .ht-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentModalMetric = btn.dataset.metric;
-      renderModalHourlyRow(d);
-    });
+  // Шкала температур в пределах этого дня — для мини-полосы позиции часа.
+  let dMin = Infinity, dMax = -Infinity;
+  d.hourly.forEach(h => {
+    if (typeof h.t === 'number') { if (h.t < dMin) dMin = h.t; if (h.t > dMax) dMax = h.t; }
   });
+  if (!isFinite(dMin)) dMin = 0;
+  if (!isFinite(dMax)) dMax = 1;
+  const dSpan = (dMax - dMin) || 1;
+  const dropSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
+
+  list.innerHTML = d.hourly.map((h, i) => {
+    const stateCls = isToday ? (i < NOW_HOUR ? ' past' : (i === NOW_HOUR ? ' now' : '')) : '';
+    const fillW = Math.max(Math.min(100, ((h.t - dMin) / dSpan) * 100), 6);
+    const pmm = (typeof h.pmm === 'number') ? h.pmm : 0;
+    const wet = pmm > 0 || h.p >= 5;
+    let prec;
+    if (wet) {
+      const mmPart = pmm > 0 ? ` <span class="mh-mm">· ${Math.round(pmm * 10) / 10} ${t('unit.mm')}</span>` : '';
+      prec = `${dropSvg}<span>${h.p}%</span>${mmPart}`;
+    } else {
+      prec = '<span class="mh-dry">—</span>';
+    }
+    const intensity = Math.min(1, pmm / 2);
+    const precBg = intensity > 0 ? ` style="background:rgba(0,212,255,${(intensity * 0.16).toFixed(3)})"` : '';
+    return `
+    <div class="mh-row${stateCls}">
+      <span class="mh-time">${String(h.h).padStart(2, '0')}:00</span>
+      <span class="mh-icon">${weatherIcon(h.c, 26)}</span>
+      <span class="mh-temp">${fmtTempNum(h.t)}°</span>
+      <span class="mh-bar"><span class="mh-fill" style="width:${fillW}%;background:${dayTempColor(h.t)}"></span></span>
+      <span class="mh-prec"${precBg}>${prec}</span>
+      <span class="mh-wind">💨 ${fmtWind(h.w)}</span>
+    </div>`;
+  }).join('');
 }
 
 function closeModal() {

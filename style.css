@@ -712,6 +712,35 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 
 .modal-hours-list{padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:18px}
 .modal-hours-list h3{font-size:13px;font-weight:600;color:#fff;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em}
+/* v1.56.1 (этап 2): вертикальный список часов в модалке дня. */
+.mh-list{display:flex;flex-direction:column;gap:4px}
+.mh-row{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 10px;border-radius:11px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.05);transition:background 0.2s}
+.mh-row.past{opacity:0.45}
+.mh-row.now{border-color:rgba(0,212,255,0.7);background:linear-gradient(135deg,rgba(0,212,255,0.16) 0%,rgba(167,139,250,0.08) 100%);box-shadow:0 4px 18px rgba(0,212,255,0.28),0 0 14px rgba(0,212,255,0.2),inset 0 1px 0 rgba(255,255,255,0.16)}
+.mh-row.now .mh-time{color:#00d4ff}
+.mh-time{width:46px;flex-shrink:0;font-size:13px;font-weight:600;color:rgba(232,240,255,0.92);font-feature-settings:'tnum'}
+.mh-icon{width:26px;height:26px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.mh-temp{width:38px;text-align:right;font-size:14px;font-weight:600;color:#fff;font-feature-settings:'tnum';flex-shrink:0}
+.mh-bar{flex:1;height:5px;min-width:28px;border-radius:3px;background:rgba(255,255,255,0.09);position:relative;overflow:hidden}
+.mh-fill{position:absolute;left:0;top:0;height:100%;border-radius:3px}
+.mh-prec{min-width:74px;text-align:right;font-size:11px;color:#00d4ff;font-weight:500;font-feature-settings:'tnum';display:flex;align-items:center;justify-content:flex-end;gap:3px;flex-shrink:0;white-space:nowrap;border-radius:6px;padding:2px 4px}
+.mh-prec svg{flex-shrink:0}
+.mh-mm{color:rgba(0,212,255,0.7)}
+.mh-dry{color:rgba(232,240,255,0.3)}
+.mh-wind{width:58px;text-align:right;font-size:11px;color:rgba(232,240,255,0.6);flex-shrink:0;font-feature-settings:'tnum';white-space:nowrap}
+:root[data-theme="light"] .mh-row{background:rgba(0,0,0,0.025);border-color:rgba(45,26,16,0.08)}
+:root[data-theme="light"] .mh-row.now{border-color:rgba(217,96,47,0.55);background:linear-gradient(135deg,rgba(255,170,90,0.22),rgba(217,96,47,0.1));box-shadow:0 4px 16px rgba(217,96,47,0.22)}
+:root[data-theme="light"] .mh-row.now .mh-time{color:#a8451c}
+:root[data-theme="light"] .mh-dry{color:rgba(45,26,16,0.35)}
+@media (max-width:480px){
+  .mh-row{gap:6px;padding:0 7px;min-height:42px}
+  .mh-time{width:40px;font-size:12px}
+  .mh-icon{width:24px;height:24px}
+  .mh-temp{width:32px;font-size:13px}
+  .mh-bar{min-width:18px}
+  .mh-wind{display:none}
+  .mh-prec{min-width:0;font-size:10px}
+}
 .hours-scroll{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(0,212,255,0.3) transparent;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain}
 .hours-scroll::-webkit-scrollbar{height:6px}
 .hours-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,0.03);border-radius:3px}
