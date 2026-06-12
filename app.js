@@ -44,6 +44,22 @@ const I18N = {
     'metric.rain.peakSub': 'пик {peak} мм/ч · ({mm} мм всего) · {desc}',
     'precip.byEns': 'по вариантам прогноза (всего {n})',
     'precip.ensNote': 'Вероятность = доля вариантов прогноза с осадками (всего {n})',
+    'accuracy.hint.avgBest': '📊 Среднее — самый точный',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} обходит среднее',
+    'accuracy.hint.avgUsuallyBetter': '📊 Среднее обычно точнее · накапливаем данные для этой модели',
+    'accuracy.hint.leaderNow': '🏆 Сейчас лидирует {name}',
+    'accuracy.hint.youLeadAll': '🏆 Лидер по точности',
+    'accuracy.hint.avgBetter': '📊 Среднее точнее',
+    'accuracy.hint.avgBetterBy': '📊 Среднее точнее на {n}°',
+    'accuracy.hint.leadModels': '🏆 Лидер среди моделей',
+    'accuracy.hint.modelBetterRank': '🏆 {name} точнее · вы №{rank} из {total}',
+    'settings.langPickerTitle': 'Язык интерфейса',
+    'unit.mmhg.short': 'мм',
+    'unit.hpa.short': 'гПа',
+    'pollen.unit': 'ч/м³',
+    'storm.hoursAhead': '+{n}ч',
+    'account.group': 'Группа {id}',
+    'account.chat': 'Чат {id}',
     'outlook.rain': 'дождь',
     'outlook.snow': 'снег',
     'outlook.precip': 'осадки',
@@ -491,6 +507,22 @@ const I18N = {
     'metric.rain.peakSub': 'пік {peak} мм/год · ({mm} мм всього) · {desc}',
     'precip.byEns': 'за варіантами прогнозу (усього {n})',
     'precip.ensNote': 'Імовірність = частка варіантів прогнозу з опадами (усього {n})',
+    'accuracy.hint.avgBest': '📊 Середнє — найточніше',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} точніше за середнє',
+    'accuracy.hint.avgUsuallyBetter': '📊 Середнє зазвичай точніше · накопичуємо дані для цієї моделі',
+    'accuracy.hint.leaderNow': '🏆 Зараз лідирує {name}',
+    'accuracy.hint.youLeadAll': '🏆 Лідер за точністю',
+    'accuracy.hint.avgBetter': '📊 Середнє точніше',
+    'accuracy.hint.avgBetterBy': '📊 Середнє точніше на {n}°',
+    'accuracy.hint.leadModels': '🏆 Лідер серед моделей',
+    'accuracy.hint.modelBetterRank': '🏆 {name} точніше · ви №{rank} з {total}',
+    'settings.langPickerTitle': 'Мова інтерфейсу',
+    'unit.mmhg.short': 'мм',
+    'unit.hpa.short': 'гПа',
+    'pollen.unit': 'ч/м³',
+    'storm.hoursAhead': '+{n}год',
+    'account.group': 'Група {id}',
+    'account.chat': 'Чат {id}',
     'outlook.rain': 'дощ',
     'outlook.snow': 'сніг',
     'outlook.precip': 'опади',
@@ -925,6 +957,22 @@ const I18N = {
     'metric.rain.peakSub': 'peak {peak} mm/h · ({mm} mm total) · {desc}',
     'precip.byEns': 'based on {n} forecast runs',
     'precip.ensNote': 'Probability = share of forecast runs with precipitation ({n} total)',
+    'accuracy.hint.avgBest': '📊 Average is the most accurate',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} beats the average',
+    'accuracy.hint.avgUsuallyBetter': '📊 Average is usually better · gathering data for this model',
+    'accuracy.hint.leaderNow': '🏆 {name} leads now',
+    'accuracy.hint.youLeadAll': '🏆 Most accurate',
+    'accuracy.hint.avgBetter': '📊 Average is better',
+    'accuracy.hint.avgBetterBy': '📊 Average is better by {n}°',
+    'accuracy.hint.leadModels': '🏆 Best among models',
+    'accuracy.hint.modelBetterRank': '🏆 {name} is better · you’re #{rank} of {total}',
+    'settings.langPickerTitle': 'Interface language',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Group {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'rain',
     'outlook.snow': 'snow',
     'outlook.precip': 'precipitation',
@@ -1358,6 +1406,22 @@ const I18N = {
     'metric.rain.peakSub': 'Spitze {peak} mm/h · ({mm} mm gesamt) · {desc}',
     'precip.byEns': 'aus {n} Prognoseläufen',
     'precip.ensNote': 'Wahrscheinlichkeit = Anteil der Prognoseläufe mit Niederschlag (insgesamt {n})',
+    'accuracy.hint.avgBest': '📊 Durchschnitt am genauesten',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} schlägt den Durchschnitt',
+    'accuracy.hint.avgUsuallyBetter': '📊 Durchschnitt meist genauer · Daten für dieses Modell werden gesammelt',
+    'accuracy.hint.leaderNow': '🏆 {name} führt aktuell',
+    'accuracy.hint.youLeadAll': '🏆 Am genauesten',
+    'accuracy.hint.avgBetter': '📊 Durchschnitt genauer',
+    'accuracy.hint.avgBetterBy': '📊 Durchschnitt um {n}° genauer',
+    'accuracy.hint.leadModels': '🏆 Bestes Modell',
+    'accuracy.hint.modelBetterRank': '🏆 {name} genauer · Sie sind #{rank} von {total}',
+    'settings.langPickerTitle': 'Sprache der Oberfläche',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Gruppe {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'Regen',
     'outlook.snow': 'Schnee',
     'outlook.precip': 'Niederschlag',
@@ -1791,6 +1855,22 @@ const I18N = {
     'metric.rain.peakSub': 'szczyt {peak} mm/h · ({mm} mm łącznie) · {desc}',
     'precip.byEns': 'wg wariantów prognozy (łącznie {n})',
     'precip.ensNote': 'Prawdopodobieństwo = udział wariantów prognozy z opadami (łącznie {n})',
+    'accuracy.hint.avgBest': '📊 Średnia najdokładniejsza',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} lepszy od średniej',
+    'accuracy.hint.avgUsuallyBetter': '📊 Średnia zwykle dokładniejsza · zbieramy dane dla tego modelu',
+    'accuracy.hint.leaderNow': '🏆 Teraz prowadzi {name}',
+    'accuracy.hint.youLeadAll': '🏆 Najdokładniejszy',
+    'accuracy.hint.avgBetter': '📊 Średnia dokładniejsza',
+    'accuracy.hint.avgBetterBy': '📊 Średnia dokładniejsza o {n}°',
+    'accuracy.hint.leadModels': '🏆 Najlepszy z modeli',
+    'accuracy.hint.modelBetterRank': '🏆 {name} dokładniejszy · jesteś #{rank} z {total}',
+    'settings.langPickerTitle': 'Język interfejsu',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Grupa {id}',
+    'account.chat': 'Czat {id}',
     'outlook.rain': 'deszcz',
     'outlook.snow': 'śnieg',
     'outlook.precip': 'opady',
@@ -2225,6 +2305,22 @@ const I18N = {
     'metric.rain.peakSub': 'špička {peak} mm/h · ({mm} mm celkem) · {desc}',
     'precip.byEns': 'podle variant předpovědi (celkem {n})',
     'precip.ensNote': 'Pravděpodobnost = podíl variant předpovědi se srážkami (celkem {n})',
+    'accuracy.hint.avgBest': '📊 Průměr je nejpřesnější',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} překonává průměr',
+    'accuracy.hint.avgUsuallyBetter': '📊 Průměr je obvykle přesnější · sbíráme data pro tento model',
+    'accuracy.hint.leaderNow': '🏆 Nyní vede {name}',
+    'accuracy.hint.youLeadAll': '🏆 Nejpřesnější',
+    'accuracy.hint.avgBetter': '📊 Průměr je přesnější',
+    'accuracy.hint.avgBetterBy': '📊 Průměr je přesnější o {n}°',
+    'accuracy.hint.leadModels': '🏆 Nejlepší z modelů',
+    'accuracy.hint.modelBetterRank': '🏆 {name} přesnější · jste #{rank} z {total}',
+    'settings.langPickerTitle': 'Jazyk rozhraní',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Skupina {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'déšť',
     'outlook.snow': 'sníh',
     'outlook.precip': 'srážky',
@@ -2659,6 +2755,22 @@ const I18N = {
     'metric.rain.peakSub': 'pic {peak} mm/h · ({mm} mm au total) · {desc}',
     'precip.byEns': 'selon {n} simulations',
     'precip.ensNote': 'Probabilité = part des simulations avec précipitations ({n} au total)',
+    'accuracy.hint.avgBest': '📊 Moyenne la plus précise',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} bat la moyenne',
+    'accuracy.hint.avgUsuallyBetter': '📊 Moyenne souvent plus précise · collecte des données pour ce modèle',
+    'accuracy.hint.leaderNow': '🏆 {name} en tête',
+    'accuracy.hint.youLeadAll': '🏆 La plus précise',
+    'accuracy.hint.avgBetter': '📊 Moyenne plus précise',
+    'accuracy.hint.avgBetterBy': '📊 Moyenne plus précise de {n}°',
+    'accuracy.hint.leadModels': '🏆 Meilleur des modèles',
+    'accuracy.hint.modelBetterRank': '🏆 {name} plus précis · vous êtes n°{rank} sur {total}',
+    'settings.langPickerTitle': 'Langue de l\'interface',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Groupe {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'pluie',
     'outlook.snow': 'neige',
     'outlook.precip': 'précipitations',
@@ -3092,6 +3204,22 @@ const I18N = {
     'metric.rain.peakSub': 'picco {peak} mm/h · ({mm} mm totali) · {desc}',
     'precip.byEns': 'su {n} simulazioni',
     'precip.ensNote': 'Probabilità = quota di simulazioni con precipitazioni ({n} in totale)',
+    'accuracy.hint.avgBest': '📊 Media la più accurata',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} batte la media',
+    'accuracy.hint.avgUsuallyBetter': '📊 Media di solito più accurata · raccolta dati per questo modello',
+    'accuracy.hint.leaderNow': '🏆 In testa ora {name}',
+    'accuracy.hint.youLeadAll': '🏆 Più accurata',
+    'accuracy.hint.avgBetter': '📊 Media più accurata',
+    'accuracy.hint.avgBetterBy': '📊 Media più accurata di {n}°',
+    'accuracy.hint.leadModels': '🏆 Migliore tra i modelli',
+    'accuracy.hint.modelBetterRank': '🏆 {name} più accurato · sei #{rank} su {total}',
+    'settings.langPickerTitle': 'Lingua dell\'interfaccia',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Gruppo {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'pioggia',
     'outlook.snow': 'neve',
     'outlook.precip': 'precipitazioni',
@@ -3525,6 +3653,22 @@ const I18N = {
     'metric.rain.peakSub': 'pico {peak} mm/h · ({mm} mm en total) · {desc}',
     'precip.byEns': 'según {n} simulaciones',
     'precip.ensNote': 'Probabilidad = proporción de simulaciones con precipitación ({n} en total)',
+    'accuracy.hint.avgBest': '📊 La media es la más precisa',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a la media',
+    'accuracy.hint.avgUsuallyBetter': '📊 La media suele ser más precisa · recopilando datos para este modelo',
+    'accuracy.hint.leaderNow': '🏆 Ahora lidera {name}',
+    'accuracy.hint.youLeadAll': '🏆 La más precisa',
+    'accuracy.hint.avgBetter': '📊 La media es más precisa',
+    'accuracy.hint.avgBetterBy': '📊 La media es más precisa por {n}°',
+    'accuracy.hint.leadModels': '🏆 La mejor entre los modelos',
+    'accuracy.hint.modelBetterRank': '🏆 {name} más preciso · eres el #{rank} de {total}',
+    'settings.langPickerTitle': 'Idioma de la interfaz',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Grupo {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'lluvia',
     'outlook.snow': 'nieve',
     'outlook.precip': 'precipitaciones',
@@ -3958,6 +4102,22 @@ const I18N = {
     'metric.rain.peakSub': 'vârf {peak} mm/h · ({mm} mm în total) · {desc}',
     'precip.byEns': 'după {n} simulări',
     'precip.ensNote': 'Probabilitate = ponderea simulărilor cu precipitații ({n} în total)',
+    'accuracy.hint.avgBest': '📊 Media este cea mai precisă',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} depășește media',
+    'accuracy.hint.avgUsuallyBetter': '📊 Media este de obicei mai precisă · colectăm date pentru acest model',
+    'accuracy.hint.leaderNow': '🏆 Acum conduce {name}',
+    'accuracy.hint.youLeadAll': '🏆 Cea mai precisă',
+    'accuracy.hint.avgBetter': '📊 Media este mai precisă',
+    'accuracy.hint.avgBetterBy': '📊 Media este mai precisă cu {n}°',
+    'accuracy.hint.leadModels': '🏆 Cel mai bun dintre modele',
+    'accuracy.hint.modelBetterRank': '🏆 {name} mai precis · ești #{rank} din {total}',
+    'settings.langPickerTitle': 'Limba interfeței',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Grup {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'ploaie',
     'outlook.snow': 'ninsoare',
     'outlook.precip': 'precipitații',
@@ -4391,6 +4551,22 @@ const I18N = {
     'metric.rain.peakSub': 'csúcs {peak} mm/h · (összesen {mm} mm) · {desc}',
     'precip.byEns': '{n} előrejelzési változat alapján',
     'precip.ensNote': 'Valószínűség = a csapadékot mutató előrejelzési változatok aránya (összesen {n})',
+    'accuracy.hint.avgBest': '📊 Az átlag a legpontosabb',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} jobb az átlagnál',
+    'accuracy.hint.avgUsuallyBetter': '📊 Az átlag általában pontosabb · adatokat gyűjtünk ehhez a modellhez',
+    'accuracy.hint.leaderNow': '🏆 Most {name} vezet',
+    'accuracy.hint.youLeadAll': '🏆 A legpontosabb',
+    'accuracy.hint.avgBetter': '📊 Az átlag pontosabb',
+    'accuracy.hint.avgBetterBy': '📊 Az átlag {n}°-kal pontosabb',
+    'accuracy.hint.leadModels': '🏆 A legjobb modell',
+    'accuracy.hint.modelBetterRank': '🏆 {name} pontosabb · Ön #{rank}/{total}',
+    'settings.langPickerTitle': 'Felület nyelve',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n} ó',
+    'account.group': 'Csoport {id}',
+    'account.chat': 'Csevegés {id}',
     'outlook.rain': 'eső',
     'outlook.snow': 'hó',
     'outlook.precip': 'csapadék',
@@ -4824,6 +5000,22 @@ const I18N = {
     'metric.rain.peakSub': 'špička {peak} mm/h · ({mm} mm spolu) · {desc}',
     'precip.byEns': 'podľa variantov predpovede (spolu {n})',
     'precip.ensNote': 'Pravdepodobnosť = podiel variantov predpovede so zrážkami (spolu {n})',
+    'accuracy.hint.avgBest': '📊 Priemer je najpresnejší',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} prekonáva priemer',
+    'accuracy.hint.avgUsuallyBetter': '📊 Priemer býva presnejší · zbierame údaje pre tento model',
+    'accuracy.hint.leaderNow': '🏆 Teraz vedie {name}',
+    'accuracy.hint.youLeadAll': '🏆 Najpresnejší',
+    'accuracy.hint.avgBetter': '📊 Priemer je presnejší',
+    'accuracy.hint.avgBetterBy': '📊 Priemer je presnejší o {n}°',
+    'accuracy.hint.leadModels': '🏆 Najlepší z modelov',
+    'accuracy.hint.modelBetterRank': '🏆 {name} presnejší · ste #{rank} z {total}',
+    'settings.langPickerTitle': 'Jazyk rozhrania',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Skupina {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'dážď',
     'outlook.snow': 'sneh',
     'outlook.precip': 'zrážky',
@@ -5257,6 +5449,22 @@ const I18N = {
     'metric.rain.peakSub': 'pico {peak} mm/h · ({mm} mm no total) · {desc}',
     'precip.byEns': 'com base em {n} simulações',
     'precip.ensNote': 'Probabilidade = fração de simulações com precipitação ({n} no total)',
+    'accuracy.hint.avgBest': '📊 A média é a mais precisa',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a média',
+    'accuracy.hint.avgUsuallyBetter': '📊 A média costuma ser mais precisa · a recolher dados para este modelo',
+    'accuracy.hint.leaderNow': '🏆 Agora lidera {name}',
+    'accuracy.hint.youLeadAll': '🏆 A mais precisa',
+    'accuracy.hint.avgBetter': '📊 A média é mais precisa',
+    'accuracy.hint.avgBetterBy': '📊 A média é mais precisa em {n}°',
+    'accuracy.hint.leadModels': '🏆 A melhor entre os modelos',
+    'accuracy.hint.modelBetterRank': '🏆 {name} mais preciso · é o #{rank} de {total}',
+    'settings.langPickerTitle': 'Idioma da interface',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}h',
+    'account.group': 'Grupo {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'chuva',
     'outlook.snow': 'neve',
     'outlook.precip': 'precipitação',
@@ -5690,6 +5898,22 @@ const I18N = {
     'metric.rain.peakSub': 'piek {peak} mm/u · ({mm} mm totaal) · {desc}',
     'precip.byEns': 'op basis van {n} berekeningen',
     'precip.ensNote': 'Kans = aandeel berekeningen met neerslag (totaal {n})',
+    'accuracy.hint.avgBest': '📊 Gemiddelde is het nauwkeurigst',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} verslaat het gemiddelde',
+    'accuracy.hint.avgUsuallyBetter': '📊 Gemiddelde meestal nauwkeuriger · gegevens verzamelen voor dit model',
+    'accuracy.hint.leaderNow': '🏆 {name} leidt nu',
+    'accuracy.hint.youLeadAll': '🏆 Nauwkeurigst',
+    'accuracy.hint.avgBetter': '📊 Gemiddelde nauwkeuriger',
+    'accuracy.hint.avgBetterBy': '📊 Gemiddelde {n}° nauwkeuriger',
+    'accuracy.hint.leadModels': '🏆 Beste van de modellen',
+    'accuracy.hint.modelBetterRank': '🏆 {name} nauwkeuriger · je bent #{rank} van {total}',
+    'settings.langPickerTitle': 'Interfacetaal',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}u',
+    'account.group': 'Groep {id}',
+    'account.chat': 'Chat {id}',
     'outlook.rain': 'regen',
     'outlook.snow': 'sneeuw',
     'outlook.precip': 'neerslag',
@@ -6123,6 +6347,22 @@ const I18N = {
     'metric.rain.peakSub': 'tepe {peak} mm/sa · (toplam {mm} mm) · {desc}',
     'precip.byEns': '{n} tahmin senaryosuna göre',
     'precip.ensNote': 'Olasılık = yağış gösteren tahmin senaryolarının payı (toplam {n})',
+    'accuracy.hint.avgBest': '📊 Ortalama en doğru',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} ortalamayı geçiyor',
+    'accuracy.hint.avgUsuallyBetter': '📊 Ortalama genelde daha doğru · bu model için veri topluyoruz',
+    'accuracy.hint.leaderNow': '🏆 Şu an {name} önde',
+    'accuracy.hint.youLeadAll': '🏆 En doğru',
+    'accuracy.hint.avgBetter': '📊 Ortalama daha doğru',
+    'accuracy.hint.avgBetterBy': '📊 Ortalama {n}° daha doğru',
+    'accuracy.hint.leadModels': '🏆 Modeller arasında en iyi',
+    'accuracy.hint.modelBetterRank': '🏆 {name} daha doğru · {total} içinde #{rank}',
+    'settings.langPickerTitle': 'Arayüz dili',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n} sa',
+    'account.group': 'Grup {id}',
+    'account.chat': 'Sohbet {id}',
     'outlook.rain': 'yağmur',
     'outlook.snow': 'kar',
     'outlook.precip': 'yağış',
@@ -6556,6 +6796,22 @@ const I18N = {
     'metric.rain.peakSub': 'κορύφωση {peak} mm/h · ({mm} mm συνολικά) · {desc}',
     'precip.byEns': 'βάσει {n} σεναρίων πρόγνωσης',
     'precip.ensNote': 'Πιθανότητα = ποσοστό σεναρίων πρόγνωσης με υετό (σύνολο {n})',
+    'accuracy.hint.avgBest': '📊 Ο μέσος όρος είναι ο πιο ακριβής',
+    'accuracy.hint.modelBeatsAvg': '🏆 {name} ξεπερνά τον μέσο όρο',
+    'accuracy.hint.avgUsuallyBetter': '📊 Ο μέσος όρος είναι συνήθως πιο ακριβής · συλλέγουμε δεδομένα για αυτό το μοντέλο',
+    'accuracy.hint.leaderNow': '🏆 Τώρα προηγείται {name}',
+    'accuracy.hint.youLeadAll': '🏆 Πιο ακριβές',
+    'accuracy.hint.avgBetter': '📊 Ο μέσος όρος είναι πιο ακριβής',
+    'accuracy.hint.avgBetterBy': '📊 Ο μέσος όρος πιο ακριβής κατά {n}°',
+    'accuracy.hint.leadModels': '🏆 Το καλύτερο μοντέλο',
+    'accuracy.hint.modelBetterRank': '🏆 {name} πιο ακριβές · είστε #{rank} από {total}',
+    'settings.langPickerTitle': 'Γλώσσα διεπαφής',
+    'unit.mmhg.short': 'mm',
+    'unit.hpa.short': 'hPa',
+    'pollen.unit': 'gr/m³',
+    'storm.hoursAhead': '+{n}ώ',
+    'account.group': 'Ομάδα {id}',
+    'account.chat': 'Συνομιλία {id}',
     'outlook.rain': 'βροχή',
     'outlook.snow': 'χιόνι',
     'outlook.precip': 'υετός',
@@ -9710,10 +9966,10 @@ function renderHeroAccuracyHint() {
     // больших чисел снижает дисперсию). Если у AVG composite-score ≤ топа
     // моделей — он самый точный. Иначе кто-то его обогнал.
     if (avgScore == null || avgScore <= top.score + 0.05) {
-      txt = `📊 Среднее — самый точный`;
+      txt = t('accuracy.hint.avgBest');
       cls = 'hap-best';
     } else {
-      txt = `🏆 ${topName} обходит среднее`;
+      txt = t('accuracy.hint.modelBeatsAvg', { name: topName });
     }
   } else {
     // Конкретная модель выбрана
@@ -9722,26 +9978,25 @@ function renderHeroAccuracyHint() {
       // Для этой модели данных пока нет. Но если AVG/другие модели набрали —
       // даём общий ориентир: «📊 Среднее точнее» (или «🏆 X лидирует»).
       if (avgScore != null) {
-        txt = `📊 Среднее обычно точнее · накапливаем данные для этой модели`;
+        txt = t('accuracy.hint.avgUsuallyBetter');
       } else if (top) {
-        txt = `🏆 Сейчас лидирует ${topName}`;
+        txt = t('accuracy.hint.leaderNow', { name: topName });
       } else {
         el.innerHTML = ''; return;
       }
     } else {
       const rank = rows.indexOf(curRow) + 1;
       if (rank === 1 && (avgScore == null || curRow.score <= avgScore)) {
-        txt = `🏆 Лидер по точности`;
+        txt = t('accuracy.hint.youLeadAll');
         cls = 'hap-best';
       } else if (avgScore != null && avgScore < curRow.score) {
         const diff = curRow.score - avgScore;
-        const diffStr = diff < 0.1 ? '' : ` на ${diff.toFixed(1)}°`;
-        txt = `📊 Среднее точнее${diffStr}`;
+        txt = diff < 0.1 ? t('accuracy.hint.avgBetter') : t('accuracy.hint.avgBetterBy', { n: diff.toFixed(1) });
       } else if (rank === 1) {
-        txt = `🏆 Лидер среди моделей`;
+        txt = t('accuracy.hint.leadModels');
         cls = 'hap-best';
       } else {
-        txt = `🏆 ${topName} точнее · вы №${rank} из ${totalModels}`;
+        txt = t('accuracy.hint.modelBetterRank', { name: topName, rank, total: totalModels });
       }
     }
   }
@@ -9821,8 +10076,8 @@ function shortMetricUnit(metric) {
     case 'wind': return unitWind();
     case 'pressure': {
       const u = state.units.pressure;
-      if (u === 'mmhg') return 'мм';
-      if (u === 'hpa') return 'гПа';
+      if (u === 'mmhg') return t('unit.mmhg.short');
+      if (u === 'hpa') return t('unit.hpa.short');
       if (u === 'inhg') return 'inHg';
       return u;
     }
@@ -12366,7 +12621,7 @@ function renderPollen() {
     cell.className = `pollen-cell pl-${level}`;
     // Заполнение полоски: 0..50 ч/м³ -> 0..100%
     const fillPct = level === 'none' ? 0 : Math.min(100, Math.round((value / 50) * 100));
-    const valueStr = value != null ? `${value} ч/м³` : '—';
+    const valueStr = value != null ? `${value} ${t('pollen.unit')}` : '—';
     cell.innerHTML = `
       <div class="pollen-head">
         <span class="pollen-icon">${p.icon}</span>
@@ -12488,7 +12743,7 @@ function renderStorm() {
       const cell = document.createElement('div');
       cell.className = 'storm-h r' + h.level;
       const parts = [
-        `+${h.hoursAhead}ч`,
+        t('storm.hoursAhead', { n: h.hoursAhead }),
         t('storm.risk' + h.level)
       ];
       if (h.cape != null) parts.push('CAPE ' + h.cape);
@@ -14331,17 +14586,7 @@ const PRIMARY_LANGS = ['ru','uk','en'];
 
 // Заголовок picker'а на текущем языке интерфейса.
 function _langPickerTitle() {
-  switch (state.lang) {
-    case 'uk': return 'Мова інтерфейсу';
-    case 'en': return 'Interface language';
-    case 'de': return 'Sprache der Oberfläche';
-    case 'pl': return 'Język interfejsu';
-    case 'cs': return 'Jazyk rozhraní';
-    case 'fr': return 'Langue de l\'interface';
-    case 'it': return 'Lingua dell\'interfaccia';
-    case 'es': return 'Idioma de la interfaz';
-    default:   return 'Язык интерфейса';
-  }
+  return t('settings.langPickerTitle');
 }
 
 // Динамическая отрисовка переключателя языка: 3 сегмента (RU/UK/EN).
@@ -17218,8 +17463,8 @@ function removeAccount(chatId) {
 function accountDisplayName(acc) {
   if (!acc) return '—';
   const isGroup = acc.chatType && acc.chatType !== 'private';
-  if (isGroup) return `👥 ${acc.chatTitle || `Группа ${acc.chatId}`}`;
-  return acc.firstName || (acc.username ? `@${acc.username}` : `Чат ${acc.chatId}`);
+  if (isGroup) return `👥 ${acc.chatTitle || t('account.group', { id: acc.chatId })}`;
+  return acc.firstName || (acc.username ? `@${acc.username}` : t('account.chat', { id: acc.chatId }));
 }
 
 // Совместимость со старым кодом — возвращает активный аккаунт или null
