@@ -1,0 +1,501 @@
+/* ============================================================
+   style-v2.css — Meteo Star V2 «Живое небо»
+   ------------------------------------------------------------
+   Оверрайды поверх базового style.css (он остаётся подключённым:
+   модалки, настройки, пикеры, compare-режим, правила бота
+   наследуются бесплатно).
+
+   ВСЕ правила скоупятся под `body.v2`:
+     • исключает конфликты с классической index.html;
+     • облегчает будущий merge (выпилить блок = выпилить V2).
+
+   Персистентное состояние V2 — только ключи localStorage kw:v2:*
+   (правило §4.5). Существующие kw:* v1 не трогаются — гарантия отката.
+
+   Этап 0: каркас (токены, скрытие .particle).
+   Этап 1: канвас неба #v2Sky, прозрачные фоны, скрытие фото-сцены.
+   ============================================================ */
+
+/* ============================================================
+   ТОКЕНЫ СЦЕНЫ
+   --v2-accent / --v2-sky-* на этапах 1+ выставляет sky-движок из
+   текущей палитры неба. Здесь — дефолты до первого кадра сцены.
+   ============================================================ */
+body.v2 {
+  --v2-accent: #4aa3ff;
+  --v2-accent-soft: rgba(74, 163, 255, 0.16);
+  --v2-accent-strong: #6bb6ff;
+
+  --v2-sky-top: #0b1026;
+  --v2-sky-mid: #16203f;
+  --v2-sky-horizon: #1a2140;
+
+  --v2-glass-tint: rgba(12, 18, 38, 0.55);
+  --v2-glass-edge: rgba(255, 255, 255, 0.10);
+
+  --v2-dock-h: 64px;
+  --v2-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ============================================================
+   КАНВАС НЕБА — фикс-слой за всем контентом.
+   Создаётся v2.js как первый ребёнок body. pointer-events:none —
+   жесты страницы и кликов по контенту не перехватываются.
+   z-index:0 → ниже .container (z-index:1): стекло «парит» над небом.
+   ============================================================ */
+body.v2 #v2Sky {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* ============================================================
+   ПРОЗРАЧНЫЕ ФОНЫ — чтобы небо было видно сквозь интерфейс.
+   html держит тёмную подложку (#02061a из style.css) как фоллбек
+   до первого кадра канваса — без белой вспышки.
+   ============================================================ */
+body.v2 {
+  background: transparent !important;
+}
+/* Старый анимированный body::before (радиальные пятна) — небо его заменяет. */
+body.v2::before { display: none !important; }
+/* Плавающие .particle body-уровня — декор V1. */
+body.v2 > .particle { display: none !important; }
+
+/* ============================================================
+   HERO: фото-сцена → процедурное небо.
+   #heroSceneBg / .hs-celestial (фото неба + рисованные солнце/луна
+   внутри hero) больше не нужны — глобальный канвас рисует то же
+   самое за стеклом hero. Скрываем (не удаляем — правило §5).
+   Стекло hero (translucent .glass) остаётся: его backdrop-filter
+   подмешивает небо за ним → «матовое окно наружу».
+   ============================================================ */
+body.v2 .hero-scene { display: none !important; }
+body.v2 .hero-overlay { display: none !important; }
+
+/* ============================================================
+   СИЛУЭТ ГОРОДА (этап 2) — отдельный inline-SVG над нижней кромкой
+   сцены, за контентом. Окна зажигаются по времени суток.
+   ============================================================ */
+body.v2 #v2Skyline {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: min(30vh, 250px);
+  z-index: 0;
+  pointer-events: none;
+}
+body.v2 #v2Skyline svg { display: block; width: 100%; height: 100%; }
+/* силуэт — тёмный, чуть прозрачный, чтобы свечение горизонта читалось по кромке */
+body.v2 .v2sl-sil { fill: #05070f; fill-opacity: 0.96; }
+/* окна: по умолчанию невидимы (силуэт сплошной); зажигаются тёплым */
+body.v2 .v2sl-win {
+  fill: #ffce7a;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+body.v2 .v2sl-win.v2sl-lit { opacity: 0.9; }
+/* маяк на телевышке — мигающий красный */
+body.v2 .v2sl-beacon { fill: #ff5a5a; animation: v2slBeacon 2.6s ease-in-out infinite; }
+@keyframes v2slBeacon { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+/* мокрый отблеск под силуэтом в дождь */
+body.v2 #v2Skyline.v2sl-wet::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 34%;
+  background: linear-gradient(to top, rgba(130,160,210,0.12), transparent);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.v2 .v2sl-beacon { animation: none; opacity: 0.85; }
+  body.v2 .v2sl-win { transition: none; }
+}
+
+/* Hero — стеклянная карточка над небом. Мягкая подложка усиливает
+   читаемость текста (контраст ≥ 4.5:1 на ярком небе, ТЗ §4.8). */
+body.v2 .hero {
+  background:
+    linear-gradient(180deg, rgba(8, 12, 30, 0.30) 0%, rgba(8, 12, 30, 0.46) 100%),
+    var(--v2-glass-tint);
+}
+
+/* ============================================================
+   ЭТАП 3 — HERO «СЕЙЧАС»
+   ============================================================ */
+
+/* --- Нейтрализация старого sticky-hero (механизм app.js .stuck).
+   Шапку сжимаем сами (ниже); hero просто скроллится. --- */
+body.v2 .hero { position: relative !important; top: auto !important; }
+body.v2 .hero.stuck .hero-temp { font-size: inherit; line-height: 1; margin-bottom: 8px; }
+body.v2 .hero.stuck .hero-temp-unit { font-size: clamp(26px, 5vw, 40px); }
+body.v2 .hero.stuck .hero-condition { font-size: 18px; margin-bottom: 4px; }
+body.v2 .hero.stuck .hero-nowcast-hint { max-height: none; opacity: 1; margin-top: 10px; overflow: visible; pointer-events: auto; }
+body.v2 .hero.stuck .hero-feels,
+body.v2 .hero.stuck .hero-label,
+body.v2 .hero.stuck .hero-source-note { opacity: 1; max-height: none; }
+
+/* --- Огромная температура-одометр --- */
+body.v2 .hero-temp { align-items: flex-start; gap: 6px; margin-bottom: 10px; }
+body.v2 .hero-temp-num { display: none; }  /* источник значения для одометра, визуально скрыт */
+body.v2 .v2-odo {
+  display: inline-flex;
+  font-size: clamp(74px, 20vw, 148px);
+  font-weight: 200;
+  letter-spacing: -0.04em;
+  line-height: 0.86;
+  color: #fff;
+  text-shadow: 0 2px 34px rgba(0, 0, 0, 0.4);
+  font-feature-settings: 'tnum';
+}
+body.v2 .v2-odo-col { display: inline-block; height: 1em; overflow: hidden; vertical-align: bottom; }
+body.v2 .v2-odo-strip { display: flex; flex-direction: column; transition: transform 0.62s cubic-bezier(0.2, 0.85, 0.25, 1); }
+body.v2 .v2-odo-d { height: 1em; display: flex; align-items: center; justify-content: center; }
+body.v2 .v2-odo-ch { display: inline-block; }
+body.v2 .hero-temp-unit { font-size: clamp(26px, 5vw, 40px); font-weight: 200; margin-top: 0.1em; color: rgba(232, 240, 255, 0.7); }
+@media (prefers-reduced-motion: reduce) { body.v2 .v2-odo-strip { transition: none; } }
+
+/* --- Строка-брифинг --- */
+body.v2 .v2-brief {
+  margin-top: 10px;
+  font-size: clamp(13px, 2.6vw, 15px);
+  line-height: 1.45;
+  color: rgba(233, 240, 255, 0.85);
+  font-weight: 400;
+  max-width: 42ch;
+}
+
+/* --- Чипы метрик: крупные карточки → компактная флекс-строка --- */
+body.v2 .metrics { display: flex; flex-wrap: wrap; gap: 10px; }
+body.v2 .metric { flex: 1 1 calc(50% - 5px); min-width: 140px; padding: 13px 15px; border-radius: 16px; gap: 7px; }
+@media (min-width: 760px) { body.v2 .metric { flex: 1 1 calc(25% - 8px); } }
+body.v2 .metric-icon { width: 30px; height: 30px; border-radius: 9px; }
+body.v2 .metric-value { font-size: 22px; }
+body.v2 .metric-sub { font-size: 11px; line-height: 1.35; }
+
+/* --- Шапка: компактная стеклянная полоска при скролле > 80px --- */
+body.v2 .header {
+  position: sticky;
+  top: max(env(safe-area-inset-top, 0px), 0px);
+  z-index: 60;
+  padding: 10px 12px;
+  border-radius: 0 0 18px 18px;
+  transition: padding 0.34s ease, background 0.34s ease, box-shadow 0.34s ease, backdrop-filter 0.34s ease;
+}
+body.v2.v2-head-shrink .header {
+  background: linear-gradient(180deg, rgba(8, 12, 30, 0.74), rgba(8, 12, 30, 0.52));
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.34);
+  padding-top: 8px; padding-bottom: 8px;
+}
+body.v2.v2-head-shrink #dateLine,
+body.v2.v2-head-shrink .location-edit-hint { display: none; }
+body.v2.v2-head-shrink .location-text h1 { font-size: 18px; }
+body.v2 .v2-head-temp { display: none; }
+body.v2.v2-head-shrink .v2-head-temp {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--v2-accent);
+}
+
+/* ============================================================
+   ЭТАП 4 — ЛИНЗА ВРЕМЕНИ (лента часов-скраб)
+   ============================================================ */
+body.v2 #v2TimeLens {
+  grid-column: 1 / -1;
+  margin-top: 16px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body.v2 .v2-lens-label {
+  min-height: 18px;
+  height: 18px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 8px;
+  color: var(--v2-accent-strong);
+  letter-spacing: 0.01em;
+  transition: opacity 0.2s ease;
+}
+body.v2 .v2-lens-track {
+  position: relative;
+  height: 40px;
+  display: flex;
+  align-items: flex-end;
+  /* лента перехватывает горизонтальный жест; вертикальный скролл страницы
+     вне ленты не страдает (ТЗ §4.7) */
+  touch-action: none;
+  cursor: ew-resize;
+  padding-top: 16px;
+}
+body.v2 .v2-lens-tick {
+  flex: 1 1 0;
+  height: 9px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  position: relative;
+}
+body.v2 .v2-lens-tick.major { height: 15px; border-left-color: rgba(255, 255, 255, 0.30); }
+body.v2 .v2-lens-tick .lh {
+  position: absolute;
+  top: -15px;
+  left: -1px;
+  font-size: 9px;
+  color: rgba(232, 240, 255, 0.5);
+}
+body.v2 .v2-lens-tick.wet::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--v2-accent);
+  box-shadow: 0 0 5px var(--v2-accent);
+}
+body.v2 .v2-lens-cursor {
+  position: absolute;
+  top: 12px; bottom: 0;
+  left: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--v2-accent-strong);
+  box-shadow: 0 0 10px var(--v2-accent), 0 0 3px var(--v2-accent-strong);
+  pointer-events: none;
+  transition: left 0.12s ease;
+}
+body.v2 #v2TimeLens.v2-lens-active .v2-lens-cursor { transition: none; }
+body.v2 #v2TimeLens:focus-visible {
+  outline: 2px solid var(--v2-accent);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.v2 .v2-lens-cursor { transition: none; }
+}
+
+/* ============================================================
+   ЭТАП 5 — «СКОРО + ГЛУБЖЕ + ДОК»
+   ============================================================ */
+
+/* --- Заголовки зон --- */
+body.v2 .v2-zone-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 22px 4px 12px;
+  color: #eaf1ff;
+  letter-spacing: 0.01em;
+}
+
+/* --- Дни-«горизонты»: вертикальный список горизонтальных плашек --- */
+body.v2 #daysWrap { overflow: visible; }
+body.v2 #daysWrap .scroll-arrow { display: none; }
+body.v2 #daysGrid { display: flex; flex-direction: column; gap: 8px; overflow: visible; }
+body.v2 .day {
+  display: flex; flex-direction: row; align-items: center; gap: 12px;
+  padding: 12px 16px; min-height: 0; cursor: pointer; position: relative; overflow: hidden;
+}
+body.v2 .day-name { flex: 0 0 auto; width: 62px; font-size: 14px; font-weight: 600; margin: 0; }
+body.v2 .day-date { flex: 0 0 auto; width: 42px; font-size: 11px; opacity: 0.55; margin: 0; }
+body.v2 .day-icon { flex: 0 0 auto; width: 34px; height: 34px; margin: 0; }
+body.v2 .day-icon svg { width: 34px; height: 34px; }
+body.v2 .v2-day-bar {
+  flex: 1 1 80px; min-width: 70px; height: 7px; border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08); position: relative;
+}
+body.v2 .v2-day-bar-seg { position: absolute; top: 0; bottom: 0; border-radius: 5px; }
+body.v2 .day-temps { flex: 0 0 auto; width: 86px; display: flex; justify-content: flex-end; gap: 8px; margin: 0; }
+body.v2 .day-hi { font-weight: 700; }
+body.v2 .day-lo { opacity: 0.5; }
+body.v2 .day-prec { flex: 0 0 auto; width: 52px; justify-content: flex-end; margin: 0; font-size: 12px; display: flex; align-items: center; gap: 3px; }
+body.v2 .day-wind { display: none; }
+body.v2 .day-tap { display: none; }
+/* полоска согласия моделей — тонкий вертикальный акцент слева плашки */
+body.v2 .day-confidence-bar {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px; height: auto;
+  border-radius: 0; margin: 0;
+}
+
+/* --- Палуба «Глубже»: snap-скролл (моб.) / бенто (десктоп ≥1024) --- */
+body.v2 .v2-deck { margin-top: 4px; }
+body.v2 .v2-deck-scroll {
+  display: flex; gap: 14px; overflow-x: auto;
+  scroll-snap-type: x mandatory; padding: 2px 2px 8px; scrollbar-width: none;
+}
+body.v2 .v2-deck-scroll::-webkit-scrollbar { display: none; }
+body.v2 .v2-deck-scroll > * { scroll-snap-align: start; flex: 0 0 86vw; max-width: 86vw; margin: 0; }
+@media (min-width: 1024px) {
+  body.v2 .v2-deck-scroll {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; overflow: visible;
+  }
+  body.v2 .v2-deck-scroll > * { flex: none; max-width: none; width: auto; }
+  body.v2 #climateCard { grid-column: span 7; }
+  body.v2 #activityWindowsCard { grid-column: span 5; }
+  body.v2 #astroPhotoCard { grid-column: span 7; }
+  body.v2 #pollenCard { grid-column: span 5; }
+}
+
+/* --- Нижний док (4 якоря, scrollspy, safe-area) --- */
+body.v2 #v2Dock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  z-index: 80;
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  border-radius: 24px;
+  background: var(--v2-glass-tint);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--v2-glass-edge);
+}
+body.v2 .v2-dock-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 7px 16px; border: none; background: transparent; cursor: pointer;
+  color: rgba(232, 240, 255, 0.58); border-radius: 18px; font-family: inherit;
+  font-size: 10px; font-weight: 500;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+body.v2 .v2-dock-btn:hover { color: rgba(232, 240, 255, 0.85); }
+body.v2 .v2-dock-btn.active { color: var(--v2-accent-strong); background: var(--v2-accent-soft); }
+body.v2 .v2-dock-ico { display: block; }
+body.v2 .v2-dock-ico svg { width: 21px; height: 21px; display: block; }
+body.v2 .v2-dock-btn:focus-visible { outline: 2px solid var(--v2-accent); outline-offset: 2px; }
+
+/* место снизу под плавающий док */
+body.v2 .container { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+
+/* ============================================================
+   ЭТАП 6 — ОБСЕРВАТОРИЯ (прибор точности в палубе)
+   ============================================================ */
+body.v2 .v2-observatory {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  justify-content: center;
+}
+body.v2 .v2-obs-verdict {
+  font-size: 21px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+body.v2 .v2-obs-accum .v2-obs-verdict {
+  font-size: 16px;
+  color: rgba(232, 240, 255, 0.82);
+  font-weight: 500;
+}
+body.v2 .v2-obs-sub {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--v2-accent-strong);
+}
+body.v2 .v2-obs-accum .v2-obs-sub {
+  color: rgba(232, 240, 255, 0.55);
+  font-weight: 500;
+  font-size: 13px;
+}
+body.v2 .v2-obs-open {
+  align-self: flex-start;
+  margin-top: 10px;
+  background: var(--v2-accent-soft);
+  color: var(--v2-accent-strong);
+  border: 1px solid var(--v2-glass-edge);
+  border-radius: 14px;
+  padding: 9px 15px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+body.v2 .v2-obs-open:hover { background: var(--v2-accent); color: #fff; }
+body.v2 .v2-obs-open:focus-visible { outline: 2px solid var(--v2-accent); outline-offset: 2px; }
+@media (min-width: 1024px) {
+  body.v2 #v2Observatory { grid-column: span 12; }
+}
+
+/* ============================================================
+   ЭТАП 7 — МАТЕРИАЛЬНАЯ ЧЕСТНОСТЬ (погода на стекле hero)
+   Слои поверх стекла hero, под текстом (.hero-info z-index:2).
+   ============================================================ */
+body.v2 .v2-hero-fx,
+body.v2 .v2-hero-frost,
+body.v2 .v2-hero-heat {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 24px;
+}
+body.v2 .v2-hero-fx { opacity: 0; transition: opacity 0.5s ease; }
+/* иней в углах при морозе ≤ −5° */
+body.v2 .v2-hero-frost {
+  display: none;
+  background:
+    radial-gradient(circle 130px at 0 0, rgba(214, 236, 255, 0.24), transparent 66%),
+    radial-gradient(circle 120px at 100% 0, rgba(214, 236, 255, 0.20), transparent 66%),
+    radial-gradient(circle 150px at 100% 100%, rgba(214, 236, 255, 0.16), transparent 66%),
+    radial-gradient(circle 110px at 0 100%, rgba(214, 236, 255, 0.15), transparent 66%);
+  mix-blend-mode: screen;
+}
+/* тёплое марево в жару ≥ +30° */
+body.v2 .v2-hero-heat {
+  display: none;
+  background: linear-gradient(0deg, rgba(255, 170, 110, 0.13), transparent 42%);
+  animation: v2heat 4.5s ease-in-out infinite;
+}
+@keyframes v2heat { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+@media (prefers-reduced-motion: reduce) {
+  body.v2 .v2-hero-heat { animation: none; opacity: 0.6; }
+}
+
+/* ============================================================
+   ЭТАП 7 — СВЕТЛАЯ ТЕМА (то же небо, «молочное» стекло, тёмный текст)
+   data-theme="light" выставляет app.js на <html>; небо не меняем.
+   ============================================================ */
+:root[data-theme="light"] body.v2 {
+  --v2-glass-tint: rgba(248, 250, 255, 0.62);
+  --v2-glass-edge: rgba(120, 140, 180, 0.20);
+}
+:root[data-theme="light"] body.v2 .hero {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.68));
+}
+/* Текст hero — тёмный. V1 держит его белым (поверх яркого фото-фона) правилами
+   ":root[data-theme=light] .hero[data-tod][data-cond] *{color:#fff !important}"
+   (важность + специфичность 0,5,0). Фото в V2 скрыто, поэтому добавляем в
+   селектор .hero (специфичность 0,5,1 > 0,5,0) + !important — осознанно
+   перебиваем светлую тему V1. */
+:root[data-theme="light"] body.v2 .hero .v2-odo,
+:root[data-theme="light"] body.v2 .hero .v2-odo * { color: #16203a !important; }
+:root[data-theme="light"] body.v2 .hero .v2-odo { text-shadow: 0 2px 18px rgba(255, 255, 255, 0.5); }
+:root[data-theme="light"] body.v2 .hero .hero-temp-unit { color: rgba(22, 32, 58, 0.7) !important; }
+:root[data-theme="light"] body.v2 .hero .hero-label { color: rgba(22, 32, 58, 0.55) !important; }
+:root[data-theme="light"] body.v2 .hero .hero-condition { color: #16203a !important; text-shadow: none !important; }
+:root[data-theme="light"] body.v2 .hero .hero-feels { color: rgba(22, 32, 58, 0.66) !important; text-shadow: none !important; }
+:root[data-theme="light"] body.v2 .hero .hero-feels strong { color: #b25a12 !important; }
+:root[data-theme="light"] body.v2 .hero .hero-source-note { color: rgba(22, 32, 58, 0.6) !important; text-shadow: none !important; }
+:root[data-theme="light"] body.v2 .hero .v2-brief { color: rgba(22, 32, 58, 0.86) !important; }
+:root[data-theme="light"] body.v2 .location-text h1 { color: #16203a; }
+:root[data-theme="light"] body.v2 .v2-zone-title { color: #16203a; }
+:root[data-theme="light"] body.v2 .v2-obs-verdict { color: #16203a; }
+:root[data-theme="light"] body.v2.v2-head-shrink .header {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.62));
+}
+:root[data-theme="light"] body.v2 #v2Dock { background: rgba(248, 250, 255, 0.72); border-color: rgba(120, 140, 180, 0.18); }
+:root[data-theme="light"] body.v2 .v2-dock-btn { color: rgba(22, 32, 58, 0.55); }
+:root[data-theme="light"] body.v2 .v2-dock-btn:hover { color: rgba(22, 32, 58, 0.85); }
+:root[data-theme="light"] body.v2 .v2-day-bar { background: rgba(20, 30, 55, 0.10); }
+:root[data-theme="light"] body.v2 .v2-hero-frost { mix-blend-mode: normal; }
