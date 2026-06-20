@@ -9410,6 +9410,12 @@ window.previewStorm = function(risk) {
    тогда скрыт (:empty).
    ============================================ */
 const OUTLOOK_WET_MM = 0.1; // мм/ч — порог «мокрого часа» (pmm округлён до 0.1)
+// v1.58.0: порог вероятности, ниже которого осадки в СВОДКАХ (посуточный список,
+// почасовка модалки дня, полоса «возможно» на графике) считаются шумом и день/час
+// читается сухим. Реальное ожидаемое количество (precipSum≥0.3 / pmm>0) показывается
+// всегда, независимо от этого порога. Был де-факто 5% — он метил «дождём» фактически
+// сухие дни (6% / 0 мм) и рассогласовывал список с графиком и плиткой.
+const PRECIP_POP_SHOW = 30; // % — порог «есть шанс осадков» для сводок и полосы графика
 
 function outlookHH(hour) { return String(hour).padStart(2, '0') + ':00'; }
 function outlookMm(v) { return String(Math.round(v * 10) / 10); }
@@ -10179,13 +10185,20 @@ function renderDays(forecast) {
     const nowMarker = (i === 0 && nowT != null)
       ? `<span class="dr-now" style="left:${Math.min(100, Math.max(0, ((nowT - gMin) / span) * 100))}%"></span>`
       : '';
-    // Осадки: % + мм (если ≥ 0.3 мм); если сухо — прочерк.
-    const wet = (typeof d.precipSum === 'number' && d.precipSum >= 0.3) || d.precip >= 5;
+    // Осадки, 3 состояния:
+    //  • дождь  — есть реальное ожидаемое количество (precipSum≥0.3): синяя капля + % + мм;
+    //  • шанс   — количества нет, но вероятность значима (≥PRECIP_POP_SHOW): приглушённая
+    //             серая капля + % (читается как «возможно», а не «точно дождь»);
+    //  • сухо   — прочерк. Так список не кричит «дождь» при 0 мм (см. полосу на графике).
+    const dropSvgChance = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
+    const rainExpected = (typeof d.precipSum === 'number' && d.precipSum >= 0.3);
+    const rainChance = !rainExpected && (typeof d.precip === 'number' && d.precip >= PRECIP_POP_SHOW);
     let precHtml = '<span class="dr-dry">—</span>';
-    if (wet) {
-      const mmPart = (typeof d.precipSum === 'number' && d.precipSum >= 0.3)
-        ? ` <span class="dr-mm">· ${Math.round(d.precipSum * 10) / 10} ${t('unit.mm')}</span>` : '';
+    if (rainExpected) {
+      const mmPart = ` <span class="dr-mm">· ${Math.round(d.precipSum * 10) / 10} ${t('unit.mm')}</span>`;
       precHtml = `${dropSvg}<span class="dr-pp">${d.precip}%</span>${mmPart}`;
+    } else if (rainChance) {
+      precHtml = `<span class="dr-prec-chance" title="${t('precip.possible')}">${dropSvgChance}<span class="dr-pp">${d.precip}%</span></span>`;
     }
     row.innerHTML = `
       ${confCls ? `<span class="dr-conf ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></span>` : ''}
@@ -12002,7 +12015,14 @@ function renderPrecipChart(forecast) {
   // сценариев ENS, а линия графика — медианное количество, которое = 0, когда
   // дождь видит лишь меньшинство сценариев. Бледная полоса показывает верхнюю
   // границу — «возможен дождь до X мм».
-  const possValues = merged.map(h => (typeof h.pmmPoss === 'number' ? h.pmmPoss : 0));
+  // Полосу показываем только в часы со значимым шансом (h.p ≥ PRECIP_POP_SHOW) —
+  // тот же порог, что и в сводках. Иначе на фактически сухих днях (вероятность 5–6%,
+  // 0 мм) график рисовал бы тень, противореча сухому списку/плитке.
+  const possValues = merged.map(h => {
+    const poss = (typeof h.pmmPoss === 'number') ? h.pmmPoss : 0;
+    const pop = (typeof h.p === 'number') ? h.p : 0;
+    return pop >= PRECIP_POP_SHOW ? poss : 0;
+  });
   // Показываем полосу только когда «возможный» дождь заметно выше медианы хотя бы
   // в одном часу (иначе она сливается с линией и ничего не добавляет).
   const hasPoss = possValues.some((v, i) => v > 0.05 && v > values[i] + 0.05);
@@ -12638,16 +12658,23 @@ function renderModalHourlyRow(d) {
   if (!isFinite(dMax)) dMax = 1;
   const dSpan = (dMax - dMin) || 1;
   const dropSvg = '<svg width="10" height="10" viewBox="0 0 24 24" fill="#00d4ff"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
+  const dropSvgChance = '<svg width="10" height="10" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
 
   list.innerHTML = d.hourly.map((h, i) => {
     const stateCls = isToday ? (i < NOW_HOUR ? ' past' : (i === NOW_HOUR ? ' now' : '')) : '';
     const fillW = Math.max(Math.min(100, ((h.t - dMin) / dSpan) * 100), 6);
     const pmm = (typeof h.pmm === 'number') ? h.pmm : 0;
-    const wet = pmm > 0 || h.p >= 5;
+    // 3 состояния как в посуточном списке: дождь (есть мм) / шанс (только вероятность
+    // ≥PRECIP_POP_SHOW) / сухо. Раньше порог был 5% — модалка показывала каплю там,
+    // где плитка и график были сухими.
+    const rainExpected = pmm > 0;
+    const rainChance = !rainExpected && (typeof h.p === 'number' && h.p >= PRECIP_POP_SHOW);
     let prec;
-    if (wet) {
-      const mmPart = pmm > 0 ? ` <span class="mh-mm">· ${Math.round(pmm * 10) / 10} ${t('unit.mm')}</span>` : '';
+    if (rainExpected) {
+      const mmPart = ` <span class="mh-mm">· ${Math.round(pmm * 10) / 10} ${t('unit.mm')}</span>`;
       prec = `${dropSvg}<span>${h.p}%</span>${mmPart}`;
+    } else if (rainChance) {
+      prec = `<span class="mh-chance" title="${t('precip.possible')}">${dropSvgChance}<span>${h.p}%</span></span>`;
     } else {
       prec = '<span class="mh-dry">—</span>';
     }
