@@ -44,6 +44,8 @@ const I18N = {
     'metric.rain.peakSub': 'пик {peak} мм/ч · ({mm} мм всего) · {desc}',
     'precip.byEns': 'по вариантам прогноза (всего {n})',
     'precip.ensNote': 'Вероятность = доля вариантов прогноза с осадками (всего {n})',
+    'precip.possible': 'возможно',
+    'precip.possibleHint': 'возможные осадки — самый мокрый сценарий ансамбля',
     'accuracy.hint.avgBest': '📊 Среднее — самый точный',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} обходит среднее',
     'accuracy.hint.avgUsuallyBetter': '📊 Среднее обычно точнее · накапливаем данные для этой модели',
@@ -511,6 +513,8 @@ const I18N = {
     'metric.rain.peakSub': 'пік {peak} мм/год · ({mm} мм всього) · {desc}',
     'precip.byEns': 'за варіантами прогнозу (усього {n})',
     'precip.ensNote': 'Імовірність = частка варіантів прогнозу з опадами (усього {n})',
+    'precip.possible': 'можливо',
+    'precip.possibleHint': 'можливі опади — найвологіший сценарій ансамблю',
     'accuracy.hint.avgBest': '📊 Середнє — найточніше',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} точніше за середнє',
     'accuracy.hint.avgUsuallyBetter': '📊 Середнє зазвичай точніше · накопичуємо дані для цієї моделі',
@@ -965,6 +969,8 @@ const I18N = {
     'metric.rain.peakSub': 'peak {peak} mm/h · ({mm} mm total) · {desc}',
     'precip.byEns': 'based on {n} forecast runs',
     'precip.ensNote': 'Probability = share of forecast runs with precipitation ({n} total)',
+    'precip.possible': 'possible',
+    'precip.possibleHint': 'possible precipitation — wettest ensemble scenario',
     'accuracy.hint.avgBest': '📊 Average is the most accurate',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} beats the average',
     'accuracy.hint.avgUsuallyBetter': '📊 Average is usually better · gathering data for this model',
@@ -1418,6 +1424,8 @@ const I18N = {
     'metric.rain.peakSub': 'Spitze {peak} mm/h · ({mm} mm gesamt) · {desc}',
     'precip.byEns': 'aus {n} Prognoseläufen',
     'precip.ensNote': 'Wahrscheinlichkeit = Anteil der Prognoseläufe mit Niederschlag (insgesamt {n})',
+    'precip.possible': 'möglich',
+    'precip.possibleHint': 'möglicher Niederschlag — nassestes Ensemble-Szenario',
     'accuracy.hint.avgBest': '📊 Durchschnitt am genauesten',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} schlägt den Durchschnitt',
     'accuracy.hint.avgUsuallyBetter': '📊 Durchschnitt meist genauer · Daten für dieses Modell werden gesammelt',
@@ -1871,6 +1879,8 @@ const I18N = {
     'metric.rain.peakSub': 'szczyt {peak} mm/h · ({mm} mm łącznie) · {desc}',
     'precip.byEns': 'wg wariantów prognozy (łącznie {n})',
     'precip.ensNote': 'Prawdopodobieństwo = udział wariantów prognozy z opadami (łącznie {n})',
+    'precip.possible': 'możliwe',
+    'precip.possibleHint': 'możliwe opady — najwilgotniejszy scenariusz zespołu',
     'accuracy.hint.avgBest': '📊 Średnia najdokładniejsza',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} lepszy od średniej',
     'accuracy.hint.avgUsuallyBetter': '📊 Średnia zwykle dokładniejsza · zbieramy dane dla tego modelu',
@@ -2325,6 +2335,8 @@ const I18N = {
     'metric.rain.peakSub': 'špička {peak} mm/h · ({mm} mm celkem) · {desc}',
     'precip.byEns': 'podle variant předpovědi (celkem {n})',
     'precip.ensNote': 'Pravděpodobnost = podíl variant předpovědi se srážkami (celkem {n})',
+    'precip.possible': 'možné',
+    'precip.possibleHint': 'možné srážky — nejvlhčí scénář ansámblu',
     'accuracy.hint.avgBest': '📊 Průměr je nejpřesnější',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} překonává průměr',
     'accuracy.hint.avgUsuallyBetter': '📊 Průměr je obvykle přesnější · sbíráme data pro tento model',
@@ -2779,6 +2791,8 @@ const I18N = {
     'metric.rain.peakSub': 'pic {peak} mm/h · ({mm} mm au total) · {desc}',
     'precip.byEns': 'selon {n} simulations',
     'precip.ensNote': 'Probabilité = part des simulations avec précipitations ({n} au total)',
+    'precip.possible': 'possible',
+    'precip.possibleHint': 'précipitations possibles — scénario d\'ensemble le plus humide',
     'accuracy.hint.avgBest': '📊 Moyenne la plus précise',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} bat la moyenne',
     'accuracy.hint.avgUsuallyBetter': '📊 Moyenne souvent plus précise · collecte des données pour ce modèle',
@@ -3232,6 +3246,8 @@ const I18N = {
     'metric.rain.peakSub': 'picco {peak} mm/h · ({mm} mm totali) · {desc}',
     'precip.byEns': 'su {n} simulazioni',
     'precip.ensNote': 'Probabilità = quota di simulazioni con precipitazioni ({n} in totale)',
+    'precip.possible': 'possibile',
+    'precip.possibleHint': 'precipitazioni possibili — scenario d\'insieme più piovoso',
     'accuracy.hint.avgBest': '📊 Media la più accurata',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} batte la media',
     'accuracy.hint.avgUsuallyBetter': '📊 Media di solito più accurata · raccolta dati per questo modello',
@@ -3685,6 +3701,8 @@ const I18N = {
     'metric.rain.peakSub': 'pico {peak} mm/h · ({mm} mm en total) · {desc}',
     'precip.byEns': 'según {n} simulaciones',
     'precip.ensNote': 'Probabilidad = proporción de simulaciones con precipitación ({n} en total)',
+    'precip.possible': 'posible',
+    'precip.possibleHint': 'precipitación posible — escenario de ensemble más húmedo',
     'accuracy.hint.avgBest': '📊 La media es la más precisa',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a la media',
     'accuracy.hint.avgUsuallyBetter': '📊 La media suele ser más precisa · recopilando datos para este modelo',
@@ -4138,6 +4156,8 @@ const I18N = {
     'metric.rain.peakSub': 'vârf {peak} mm/h · ({mm} mm în total) · {desc}',
     'precip.byEns': 'după {n} simulări',
     'precip.ensNote': 'Probabilitate = ponderea simulărilor cu precipitații ({n} în total)',
+    'precip.possible': 'posibil',
+    'precip.possibleHint': 'precipitații posibile — cel mai ploios scenariu de ansamblu',
     'accuracy.hint.avgBest': '📊 Media este cea mai precisă',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} depășește media',
     'accuracy.hint.avgUsuallyBetter': '📊 Media este de obicei mai precisă · colectăm date pentru acest model',
@@ -4591,6 +4611,8 @@ const I18N = {
     'metric.rain.peakSub': 'csúcs {peak} mm/h · (összesen {mm} mm) · {desc}',
     'precip.byEns': '{n} előrejelzési változat alapján',
     'precip.ensNote': 'Valószínűség = a csapadékot mutató előrejelzési változatok aránya (összesen {n})',
+    'precip.possible': 'lehetséges',
+    'precip.possibleHint': 'lehetséges csapadék — a legnedvesebb ensemble-forgatókönyv',
     'accuracy.hint.avgBest': '📊 Az átlag a legpontosabb',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} jobb az átlagnál',
     'accuracy.hint.avgUsuallyBetter': '📊 Az átlag általában pontosabb · adatokat gyűjtünk ehhez a modellhez',
@@ -5044,6 +5066,8 @@ const I18N = {
     'metric.rain.peakSub': 'špička {peak} mm/h · ({mm} mm spolu) · {desc}',
     'precip.byEns': 'podľa variantov predpovede (spolu {n})',
     'precip.ensNote': 'Pravdepodobnosť = podiel variantov predpovede so zrážkami (spolu {n})',
+    'precip.possible': 'možné',
+    'precip.possibleHint': 'možné zrážky — najvlhkejší scenár ansámblu',
     'accuracy.hint.avgBest': '📊 Priemer je najpresnejší',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} prekonáva priemer',
     'accuracy.hint.avgUsuallyBetter': '📊 Priemer býva presnejší · zbierame údaje pre tento model',
@@ -5497,6 +5521,8 @@ const I18N = {
     'metric.rain.peakSub': 'pico {peak} mm/h · ({mm} mm no total) · {desc}',
     'precip.byEns': 'com base em {n} simulações',
     'precip.ensNote': 'Probabilidade = fração de simulações com precipitação ({n} no total)',
+    'precip.possible': 'possível',
+    'precip.possibleHint': 'precipitação possível — cenário de ensemble mais húmido',
     'accuracy.hint.avgBest': '📊 A média é a mais precisa',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a média',
     'accuracy.hint.avgUsuallyBetter': '📊 A média costuma ser mais precisa · a recolher dados para este modelo',
@@ -5950,6 +5976,8 @@ const I18N = {
     'metric.rain.peakSub': 'piek {peak} mm/u · ({mm} mm totaal) · {desc}',
     'precip.byEns': 'op basis van {n} berekeningen',
     'precip.ensNote': 'Kans = aandeel berekeningen met neerslag (totaal {n})',
+    'precip.possible': 'mogelijk',
+    'precip.possibleHint': 'mogelijke neerslag — natste ensemblescenario',
     'accuracy.hint.avgBest': '📊 Gemiddelde is het nauwkeurigst',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} verslaat het gemiddelde',
     'accuracy.hint.avgUsuallyBetter': '📊 Gemiddelde meestal nauwkeuriger · gegevens verzamelen voor dit model',
@@ -6403,6 +6431,8 @@ const I18N = {
     'metric.rain.peakSub': 'tepe {peak} mm/sa · (toplam {mm} mm) · {desc}',
     'precip.byEns': '{n} tahmin senaryosuna göre',
     'precip.ensNote': 'Olasılık = yağış gösteren tahmin senaryolarının payı (toplam {n})',
+    'precip.possible': 'olası',
+    'precip.possibleHint': 'olası yağış — en yağışlı topluluk senaryosu',
     'accuracy.hint.avgBest': '📊 Ortalama en doğru',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} ortalamayı geçiyor',
     'accuracy.hint.avgUsuallyBetter': '📊 Ortalama genelde daha doğru · bu model için veri topluyoruz',
@@ -6856,6 +6886,8 @@ const I18N = {
     'metric.rain.peakSub': 'κορύφωση {peak} mm/h · ({mm} mm συνολικά) · {desc}',
     'precip.byEns': 'βάσει {n} σεναρίων πρόγνωσης',
     'precip.ensNote': 'Πιθανότητα = ποσοστό σεναρίων πρόγνωσης με υετό (σύνολο {n})',
+    'precip.possible': 'πιθανό',
+    'precip.possibleHint': 'πιθανός υετός — το πιο βροχερό σενάριο συστοιχίας',
     'accuracy.hint.avgBest': '📊 Ο μέσος όρος είναι ο πιο ακριβής',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} ξεπερνά τον μέσο όρο',
     'accuracy.hint.avgUsuallyBetter': '📊 Ο μέσος όρος είναι συνήθως πιο ακριβής · συλλέγουμε δεδομένα για αυτό το μοντέλο',
@@ -11964,6 +11996,23 @@ function renderPrecipChart(forecast) {
   const values = merged.map(h => (typeof h.pmm === 'number' ? h.pmm : 0));
   const kinds = merged.map(h => precipKind(h));
 
+  // v1.57.0: полоса «возможных осадков» — макс. член ENS-ансамбля по часам
+  // (h.pmmPoss, см. parseAllModels). Лечит рассинхрон «в посуточном списке стоит
+  // вероятность дождя, а график осадков пуст»: вероятность считается по доле
+  // сценариев ENS, а линия графика — медианное количество, которое = 0, когда
+  // дождь видит лишь меньшинство сценариев. Бледная полоса показывает верхнюю
+  // границу — «возможен дождь до X мм».
+  const possValues = merged.map(h => (typeof h.pmmPoss === 'number' ? h.pmmPoss : 0));
+  // Показываем полосу только когда «возможный» дождь заметно выше медианы хотя бы
+  // в одном часу (иначе она сливается с линией и ничего не добавляет).
+  const hasPoss = possValues.some((v, i) => v > 0.05 && v > values[i] + 0.05);
+
+  const possNoteEl = document.getElementById('precipPossNote');
+  if (possNoteEl) {
+    possNoteEl.style.display = hasPoss ? '' : 'none';
+    if (hasPoss) possNoteEl.textContent = `▒ ${t('precip.possibleHint')}`;
+  }
+
   // Ряд эмодзи под графиком: один блок на каждый час, эмодзи только там где есть осадки.
   typesBar.innerHTML = kinds.map((k) => {
     const emoji = k ? PRECIP_KIND_EMOJI[k] : '';
@@ -11982,7 +12031,19 @@ function renderPrecipChart(forecast) {
   const ctx = canvas.getContext('2d');
   if (precipChartInstance) precipChartInstance.destroy();
 
-  const maxVal = Math.max(...values, 1);
+  const maxMedian = Math.max(0, ...values);
+  const maxPoss = hasPoss ? Math.max(0, ...possValues) : 0;
+  // Когда медиана почти сухая, а дождь только «возможен» — масштабируем шкалу по
+  // полосе (мягкий пол 0.5 мм), чтобы бледная тень была видна, а не слилась с осью.
+  let maxVal;
+  if (maxMedian < 0.15 && maxPoss > 0.05) {
+    maxVal = Math.max(maxPoss, 0.5);
+  } else {
+    // Влияние полосы ограничиваем, чтобы один экстремальный член ансамбля не раздул
+    // ось и не «прижал» медианную линию на реально дождливых днях.
+    const possCap = Math.min(maxPoss, maxMedian * 2 + 1);
+    maxVal = Math.max(maxMedian, possCap, 1);
+  }
 
   // Градиент заливки под линией: насыщенный бирюзовый внизу → прозрачный наверху
   const fillGrad = ctx.createLinearGradient(0, 0, 0, 200);
@@ -12041,33 +12102,55 @@ function renderPrecipChart(forecast) {
     }
   };
 
+  // Медианная линия (основной ряд) — фактическое наиболее вероятное количество.
+  const medianDataset = {
+    label: t('precip.legend'),
+    data: values,
+    borderColor: '#00d4ff',
+    backgroundColor: fillGrad,
+    borderWidth: 2.5,
+    pointRadius: values.map((v, i) => (i === 0 || (kinds[i] && v > 0.05)) ? 4 : 0),
+    pointHoverRadius: 6,
+    pointBackgroundColor: kinds.map(k => k ? PRECIP_KIND_COLORS[k] : '#00d4ff'),
+    pointBorderColor: '#fff',
+    pointBorderWidth: 1.5,
+    fill: true,
+    tension: 0.4,
+    cubicInterpolationMode: 'monotone',
+    spanGaps: true,
+    segment: {
+      borderColor: (ctx) => {
+        const k = kinds[ctx.p1DataIndex] || kinds[ctx.p0DataIndex];
+        return k ? PRECIP_KIND_COLORS[k] : '#00d4ff';
+      }
+    }
+  };
+  // Полоса «возможных осадков» — рисуется ПЕРВОЙ (позади медианной линии),
+  // полупрозрачная пунктирная заливка до нуля. Видна только там, где медиана 0,
+  // а сценарии ансамбля допускают дождь.
+  const possDataset = hasPoss ? {
+    label: t('precip.possible'),
+    data: possValues,
+    _isPossible: true,
+    borderColor: 'rgba(0,212,255,0.40)',
+    backgroundColor: 'rgba(0,212,255,0.12)',
+    borderWidth: 1,
+    borderDash: [4, 3],
+    pointRadius: 0,
+    pointHoverRadius: 0,
+    fill: true,
+    tension: 0.4,
+    cubicInterpolationMode: 'monotone',
+    spanGaps: true
+  } : null;
+  const chartDatasets = possDataset ? [possDataset, medianDataset] : [medianDataset];
+
   precipChartInstance = new Chart(ctx, {
     type: 'line',
     plugins: [dayBackgroundPlugin, dayDividersPlugin],
     data: {
       labels,
-      datasets: [{
-        label: t('precip.legend'),
-        data: values,
-        borderColor: '#00d4ff',
-        backgroundColor: fillGrad,
-        borderWidth: 2.5,
-        pointRadius: values.map((v, i) => (i === 0 || (kinds[i] && v > 0.05)) ? 4 : 0),
-        pointHoverRadius: 6,
-        pointBackgroundColor: kinds.map(k => k ? PRECIP_KIND_COLORS[k] : '#00d4ff'),
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1.5,
-        fill: true,
-        tension: 0.4,
-        cubicInterpolationMode: 'monotone',
-        spanGaps: true,
-        segment: {
-          borderColor: (ctx) => {
-            const k = kinds[ctx.p1DataIndex] || kinds[ctx.p0DataIndex];
-            return k ? PRECIP_KIND_COLORS[k] : '#00d4ff';
-          }
-        }
-      }]
+      datasets: chartDatasets
     },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -12079,6 +12162,15 @@ function renderPrecipChart(forecast) {
           borderColor: 'rgba(0,212,255,0.3)', borderWidth: 1, padding: 12, cornerRadius: 12,
           titleFont: { family: 'Onest', size: 13, weight: '600' },
           bodyFont: { family: 'Onest', size: 12 },
+          // Медиану показываем первой, «возможно» — следом.
+          itemSort: (a, b) => (a.dataset._isPossible ? 1 : 0) - (b.dataset._isPossible ? 1 : 0),
+          // «Возможно» в тултипе — только когда оно заметно выше медианы в этот час.
+          filter: (item) => {
+            if (!item.dataset._isPossible) return true;
+            const med = item.chart.data.datasets.find(d => !d._isPossible);
+            const medV = med ? (med.data[item.dataIndex] || 0) : 0;
+            return item.parsed.y > 0.05 && item.parsed.y > medV + 0.05;
+          },
           callbacks: {
             title: (items) => {
               const i = items[0].dataIndex;
@@ -12096,7 +12188,9 @@ function renderPrecipChart(forecast) {
                 : (localizeDayFull(day.dayName) || localizeDayShort(day.name));
               return `${String(h.h).padStart(2,'0')}:00 · ${dayLabel} · ${dateShort}`;
             },
-            label: (c) => ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
+            label: (c) => c.dataset._isPossible
+              ? ` ${t('precip.possible')}: ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
+              : ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
           }
         }
       },
@@ -16028,13 +16122,24 @@ function parseEnsembleHourly(data) {
   const hours = [];
   for (let i = 0; i < times.length; i++) {
     let wet = 0, valid = 0;
+    const vals = [];
     for (const k of memberKeys) {
       const v = h[k][i];
       if (typeof v !== 'number' || Number.isNaN(v)) continue;
       valid++;
+      vals.push(v);
       if (v >= ENSEMBLE_WET_HOUR_MM) wet++;
     }
-    hours.push({ pWet: valid > 0 ? Math.round((wet / valid) * 100) : null });
+    // pmmMax — самый «мокрый» член ансамбля в этот час. Нужен для полосы
+    // «возможных осадков» на графике: когда медиана сухая (0 мм), но часть
+    // сценариев видит дождь, полоса показывает верхнюю границу — иначе график
+    // пуст, хотя в посуточном списке стоит вероятность (см. renderPrecipChart).
+    let pmmMax = 0;
+    if (vals.length) { vals.sort((a, b) => a - b); pmmMax = vals[vals.length - 1]; }
+    hours.push({
+      pWet: valid > 0 ? Math.round((wet / valid) * 100) : null,
+      pmmMax: Math.round(pmmMax * 10) / 10
+    });
   }
 
   const numDays = Math.floor(times.length / 24);
@@ -16435,6 +16540,31 @@ async function parseAllModels(data, sources, ensemble = null) {
       result.smart = computeSmartForecast(validForecasts, validIds, ensAligned);
     } catch (e) {
       console.warn('Smart-комбинация не собралась, fallback на avg:', e);
+    }
+
+    // v1.57.0: полоса «возможных осадков». Вероятность дождя в посуточном списке
+    // (d.precip) приходит из доли членов ENS-ансамбля, а график осадков рисует
+    // медианное количество (h.pmm) — которое часто = 0, когда дождь видит лишь
+    // меньшинство сценариев. Из-за этого «дождь в списке / пусто в графике».
+    // Кладём в каждый час pmmPoss = макс. член ансамбля за этот час (поверх любой
+    // модели), и график рисует им бледную полосу. Час ENS индексируется позиционно
+    // от полуночи today; forecast[di].hourly[k] выровнен на тот же индекс di*24+k.
+    if (ensAligned && Array.isArray(ensAligned.hours)) {
+      const eHours = ensAligned.hours;
+      const applyPoss = (fc) => {
+        if (!Array.isArray(fc)) return;
+        fc.forEach((day, di) => {
+          if (!day || !Array.isArray(day.hourly)) return;
+          day.hourly.forEach((hr, k) => {
+            const eh = eHours[di * 24 + k];
+            if (eh && typeof eh.pmmMax === 'number') hr.pmmPoss = eh.pmmMax;
+          });
+        });
+      };
+      Object.keys(result).forEach(key => {
+        if (key === '__minutely15__') return;
+        applyPoss(result[key]);
+      });
     }
   }
   // v1.39.0: 15-минутный nowcast осадков. Не привязан к моделям — у Open-Meteo
