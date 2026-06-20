@@ -598,6 +598,13 @@ body.dock-modal-pinned .pdm-scroll{padding-bottom:calc(84px + env(safe-area-inse
 }
 :root[data-theme="light"] .precip-ens-note{color:#15803d}
 
+/* v1.57.0: легенда бледной полосы «возможных осадков» (макс. член ENS) */
+.precip-poss-note{
+  margin-top:5px;font-size:10.5px;font-family:'JetBrains Mono',monospace;
+  color:rgba(0,212,255,0.78);line-height:1.4;
+}
+:root[data-theme="light"] .precip-poss-note{color:#0e7490}
+
 /* v1.53.0: строка ансамблевой полосы осадков (P10–P90) в модалке дня */
 .modal-ens-band{
   margin:10px 0 2px;padding:8px 12px;border-radius:10px;
