@@ -9639,7 +9639,10 @@ function buildTodayOutlook(fc) {
     if (possPeak >= 0.3) {
       const range = remainingPrecipRange();
       const upTo = (range && range.hi >= possPeak) ? range.hi : possPeak;
-      segs.push(possFrom >= 0
+      // Время начала называем только если оно В БУДУЩЕМ. «с 17:00» в 17:59
+      // читается как прогноз в прошлое (окно текущего часа почти закрыто) —
+      // тогда просто «возможен дождь · до X мм», без привязки к часу.
+      segs.push((possFrom > NOW_HOUR)
         ? t('outlook.maybeFrom', { time: String(possFrom).padStart(2, '0') + ':00', mm: outlookMm(upTo) })
         : t('outlook.maybeAmount', { mm: outlookMm(upTo) }));
     } else {
@@ -17716,6 +17719,24 @@ function setupScrollAnimationPause() {
   window.addEventListener('scroll', onScroll, { passive: true });
 }
 setupScrollAnimationPause();
+
+/* ============================================
+   v1.62.1: тик смены календарного часа. Всё «Сегодня = остаток суток»
+   (плитка дня, сводка, полоса ансамбля, окна активности) зависит от NOW_HOUR,
+   а он обновлялся только при refreshForecast. На странице, открытой дольше
+   часа, «остаток» протухал: в 17:59 сводка писала «возможен дождь с 17:00».
+   Раз в минуту сверяем час; сменился — мягкий re-render из кэша (без сети,
+   если кэш свеж; NOW_HOUR обновляется внутри refreshForecast).
+   ============================================ */
+setInterval(() => {
+  try {
+    if (typeof NOW_HOUR === 'number' && new Date().getHours() !== NOW_HOUR
+        && !(typeof API_STATE === 'object' && API_STATE.loading)
+        && document.visibilityState === 'visible') {
+      refreshForecast(false);
+    }
+  } catch (e) { /* не роняем тик */ }
+}, 60 * 1000);
 
 /* ============================================
    PULL-TO-REFRESH — свайп вниз с верха для принудительного обновления PWA
