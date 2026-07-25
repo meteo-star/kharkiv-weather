@@ -178,6 +178,7 @@ const I18N = {
     'sources.smartTitle': 'Smart-комбинация',
     'sources.smartSub': 'Лучшее по каждому параметру · веса из реальной точности',
     'modal.precipBand': 'Осадки в {p}% вариантов прогноза (всего {n}) · скорее всего {lo}–{hi} мм за день',
+    'modal.precipBandRest': 'Осадки в {p}% вариантов прогноза (всего {n}) · за остаток дня до {mm} мм',
     'sources.avgShort': 'Среднее по 8 моделям',
     'sources.dividerOr': 'или конкретный источник',
     'sources.confHint': 'Цветная полоска под карточкой дня — согласие 8 моделей:',
@@ -653,6 +654,7 @@ const I18N = {
     'sources.smartTitle': 'Smart-комбінація',
     'sources.smartSub': 'Найкраще за кожним параметром · ваги з реальної точності',
     'modal.precipBand': 'Опади у {p}% варіантів прогнозу (усього {n}) · найімовірніше {lo}–{hi} мм за день',
+    'modal.precipBandRest': 'Опади у {p}% варіантів прогнозу (усього {n}) · за решту дня до {mm} мм',
     'sources.confHint': 'Кольорова смужка під карткою дня — згода 8 моделей:',
     'sources.confLegend.high': 'надійний',
     'sources.confLegend.mid': 'середній',
@@ -1115,6 +1117,7 @@ const I18N = {
     'sources.smartTitle': 'Smart blend',
     'sources.smartSub': 'Best per parameter · weights from real accuracy',
     'modal.precipBand': 'Precipitation in {p}% of {n} forecast runs · most likely {lo}–{hi} mm for the day',
+    'modal.precipBandRest': 'Precipitation in {p}% of {n} forecast runs · up to {mm} mm for the rest of the day',
     'sources.confHint': 'Coloured bar under the day card — agreement of 8 models:',
     'sources.confLegend.high': 'reliable',
     'sources.confLegend.mid': 'medium',
@@ -1576,6 +1579,7 @@ const I18N = {
     'sources.smartTitle': 'Smart-Kombination',
     'sources.smartSub': 'Bestes je Parameter · Gewichte aus echter Genauigkeit',
     'modal.precipBand': 'Niederschlag in {p}% von {n} Prognoseläufen · wahrscheinlich {lo}–{hi} mm am Tag',
+    'modal.precipBandRest': 'Niederschlag in {p}% von {n} Prognoseläufen · bis {mm} mm für den Rest des Tages',
     'sources.confHint': 'Farbiger Balken unter der Tageskarte — Übereinstimmung der 8 Modelle:',
     'sources.confLegend.high': 'zuverlässig',
     'sources.confLegend.mid': 'mittel',
@@ -2037,6 +2041,7 @@ const I18N = {
     'sources.smartTitle': 'Kombinacja Smart',
     'sources.smartSub': 'Najlepsze dla każdego parametru · wagi z rzeczywistej dokładności',
     'modal.precipBand': 'Opady w {p}% ze {n} wariantów prognozy · najpewniej {lo}–{hi} mm na dobę',
+    'modal.precipBandRest': 'Opady w {p}% z {n} wariantów prognozy · do {mm} mm do końca dnia',
     'sources.confHint': 'Kolorowy pasek pod kartą dnia — zgodność 8 modeli:',
     'sources.confLegend.high': 'wiarygodne',
     'sources.confLegend.mid': 'średnie',
@@ -2499,6 +2504,7 @@ const I18N = {
     'sources.smartTitle': 'Kombinace Smart',
     'sources.smartSub': 'Nejlepší pro každý parametr · váhy ze skutečné přesnosti',
     'modal.precipBand': 'Srážky v {p} % z {n} variant předpovědi · nejspíš {lo}–{hi} mm za den',
+    'modal.precipBandRest': 'Srážky v {p} % z {n} variant předpovědi · až {mm} mm do konce dne',
     'sources.confHint': 'Barevný pruh pod kartou dne — shoda 8 modelů:',
     'sources.confLegend.high': 'spolehlivé',
     'sources.confLegend.mid': 'střední',
@@ -2961,6 +2967,7 @@ const I18N = {
     'sources.smartTitle': 'Combinaison Smart',
     'sources.smartSub': 'Le meilleur par paramètre · poids selon la précision réelle',
     'modal.precipBand': 'Précipitations dans {p}% des {n} simulations · le plus probable : {lo}–{hi} mm sur la journée',
+    'modal.precipBandRest': 'Précipitations dans {p}% des {n} simulations · jusqu’à {mm} mm pour le reste de la journée',
     'sources.confHint': 'Barre colorée sous la carte du jour — accord des 8 modèles :',
     'sources.confLegend.high': 'fiable',
     'sources.confLegend.mid': 'moyen',
@@ -3422,6 +3429,7 @@ const I18N = {
     'sources.smartTitle': 'Combinazione Smart',
     'sources.smartSub': 'Il meglio per ogni parametro · pesi dalla precisione reale',
     'modal.precipBand': 'Precipitazioni nel {p}% di {n} simulazioni · probabilmente {lo}–{hi} mm nella giornata',
+    'modal.precipBandRest': 'Precipitazioni nel {p}% di {n} simulazioni · fino a {mm} mm per il resto della giornata',
     'sources.confHint': 'Barra colorata sotto la carta del giorno — accordo degli 8 modelli:',
     'sources.confLegend.high': 'affidabile',
     'sources.confLegend.mid': 'medio',
@@ -3883,6 +3891,7 @@ const I18N = {
     'sources.smartTitle': 'Combinación Smart',
     'sources.smartSub': 'Lo mejor por parámetro · pesos según la precisión real',
     'modal.precipBand': 'Precipitación en el {p}% de {n} simulaciones · lo más probable {lo}–{hi} mm en el día',
+    'modal.precipBandRest': 'Precipitación en el {p}% de {n} simulaciones · hasta {mm} mm en lo que queda del día',
     'sources.confHint': 'Barra de color bajo la tarjeta del día — acuerdo de los 8 modelos:',
     'sources.confLegend.high': 'fiable',
     'sources.confLegend.mid': 'medio',
@@ -4344,6 +4353,7 @@ const I18N = {
     'sources.smartTitle': 'Combinație Smart',
     'sources.smartSub': 'Cel mai bun pe fiecare parametru · ponderi din precizia reală',
     'modal.precipBand': 'Precipitații în {p}% din {n} simulări · cel mai probabil {lo}–{hi} mm pe zi',
+    'modal.precipBandRest': 'Precipitații în {p}% din {n} simulări · până la {mm} mm pentru restul zilei',
     'sources.confHint': 'Bara colorată sub cardul zilei — acordul celor 8 modele:',
     'sources.confLegend.high': 'fiabil',
     'sources.confLegend.mid': 'mediu',
@@ -4805,6 +4815,7 @@ const I18N = {
     'sources.smartTitle': 'Smart kombináció',
     'sources.smartSub': 'Paraméterenként a legjobb · súlyok a valós pontosságból',
     'modal.precipBand': 'Csapadék a(z) {n} előrejelzési változat {p}%-ában · valószínűleg {lo}–{hi} mm a napra',
+    'modal.precipBandRest': 'Csapadék az előrejelzési változatok {p}%-ában (összesen {n}) · a nap hátralévő részében akár {mm} mm',
     'sources.confHint': 'Színes sáv a napi kártya alatt — a 8 modell egyetértése:',
     'sources.confLegend.high': 'megbízható',
     'sources.confLegend.mid': 'közepes',
@@ -5266,6 +5277,7 @@ const I18N = {
     'sources.smartTitle': 'Kombinácia Smart',
     'sources.smartSub': 'Najlepšie pre každý parameter · váhy zo skutočnej presnosti',
     'modal.precipBand': 'Zrážky v {p} % zo {n} variantov predpovede · najskôr {lo}–{hi} mm za deň',
+    'modal.precipBandRest': 'Zrážky v {p} % z {n} variantov predpovede · až {mm} mm do konca dňa',
     'sources.confHint': 'Farebný pruh pod kartou dňa — zhoda 8 modelov:',
     'sources.confLegend.high': 'spoľahlivé',
     'sources.confLegend.mid': 'stredné',
@@ -5727,6 +5739,7 @@ const I18N = {
     'sources.smartTitle': 'Combinação Smart',
     'sources.smartSub': 'O melhor por parâmetro · pesos da precisão real',
     'modal.precipBand': 'Precipitação em {p}% de {n} simulações · provavelmente {lo}–{hi} mm no dia',
+    'modal.precipBandRest': 'Precipitação em {p}% de {n} simulações · até {mm} mm no resto do dia',
     'sources.confHint': 'Barra colorida sob o cartão do dia — concordância dos 8 modelos:',
     'sources.confLegend.high': 'fiável',
     'sources.confLegend.mid': 'médio',
@@ -6188,6 +6201,7 @@ const I18N = {
     'sources.smartTitle': 'Smart-combinatie',
     'sources.smartSub': 'Beste per parameter · gewichten uit echte nauwkeurigheid',
     'modal.precipBand': 'Neerslag in {p}% van {n} berekeningen · waarschijnlijk {lo}–{hi} mm per dag',
+    'modal.precipBandRest': 'Neerslag in {p}% van {n} berekeningen · tot {mm} mm voor de rest van de dag',
     'sources.confHint': 'Gekleurde balk onder de dagkaart — overeenstemming van 8 modellen:',
     'sources.confLegend.high': 'betrouwbaar',
     'sources.confLegend.mid': 'gemiddeld',
@@ -6649,6 +6663,7 @@ const I18N = {
     'sources.smartTitle': 'Smart kombinasyon',
     'sources.smartSub': 'Her parametrede en iyisi · gerçek doğruluktan ağırlıklar',
     'modal.precipBand': 'Yağış: {n} senaryodan %{p} · büyük olasılıkla günde {lo}–{hi} mm',
+    'modal.precipBandRest': 'Tahmin senaryolarının {p}%’inde yağış (toplam {n}) · günün kalanında {mm} mm’ye kadar',
     'sources.confHint': 'Gün kartının altındaki renkli çubuk — 8 modelin uyumu:',
     'sources.confLegend.high': 'güvenilir',
     'sources.confLegend.mid': 'orta',
@@ -7110,6 +7125,7 @@ const I18N = {
     'sources.smartTitle': 'Συνδυασμός Smart',
     'sources.smartSub': 'Το καλύτερο ανά παράμετρο · βάρη από πραγματική ακρίβεια',
     'modal.precipBand': 'Βροχόπτωση στο {p}% από {n} σενάρια πρόγνωσης · πιθανότερα {lo}–{hi} mm την ημέρα',
+    'modal.precipBandRest': 'Υετός στο {p}% των {n} σεναρίων πρόγνωσης · έως {mm} mm για το υπόλοιπο της ημέρας',
     'sources.confHint': 'Χρωματιστή μπάρα κάτω από την κάρτα ημέρας — συμφωνία 8 μοντέλων:',
     'sources.confLegend.high': 'αξιόπιστα',
     'sources.confLegend.mid': 'μέτρια',
@@ -12777,14 +12793,26 @@ function openModal(dayId) {
       <div class="mini-m"><div class="l">${t('metric.humidity')}</div><div class="v">${d.humidity}<span> %</span></div></div>
     </div>
 
-    ${(d.precipBand && (d.precipBand.pDay >= 5 || (typeof d.precipBand.p90 === 'number' && d.precipBand.p90 >= 0.1)))
-      ? `<div class="modal-ens-band">🎲 ${t('modal.precipBand', {
-            n: d.precipBand.members,
-            p: d.precipBand.pDay,
-            lo: String(d.precipBand.p10 ?? 0),
-            hi: String(d.precipBand.p90 ?? 0)
-          })}</div>`
-      : ''}
+    ${(() => {
+      // v1.62.0: для «Сегодня» днём полоса ансамбля пересчитывается на ОСТАТОК
+      // суток. precipBand.pDay/p10/p90 считаются за полные 00:00–23:59 — днём это
+      // включает уже прошедший дождь и противоречит мини-метрике «осталось N%»
+      // прямо над полосой (Стас ловил тот же класс бага на плитке дня).
+      if (!d.precipBand) return '';
+      const b = d.precipBand;
+      if (d.id === 0 && mPv.partial) {
+        if (mPv.pct < 5 && mPv.possMm < 0.1) return '';
+        return `<div class="modal-ens-band">🎲 ${t('modal.precipBandRest', {
+          n: b.members, p: mPv.pct, mm: String(mPv.possMm)
+        })}</div>`;
+      }
+      if (b.pDay >= 5 || (typeof b.p90 === 'number' && b.p90 >= 0.1)) {
+        return `<div class="modal-ens-band">🎲 ${t('modal.precipBand', {
+          n: b.members, p: b.pDay, lo: String(b.p10 ?? 0), hi: String(b.p90 ?? 0)
+        })}</div>`;
+      }
+      return '';
+    })()}
 
     <div class="modal-astro">
       <div class="modal-astro-cell sun">
@@ -17667,6 +17695,27 @@ function setupHeroSticky() {
   });
   check(); // initial
 }
+
+/* ============================================
+   v1.62.0 PERF: пауза декоративных анимаций во время прокрутки.
+   Анимированный фон (body::before), частицы и погодная сцена под ~20
+   backdrop-filter карточками заставляли GPU пере-размывать каждую на каждом
+   кадре скролла. Класс на <html> (НЕ на body — MutationObserver наблюдает
+   класс body для модалок, не дёргаем его на каждый скролл); CSS ставит
+   animation-play-state:paused, прогресс анимаций сохраняется.
+   ============================================ */
+function setupScrollAnimationPause() {
+  const root = document.documentElement;
+  let timer = null;
+  let marked = false;
+  const onScroll = () => {
+    if (!marked) { root.classList.add('is-scrolling'); marked = true; }
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => { root.classList.remove('is-scrolling'); marked = false; }, 160);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+}
+setupScrollAnimationPause();
 
 /* ============================================
    PULL-TO-REFRESH — свайп вниз с верха для принудительного обновления PWA
