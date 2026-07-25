@@ -45,6 +45,9 @@ const I18N = {
     'precip.byEns': 'по вариантам прогноза (всего {n})',
     'precip.ensNote': 'Вероятность = доля вариантов прогноза с осадками (всего {n})',
     'precip.possible': 'возможно',
+    'precip.upTo': 'до {mm} мм',
+    'precip.restOfDay': 'осадки за остаток дня (прошедшие часы не учитываются)',
+    'precip.restOfDayShort': 'осталось',
     'precip.possibleHint': 'возможные осадки — самый мокрый сценарий ансамбля',
     'accuracy.hint.avgBest': '📊 Среднее — самый точный',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} обходит среднее',
@@ -514,6 +517,9 @@ const I18N = {
     'precip.byEns': 'за варіантами прогнозу (усього {n})',
     'precip.ensNote': 'Імовірність = частка варіантів прогнозу з опадами (усього {n})',
     'precip.possible': 'можливо',
+    'precip.upTo': 'до {mm} мм',
+    'precip.restOfDay': 'опади за решту дня (минулі години не враховуються)',
+    'precip.restOfDayShort': 'залишилось',
     'precip.possibleHint': 'можливі опади — найвологіший сценарій ансамблю',
     'accuracy.hint.avgBest': '📊 Середнє — найточніше',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} точніше за середнє',
@@ -970,6 +976,9 @@ const I18N = {
     'precip.byEns': 'based on {n} forecast runs',
     'precip.ensNote': 'Probability = share of forecast runs with precipitation ({n} total)',
     'precip.possible': 'possible',
+    'precip.upTo': 'up to {mm} mm',
+    'precip.restOfDay': 'precipitation for the rest of the day (past hours excluded)',
+    'precip.restOfDayShort': 'left today',
     'precip.possibleHint': 'possible precipitation — wettest ensemble scenario',
     'accuracy.hint.avgBest': '📊 Average is the most accurate',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} beats the average',
@@ -1425,6 +1434,9 @@ const I18N = {
     'precip.byEns': 'aus {n} Prognoseläufen',
     'precip.ensNote': 'Wahrscheinlichkeit = Anteil der Prognoseläufe mit Niederschlag (insgesamt {n})',
     'precip.possible': 'möglich',
+    'precip.upTo': 'bis {mm} mm',
+    'precip.restOfDay': 'Niederschlag für den Rest des Tages (vergangene Stunden ausgenommen)',
+    'precip.restOfDayShort': 'Rest',
     'precip.possibleHint': 'möglicher Niederschlag — nassestes Ensemble-Szenario',
     'accuracy.hint.avgBest': '📊 Durchschnitt am genauesten',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} schlägt den Durchschnitt',
@@ -1880,6 +1892,9 @@ const I18N = {
     'precip.byEns': 'wg wariantów prognozy (łącznie {n})',
     'precip.ensNote': 'Prawdopodobieństwo = udział wariantów prognozy z opadami (łącznie {n})',
     'precip.possible': 'możliwe',
+    'precip.upTo': 'do {mm} mm',
+    'precip.restOfDay': 'opady na pozostałą część dnia (minione godziny pominięte)',
+    'precip.restOfDayShort': 'pozostało',
     'precip.possibleHint': 'możliwe opady — najwilgotniejszy scenariusz zespołu',
     'accuracy.hint.avgBest': '📊 Średnia najdokładniejsza',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} lepszy od średniej',
@@ -2336,6 +2351,9 @@ const I18N = {
     'precip.byEns': 'podle variant předpovědi (celkem {n})',
     'precip.ensNote': 'Pravděpodobnost = podíl variant předpovědi se srážkami (celkem {n})',
     'precip.possible': 'možné',
+    'precip.upTo': 'až {mm} mm',
+    'precip.restOfDay': 'srážky na zbytek dne (uplynulé hodiny se nezapočítávají)',
+    'precip.restOfDayShort': 'zbývá',
     'precip.possibleHint': 'možné srážky — nejvlhčí scénář ansámblu',
     'accuracy.hint.avgBest': '📊 Průměr je nejpřesnější',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} překonává průměr',
@@ -2792,6 +2810,9 @@ const I18N = {
     'precip.byEns': 'selon {n} simulations',
     'precip.ensNote': 'Probabilité = part des simulations avec précipitations ({n} au total)',
     'precip.possible': 'possible',
+    'precip.upTo': 'jusqu\'à {mm} mm',
+    'precip.restOfDay': 'précipitations pour le reste de la journée (heures passées exclues)',
+    'precip.restOfDayShort': 'restant',
     'precip.possibleHint': 'précipitations possibles — scénario d\'ensemble le plus humide',
     'accuracy.hint.avgBest': '📊 Moyenne la plus précise',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} bat la moyenne',
@@ -3247,6 +3268,9 @@ const I18N = {
     'precip.byEns': 'su {n} simulazioni',
     'precip.ensNote': 'Probabilità = quota di simulazioni con precipitazioni ({n} in totale)',
     'precip.possible': 'possibile',
+    'precip.upTo': 'fino a {mm} mm',
+    'precip.restOfDay': 'precipitazioni per il resto della giornata (ore passate escluse)',
+    'precip.restOfDayShort': 'resto',
     'precip.possibleHint': 'precipitazioni possibili — scenario d\'insieme più piovoso',
     'accuracy.hint.avgBest': '📊 Media la più accurata',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} batte la media',
@@ -3702,6 +3726,9 @@ const I18N = {
     'precip.byEns': 'según {n} simulaciones',
     'precip.ensNote': 'Probabilidad = proporción de simulaciones con precipitación ({n} en total)',
     'precip.possible': 'posible',
+    'precip.upTo': 'hasta {mm} mm',
+    'precip.restOfDay': 'precipitación para el resto del día (horas pasadas excluidas)',
+    'precip.restOfDayShort': 'resta',
     'precip.possibleHint': 'precipitación posible — escenario de ensemble más húmedo',
     'accuracy.hint.avgBest': '📊 La media es la más precisa',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a la media',
@@ -4157,6 +4184,9 @@ const I18N = {
     'precip.byEns': 'după {n} simulări',
     'precip.ensNote': 'Probabilitate = ponderea simulărilor cu precipitații ({n} în total)',
     'precip.possible': 'posibil',
+    'precip.upTo': 'până la {mm} mm',
+    'precip.restOfDay': 'precipitații pentru restul zilei (orele trecute sunt excluse)',
+    'precip.restOfDayShort': 'rămas',
     'precip.possibleHint': 'precipitații posibile — cel mai ploios scenariu de ansamblu',
     'accuracy.hint.avgBest': '📊 Media este cea mai precisă',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} depășește media',
@@ -4612,6 +4642,9 @@ const I18N = {
     'precip.byEns': '{n} előrejelzési változat alapján',
     'precip.ensNote': 'Valószínűség = a csapadékot mutató előrejelzési változatok aránya (összesen {n})',
     'precip.possible': 'lehetséges',
+    'precip.upTo': 'akár {mm} mm',
+    'precip.restOfDay': 'csapadék a nap hátralévő részére (az eltelt órák nélkül)',
+    'precip.restOfDayShort': 'hátra',
     'precip.possibleHint': 'lehetséges csapadék — a legnedvesebb ensemble-forgatókönyv',
     'accuracy.hint.avgBest': '📊 Az átlag a legpontosabb',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} jobb az átlagnál',
@@ -5067,6 +5100,9 @@ const I18N = {
     'precip.byEns': 'podľa variantov predpovede (spolu {n})',
     'precip.ensNote': 'Pravdepodobnosť = podiel variantov predpovede so zrážkami (spolu {n})',
     'precip.possible': 'možné',
+    'precip.upTo': 'až {mm} mm',
+    'precip.restOfDay': 'zrážky na zvyšok dňa (uplynulé hodiny sa nepočítajú)',
+    'precip.restOfDayShort': 'zostáva',
     'precip.possibleHint': 'možné zrážky — najvlhkejší scenár ansámblu',
     'accuracy.hint.avgBest': '📊 Priemer je najpresnejší',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} prekonáva priemer',
@@ -5522,6 +5558,9 @@ const I18N = {
     'precip.byEns': 'com base em {n} simulações',
     'precip.ensNote': 'Probabilidade = fração de simulações com precipitação ({n} no total)',
     'precip.possible': 'possível',
+    'precip.upTo': 'até {mm} mm',
+    'precip.restOfDay': 'precipitação para o resto do dia (horas passadas excluídas)',
+    'precip.restOfDayShort': 'resta',
     'precip.possibleHint': 'precipitação possível — cenário de ensemble mais húmido',
     'accuracy.hint.avgBest': '📊 A média é a mais precisa',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a média',
@@ -5977,6 +6016,9 @@ const I18N = {
     'precip.byEns': 'op basis van {n} berekeningen',
     'precip.ensNote': 'Kans = aandeel berekeningen met neerslag (totaal {n})',
     'precip.possible': 'mogelijk',
+    'precip.upTo': 'tot {mm} mm',
+    'precip.restOfDay': 'neerslag voor de rest van de dag (voorbije uren niet meegeteld)',
+    'precip.restOfDayShort': 'resterend',
     'precip.possibleHint': 'mogelijke neerslag — natste ensemblescenario',
     'accuracy.hint.avgBest': '📊 Gemiddelde is het nauwkeurigst',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} verslaat het gemiddelde',
@@ -6432,6 +6474,9 @@ const I18N = {
     'precip.byEns': '{n} tahmin senaryosuna göre',
     'precip.ensNote': 'Olasılık = yağış gösteren tahmin senaryolarının payı (toplam {n})',
     'precip.possible': 'olası',
+    'precip.upTo': '{mm} mm’ye kadar',
+    'precip.restOfDay': 'günün kalanı için yağış (geçen saatler hariç)',
+    'precip.restOfDayShort': 'kalan',
     'precip.possibleHint': 'olası yağış — en yağışlı topluluk senaryosu',
     'accuracy.hint.avgBest': '📊 Ortalama en doğru',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} ortalamayı geçiyor',
@@ -6887,6 +6932,9 @@ const I18N = {
     'precip.byEns': 'βάσει {n} σεναρίων πρόγνωσης',
     'precip.ensNote': 'Πιθανότητα = ποσοστό σεναρίων πρόγνωσης με υετό (σύνολο {n})',
     'precip.possible': 'πιθανό',
+    'precip.upTo': 'έως {mm} mm',
+    'precip.restOfDay': 'υετός για το υπόλοιπο της ημέρας (οι ώρες που πέρασαν δεν μετρούν)',
+    'precip.restOfDayShort': 'υπόλοιπο',
     'precip.possibleHint': 'πιθανός υετός — το πιο βροχερό σενάριο συστοιχίας',
     'accuracy.hint.avgBest': '📊 Ο μέσος όρος είναι ο πιο ακριβής',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} ξεπερνά τον μέσο όρο',
@@ -9415,7 +9463,7 @@ const OUTLOOK_WET_MM = 0.1; // мм/ч — порог «мокрого часа�
 // читается сухим. Реальное ожидаемое количество (precipSum≥0.3 / pmm>0) показывается
 // всегда, независимо от этого порога. Был де-факто 5% — он метил «дождём» фактически
 // сухие дни (6% / 0 мм) и рассогласовывал список с графиком и плиткой.
-const PRECIP_POP_SHOW = 30; // % — порог «есть шанс осадков» для сводок и полосы графика
+const PRECIP_POP_SHOW = 20; // % — порог «есть шанс осадков» для сводок и полосы графика
 
 function outlookHH(hour) { return String(hour).padStart(2, '0') + ':00'; }
 function outlookMm(v) { return String(Math.round(v * 10) / 10); }
@@ -10150,6 +10198,56 @@ function dayTempColor(tc) {
   return `rgb(${s[s.length - 1][1].join(',')})`;
 }
 
+// v1.59.0 (КЛЮЧЕВОЕ ДЛЯ ТОЧНОСТИ): осадки дня ДЛЯ ОТОБРАЖЕНИЯ. Решает две болезни:
+//
+//  1) «Сегодня» = ОСТАТОК суток, а не полные сутки. Дневные поля Open-Meteo
+//     (precipitation_probability_max / precipitation_sum) покрывают 00:00–23:59,
+//     поэтому днём плитка показывала «84%» из-за дождя, который ПРОШЁЛ ночью, —
+//     при полностью сухом остатке дня. Прогноз на прошедшее время бессмыслен.
+//
+//  2) Согласование дня с почасовкой. Дневная вероятность в AVG — это среднее
+//     ПО-МОДЕЛЬНЫХ максимумов (mean-of-max). Когда модели расходятся во времени
+//     дождя, mean-of-max сильно выше любого часа (день 66%, а max час 46%) —
+//     отсюда «на плитке дождь, в часах пусто». Берём max почасовой вероятности,
+//     то есть ровно ту величину, которую пользователь видит в списке часов.
+//
+// Сырые d.precip / d.precipSum НЕ трогаем — они уходят в accuracy-замеры (KV).
+function dayPrecipView(d, isToday) {
+  const fallback = {
+    pct: (typeof d.precip === 'number' ? d.precip : 0),
+    mm:  (typeof d.precipSum === 'number' ? d.precipSum : 0),
+    partial: false
+  };
+  const hrs = Array.isArray(d.hourly) ? d.hourly : null;
+  if (!hrs || hrs.length === 0) return fallback;
+  const from = isToday ? Math.max(0, Math.min(NOW_HOUR, hrs.length - 1)) : 0;
+
+  let pct = 0, mm = 0, possMm = 0;
+  for (let i = from; i < hrs.length; i++) {
+    const h = hrs[i];
+    if (!h) continue;
+    if (typeof h.p === 'number' && h.p > pct) pct = h.p;
+    if (typeof h.pmm === 'number') mm += h.pmm;
+    // «Возможное» количество — самая мокрая модель / член ансамбля в этот час.
+    // Нужно, чтобы ливень, который видит меньшинство моделей, не исчезал совсем:
+    // медиана Smart обнуляет такие часы (см. renderModalHourlyRow).
+    const p1 = typeof h.pmmMax === 'number' ? h.pmmMax : 0;
+    const p2 = typeof h.pmmPoss === 'number' ? h.pmmPoss : 0;
+    const pm = Math.max(p1, p2);
+    if (pm > possMm) possMm = pm;
+  }
+  // Для будущих дней сумму берём из daily (precipitation_sum точнее суммы
+  // округлённых почасовых). Для «сегодня» — только фактический остаток.
+  if (!isToday && typeof d.precipSum === 'number') mm = d.precipSum;
+
+  return {
+    pct: Math.round(pct),
+    mm: Math.round(mm * 10) / 10,
+    possMm: Math.round(possMm * 10) / 10,
+    partial: isToday && from > 0
+  };
+}
+
 // v1.56.0: дни вертикальным списком строк-карточек (вместо горизонтальной ленты).
 // Температурная полоса каждого дня позиционируется на ОБЩЕЙ шкале min/max всех
 // 10 дней (как Apple Weather). «Сегодня» — неоновая строка (.day.today), на её
@@ -10191,14 +10289,18 @@ function renderDays(forecast) {
     //             серая капля + % (читается как «возможно», а не «точно дождь»);
     //  • сухо   — прочерк. Так список не кричит «дождь» при 0 мм (см. полосу на графике).
     const dropSvgChance = '<svg width="11" height="11" viewBox="0 0 24 24" fill="#94a3b8"><path d="M12 2.7s5.5 6 5.5 11a5.5 5.5 0 0 1-11 0c0-5 5.5-11 5.5-11z"/></svg>';
-    const rainExpected = (typeof d.precipSum === 'number' && d.precipSum >= 0.3);
-    const rainChance = !rainExpected && (typeof d.precip === 'number' && d.precip >= PRECIP_POP_SHOW);
-    let precHtml = '<span class="dr-dry">—</span>';
+    // v1.59.0: для «Сегодня» — остаток суток, вероятность = max почасовых (см. dayPrecipView).
+    const pv = dayPrecipView(d, i === 0);
+    const pvTitle = pv.partial ? ` title="${t('precip.restOfDay')}"` : '';
+    const rainExpected = pv.mm >= 0.3;
+    // «Шанс» ловит и ливень, который видит меньшинство моделей (медиана Smart = 0).
+    const rainChance = !rainExpected && (pv.pct >= PRECIP_POP_SHOW || pv.possMm >= 0.5);
+    let precHtml = `<span class="dr-dry"${pvTitle}>—</span>`;
     if (rainExpected) {
-      const mmPart = ` <span class="dr-mm">· ${Math.round(d.precipSum * 10) / 10} ${t('unit.mm')}</span>`;
-      precHtml = `${dropSvg}<span class="dr-pp">${d.precip}%</span>${mmPart}`;
+      const mmPart = ` <span class="dr-mm">· ${pv.mm} ${t('unit.mm')}</span>`;
+      precHtml = `<span class="dr-prec-val"${pvTitle}>${dropSvg}<span class="dr-pp">${pv.pct}%</span>${mmPart}</span>`;
     } else if (rainChance) {
-      precHtml = `<span class="dr-prec-chance" title="${t('precip.possible')}">${dropSvgChance}<span class="dr-pp">${d.precip}%</span></span>`;
+      precHtml = `<span class="dr-prec-chance" title="${pv.partial ? t('precip.restOfDay') : t('precip.possible')}">${dropSvgChance}<span class="dr-pp">${pv.pct}%</span></span>`;
     }
     row.innerHTML = `
       ${confCls ? `<span class="dr-conf ${confCls}" title="${t('confidence.label')}: ${d.confidence}%"></span>` : ''}
@@ -12547,6 +12649,8 @@ function openModal(dayId) {
   const srcFull = `<span class="src-name">${localizeSourceFullName(src)}</span>`;
   // v1.55.0: сводка «остаток дня + ночь» — только для дня «СЕГОДНЯ» (смотрит вперёд).
   const outlookStr = d.id === 0 ? buildTodayOutlook(forecast) : '';
+  // v1.59.0: осадки в мини-метриках — для «Сегодня» считаем остаток суток (см. dayPrecipView).
+  const mPv = dayPrecipView(d, d.id === 0);
 
   modalBody.innerHTML = `
     <div class="modal-header">
@@ -12571,7 +12675,7 @@ function openModal(dayId) {
 
     <div class="modal-mini-metrics">
       <div class="mini-m"><div class="l">${t('metric.wind')}</div><div class="v">${fmtWind(d.wind, {withUnit:false})}<span> ${unitWind()} ${localizeWindDirShort(d.windDir)}</span></div></div>
-      <div class="mini-m"><div class="l">${t('metric.rain')}</div><div class="v">${d.precip}<span> %</span></div></div>
+      <div class="mini-m"${mPv.partial ? ` title="${t('precip.restOfDay')}"` : ''}><div class="l">${t('metric.rain')}${mPv.partial ? ` <span class="mini-m-note">· ${t('precip.restOfDayShort')}</span>` : ''}</div><div class="v">${mPv.pct}<span> %</span></div></div>
       <div class="mini-m"><div class="l">${t('metric.pressure')}</div><div class="v">${fmtPressure(d.pressure, {withUnit:false})}<span> ${unitPressure()}</span></div></div>
       <div class="mini-m"><div class="l">${t('metric.humidity')}</div><div class="v">${d.humidity}<span> %</span></div></div>
     </div>
@@ -12664,17 +12768,26 @@ function renderModalHourlyRow(d) {
     const stateCls = isToday ? (i < NOW_HOUR ? ' past' : (i === NOW_HOUR ? ' now' : '')) : '';
     const fillW = Math.max(Math.min(100, ((h.t - dMin) / dSpan) * 100), 6);
     const pmm = (typeof h.pmm === 'number') ? h.pmm : 0;
-    // 3 состояния как в посуточном списке: дождь (есть мм) / шанс (только вероятность
-    // ≥PRECIP_POP_SHOW) / сухо. Раньше порог был 5% — модалка показывала каплю там,
-    // где плитка и график были сухими.
+    // 3 состояния: дождь (есть ожидаемые мм) / шанс / сухо.
+    // v1.59.0 (точность по осадкам): «шанс» теперь ловит и случай, когда медиана
+    // моделей = 0, но часть моделей (или членов ансамбля) уверенно даёт дождь —
+    // типичная ситуация для ЛИВНЕЙ: они локальны, модели расходятся, и медиана
+    // Smart систематически обнуляет их. Раньше такой час выглядел полностью сухим.
+    const possMm = Math.max(
+      typeof h.pmmMax === 'number' ? h.pmmMax : 0,
+      typeof h.pmmPoss === 'number' ? h.pmmPoss : 0
+    );
     const rainExpected = pmm > 0;
-    const rainChance = !rainExpected && (typeof h.p === 'number' && h.p >= PRECIP_POP_SHOW);
+    const rainChance = !rainExpected
+      && ((typeof h.p === 'number' && h.p >= PRECIP_POP_SHOW) || possMm >= 0.3);
     let prec;
     if (rainExpected) {
       const mmPart = ` <span class="mh-mm">· ${Math.round(pmm * 10) / 10} ${t('unit.mm')}</span>`;
       prec = `${dropSvg}<span>${h.p}%</span>${mmPart}`;
     } else if (rainChance) {
-      prec = `<span class="mh-chance" title="${t('precip.possible')}">${dropSvgChance}<span>${h.p}%</span></span>`;
+      const upTo = possMm >= 0.3
+        ? ` <span class="mh-mm">· ${t('precip.upTo', { mm: Math.round(possMm * 10) / 10 })}</span>` : '';
+      prec = `<span class="mh-chance" title="${t('precip.possibleHint')}">${dropSvgChance}<span>${h.p}%</span>${upTo}</span>`;
     } else {
       prec = '<span class="mh-dry">—</span>';
     }
