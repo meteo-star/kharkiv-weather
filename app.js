@@ -77,6 +77,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} до конца дня',
     'outlook.noPrecip': 'осадков не ожидается',
     'outlook.maybePrecip': 'возможны слабые осадки',
+    'outlook.maybeFrom': 'возможен дождь с {time} · до {mm} мм',
+    'outlook.maybeAmount': 'возможен дождь · до {mm} мм',
     'outlook.amountRange': '{p}{lo}–{hi} мм',
     'outlook.amount': '{p}~{mm} мм',
     'outlook.night': 'ночью до {t}',
@@ -550,6 +552,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} до кінця дня',
     'outlook.noPrecip': 'опадів не очікується',
     'outlook.maybePrecip': 'можливі слабкі опади',
+    'outlook.maybeFrom': 'можливий дощ з {time} · до {mm} мм',
+    'outlook.maybeAmount': 'можливий дощ · до {mm} мм',
     'outlook.amountRange': '{p}{lo}–{hi} мм',
     'outlook.amount': '{p}~{mm} мм',
     'outlook.night': 'вночі до {t}',
@@ -1010,6 +1014,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} until end of day',
     'outlook.noPrecip': 'no precipitation expected',
     'outlook.maybePrecip': 'light precipitation possible',
+    'outlook.maybeFrom': 'rain possible from {time} · up to {mm} mm',
+    'outlook.maybeAmount': 'rain possible · up to {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'night low {t}',
@@ -1469,6 +1475,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} bis Tagesende',
     'outlook.noPrecip': 'kein Niederschlag erwartet',
     'outlook.maybePrecip': 'leichter Niederschlag möglich',
+    'outlook.maybeFrom': 'Regen möglich ab {time} · bis {mm} mm',
+    'outlook.maybeAmount': 'Regen möglich · bis {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'nachts bis {t}',
@@ -1928,6 +1936,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} do końca dnia',
     'outlook.noPrecip': 'bez opadów',
     'outlook.maybePrecip': 'możliwe słabe opady',
+    'outlook.maybeFrom': 'możliwy deszcz od {time} · do {mm} mm',
+    'outlook.maybeAmount': 'możliwy deszcz · do {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'w nocy do {t}',
@@ -2388,6 +2398,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} do konce dne',
     'outlook.noPrecip': 'bez srážek',
     'outlook.maybePrecip': 'možné slabé srážky',
+    'outlook.maybeFrom': 'možný déšť od {time} · až {mm} mm',
+    'outlook.maybeAmount': 'možný déšť · až {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'v noci do {t}',
@@ -2848,6 +2860,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} jusqu\'à la fin de la journée',
     'outlook.noPrecip': 'pas de précipitations',
     'outlook.maybePrecip': 'faibles précipitations possibles',
+    'outlook.maybeFrom': 'pluie possible dès {time} · jusqu’à {mm} mm',
+    'outlook.maybeAmount': 'pluie possible · jusqu’à {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'la nuit jusqu\'à {t}',
@@ -3307,6 +3321,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} fino a fine giornata',
     'outlook.noPrecip': 'nessuna precipitazione',
     'outlook.maybePrecip': 'possibili deboli precipitazioni',
+    'outlook.maybeFrom': 'pioggia possibile dalle {time} · fino a {mm} mm',
+    'outlook.maybeAmount': 'pioggia possibile · fino a {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'di notte fino a {t}',
@@ -3766,6 +3782,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} hasta el final del día',
     'outlook.noPrecip': 'sin precipitaciones',
     'outlook.maybePrecip': 'posible precipitación débil',
+    'outlook.maybeFrom': 'posible lluvia desde {time} · hasta {mm} mm',
+    'outlook.maybeAmount': 'posible lluvia · hasta {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'de noche hasta {t}',
@@ -4225,6 +4243,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} până la sfârșitul zilei',
     'outlook.noPrecip': 'fără precipitații',
     'outlook.maybePrecip': 'posibile precipitații slabe',
+    'outlook.maybeFrom': 'ploaie posibilă de la {time} · până la {mm} mm',
+    'outlook.maybeAmount': 'ploaie posibilă · până la {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'noaptea până la {t}',
@@ -4684,6 +4704,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} a nap végéig',
     'outlook.noPrecip': 'nincs várható csapadék',
     'outlook.maybePrecip': 'gyenge csapadék lehetséges',
+    'outlook.maybeFrom': 'eső lehetséges {time}-tól · akár {mm} mm',
+    'outlook.maybeAmount': 'eső lehetséges · akár {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'éjjel {t}',
@@ -5143,6 +5165,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} do konca dňa',
     'outlook.noPrecip': 'bez zrážok',
     'outlook.maybePrecip': 'možné slabé zrážky',
+    'outlook.maybeFrom': 'možný dážď od {time} · až {mm} mm',
+    'outlook.maybeAmount': 'možný dážď · až {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'v noci do {t}',
@@ -5602,6 +5626,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} até ao fim do dia',
     'outlook.noPrecip': 'sem precipitação',
     'outlook.maybePrecip': 'possível precipitação fraca',
+    'outlook.maybeFrom': 'chuva possível a partir das {time} · até {mm} mm',
+    'outlook.maybeAmount': 'chuva possível · até {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'à noite até {t}',
@@ -6061,6 +6087,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} tot het einde van de dag',
     'outlook.noPrecip': 'geen neerslag verwacht',
     'outlook.maybePrecip': 'lichte neerslag mogelijk',
+    'outlook.maybeFrom': 'regen mogelijk vanaf {time} · tot {mm} mm',
+    'outlook.maybeAmount': 'regen mogelijk · tot {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': '\'s nachts tot {t}',
@@ -6520,6 +6548,8 @@ const I18N = {
     'outlook.wetRestOfDay': 'gün sonuna kadar {p}',
     'outlook.noPrecip': 'yağış beklenmiyor',
     'outlook.maybePrecip': 'hafif yağış olabilir',
+    'outlook.maybeFrom': '{time}’dan itibaren yağmur olabilir · {mm} mm’ye kadar',
+    'outlook.maybeAmount': 'yağmur olabilir · {mm} mm’ye kadar',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'gece {t}',
@@ -6979,6 +7009,8 @@ const I18N = {
     'outlook.wetRestOfDay': '{p} μέχρι το τέλος της ημέρας',
     'outlook.noPrecip': 'χωρίς βροχόπτωση',
     'outlook.maybePrecip': 'πιθανός ασθενής υετός',
+    'outlook.maybeFrom': 'πιθανή βροχή από {time} · έως {mm} mm',
+    'outlook.maybeAmount': 'πιθανή βροχή · έως {mm} mm',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'τη νύχτα έως {t}',
@@ -9572,7 +9604,31 @@ function buildTodayOutlook(fc) {
     let nc = null;
     try { nc = (typeof nowcastInfo === 'function') ? nowcastInfo() : null; } catch (e) { nc = null; }
     const ncWet = nc && (nc.kind === 'now' || nc.kind === 'soon');
-    segs.push(t(ncWet ? 'outlook.maybePrecip' : 'outlook.noPrecip'));
+
+    // v1.61.0: в Smart медиана по часам почти всегда 0 (в каждый час большинство
+    // моделей сухие), поэтому сводка писала «возможны СЛАБЫЕ осадки» в дни, когда
+    // часть моделей даёт 2 мм и список рядом показывает «дождь 50%». Если модели
+    // допускают заметное количество — называем его, а не занижаем на словах.
+    let possPeak = 0, possFrom = -1;
+    for (let i = NOW_HOUR; i < hrs.length; i++) {
+      const h = hrs[i];
+      if (!h) continue;
+      const pm = Math.max(
+        typeof h.pmmMax === 'number' ? h.pmmMax : 0,
+        typeof h.pmmPoss === 'number' ? h.pmmPoss : 0
+      );
+      if (pm >= 0.3 && possFrom < 0) possFrom = h.h;
+      if (pm > possPeak) possPeak = pm;
+    }
+    if (possPeak >= 0.3) {
+      const range = remainingPrecipRange();
+      const upTo = (range && range.hi >= possPeak) ? range.hi : possPeak;
+      segs.push(possFrom >= 0
+        ? t('outlook.maybeFrom', { time: String(possFrom).padStart(2, '0') + ':00', mm: outlookMm(upTo) })
+        : t('outlook.maybeAmount', { mm: outlookMm(upTo) }));
+    } else {
+      segs.push(t(ncWet ? 'outlook.maybePrecip' : 'outlook.noPrecip'));
+    }
   } else {
     const wetAvgT = wetCount ? wetTempSum / wetCount : 10;
     const precip = wetAvgT <= 0 ? t('outlook.snow')
@@ -10245,23 +10301,38 @@ function dayPrecipView(d, isToday) {
   if (!hrs || hrs.length === 0) return fallback;
   const from = isToday ? Math.max(0, Math.min(NOW_HOUR, hrs.length - 1)) : 0;
 
-  let pct = 0, mm = 0, possMm = 0;
-  for (let i = from; i < hrs.length; i++) {
+  const possOf = (h) => Math.max(
+    typeof h.pmmMax === 'number' ? h.pmmMax : 0,
+    typeof h.pmmPoss === 'number' ? h.pmmPoss : 0
+  );
+
+  let pct = 0, mm = 0, possMm = 0, possRest = 0, possAll = 0;
+  for (let i = 0; i < hrs.length; i++) {
     const h = hrs[i];
     if (!h) continue;
+    const pm = possOf(h);
+    possAll += pm;                      // профиль осадков за ВЕСЬ день (для масштабирования)
+    if (i < from) continue;             // до текущего часа — только в профиль
     if (typeof h.p === 'number' && h.p > pct) pct = h.p;
     if (typeof h.pmm === 'number') mm += h.pmm;
-    // «Возможное» количество — самая мокрая модель / член ансамбля в этот час.
-    // Нужно, чтобы ливень, который видит меньшинство моделей, не исчезал совсем:
-    // медиана Smart обнуляет такие часы (см. renderModalHourlyRow).
-    const p1 = typeof h.pmmMax === 'number' ? h.pmmMax : 0;
-    const p2 = typeof h.pmmPoss === 'number' ? h.pmmPoss : 0;
-    const pm = Math.max(p1, p2);
-    if (pm > possMm) possMm = pm;
+    possRest += pm;
+    if (pm > possMm) possMm = pm;       // пиковое «возможное» в остатке
   }
   // Для будущих дней сумму берём из daily (precipitation_sum точнее суммы
   // округлённых почасовых). Для «сегодня» — только фактический остаток.
   if (!isToday && typeof d.precipSum === 'number') mm = d.precipSum;
+
+  // v1.61.0 (точность Smart): сумма почасовых МЕДИАН систематически занижена —
+  // в каждый отдельный час большинство моделей сухие, поэтому медиана часа = 0,
+  // хотя за сутки дождь есть почти у всех. Это свойство медианы, а не погоды.
+  // Дневная precipSum считается как медиана СУТОЧНЫХ СУММ и такого провала не
+  // имеет (Smart: сутки 1.2 мм против нуля по всем часам). Поэтому, если дневная
+  // сумма заметно больше почасовой, распределяем её по временнóму профилю
+  // возможных осадков и берём долю, приходящуюся на остаток дня.
+  if (isToday && typeof d.precipSum === 'number' && possAll > 0 && d.precipSum > mm + 0.2) {
+    const scaled = d.precipSum * (possRest / possAll);
+    if (scaled > mm) mm = scaled;
+  }
 
   return {
     pct: Math.round(pct),
@@ -16029,10 +16100,25 @@ function computeSmartForecast(forecasts, modelIds, ensemble = null) {
       const ensHour = (ensemble && ensemble.hours) ? ensemble.hours[i * 24 + h] : null;
       const ensP = (ensHour && typeof ensHour.pWet === 'number') ? ensHour.pWet : null;
 
+      // v1.61.0 (точность по осадкам): ансамбль — это ТОЛЬКО ECMWF (51 член его
+      // собственной физики). Когда ECMWF суше остальных, Smart показывал 0–2%
+      // в часы, где UKMO/GFS дают 1.8–2.1 мм — то есть терял риск целиком.
+      // Берём вторую, независимую оценку — долю МОДЕЛЕЙ с осадками в этот час —
+      // и не занижаем ниже неё: разные источники неопределённости складываются,
+      // а пропустить дождь дороже, чем показать лишние проценты.
+      let modelWetShare = 0;
+      if (hourPairs.length) {
+        const wetN = hourPairs.filter(p => (typeof p.hour.pmm === 'number' ? p.hour.pmm : 0) >= 0.1).length;
+        modelWetShare = Math.round((wetN / hourPairs.length) * 100);
+      }
+
       hourly.push({
         h: hourPairs[0].hour.h,
         t: tVal,
-        p: ensP != null ? ensP : (wMean('p', byPrec, 0) ?? 0),
+        p: Math.max(
+             ensP != null ? ensP : (wMean('p', byPrec, 0) ?? 0),
+             modelWetShare
+           ),
         pmm: pmmVal,
         pmmMax: Math.max(0, ...hourPairs.map(p => typeof p.hour.pmm === 'number' ? p.hour.pmm : 0)),
         w: wMean('w', byComp, 0) ?? 0,
