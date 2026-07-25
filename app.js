@@ -76,6 +76,7 @@ const I18N = {
     'outlook.wetUntil': '{p} до {time}',
     'outlook.wetRestOfDay': '{p} до конца дня',
     'outlook.noPrecip': 'осадков не ожидается',
+    'outlook.maybePrecip': 'возможны слабые осадки',
     'outlook.amountRange': '{p}{lo}–{hi} мм',
     'outlook.amount': '{p}~{mm} мм',
     'outlook.night': 'ночью до {t}',
@@ -548,6 +549,7 @@ const I18N = {
     'outlook.wetUntil': '{p} до {time}',
     'outlook.wetRestOfDay': '{p} до кінця дня',
     'outlook.noPrecip': 'опадів не очікується',
+    'outlook.maybePrecip': 'можливі слабкі опади',
     'outlook.amountRange': '{p}{lo}–{hi} мм',
     'outlook.amount': '{p}~{mm} мм',
     'outlook.night': 'вночі до {t}',
@@ -1007,6 +1009,7 @@ const I18N = {
     'outlook.wetUntil': '{p} until {time}',
     'outlook.wetRestOfDay': '{p} until end of day',
     'outlook.noPrecip': 'no precipitation expected',
+    'outlook.maybePrecip': 'light precipitation possible',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'night low {t}',
@@ -1465,6 +1468,7 @@ const I18N = {
     'outlook.wetUntil': '{p} bis {time}',
     'outlook.wetRestOfDay': '{p} bis Tagesende',
     'outlook.noPrecip': 'kein Niederschlag erwartet',
+    'outlook.maybePrecip': 'leichter Niederschlag möglich',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'nachts bis {t}',
@@ -1923,6 +1927,7 @@ const I18N = {
     'outlook.wetUntil': '{p} do {time}',
     'outlook.wetRestOfDay': '{p} do końca dnia',
     'outlook.noPrecip': 'bez opadów',
+    'outlook.maybePrecip': 'możliwe słabe opady',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'w nocy do {t}',
@@ -2382,6 +2387,7 @@ const I18N = {
     'outlook.wetUntil': '{p} do {time}',
     'outlook.wetRestOfDay': '{p} do konce dne',
     'outlook.noPrecip': 'bez srážek',
+    'outlook.maybePrecip': 'možné slabé srážky',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'v noci do {t}',
@@ -2841,6 +2847,7 @@ const I18N = {
     'outlook.wetUntil': '{p} jusqu\'à {time}',
     'outlook.wetRestOfDay': '{p} jusqu\'à la fin de la journée',
     'outlook.noPrecip': 'pas de précipitations',
+    'outlook.maybePrecip': 'faibles précipitations possibles',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'la nuit jusqu\'à {t}',
@@ -3299,6 +3306,7 @@ const I18N = {
     'outlook.wetUntil': '{p} fino alle {time}',
     'outlook.wetRestOfDay': '{p} fino a fine giornata',
     'outlook.noPrecip': 'nessuna precipitazione',
+    'outlook.maybePrecip': 'possibili deboli precipitazioni',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'di notte fino a {t}',
@@ -3757,6 +3765,7 @@ const I18N = {
     'outlook.wetUntil': '{p} hasta las {time}',
     'outlook.wetRestOfDay': '{p} hasta el final del día',
     'outlook.noPrecip': 'sin precipitaciones',
+    'outlook.maybePrecip': 'posible precipitación débil',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'de noche hasta {t}',
@@ -4215,6 +4224,7 @@ const I18N = {
     'outlook.wetUntil': '{p} până la {time}',
     'outlook.wetRestOfDay': '{p} până la sfârșitul zilei',
     'outlook.noPrecip': 'fără precipitații',
+    'outlook.maybePrecip': 'posibile precipitații slabe',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'noaptea până la {t}',
@@ -4673,6 +4683,7 @@ const I18N = {
     'outlook.wetUntil': '{p} {time}-ig',
     'outlook.wetRestOfDay': '{p} a nap végéig',
     'outlook.noPrecip': 'nincs várható csapadék',
+    'outlook.maybePrecip': 'gyenge csapadék lehetséges',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'éjjel {t}',
@@ -5131,6 +5142,7 @@ const I18N = {
     'outlook.wetUntil': '{p} do {time}',
     'outlook.wetRestOfDay': '{p} do konca dňa',
     'outlook.noPrecip': 'bez zrážok',
+    'outlook.maybePrecip': 'možné slabé zrážky',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'v noci do {t}',
@@ -5589,6 +5601,7 @@ const I18N = {
     'outlook.wetUntil': '{p} até às {time}',
     'outlook.wetRestOfDay': '{p} até ao fim do dia',
     'outlook.noPrecip': 'sem precipitação',
+    'outlook.maybePrecip': 'possível precipitação fraca',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'à noite até {t}',
@@ -6047,6 +6060,7 @@ const I18N = {
     'outlook.wetUntil': '{p} tot {time}',
     'outlook.wetRestOfDay': '{p} tot het einde van de dag',
     'outlook.noPrecip': 'geen neerslag verwacht',
+    'outlook.maybePrecip': 'lichte neerslag mogelijk',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': '\'s nachts tot {t}',
@@ -6505,6 +6519,7 @@ const I18N = {
     'outlook.wetUntil': '{time}\'a kadar {p}',
     'outlook.wetRestOfDay': 'gün sonuna kadar {p}',
     'outlook.noPrecip': 'yağış beklenmiyor',
+    'outlook.maybePrecip': 'hafif yağış olabilir',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'gece {t}',
@@ -6963,6 +6978,7 @@ const I18N = {
     'outlook.wetUntil': '{p} μέχρι τις {time}',
     'outlook.wetRestOfDay': '{p} μέχρι το τέλος της ημέρας',
     'outlook.noPrecip': 'χωρίς βροχόπτωση',
+    'outlook.maybePrecip': 'πιθανός ασθενής υετός',
     'outlook.amountRange': '{p}{lo}–{hi} mm',
     'outlook.amount': '{p}~{mm} mm',
     'outlook.night': 'τη νύχτα έως {t}',
@@ -9549,7 +9565,14 @@ function buildTodayOutlook(fc) {
   mm = Math.round(mm * 10) / 10;
 
   if (firstWet < 0) {
-    segs.push(t('outlook.noPrecip'));
+    // v1.60.0: не утверждаем «осадков не ожидается», если 15-минутный nowcast
+    // прямо сейчас видит осадки. Источники разные (nowcast — max по моделям,
+    // сводка — их консенсус), и при мороси, которую видит одна модель, плашки
+    // противоречили друг другу: «морось через 12 мин» + «осадков не ожидается».
+    let nc = null;
+    try { nc = (typeof nowcastInfo === 'function') ? nowcastInfo() : null; } catch (e) { nc = null; }
+    const ncWet = nc && (nc.kind === 'now' || nc.kind === 'soon');
+    segs.push(t(ncWet ? 'outlook.maybePrecip' : 'outlook.noPrecip'));
   } else {
     const wetAvgT = wetCount ? wetTempSum / wetCount : 10;
     const precip = wetAvgT <= 0 ? t('outlook.snow')
@@ -10293,8 +10316,9 @@ function renderDays(forecast) {
     const pv = dayPrecipView(d, i === 0);
     const pvTitle = pv.partial ? ` title="${t('precip.restOfDay')}"` : '';
     const rainExpected = pv.mm >= 0.3;
-    // «Шанс» ловит и ливень, который видит меньшинство моделей (медиана Smart = 0).
-    const rainChance = !rainExpected && (pv.pct >= PRECIP_POP_SHOW || pv.possMm >= 0.5);
+    // «Шанс» ловит и ливень, и морось, которые видит меньшинство моделей
+    // (медиана Smart их обнуляет). Порог 0.2 мм — уровень мороси.
+    const rainChance = !rainExpected && (pv.pct >= PRECIP_POP_SHOW || pv.possMm >= 0.2);
     let precHtml = `<span class="dr-dry"${pvTitle}>—</span>`;
     if (rainExpected) {
       const mmPart = ` <span class="dr-mm">· ${pv.mm} ${t('unit.mm')}</span>`;
@@ -12117,13 +12141,15 @@ function renderPrecipChart(forecast) {
   // сценариев ENS, а линия графика — медианное количество, которое = 0, когда
   // дождь видит лишь меньшинство сценариев. Бледная полоса показывает верхнюю
   // границу — «возможен дождь до X мм».
-  // Полосу показываем только в часы со значимым шансом (h.p ≥ PRECIP_POP_SHOW) —
-  // тот же порог, что и в сводках. Иначе на фактически сухих днях (вероятность 5–6%,
-  // 0 мм) график рисовал бы тень, противореча сухому списку/плитке.
+  // v1.60.0: полоса привязана к КОЛИЧЕСТВУ, а не к вероятности. Раньше она гасилась
+  // при h.p < PRECIP_POP_SHOW — и морось (0.1–0.2 мм при вероятности 14%) исчезала
+  // из графика, хотя nowcast-плашка писала «морось через 12 минут». Берём и члены
+  // ансамбля (pmmPoss), и самую мокрую модель (pmmMax) — «хоть кто-то видит осадки».
   const possValues = merged.map(h => {
-    const poss = (typeof h.pmmPoss === 'number') ? h.pmmPoss : 0;
-    const pop = (typeof h.p === 'number') ? h.p : 0;
-    return pop >= PRECIP_POP_SHOW ? poss : 0;
+    const p1 = (typeof h.pmmPoss === 'number') ? h.pmmPoss : 0;
+    const p2 = (typeof h.pmmMax === 'number') ? h.pmmMax : 0;
+    const poss = Math.max(p1, p2);
+    return poss >= 0.1 ? poss : 0;
   });
   // Показываем полосу только когда «возможный» дождь заметно выше медианы хотя бы
   // в одном часу (иначе она сливается с линией и ничего не добавляет).
@@ -12778,14 +12804,17 @@ function renderModalHourlyRow(d) {
       typeof h.pmmPoss === 'number' ? h.pmmPoss : 0
     );
     const rainExpected = pmm > 0;
+    // Порог 0.1 мм, а не 0.3: МОРОСЬ — это как раз 0.1–0.2 мм/ч. С порогом 0.3
+    // она проваливалась в «сухо», хотя nowcast-плашка честно писала «морось через
+    // 12 минут» (она берёт max по моделям). Осадки важнее шума — см. PRECIP_POP_SHOW.
     const rainChance = !rainExpected
-      && ((typeof h.p === 'number' && h.p >= PRECIP_POP_SHOW) || possMm >= 0.3);
+      && ((typeof h.p === 'number' && h.p >= PRECIP_POP_SHOW) || possMm >= 0.1);
     let prec;
     if (rainExpected) {
       const mmPart = ` <span class="mh-mm">· ${Math.round(pmm * 10) / 10} ${t('unit.mm')}</span>`;
       prec = `${dropSvg}<span>${h.p}%</span>${mmPart}`;
     } else if (rainChance) {
-      const upTo = possMm >= 0.3
+      const upTo = possMm >= 0.1
         ? ` <span class="mh-mm">· ${t('precip.upTo', { mm: Math.round(possMm * 10) / 10 })}</span>` : '';
       prec = `<span class="mh-chance" title="${t('precip.possibleHint')}">${dropSvgChance}<span>${h.p}%</span>${upTo}</span>`;
     } else {
