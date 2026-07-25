@@ -2796,13 +2796,18 @@ function buildMorningSummary(sub, rule, fc) {
 
   // Дополнительные секции — порядок фиксированный, между блоками пустая строка
   const lat = (sub && typeof sub.lat === 'number') ? sub.lat : 50;
-  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, s, e, lat, daily, lang));
-  if (sections.fog)      pushBlock(lines, buildFogBlock(hourly, s, e, lang));
-  if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, s, e, lang));
-  if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, s, e, lang));
+  // v1.59.0: сводка смотрит ВПЕРЁД. Раньше блоки строились от начала суток (s),
+  // поэтому в 07:00 приходило «дождь с 01:00 до 04:00» — про время, которое уже
+  // прошло. Начинаем с текущего часа; astro/moon/tomorrow от времени не зависят.
+  const sEff = (s >= 0) ? Math.max(s, nowIdx) : s;
+  const partialDay = sEff > s;
+  if (sections.precip)   pushBlock(lines, buildPrecipBlock(hourly, sEff, e, lat, daily, lang, partialDay));
+  if (sections.fog)      pushBlock(lines, buildFogBlock(hourly, sEff, e, lang));
+  if (sections.wind)     pushBlock(lines, buildWindBlock(hourly, sEff, e, lang));
+  if (sections.feels)    pushBlock(lines, buildFeelsBlock(hourly, sEff, e, lang));
   if (sections.astro)    pushBlock(lines, buildAstroBlock(daily, lang));
   if (sections.moon)     pushBlock(lines, buildMoonBlock(lang));
-  if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, s, e, lang));
+  if (sections.storm)    pushBlock(lines, buildStormBlock(hourly, sEff, e, lang));
   if (sections.tomorrow) pushBlock(lines, buildTomorrowBlock(daily, lang));
 
   // v1.43.1: footer с источником данных — для прозрачности «на основе чего сводка»
@@ -2896,7 +2901,10 @@ function inSnowSeason(lat, date) {
   return m >= 4 && m <= 10;
 }
 
-function buildPrecipBlock(hourly, s, e, lat, daily, lang = 'ru') {
+// partialDay=true — диапазон начинается не с полуночи, а с текущего часа
+// (утренняя сводка смотрит вперёд). Тогда суточную сумму из daily брать НЕЛЬЗЯ:
+// она включает уже выпавшие осадки и завышает прогноз на остаток дня.
+function buildPrecipBlock(hourly, s, e, lat, daily, lang = 'ru', partialDay = false) {
   if (s < 0) return null;
   const wcArr = hourly.weather_code || [];
   const pmArr = hourly.precipitation || [];
@@ -2906,7 +2914,7 @@ function buildPrecipBlock(hourly, s, e, lat, daily, lang = 'ru') {
   // (например, осадки прерывистые: 0.1 мм/ч в каждом из 5 часов — за день
   // набегает 0.5 мм, но цельного «дождевого окна» нет). Без этого блок
   // выдавал «дождя не ожидается» при сценарии где сайт показывал явный дождь.
-  const todayDailyPSum = (daily && Array.isArray(daily.precipitation_sum))
+  const todayDailyPSum = (!partialDay && daily && Array.isArray(daily.precipitation_sum))
     ? Number(daily.precipitation_sum[0]) || 0
     : 0;
   let todayHourlyPSum = 0;
