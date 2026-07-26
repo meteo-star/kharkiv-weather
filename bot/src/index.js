@@ -2776,7 +2776,11 @@ function buildMorningSummary(sub, rule, fc) {
   const curT = hourly.temperature_2m?.[nowIdx];
   const tMin = daily.temperature_2m_min?.[0];
   const tMax = daily.temperature_2m_max?.[0];
-  const wc = daily.weather_code?.[0];
+  // v1.62.1: заголовок = состояние ТЕКУЩЕГО часа. daily.weather_code — «самый
+  // суровый» код за полные сутки: ночной дождь держал «🌧 Дождь» в шапке весь
+  // день рядом с «✓ Дождя не ожидается» ниже (Стас поймал это противоречие).
+  const nowWc = hourly.weather_code?.[nowIdx];
+  const wc = (nowWc != null) ? nowWc : daily.weather_code?.[0];
   const condLabel = tWeatherCodeLabel(wc, lang);
 
   const lines = [
@@ -2925,6 +2929,13 @@ function buildPrecipBlock(hourly, s, e, lat, daily, lang = 'ru', partialDay = fa
   const fmtMm = (v) => (Math.round(v * 10) / 10).toFixed(1);
 
   const rainWin = findPrecipWindow(times, wcArr, pmArr, 'rain', s, e);
+  // v1.62.1: осадочно ли ПРЯМО СЕЙЧАС (первый час диапазона). Медиана/среднее
+  // мм часто 0 при идущей мороси (её видит меньшинство моделей), но дождевой
+  // weather_code (max-по-моделям) её ловит. Без этой проверки сводка писала
+  // «✓ Дождя не ожидается» в момент, когда за окном шёл дождь.
+  const wcNow = wcArr?.[s];
+  const rainyNow = (wcNow != null && ((wcNow >= 51 && wcNow <= 67) || (wcNow >= 80 && wcNow <= 82) || (wcNow >= 95 && wcNow <= 99)))
+    || ((pmArr?.[s] || 0) >= 0.05);
   let block;
   if (rainWin) {
     let line = t('block.precip.rain', lang, { from: rainWin.from, to: rainWin.to });
@@ -2933,6 +2944,8 @@ function buildPrecipBlock(hourly, s, e, lat, daily, lang = 'ru', partialDay = fa
     block = line;
   } else if (totalSum >= 0.5) {
     block = t('block.precip.possible', lang, { mm: fmtMm(totalSum) });
+  } else if (rainyNow) {
+    block = t('block.precip.nowThenDry', lang);
   } else {
     block = t('block.precip.noRain', lang);
   }
@@ -3082,7 +3095,14 @@ function buildTomorrowBlock(daily, lang = 'ru') {
   const tMin = daily.temperature_2m_min?.[1];
   const tMax = daily.temperature_2m_max?.[1];
   const pSum = daily.precipitation_sum?.[1] || 0;
-  const wc = daily.weather_code?.[1];
+  let wc = daily.weather_code?.[1];
+  // v1.62.1: согласование лейбла с миллиметрами. weather_code — «самый суровый»
+  // код суток (max-по-моделям), а pSum — консенсусная сумма; при расхождении
+  // получался оксюморон «🌧 Морось, без осадков». Если суммы фактически нет,
+  // осадочный код даунгрейдится до «Облачно» — как downgradeWetHourlyConditions
+  // на сайте.
+  const wetCode = wc != null && ((wc >= 51 && wc <= 67) || (wc >= 71 && wc <= 86) || (wc >= 95 && wc <= 99));
+  if (wetCode && pSum <= 0.5) wc = 3;
   const label = tWeatherCodeLabel(wc, lang);
   const tStr = `${tMin != null ? Math.round(tMin) : '?'}…${tMax != null ? Math.round(tMax) : '?'}°C`;
   const precipStr = pSum > 0.5

@@ -9671,8 +9671,19 @@ function buildTodayOutlook(fc) {
                          : t('outlook.wetUntil', { p: precip, time: outlookHH(endH) }));
       segs.push(amountSeg(''));
     } else {
-      segs.push(t('outlook.dryUntil', { time: outlookHH(firstWet) }));
-      segs.push(amountSeg(precip + ' '));
+      // v1.62.1: «до 15:00 сухо» НЕ пишем, когда 15-минутный nowcast видит
+      // осадки прямо сейчас (морось меньшинства моделей: медиана суха, nowcast
+      // мокрый) — рядом с плашкой «Дождь сейчас» это читалось как противоречие.
+      // Вместо утверждения о сухости — только время основного дождя.
+      let ncNow = null;
+      try { ncNow = (typeof nowcastInfo === 'function') ? nowcastInfo() : null; } catch (e) { ncNow = null; }
+      const ncWetNow = ncNow && (ncNow.kind === 'now' || ncNow.kind === 'soon');
+      if (ncWetNow) {
+        segs.push(t('outlook.maybeFrom', { time: outlookHH(firstWet), mm: outlookMm((range && range.hi) || mm || OUTLOOK_WET_MM) }));
+      } else {
+        segs.push(t('outlook.dryUntil', { time: outlookHH(firstWet) }));
+        segs.push(amountSeg(precip + ' '));
+      }
     }
   }
 
