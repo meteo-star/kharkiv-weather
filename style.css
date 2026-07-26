@@ -231,11 +231,10 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 }
 .glass::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);pointer-events:none}
 
-/* v1.62.3: длительность сворачивания возвращена к исходным 0.42s — 0.28s
-   Стас оценил как «резковато». Разовая reflow-анимация при пересечении
-   порога допустима: тяжёлые слои (blur-бюджет, пауза анимаций, smooth)
-   убраны в v1.62.0, и рывка она больше не даёт. */
-.hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:sticky;top:max(env(safe-area-inset-top,0px),0px);z-index:50;isolation:isolate;min-height:220px;transition:padding 0.42s cubic-bezier(0.4,0,0.2,1),min-height 0.42s cubic-bezier(0.4,0,0.2,1),box-shadow 0.42s cubic-bezier(0.4,0,0.2,1),border-radius 0.42s cubic-bezier(0.4,0,0.2,1)}
+/* v1.62.4: сворачивание hero мягче — 0.55s + decelerate-кривая
+   cubic-bezier(0.25,0.8,0.3,1): быстрый старт и долгое плавное затухание.
+   Ощущение «грубости» давал резкий финиш стандартной material-кривой. */
+.hero{padding:28px;margin-bottom:18px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;position:sticky;top:max(env(safe-area-inset-top,0px),0px);z-index:50;isolation:isolate;min-height:220px;transition:padding 0.55s cubic-bezier(0.25,0.8,0.3,1),min-height 0.55s cubic-bezier(0.25,0.8,0.3,1),box-shadow 0.55s cubic-bezier(0.25,0.8,0.3,1),border-radius 0.55s cubic-bezier(0.25,0.8,0.3,1)}
 /* COMPACT вЂ” РєРѕРіРґР° Р·Р°Р»РёРї СЃРІРµСЂС…Сѓ РїСЂРё СЃРєСЂРѕР»Р»Рµ. РљР°СЂС‚РѕС‡РєР° СЃРѕС…СЂР°РЅСЏРµС‚ С€РёСЂРёРЅСѓ
    Рё СЃРєСЂСѓРіР»С‘РЅРЅС‹Рµ РєСЂР°СЏ, РЅРёРєР°РєРѕР№ РїРѕРґР»РѕР¶РєРё/overlay СЃР·Р°РґРё. РћРЅР° РїСЂРѕСЃС‚Рѕ
    В«РІРёСЃРёС‚ РІ РІРѕР·РґСѓС…РµВ» РєР°Рє РЅР°СЃС‚РѕСЏС‰РёР№ floating glass вЂ” СЃРєСЂРѕР»Р»СЏС‰РёР№СЃСЏ
@@ -264,8 +263,9 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .hero.stuck .hero-temp-num{font-size:50px;line-height:1.05}
 .hero.stuck .hero-temp-unit{font-size:24px}
 .hero.stuck .hero-condition{font-size:15px;margin-top:4px}
-/* v1.62.3: контент шапки — исходные 0.4/0.42s (0.28s было резковато). */
-.hero-scene,.hero-overlay,.hero-label,.hero-feels,.hero-source-note,.hero-temp-num,.hero-temp-unit,.hero-condition{transition:opacity 0.4s ease,max-height 0.42s cubic-bezier(0.4,0,0.2,1),margin 0.42s cubic-bezier(0.4,0,0.2,1),font-size 0.42s cubic-bezier(0.4,0,0.2,1),background 0.42s ease}
+/* v1.62.4: контент шапки — та же мягкая decelerate-кривая 0.55s, что у .hero
+   (единый ритм сворачивания: рамка и текст движутся синхронно). */
+.hero-scene,.hero-overlay,.hero-label,.hero-feels,.hero-source-note,.hero-temp-num,.hero-temp-unit,.hero-condition{transition:opacity 0.5s ease,max-height 0.55s cubic-bezier(0.25,0.8,0.3,1),margin 0.55s cubic-bezier(0.25,0.8,0.3,1),font-size 0.55s cubic-bezier(0.25,0.8,0.3,1),background 0.42s ease}
 .hero-scene{position:absolute;inset:0;z-index:0;border-radius:24px;overflow:hidden;background-color:#0a1838;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image 0.6s ease-in-out}
 .hero-overlay{position:absolute;inset:0;z-index:1;border-radius:24px;background:linear-gradient(90deg,rgba(5,10,38,0.78) 0%,rgba(5,10,38,0.55) 35%,rgba(5,10,38,0.22) 70%,rgba(5,10,38,0.05) 100%);pointer-events:none;transition:background 0.6s ease}
 .hero-info{position:relative;z-index:2}
