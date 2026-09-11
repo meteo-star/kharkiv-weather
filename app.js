@@ -12409,12 +12409,13 @@ function renderPrecipChart(forecast) {
      ОТКАТ: PRECIP_CLOUD_BAND = false ниже выключает ленту целиком; изменение
      аддитивно, существующие слои графика не тронуты. */
   const PRECIP_CLOUD_BAND = true;
+  // v1.64.1: цвета насыщеннее (фидбек: лента бледная, не читается на телефоне)
   const cloudColor = (cl) => {
-    if (cl == null) return 'rgba(148,163,184,0.18)';
-    if (cl <= 25) return 'rgba(253,208,71,0.60)';    // ясно: золотистый
-    if (cl <= 50) return 'rgba(147,197,253,0.50)';   // малооблачно: светло-голубой
-    if (cl <= 75) return 'rgba(148,163,184,0.50)';   // облачно: серо-голубой
-    return 'rgba(100,116,139,0.65)';                 // пасмурно: серый
+    if (cl == null) return 'rgba(148,163,184,0.25)';
+    if (cl <= 25) return 'rgba(253,200,50,0.90)';    // ясно: золотистый
+    if (cl <= 50) return 'rgba(125,190,255,0.85)';   // малооблачно: светло-голубой
+    if (cl <= 75) return 'rgba(148,163,184,0.85)';   // облачно: серо-голубой
+    return 'rgba(84,98,122,0.95)';                   // пасмурно: серый
   };
   const cloudEmoji = (cl) => (cl <= 30 ? '☀️' : (cl <= 70 ? '⛅' : '☁️'));
   const cloudCat   = (cl) => (cl <= 30 ? 0 : (cl <= 70 ? 1 : 2));
@@ -12428,7 +12429,9 @@ function renderPrecipChart(forecast) {
       if (!xScale || !yScale) return;
       const cls = merged.map(h => (h && typeof h.cl === 'number') ? h.cl : null);
       if (!cls.some(v => v != null)) return;   // нет данных облачности: ленты нет
-      const y0 = yScale.top + 3, bandH = 11;
+      // v1.64.1: лента вдвое толще, эмодзи крупнее и на контрастной подложке
+      // (фидбек: «значки вообще не читаются, на телефоне очень мелко»)
+      const y0 = yScale.top + 2, bandH = 20;
       const xL = xScale.left, xR = xScale.right;
       if (!(xR > xL)) return;
       c.save();
@@ -12440,12 +12443,12 @@ function renderPrecipChart(forecast) {
         grad.addColorStop(stop, cloudColor(cl));
       });
       c.beginPath();
-      if (typeof c.roundRect === 'function') c.roundRect(xL, y0, xR - xL, bandH, 5);
+      if (typeof c.roundRect === 'function') c.roundRect(xL, y0, xR - xL, bandH, 8);
       else c.rect(xL, y0, xR - xL, bandH);
       c.fillStyle = grad;
       c.fill();
-      // эмодзи по центрам однородных участков (от 3 часов подряд одной категории)
-      c.font = '10px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+      // эмодзи по центрам однородных участков (от 3 часов подряд одной категории);
+      // под каждым тёмный кружок-подложка: цветной значок читается на любом фоне
       c.textAlign = 'center';
       c.textBaseline = 'middle';
       let segStart = 0;
@@ -12456,7 +12459,16 @@ function renderPrecipChart(forecast) {
           const len = i - segStart;
           if (len >= 3 && cls[segStart] != null) {
             const midPx = xScale.getPixelForValue(segStart + (len - 1) / 2);
-            if (midPx > xL + 8 && midPx < xR - 8) c.fillText(cloudEmoji(cls[segStart]), midPx, y0 + bandH / 2 + 0.5);
+            const cy = y0 + bandH / 2;
+            if (midPx > xL + 12 && midPx < xR - 12) {
+              c.beginPath();
+              c.arc(midPx, cy, 11, 0, Math.PI * 2);
+              c.fillStyle = 'rgba(6,12,34,0.72)';
+              c.fill();
+              c.font = '14px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+              c.fillStyle = '#fff';
+              c.fillText(cloudEmoji(cls[segStart]), midPx, cy + 1);
+            }
           }
           segStart = i;
         }

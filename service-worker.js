@@ -7,7 +7,7 @@
     При обновлении версии CACHE_VERSION старый кэш стирается на activate.
 */
 
-const CACHE_VERSION = 'meteo-star-v1.64.0-cloud-band';
+const CACHE_VERSION = 'meteo-star-v1.64.1-cloud-band-bold';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const API_CACHE = `${CACHE_VERSION}-api`;
 const FONT_CACHE = `${CACHE_VERSION}-fonts`;
