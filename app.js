@@ -12306,6 +12306,20 @@ function renderPrecipChart(forecast) {
     return `<div class="${cls}" style="width:${PRECIP_PX_PER_HOUR}px">${emoji}</div>`;
   }).join('');
 
+  // v1.63.1: ряд ВЕРОЯТНОСТЕЙ по часам, те же h.p, что в списке часов модалки.
+  // Раньше график говорил только миллиметрами, а часы процентами: пользователь
+  // сравнивал «73%» с почти пустой линией (медиана 0) и законно видел
+  // несоответствие. Теперь оба языка на одном экране. Ниже 10% не печатаем,
+  // чтобы строка не рябила нулями.
+  const probsBar = document.getElementById('precipProbs');
+  if (probsBar) {
+    probsBar.innerHTML = merged.map((h) => {
+      const p = (typeof h.p === 'number') ? h.p : 0;
+      const cls = p >= 60 ? ' high' : (p >= PRECIP_POP_SHOW ? ' mid' : '');
+      return `<div class="precip-prob${cls}" style="width:${PRECIP_PX_PER_HOUR}px">${p >= 10 ? p + '%' : ''}</div>`;
+    }).join('');
+  }
+
   // Индексы где начинается новый день (для пунктирных разделителей в графике)
   const dayBreakIndices = [];
   let acc = 0;
@@ -12476,7 +12490,14 @@ function renderPrecipChart(forecast) {
             },
             label: (c) => c.dataset._isPossible
               ? ` ${t('precip.possible')}: ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
-              : ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
+              : ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`,
+            // v1.63.1: вероятность часа в тултипе (символ + число, без i18n) —
+            // те же h.p, что в списке часов модалки.
+            afterBody: (items) => {
+              const h = items && items[0] ? merged[items[0].dataIndex] : null;
+              const p = h && typeof h.p === 'number' ? h.p : 0;
+              return p >= 5 ? [` 💧 ${p}%`] : [];
+            }
           }
         }
       },
@@ -12575,6 +12596,14 @@ function renderPrecipChart(forecast) {
 
     [...typesBar.children].forEach((el) => { el.style.width = hourPx + 'px'; });
     [...daysBar.children].forEach((el, si) => { el.style.width = segPx[si] + 'px'; });
+
+    // v1.63.1: ряд вероятностей выравнивается той же геометрией, что и эмодзи.
+    const probsBarEl = document.getElementById('precipProbs');
+    if (probsBarEl) {
+      probsBarEl.style.marginLeft  = cArea.left + 'px';
+      probsBarEl.style.marginRight = rightMargin + 'px';
+      [...probsBarEl.children].forEach((el) => { el.style.width = hourPx + 'px'; });
+    }
   };
 
   // Несколько попыток на разных таймингах — Chart.js может ещё не успеть
