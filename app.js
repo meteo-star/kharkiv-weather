@@ -12402,6 +12402,69 @@ function renderPrecipChart(forecast) {
     }
   };
 
+  /* v1.64.0: «лента неба» вверху графика осадков: облачность по часам одним
+     взглядом. Тонкая полоса с плавным градиентом (золотистое: ясно, голубое:
+     переменная облачность, серое: пасмурно) и эмодзи на однородных участках
+     от 3 часов. Данные: h.cl (cloud_cover, %), есть во всех источниках.
+     ОТКАТ: PRECIP_CLOUD_BAND = false ниже выключает ленту целиком; изменение
+     аддитивно, существующие слои графика не тронуты. */
+  const PRECIP_CLOUD_BAND = true;
+  const cloudColor = (cl) => {
+    if (cl == null) return 'rgba(148,163,184,0.18)';
+    if (cl <= 25) return 'rgba(253,208,71,0.60)';    // ясно: золотистый
+    if (cl <= 50) return 'rgba(147,197,253,0.50)';   // малооблачно: светло-голубой
+    if (cl <= 75) return 'rgba(148,163,184,0.50)';   // облачно: серо-голубой
+    return 'rgba(100,116,139,0.65)';                 // пасмурно: серый
+  };
+  const cloudEmoji = (cl) => (cl <= 30 ? '☀️' : (cl <= 70 ? '⛅' : '☁️'));
+  const cloudCat   = (cl) => (cl <= 30 ? 0 : (cl <= 70 ? 1 : 2));
+  const cloudBandPlugin = {
+    id: 'precipCloudBand',
+    beforeDatasetsDraw(chart) {
+      if (!PRECIP_CLOUD_BAND) return;
+      const c = chart.ctx;
+      const xScale = chart.scales.x;
+      const yScale = chart.scales.y;
+      if (!xScale || !yScale) return;
+      const cls = merged.map(h => (h && typeof h.cl === 'number') ? h.cl : null);
+      if (!cls.some(v => v != null)) return;   // нет данных облачности: ленты нет
+      const y0 = yScale.top + 3, bandH = 11;
+      const xL = xScale.left, xR = xScale.right;
+      if (!(xR > xL)) return;
+      c.save();
+      // градиент по часам: стоп в центре каждого часа
+      const grad = c.createLinearGradient(xL, 0, xR, 0);
+      cls.forEach((cl, i) => {
+        const px = xScale.getPixelForValue(i);
+        const stop = Math.min(1, Math.max(0, (px - xL) / (xR - xL)));
+        grad.addColorStop(stop, cloudColor(cl));
+      });
+      c.beginPath();
+      if (typeof c.roundRect === 'function') c.roundRect(xL, y0, xR - xL, bandH, 5);
+      else c.rect(xL, y0, xR - xL, bandH);
+      c.fillStyle = grad;
+      c.fill();
+      // эмодзи по центрам однородных участков (от 3 часов подряд одной категории)
+      c.font = '10px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      let segStart = 0;
+      for (let i = 1; i <= cls.length; i++) {
+        const prev = cls[i - 1], cur = (i < cls.length) ? cls[i] : null;
+        const brk = (i === cls.length) || prev == null || cur == null || cloudCat(prev) !== cloudCat(cur);
+        if (brk) {
+          const len = i - segStart;
+          if (len >= 3 && cls[segStart] != null) {
+            const midPx = xScale.getPixelForValue(segStart + (len - 1) / 2);
+            if (midPx > xL + 8 && midPx < xR - 8) c.fillText(cloudEmoji(cls[segStart]), midPx, y0 + bandH / 2 + 0.5);
+          }
+          segStart = i;
+        }
+      }
+      c.restore();
+    }
+  };
+
   // Медианная линия (основной ряд) — фактическое наиболее вероятное количество.
   const medianDataset = {
     label: t('precip.legend'),
@@ -12447,7 +12510,7 @@ function renderPrecipChart(forecast) {
 
   precipChartInstance = new Chart(ctx, {
     type: 'line',
-    plugins: [dayBackgroundPlugin, dayDividersPlugin],
+    plugins: [dayBackgroundPlugin, cloudBandPlugin, dayDividersPlugin],
     data: {
       labels,
       datasets: chartDatasets
@@ -12491,12 +12554,17 @@ function renderPrecipChart(forecast) {
             label: (c) => c.dataset._isPossible
               ? ` ${t('precip.possible')}: ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`
               : ` ${c.parsed.y.toFixed(1)} ${t('precip.legend')}`,
-            // v1.63.1: вероятность часа в тултипе (символ + число, без i18n) —
+            // v1.63.1: вероятность часа в тултипе (символ + число, без i18n),
             // те же h.p, что в списке часов модалки.
+            // v1.64.0: плюс облачность часа (лента неба сверху графика).
             afterBody: (items) => {
               const h = items && items[0] ? merged[items[0].dataIndex] : null;
-              const p = h && typeof h.p === 'number' ? h.p : 0;
-              return p >= 5 ? [` 💧 ${p}%`] : [];
+              if (!h) return [];
+              const rows = [];
+              const p = typeof h.p === 'number' ? h.p : 0;
+              if (p >= 5) rows.push(` 💧 ${p}%`);
+              if (typeof h.cl === 'number') rows.push(` ${cloudEmoji(h.cl)} ${h.cl}%`);
+              return rows;
             }
           }
         }
