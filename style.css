@@ -1042,6 +1042,15 @@ body.modal-bridge::before{content:'';position:fixed;inset:0;z-index:999;backgrou
 .precip-scroll::-webkit-scrollbar-thumb:hover{background:rgba(0,212,255,0.5)}
 .precip-inner{display:flex;flex-direction:column}
 .precip-chart-wrap{position:relative;height:200px}
+/* v1.63.1: ряд вероятностей по часам под графиком осадков. Те же проценты,
+   что в списке часов модалки: график и часы говорят на одном языке. */
+.precip-probs{display:flex;height:14px;margin-top:4px;align-items:center}
+.precip-prob{flex:0 0 auto;text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;line-height:14px;color:rgba(148,163,184,0.75);white-space:nowrap;overflow:hidden}
+.precip-prob.mid{color:rgba(0,212,255,0.75)}
+.precip-prob.high{color:#00d4ff;font-weight:600}
+:root[data-theme="light"] .precip-prob{color:rgba(100,116,139,0.8)}
+:root[data-theme="light"] .precip-prob.mid{color:#0e7490}
+:root[data-theme="light"] .precip-prob.high{color:#0891b2;font-weight:600}
 .precip-types{display:flex;height:20px;margin-top:2px;align-items:center}
 .precip-type{flex:0 0 auto;text-align:center;font-size:12px;line-height:20px;letter-spacing:0}
 .precip-type.rain{color:#00d4ff;filter:drop-shadow(0 0 4px rgba(0,212,255,0.55))}
