@@ -48,7 +48,7 @@ const I18N = {
     'precip.upTo': 'до {mm} мм',
     'precip.restOfDay': 'осадки за остаток дня (прошедшие часы не учитываются)',
     'precip.restOfDayShort': 'осталось',
-    'precip.possibleHint': 'возможные осадки — самый мокрый сценарий ансамбля',
+    'precip.possibleHint': 'возможные осадки: самый мокрый сценарий ансамбля',
     'accuracy.hint.avgBest': '📊 Среднее — самый точный',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} обходит среднее',
     'accuracy.hint.avgUsuallyBetter': '📊 Среднее обычно точнее · накапливаем данные для этой модели',
@@ -327,6 +327,7 @@ const I18N = {
     'accuracy.precipLegend': 'Осадки: % промахов «дождь/сухо» (порог 0.5 мм) и ±ошибка в мм — по реальным наблюдениям',
     'accuracy.wetCal.on': 'Авто-порог дождя: {mm} мм (промахи {miss}% против {base}%, {n} замеров)',
     'accuracy.wetCal.off': 'Авто-порог дождя: копится статистика ({n}/{needN} замеров, {wet}/{needWet} дождей)',
+    'accuracy.wetCal.kept': 'Авто-порог дождя: {mm} мм подтверждён данными ({miss}% промахов, {n} замеров)',
     'accuracy.bestBadge': 'Самая точная модель по последним замерам',
     'footer.refresh': 'Обновить',
     'footer.speak': 'Озвучить',
@@ -526,7 +527,7 @@ const I18N = {
     'precip.upTo': 'до {mm} мм',
     'precip.restOfDay': 'опади за решту дня (минулі години не враховуються)',
     'precip.restOfDayShort': 'залишилось',
-    'precip.possibleHint': 'можливі опади — найвологіший сценарій ансамблю',
+    'precip.possibleHint': 'можливі опади: найвологіший сценарій ансамблю',
     'accuracy.hint.avgBest': '📊 Середнє — найточніше',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} точніше за середнє',
     'accuracy.hint.avgUsuallyBetter': '📊 Середнє зазвичай точніше · накопичуємо дані для цієї моделі',
@@ -805,6 +806,7 @@ const I18N = {
     'accuracy.precipLegend': 'Опади: % промахів «дощ/сухо» (поріг 0.5 мм) та ±похибка в мм — за реальними спостереженнями',
     'accuracy.wetCal.on': 'Авто-поріг дощу: {mm} мм (промахи {miss}% проти {base}%, {n} вимірів)',
     'accuracy.wetCal.off': 'Авто-поріг дощу: накопичується статистика ({n}/{needN} вимірів, {wet}/{needWet} дощів)',
+    'accuracy.wetCal.kept': 'Авто-поріг дощу: {mm} мм підтверджено даними ({miss}% промахів, {n} вимірів)',
     'accuracy.bestBadge': 'Найточніша модель за останніми замірами',
     'footer.refresh': 'Оновити',
     'footer.speak': 'Озвучити',
@@ -991,7 +993,7 @@ const I18N = {
     'precip.upTo': 'up to {mm} mm',
     'precip.restOfDay': 'precipitation for the rest of the day (past hours excluded)',
     'precip.restOfDayShort': 'left today',
-    'precip.possibleHint': 'possible precipitation — wettest ensemble scenario',
+    'precip.possibleHint': 'possible precipitation: wettest ensemble scenario',
     'accuracy.hint.avgBest': '📊 Average is the most accurate',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} beats the average',
     'accuracy.hint.avgUsuallyBetter': '📊 Average is usually better · gathering data for this model',
@@ -1270,6 +1272,7 @@ const I18N = {
     'accuracy.precipLegend': 'Precip: % of wet/dry misses (0.5 mm threshold) and ±error in mm — vs real observations',
     'accuracy.wetCal.on': 'Auto rain threshold: {mm} mm ({miss}% misses vs {base}%, {n} samples)',
     'accuracy.wetCal.off': 'Auto rain threshold: collecting data ({n}/{needN} samples, {wet}/{needWet} rainy days)',
+    'accuracy.wetCal.kept': 'Auto rain threshold: {mm} mm confirmed by data ({miss}% misses, {n} samples)',
     'accuracy.bestBadge': 'Most accurate model by recent samples',
     'footer.refresh': 'Refresh',
     'footer.speak': 'Speak',
@@ -1455,7 +1458,7 @@ const I18N = {
     'precip.upTo': 'bis {mm} mm',
     'precip.restOfDay': 'Niederschlag für den Rest des Tages (vergangene Stunden ausgenommen)',
     'precip.restOfDayShort': 'Rest',
-    'precip.possibleHint': 'möglicher Niederschlag — nassestes Ensemble-Szenario',
+    'precip.possibleHint': 'möglicher Niederschlag: nassestes Ensemble-Szenario',
     'accuracy.hint.avgBest': '📊 Durchschnitt am genauesten',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} schlägt den Durchschnitt',
     'accuracy.hint.avgUsuallyBetter': '📊 Durchschnitt meist genauer · Daten für dieses Modell werden gesammelt',
@@ -1734,6 +1737,7 @@ const I18N = {
     'accuracy.precipLegend': 'Niederschlag: % Fehltreffer nass/trocken (Schwelle 0.5 mm) und ±Fehler in mm — vs. echte Beobachtungen',
     'accuracy.wetCal.on': 'Auto-Regenschwelle: {mm} mm ({miss}% Fehler vs {base}%, {n} Messungen)',
     'accuracy.wetCal.off': 'Auto-Regenschwelle: Daten werden gesammelt ({n}/{needN} Messungen, {wet}/{needWet} Regentage)',
+    'accuracy.wetCal.kept': 'Auto-Regenschwelle: {mm} mm durch Daten bestätigt ({miss}% Fehler, {n} Messungen)',
     'accuracy.bestBadge': 'Genauestes Modell nach jüngsten Messungen',
     'footer.refresh': 'Aktualisieren',
     'footer.speak': 'Vorlesen',
@@ -1919,7 +1923,7 @@ const I18N = {
     'precip.upTo': 'do {mm} mm',
     'precip.restOfDay': 'opady na pozostałą część dnia (minione godziny pominięte)',
     'precip.restOfDayShort': 'pozostało',
-    'precip.possibleHint': 'możliwe opady — najwilgotniejszy scenariusz zespołu',
+    'precip.possibleHint': 'możliwe opady: najwilgotniejszy scenariusz zespołu',
     'accuracy.hint.avgBest': '📊 Średnia najdokładniejsza',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} lepszy od średniej',
     'accuracy.hint.avgUsuallyBetter': '📊 Średnia zwykle dokładniejsza · zbieramy dane dla tego modelu',
@@ -2198,6 +2202,7 @@ const I18N = {
     'accuracy.precipLegend': 'Opady: % pomyłek deszcz/sucho (próg 0.5 mm) i ±błąd w mm — wzgl. rzeczywistych obserwacji',
     'accuracy.wetCal.on': 'Auto-próg deszczu: {mm} mm ({miss}% pomyłek vs {base}%, {n} pomiarów)',
     'accuracy.wetCal.off': 'Auto-próg deszczu: zbieranie danych ({n}/{needN} pomiarów, {wet}/{needWet} dni z deszczem)',
+    'accuracy.wetCal.kept': 'Auto-próg deszczu: {mm} mm potwierdzony danymi ({miss}% pomyłek, {n} pomiarów)',
     'accuracy.bestBadge': 'Najdokładniejszy model według ostatnich próbek',
     'footer.refresh': 'Odśwież',
     'footer.speak': 'Czytaj',
@@ -2384,7 +2389,7 @@ const I18N = {
     'precip.upTo': 'až {mm} mm',
     'precip.restOfDay': 'srážky na zbytek dne (uplynulé hodiny se nezapočítávají)',
     'precip.restOfDayShort': 'zbývá',
-    'precip.possibleHint': 'možné srážky — nejvlhčí scénář ansámblu',
+    'precip.possibleHint': 'možné srážky: nejvlhčí scénář ansámblu',
     'accuracy.hint.avgBest': '📊 Průměr je nejpřesnější',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} překonává průměr',
     'accuracy.hint.avgUsuallyBetter': '📊 Průměr je obvykle přesnější · sbíráme data pro tento model',
@@ -2663,6 +2668,7 @@ const I18N = {
     'accuracy.precipLegend': 'Srážky: % omylů déšť/sucho (práh 0.5 mm) a ±chyba v mm — vs. skutečná pozorování',
     'accuracy.wetCal.on': 'Auto-práh deště: {mm} mm ({miss}% chyb vs {base}%, {n} měření)',
     'accuracy.wetCal.off': 'Auto-práh deště: sbírání dat ({n}/{needN} měření, {wet}/{needWet} deštivých dnů)',
+    'accuracy.wetCal.kept': 'Auto-práh deště: {mm} mm potvrzen daty ({miss}% chyb, {n} měření)',
     'accuracy.bestBadge': 'Nejpřesnější model podle posledních vzorků',
     'footer.refresh': 'Obnovit',
     'footer.speak': 'Přečíst',
@@ -2849,7 +2855,7 @@ const I18N = {
     'precip.upTo': 'jusqu\'à {mm} mm',
     'precip.restOfDay': 'précipitations pour le reste de la journée (heures passées exclues)',
     'precip.restOfDayShort': 'restant',
-    'precip.possibleHint': 'précipitations possibles — scénario d\'ensemble le plus humide',
+    'precip.possibleHint': 'précipitations possibles: scénario d\'ensemble le plus humide',
     'accuracy.hint.avgBest': '📊 Moyenne la plus précise',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} bat la moyenne',
     'accuracy.hint.avgUsuallyBetter': '📊 Moyenne souvent plus précise · collecte des données pour ce modèle',
@@ -3128,6 +3134,7 @@ const I18N = {
     'accuracy.precipLegend': 'Précip. : % de ratés pluie/sec (seuil 0.5 mm) et ±écart en mm — vs observations réelles',
     'accuracy.wetCal.on': 'Seuil de pluie auto : {mm} mm ({miss}% d’erreurs vs {base}%, {n} mesures)',
     'accuracy.wetCal.off': 'Seuil de pluie auto : collecte de données ({n}/{needN} mesures, {wet}/{needWet} jours de pluie)',
+    'accuracy.wetCal.kept': 'Seuil de pluie auto : {mm} mm confirmé par les données ({miss}% d’erreurs, {n} mesures)',
     'accuracy.bestBadge': 'Modèle le plus précis selon les échantillons récents',
     'footer.refresh': 'Actualiser',
     'footer.speak': 'Lire',
@@ -3313,7 +3320,7 @@ const I18N = {
     'precip.upTo': 'fino a {mm} mm',
     'precip.restOfDay': 'precipitazioni per il resto della giornata (ore passate escluse)',
     'precip.restOfDayShort': 'resto',
-    'precip.possibleHint': 'precipitazioni possibili — scenario d\'insieme più piovoso',
+    'precip.possibleHint': 'precipitazioni possibili: scenario d\'insieme più piovoso',
     'accuracy.hint.avgBest': '📊 Media la più accurata',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} batte la media',
     'accuracy.hint.avgUsuallyBetter': '📊 Media di solito più accurata · raccolta dati per questo modello',
@@ -3592,6 +3599,7 @@ const I18N = {
     'accuracy.precipLegend': 'Precip.: % di errori pioggia/secco (soglia 0.5 mm) e ±errore in mm — vs osservazioni reali',
     'accuracy.wetCal.on': 'Soglia pioggia auto: {mm} mm ({miss}% errori vs {base}%, {n} misurazioni)',
     'accuracy.wetCal.off': 'Soglia pioggia auto: raccolta dati ({n}/{needN} misurazioni, {wet}/{needWet} giorni di pioggia)',
+    'accuracy.wetCal.kept': 'Soglia pioggia auto: {mm} mm confermata dai dati ({miss}% errori, {n} misurazioni)',
     'accuracy.bestBadge': 'Modello più preciso secondo i campioni recenti',
     'footer.refresh': 'Aggiorna',
     'footer.speak': 'Leggi',
@@ -3777,7 +3785,7 @@ const I18N = {
     'precip.upTo': 'hasta {mm} mm',
     'precip.restOfDay': 'precipitación para el resto del día (horas pasadas excluidas)',
     'precip.restOfDayShort': 'resta',
-    'precip.possibleHint': 'precipitación posible — escenario de ensemble más húmedo',
+    'precip.possibleHint': 'precipitación posible: escenario de ensemble más húmedo',
     'accuracy.hint.avgBest': '📊 La media es la más precisa',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a la media',
     'accuracy.hint.avgUsuallyBetter': '📊 La media suele ser más precisa · recopilando datos para este modelo',
@@ -4056,6 +4064,7 @@ const I18N = {
     'accuracy.precipLegend': 'Precip.: % de fallos lluvia/seco (umbral 0.5 mm) y ±error en mm — vs observaciones reales',
     'accuracy.wetCal.on': 'Umbral de lluvia auto: {mm} mm ({miss}% fallos vs {base}%, {n} mediciones)',
     'accuracy.wetCal.off': 'Umbral de lluvia auto: recopilando datos ({n}/{needN} mediciones, {wet}/{needWet} días de lluvia)',
+    'accuracy.wetCal.kept': 'Umbral de lluvia auto: {mm} mm confirmado por los datos ({miss}% fallos, {n} mediciones)',
     'accuracy.bestBadge': 'Modelo más preciso según muestras recientes',
     'footer.refresh': 'Actualizar',
     'footer.speak': 'Leer',
@@ -4241,7 +4250,7 @@ const I18N = {
     'precip.upTo': 'până la {mm} mm',
     'precip.restOfDay': 'precipitații pentru restul zilei (orele trecute sunt excluse)',
     'precip.restOfDayShort': 'rămas',
-    'precip.possibleHint': 'precipitații posibile — cel mai ploios scenariu de ansamblu',
+    'precip.possibleHint': 'precipitații posibile: cel mai ploios scenariu de ansamblu',
     'accuracy.hint.avgBest': '📊 Media este cea mai precisă',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} depășește media',
     'accuracy.hint.avgUsuallyBetter': '📊 Media este de obicei mai precisă · colectăm date pentru acest model',
@@ -4520,6 +4529,7 @@ const I18N = {
     'accuracy.precipLegend': 'Precip.: % erori ploaie/uscat (prag 0.5 mm) și ±eroare în mm — vs observații reale',
     'accuracy.wetCal.on': 'Prag auto de ploaie: {mm} mm ({miss}% ratări vs {base}%, {n} măsurători)',
     'accuracy.wetCal.off': 'Prag auto de ploaie: se adună date ({n}/{needN} măsurători, {wet}/{needWet} zile ploioase)',
+    'accuracy.wetCal.kept': 'Prag auto de ploaie: {mm} mm confirmat de date ({miss}% ratări, {n} măsurători)',
     'accuracy.bestBadge': 'Cel mai precis model conform eșantioanelor recente',
     'footer.refresh': 'Reîmprospătează',
     'footer.speak': 'Citește',
@@ -4705,7 +4715,7 @@ const I18N = {
     'precip.upTo': 'akár {mm} mm',
     'precip.restOfDay': 'csapadék a nap hátralévő részére (az eltelt órák nélkül)',
     'precip.restOfDayShort': 'hátra',
-    'precip.possibleHint': 'lehetséges csapadék — a legnedvesebb ensemble-forgatókönyv',
+    'precip.possibleHint': 'lehetséges csapadék: a legnedvesebb ensemble-forgatókönyv',
     'accuracy.hint.avgBest': '📊 Az átlag a legpontosabb',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} jobb az átlagnál',
     'accuracy.hint.avgUsuallyBetter': '📊 Az átlag általában pontosabb · adatokat gyűjtünk ehhez a modellhez',
@@ -4984,6 +4994,7 @@ const I18N = {
     'accuracy.precipLegend': 'Csapadék: eső/száraz tévesztések %-a (0.5 mm küszöb) és ±hiba mm-ben — valós mérésekhez képest',
     'accuracy.wetCal.on': 'Auto esőküszöb: {mm} mm ({miss}% hiba vs {base}%, {n} mérés)',
     'accuracy.wetCal.off': 'Auto esőküszöb: adatgyűjtés ({n}/{needN} mérés, {wet}/{needWet} esős nap)',
+    'accuracy.wetCal.kept': 'Auto esőküszöb: {mm} mm az adatok alapján megerősítve ({miss}% hiba, {n} mérés)',
     'accuracy.bestBadge': 'A legpontosabb modell a legutóbbi minták szerint',
     'footer.refresh': 'Frissítés',
     'footer.speak': 'Felolvasás',
@@ -5169,7 +5180,7 @@ const I18N = {
     'precip.upTo': 'až {mm} mm',
     'precip.restOfDay': 'zrážky na zvyšok dňa (uplynulé hodiny sa nepočítajú)',
     'precip.restOfDayShort': 'zostáva',
-    'precip.possibleHint': 'možné zrážky — najvlhkejší scenár ansámblu',
+    'precip.possibleHint': 'možné zrážky: najvlhkejší scenár ansámblu',
     'accuracy.hint.avgBest': '📊 Priemer je najpresnejší',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} prekonáva priemer',
     'accuracy.hint.avgUsuallyBetter': '📊 Priemer býva presnejší · zbierame údaje pre tento model',
@@ -5448,6 +5459,7 @@ const I18N = {
     'accuracy.precipLegend': 'Zrážky: % omylov dážď/sucho (prah 0.5 mm) a ±chyba v mm — vs. skutočné pozorovania',
     'accuracy.wetCal.on': 'Auto-prah dažďa: {mm} mm ({miss}% chýb vs {base}%, {n} meraní)',
     'accuracy.wetCal.off': 'Auto-prah dažďa: zber dát ({n}/{needN} meraní, {wet}/{needWet} daždivých dní)',
+    'accuracy.wetCal.kept': 'Auto-prah dažďa: {mm} mm potvrdený dátami ({miss}% chýb, {n} meraní)',
     'accuracy.bestBadge': 'Najpresnejší model podľa nedávnych vzoriek',
     'footer.refresh': 'Obnoviť',
     'footer.speak': 'Prečítať',
@@ -5633,7 +5645,7 @@ const I18N = {
     'precip.upTo': 'até {mm} mm',
     'precip.restOfDay': 'precipitação para o resto do dia (horas passadas excluídas)',
     'precip.restOfDayShort': 'resta',
-    'precip.possibleHint': 'precipitação possível — cenário de ensemble mais húmido',
+    'precip.possibleHint': 'precipitação possível: cenário de ensemble mais húmido',
     'accuracy.hint.avgBest': '📊 A média é a mais precisa',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} supera a média',
     'accuracy.hint.avgUsuallyBetter': '📊 A média costuma ser mais precisa · a recolher dados para este modelo',
@@ -5912,6 +5924,7 @@ const I18N = {
     'accuracy.precipLegend': 'Precip.: % de erros chuva/seco (limiar 0.5 mm) e ±erro em mm — vs observações reais',
     'accuracy.wetCal.on': 'Limiar de chuva auto: {mm} mm ({miss}% erros vs {base}%, {n} medições)',
     'accuracy.wetCal.off': 'Limiar de chuva auto: recolhendo dados ({n}/{needN} medições, {wet}/{needWet} dias de chuva)',
+    'accuracy.wetCal.kept': 'Limiar de chuva auto: {mm} mm confirmado pelos dados ({miss}% erros, {n} medições)',
     'accuracy.bestBadge': 'Modelo mais preciso segundo as amostras recentes',
     'footer.refresh': 'Atualizar',
     'footer.speak': 'Ler',
@@ -6097,7 +6110,7 @@ const I18N = {
     'precip.upTo': 'tot {mm} mm',
     'precip.restOfDay': 'neerslag voor de rest van de dag (voorbije uren niet meegeteld)',
     'precip.restOfDayShort': 'resterend',
-    'precip.possibleHint': 'mogelijke neerslag — natste ensemblescenario',
+    'precip.possibleHint': 'mogelijke neerslag: natste ensemblescenario',
     'accuracy.hint.avgBest': '📊 Gemiddelde is het nauwkeurigst',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} verslaat het gemiddelde',
     'accuracy.hint.avgUsuallyBetter': '📊 Gemiddelde meestal nauwkeuriger · gegevens verzamelen voor dit model',
@@ -6376,6 +6389,7 @@ const I18N = {
     'accuracy.precipLegend': 'Neerslag: % missers nat/droog (drempel 0.5 mm) en ±fout in mm — vs echte waarnemingen',
     'accuracy.wetCal.on': 'Auto-regendrempel: {mm} mm ({miss}% missers vs {base}%, {n} metingen)',
     'accuracy.wetCal.off': 'Auto-regendrempel: gegevens verzamelen ({n}/{needN} metingen, {wet}/{needWet} regendagen)',
+    'accuracy.wetCal.kept': 'Auto-regendrempel: {mm} mm bevestigd door de gegevens ({miss}% missers, {n} metingen)',
     'accuracy.bestBadge': 'Meest nauwkeurig model volgens recente monsters',
     'footer.refresh': 'Verversen',
     'footer.speak': 'Voorlezen',
@@ -6561,7 +6575,7 @@ const I18N = {
     'precip.upTo': '{mm} mm’ye kadar',
     'precip.restOfDay': 'günün kalanı için yağış (geçen saatler hariç)',
     'precip.restOfDayShort': 'kalan',
-    'precip.possibleHint': 'olası yağış — en yağışlı topluluk senaryosu',
+    'precip.possibleHint': 'olası yağış: en yağışlı topluluk senaryosu',
     'accuracy.hint.avgBest': '📊 Ortalama en doğru',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} ortalamayı geçiyor',
     'accuracy.hint.avgUsuallyBetter': '📊 Ortalama genelde daha doğru · bu model için veri topluyoruz',
@@ -6840,6 +6854,7 @@ const I18N = {
     'accuracy.precipLegend': 'Yağış: yağmur/kuru hata yüzdesi (0.5 mm eşik) ve mm cinsinden ±hata — gerçek gözlemlere göre',
     'accuracy.wetCal.on': 'Oto yağmur eşiği: {mm} mm ({miss}% hata vs {base}%, {n} ölçüm)',
     'accuracy.wetCal.off': 'Oto yağmur eşiği: veri toplanıyor ({n}/{needN} ölçüm, {wet}/{needWet} yağmurlu gün)',
+    'accuracy.wetCal.kept': 'Oto yağmur eşiği: {mm} mm veriyle doğrulandı ({miss}% hata, {n} ölçüm)',
     'accuracy.bestBadge': 'Son örneklere göre en doğru model',
     'footer.refresh': 'Yenile',
     'footer.speak': 'Oku',
@@ -7025,7 +7040,7 @@ const I18N = {
     'precip.upTo': 'έως {mm} mm',
     'precip.restOfDay': 'υετός για το υπόλοιπο της ημέρας (οι ώρες που πέρασαν δεν μετρούν)',
     'precip.restOfDayShort': 'υπόλοιπο',
-    'precip.possibleHint': 'πιθανός υετός — το πιο βροχερό σενάριο συστοιχίας',
+    'precip.possibleHint': 'πιθανός υετός: το πιο βροχερό σενάριο συστοιχίας',
     'accuracy.hint.avgBest': '📊 Ο μέσος όρος είναι ο πιο ακριβής',
     'accuracy.hint.modelBeatsAvg': '🏆 {name} ξεπερνά τον μέσο όρο',
     'accuracy.hint.avgUsuallyBetter': '📊 Ο μέσος όρος είναι συνήθως πιο ακριβής · συλλέγουμε δεδομένα για αυτό το μοντέλο',
@@ -7304,6 +7319,7 @@ const I18N = {
     'accuracy.precipLegend': 'Υετός: % αστοχιών βροχή/στεγνό (όριο 0.5 mm) και ±σφάλμα σε mm — έναντι πραγματικών παρατηρήσεων',
     'accuracy.wetCal.on': 'Αυτόματο όριο βροχής: {mm} mm ({miss}% αστοχίες έναντι {base}%, {n} μετρήσεις)',
     'accuracy.wetCal.off': 'Αυτόματο όριο βροχής: συλλογή δεδομένων ({n}/{needN} μετρήσεις, {wet}/{needWet} βροχερές ημέρες)',
+    'accuracy.wetCal.kept': 'Αυτόματο όριο βροχής: {mm} mm επιβεβαιώθηκε από τα δεδομένα ({miss}% αστοχίες, {n} μετρήσεις)',
     'accuracy.bestBadge': 'Πιο ακριβές μοντέλο σύμφωνα με τα πρόσφατα δείγματα',
     'footer.refresh': 'Ανανέωση',
     'footer.speak': 'Ανάγνωση',
@@ -13541,6 +13557,12 @@ function renderAccuracy() {
       wetCalEl.textContent = '🎯 ' + t('accuracy.wetCal.on', {
         mm: WET_CAL.t, miss: WET_CAL.miss, base: WET_CAL.missBase, n: WET_CAL.n
       });
+    } else if (WET_CAL && WET_CAL.evaluated) {
+      // Enough data and no significantly better threshold: default confirmed.
+      wetCalEl.style.display = '';
+      wetCalEl.textContent = '🎯 ' + t('accuracy.wetCal.kept', {
+        mm: WET_CAL.t, miss: WET_CAL.miss, n: WET_CAL.n
+      });
     } else if (WET_CAL && WET_CAL.n > 0) {
       wetCalEl.style.display = '';
       wetCalEl.textContent = '🎯 ' + t('accuracy.wetCal.off', {
@@ -15879,26 +15901,31 @@ function updateAccuracyData(lat, lon, byModel) {
 const WET_DAY_MM = 0.5; // порог «дождливого дня», мм/сутки (ниже — следы/морось)
 
 /* ============================================
-   v1.63.0: АВТОКАЛИБРОВКА порога «дождь/сухо» для отображения.
-   Идея: «дождь» на плитке дня решается порогом по прогнозной сумме мм, и
-   оптимальный порог зависит от точки/сезона. Подбираем его по накопленным
-   реальным замерам (KV бота, actualSource='archive'), минимизируя промахи
-   1−CSI против события «фактическая сумма ≥ WET_DAY_MM».
+   Rain/dry threshold auto-calibration (v1.63.0, guard fixed in v1.65.0).
+   The "rain" state of a day tile is decided by a threshold on the forecast
+   daily sum (mm). The best threshold depends on location and season, so it
+   is fitted on accumulated real observations (bot KV, actualSource
+   'archive') by minimising misses 1 - CSI against the event
+   "observed sum >= WET_DAY_MM".
 
-   Предохранители (без них калибровка на малой выборке = оверфит,
-   см. бэктест 13.08: train 15% → test 36%):
-     • не активируется, пока архивных замеров < 60 или фактических
-       дождливых дней < 25;
-     • выбранный порог применяется, только если выигрыш против базового
-       ≥ 10 п.п. промахов — иначе остаётся дефолт;
-     • само ОПРЕДЕЛЕНИЕ события (WET_DAY_MM=0.5) и метрики accuracy-таблицы
-       не меняются — сравнение источников остаётся честным.
+   Guards against overfitting (backtest 2026-08-13: train 15% vs test 36%):
+     * evaluation starts at WET_CAL_MIN_RECORDS archive records and
+       WET_CAL_MIN_WET observed rainy days. The bot keeps at most 60 records
+       (ACC_MAX_RECORDS), two of them are future days and a few await the
+       archive, so ~56 is the practical ceiling. The original guard of 60
+       could never be reached;
+     * a different threshold replaces the display default only when it
+       beats the default by >= WET_CAL_MIN_GAIN percentage points;
+     * the event definition (WET_DAY_MM = 0.5) and the accuracy table
+       metrics are untouched, so the source comparison stays fair.
    ============================================ */
-const WET_CAL_MIN_RECORDS = 60;
-const WET_CAL_MIN_WET     = 25;
-const WET_CAL_MIN_GAIN    = 10;   // п.п. промахов — минимум значимого выигрыша
+const WET_SHOW_DEFAULT    = 0.3;  // mm, display threshold for the "rain" state (v1.60.0)
+const WET_CAL_MIN_RECORDS = 45;
+const WET_CAL_MIN_WET     = 15;
+const WET_CAL_MIN_GAIN    = 10;   // percentage points of misses
 const WET_CAL_CANDIDATES  = [0.2, 0.3, 0.4, 0.5, 0.6, 0.8];
-let WET_CAL = null; // {active, t?, n, wet, miss?, missBase?}
+// {active, evaluated, t, n, wet, miss, missBase}
+let WET_CAL = null;
 
 function computeWetCalibration() {
   WET_CAL = null;
@@ -15907,8 +15934,8 @@ function computeWetCalibration() {
     const data = loadAccuracyData(currentLocation.lat, currentLocation.lon);
     const recs = (data && Array.isArray(data.records) ? data.records : [])
       .filter(r => r && r.actualSource === 'archive' && r.actual && typeof r.actual.precipSum === 'number');
-    // Калибруем по активному агрегату; для одиночной модели берём smart/avg —
-    // решение «показать дождь» всё равно строится на агрегированных мм.
+    // Calibrate on the active aggregate; a single-model view uses smart/avg,
+    // since the "show rain" decision is made on aggregated millimetres anyway.
     const src = (currentSourceId === 'avg') ? 'avg' : 'smart';
     const pairs = [];
     for (const r of recs) {
@@ -15918,7 +15945,7 @@ function computeWetCalibration() {
     }
     const wet = pairs.filter(x => x.act >= WET_DAY_MM).length;
     if (pairs.length < WET_CAL_MIN_RECORDS || wet < WET_CAL_MIN_WET) {
-      WET_CAL = { active: false, n: pairs.length, wet };
+      WET_CAL = { active: false, evaluated: false, n: pairs.length, wet };
       return;
     }
     const missOf = (t) => {
@@ -15930,27 +15957,29 @@ function computeWetCalibration() {
       const den = TP + FP + FN;
       return den ? Math.round((1 - TP / den) * 100) : 100;
     };
-    const missBase = missOf(WET_DAY_MM);
-    let best = { t: WET_DAY_MM, miss: missBase };
+    // Compare against the threshold actually in use, not against the event
+    // definition: the calibration decides whether to REPLACE the default.
+    const missBase = missOf(WET_SHOW_DEFAULT);
+    let best = { t: WET_SHOW_DEFAULT, miss: missBase };
     for (const t of WET_CAL_CANDIDATES) {
       const m = missOf(t);
-      // при равенстве предпочитаем порог ближе к базовому (консервативность)
-      if (m < best.miss || (m === best.miss && Math.abs(t - WET_DAY_MM) < Math.abs(best.t - WET_DAY_MM))) {
+      // on a tie prefer the threshold closer to the default (conservative)
+      if (m < best.miss || (m === best.miss && Math.abs(t - WET_SHOW_DEFAULT) < Math.abs(best.t - WET_SHOW_DEFAULT))) {
         best = { t, miss: m };
       }
     }
-    if (best.t !== WET_DAY_MM && (missBase - best.miss) >= WET_CAL_MIN_GAIN) {
-      WET_CAL = { active: true, t: best.t, n: pairs.length, wet, miss: best.miss, missBase };
+    if (best.t !== WET_SHOW_DEFAULT && (missBase - best.miss) >= WET_CAL_MIN_GAIN) {
+      WET_CAL = { active: true, evaluated: true, t: best.t, n: pairs.length, wet, miss: best.miss, missBase };
     } else {
-      WET_CAL = { active: false, n: pairs.length, wet, miss: missBase };
+      // Enough data, but no alternative is significantly better: the default is confirmed.
+      WET_CAL = { active: false, evaluated: true, t: WET_SHOW_DEFAULT, n: pairs.length, wet, miss: missBase, missBase };
     }
   } catch (e) { WET_CAL = null; }
 }
 
-// Порог мм для состояния «дождь» на плитке дня. Дефолт 0.3 (v1.60.0);
-// активная калибровка может сдвинуть его по накопленной статистике точки.
+// Threshold (mm) for the "rain" state of a day tile.
 function getWetShowThreshold() {
-  return (WET_CAL && WET_CAL.active && typeof WET_CAL.t === 'number') ? WET_CAL.t : 0.3;
+  return (WET_CAL && WET_CAL.active && typeof WET_CAL.t === 'number') ? WET_CAL.t : WET_SHOW_DEFAULT;
 }
 
 function computeAccuracyStats(records) {
